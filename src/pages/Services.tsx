@@ -1001,10 +1001,10 @@ export const Services = () => {
         </div>
 
         {/* ══ SUPER-CATEGORY TABS ═════════════════════════════ */}
-        <div className="tabs-scroll-mobile" style={{ background:T.bgSurface,
-  borderBottom:`1px solid ${T.borderFaint}`,
-  padding:"0 32px",
-  display:"flex", gap:2, overflowX:"auto" }}>
+        <div style={{ background:T.bgSurface,
+          borderBottom:`1px solid ${T.borderFaint}`,
+          padding:"0 32px",
+          display:"flex", gap:2, overflowX:"auto" }}>
           {SUPER_CATS.map(tab => {
             const Icon = tab.icon;
             const active = superCat === tab.key;
@@ -1037,11 +1037,11 @@ export const Services = () => {
         </div>
 
         {/* ══ SUB-CATEGORY STRIP + SEARCH ═════════════════════ */}
-        <div className="tabs-scroll-mobile" style={{ background:T.bgSurface,
-  borderBottom:`1px solid ${T.borderFaint}`,
-  padding:"10px 32px",
-  display:"flex", alignItems:"center",
-  gap:6, flexWrap:"wrap" }}>
+        <div style={{ background:T.bgSurface,
+          borderBottom:`1px solid ${T.borderFaint}`,
+          padding:"10px 32px",
+          display:"flex", alignItems:"center",
+          gap:6, flexWrap:"wrap" }}>
 
           {subCats.map(cat => {
             const active = subCat === cat;
