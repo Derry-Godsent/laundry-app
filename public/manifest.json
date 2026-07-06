@@ -1,0 +1,26 @@
+{
+  "short_name": "Chapman Ops",
+  "name": "Chapman Prestige Limited Operations",
+  "description": "Centralized Operations platform",
+  "icons": [
+    {
+      "src": "/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#07090e",
+  "theme_color": "#07090e",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "prefer_related_applications": false
+}

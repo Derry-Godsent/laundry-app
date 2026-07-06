@@ -1,0 +1,266 @@
+/* ─────────────────────────────────────────────────────────────
+   SHARED PALETTE — same family used across Payments/Security,
+   exposed as CSS variables so the whole app shares one language.
+───────────────────────────────────────────────────────────── */
+.layout-container {
+  --bg-base: #05060a;
+  --bg-surface: #0a0c13;
+  --bg-raised: #10131d;
+  --bg-elevated: #161a28;
+
+  --border-faint: rgba(255, 255, 255, 0.045);
+  --border-soft: rgba(255, 255, 255, 0.085);
+  --border-mid: rgba(255, 255, 255, 0.14);
+
+  --text-primary: #eef1f8;
+  --text-sec: #98a1b5;
+  --text-tert: #57617a;
+  --text-hint: #333d54;
+
+  --accent: #8388f8;
+  --accent-glow: rgba(108, 114, 243, 0.32);
+
+  --gold: #e2b57e;
+  --emerald: #3fe3a6;
+  --ember: #fb7676;
+
+  display: flex;
+  height: 100vh;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Quiet ambient glow — fixed, behind everything, ignores clicks */
+.layout-container::before,
+.layout-container::after {
+  content: "";
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(60px);
+  animation: layoutDrift 18s ease-in-out infinite;
+}
+
+.layout-container::before {
+  top: -12%;
+  right: 6%;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  opacity: 0.1;
+}
+
+.layout-container::after {
+  bottom: -18%;
+  left: 2%;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(226, 181, 126, 0.28) 0%, transparent 70%);
+  opacity: 0.07;
+  animation-delay: 4s;
+}
+
+@keyframes layoutDrift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-3%, 4%); }
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.main-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar — subtle, matches the dark palette instead of
+   the browser default. Falls back silently on non-webkit browsers. */
+.main-body::-webkit-scrollbar {
+  width: 10px;
+}
+.main-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.main-body::-webkit-scrollbar-thumb {
+  background: var(--border-mid);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.main-body::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tert);
+  background-clip: padding-box;
+}
+.main-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-mid) transparent;
+}
+
+/* Route content fade — key changes on navigation, so this replays
+   each time without needing any extra JS beyond the location key. */
+.route-transition {
+  animation: routeFadeIn 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes routeFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Generic focus ring — keyboard users get a visible, on-brand
+   outline instead of the browser default or nothing at all. */
+.layout-container :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── MOBILE RESPONSIVE NAVIGATION ─────────────────────── */
+
+/* Mobile: Hide sidebar by default, show as slide-over */
+@media (max-width: 1024px) {
+  .layout-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    background: var(--bg-surface);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 50;
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.45);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Overlay when sidebar is open on mobile */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 40;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Main content full width on mobile */
+  .main-content {
+    width: 100%;
+  }
+
+  /* Compact topbar padding */
+  .topbar {
+    padding: 12px 16px !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .main-body {
+    padding: 18px 16px;
+  }
+
+  /* Hide desktop-only elements */
+  .sidebar-toggle-desktop {
+    display: none;
+  }
+
+  /* Show mobile hamburger in topbar */
+  .sidebar-toggle-mobile {
+    display: flex !important;
+    transition: transform 0.16s ease;
+  }
+  .sidebar-toggle-mobile:active {
+    transform: scale(0.92);
+  }
+
+  /* Tables: horizontal scroll instead of squash */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    min-width: 680px;
+  }
+
+  /* Touch-friendly tap targets */
+  button, [role="button"], input, select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Tablet: 2-column grids */
+@media (max-width: 1024px) {
+  .grid-4, .grid-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Phone: 1-column grids + compact text */
+@media (max-width: 480px) {
+  .grid-2, .grid-4, .grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .text-xl {
+    font-size: 22px !important;
+  }
+
+  .text-2xl {
+    font-size: 28px !important;
+  }
+
+  /* Safe area for notched devices */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Prevent iOS zoom on input focus */
+@media (max-width: 1024px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .layout-container::before,
+  .layout-container::after,
+  .route-transition {
+    animation: none !important;
+  }
+  .sidebar,
+  .sidebar-overlay,
+  .sidebar-toggle-mobile {
+    transition: none !important;
+  }
+}

@@ -1,194 +1,99 @@
-import { Outlet, createBrowserRouter } from "react-router-dom";
-import { Layout, ProtectedRoute } from "./components";
-import {
-  Dashboard,
-  CreateCustomer,
-  CreateInventory,
-  CreateOrder,
-  CreateService,
-  CreateStaff,
-  Customers,
-  EditCustomer,
-  EditInventory,
-  EditOrder,
-  EditService,
-  EditStaff,
-  Inventory,
-  Login,
-  Orders,
-  Profile,
-  Reports,
-  Services,
-  Staff,
-  ViewCustomer,
-  ViewInventory,
-  ViewOrder,
-  ViewService,
-  ViewStaff,
-  ResetPassword,
-  ViewInvoice,
-  SendOtp,
-  EditProfile,
-} from "./pages";
+import { useState, useEffect, ReactNode } from "react";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+// @ts-ignore
+import { supabase } from "./lib/supabaseClient"; 
+import MainLayout from "./layouts/MainLayout";
+import { Dashboard } from "./pages/Dashboard";
+import { Orders } from "./pages/Orders";
+import { OrderBuilder } from "./pages/OrderBuilder";
+import { Staff } from "./pages/Staff";
+import { Services } from "./pages/Services";
+import { Payments } from "./pages/Payments";
+import { Settings } from "./pages/Settings";
+import { Security } from "./pages/Security";
+import { Clients } from "./pages/Clients";
+import { Receipt } from "./pages/Receipt";
+import { Login } from "./pages/Login";
 
-const router = createBrowserRouter([
-  {
-    element: (
-      <ProtectedRoute>
-        <Layout />
-      </ProtectedRoute>
-    ),
-    children: [
-      {
-        path: "/",
-        element: <Dashboard />,
-        index: true,
-      },
-      {
-        path: "orders",
-        element: <Outlet />,
-        children: [
-          {
-            index: true,
-            path: "",
-            element: <Orders />,
-          },
-          {
-            path: ":orderId",
-            element: <ViewOrder />,
-          },
-          {
-            path: ":orderId/edit",
-            element: <EditOrder />,
-          },
-          {
-            path: "new",
-            element: <CreateOrder />,
-          },
-          {
-            path: ":orderId/invoice/:invoiceId",
-            element: <ViewInvoice />,
-          },
-        ],
-      },
-      {
-        path: "services",
-        element: <Outlet />,
-        children: [
-          {
-            index: true,
-            path: "",
-            element: <Services />,
-          },
-          {
-            path: ":serviceId",
-            element: <ViewService />,
-          },
-          {
-            path: ":serviceId/edit",
-            element: <EditService />,
-          },
-          {
-            path: "new",
-            element: <CreateService />,
-          },
-        ],
-      },
-      {
-        path: "customers",
-        element: <Outlet />,
-        children: [
-          {
-            index: true,
-            path: "",
-            element: <Customers />,
-          },
-          {
-            path: ":customerId",
-            element: <ViewCustomer />,
-          },
-          {
-            path: ":customerId/edit",
-            element: <EditCustomer />,
-          },
-          {
-            path: "new",
-            element: <CreateCustomer />,
-          },
-        ],
-      },
-      {
-        path: "inventory",
-        element: <Outlet />,
-        children: [
-          {
-            index: true,
-            path: "",
-            element: <Inventory />,
-          },
-          {
-            path: ":itemId",
-            element: <ViewInventory />,
-          },
-          {
-            path: ":itemId/edit",
-            element: <EditInventory />,
-          },
-          {
-            path: "new",
-            element: <CreateInventory />,
-          },
-        ],
-      },
-      {
-        path: "staff",
-        element: <Outlet />,
-        children: [
-          {
-            index: true,
-            path: "",
-            element: <Staff />,
-          },
-          {
-            path: ":staffId",
-            element: <ViewStaff />,
-          },
-          {
-            path: ":staffId/edit",
-            element: <EditStaff />,
-          },
-          {
-            path: "new",
-            element: <CreateStaff />,
-          },
-        ],
-      },
-      {
-        path: "/reports",
-        element: <Reports />,
-      },
-      {
-        path: "/profile",
-        element: <Profile />,
-      },
-      {
-        path: "/profile/edit",
-        element: <EditProfile />,
-      },
-    ],
-  },
+// ─── PROTECTED ROUTE WRAPPER ──────────────────────────────────────────────
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+      setSession(session);
+      setLoading(false);
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) return <div style={{ padding: 40, color: "#fff", fontFamily: "'DM Sans', sans-serif" }}>Loading...</div>;
+  if (!session) return <Navigate to="/login" replace />;
+  
+  return <>{children}</>;
+};
+
+// ─── ROLE-BASED ROUTE GUARD (Optional) ────────────────────────────────────
+const RoleGuard = ({ children, allowedRoles }: { children: ReactNode; allowedRoles: string[] }) => {
+  const [role, setRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkRole = async () => {
+      const { data: { session } }: { data: { session: any } } = await supabase.auth.getSession();
+      if (!session) {
+        setLoading(false);
+        return;
+      }
+      
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+      
+      setRole(roleData?.role || session.user.user_metadata?.role || 'staff');
+      setLoading(false);
+    };
+    
+    checkRole();
+  }, []);
+
+  if (loading) return <div style={{ padding: 40, color: "#fff", fontFamily: "'DM Sans', sans-serif" }}>Checking access...</div>;
+  if (!role || !allowedRoles.includes(role)) return <Navigate to="/dashboard" replace />;
+  
+  return <>{children}</>;
+};
+
+export const router = createBrowserRouter([
   {
     path: "/login",
-    element: <Login />,
+    element: <Login />, 
   },
   {
-    path: "/reset-password",
-    element: <ResetPassword />,
+    path: "/",
+    element: <ProtectedRoute><MainLayout /></ProtectedRoute>,
+    children: [
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { path: "dashboard", element: <Dashboard /> },
+      { path: "orders", element: <Orders /> },
+      { path: "new-order", element: <OrderBuilder /> },
+      { path: "staff", element: <Staff /> },
+      { path: "services", element: <Services /> },
+      { path: "payments", element: <Payments /> },
+      { path: "settings", element: <Settings /> },
+      { path: "security", element: <Security /> },
+      { path: "clients", element: <Clients /> },
+      { path: "receipt", element: <Receipt /> },
+      
+    ],
   },
-  {
-    path: "/send-otp",
-    element: <SendOtp />,
-  },
+  { path: "*", element: <Navigate to="/dashboard" replace /> }, 
 ]);
-
-export default router;

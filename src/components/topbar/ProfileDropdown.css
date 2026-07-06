@@ -1,0 +1,122 @@
+.profile-wrapper { position: relative; }
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 6px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  transform: translateZ(0);
+}
+
+.profile-trigger:hover {
+  background: #12141c;
+  border-color: #1e212b;
+  transform: translateY(-1px);
+}
+
+.profile-trigger:active { transform: translateY(0); }
+
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  transition: box-shadow 0.2s ease;
+}
+
+.profile-trigger:hover .profile-avatar {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  min-width: 0;
+}
+
+.profile-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+.profile-role {
+  font-size: 11px;
+  color: #8b8f99;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 200px;
+  background: #12141c;
+  border: 1px solid #1e212b;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  padding: 6px;
+  z-index: 50;
+  animation: slideDown 0.2s ease;
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #8b8f99;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  transform: translateZ(0);
+}
+
+.profile-menu-item:hover {
+  background: #1a1d26;
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.profile-menu-item:active { transform: translateX(0); }
+
+.profile-menu-item.logout { color: #ef4444; }
+.profile-menu-item.logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
+
+.profile-divider {
+  height: 1px;
+  margin: 6px 0;
+  background: linear-gradient(to right, transparent, #1e212b, transparent);
+}
