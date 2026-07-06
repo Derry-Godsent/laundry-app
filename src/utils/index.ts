@@ -1,4 +1,5 @@
-import { BadgeColorScheme } from "../components/badge";
+// ✅ Fixed: Replaced broken import with local type definition
+export type BadgeColorScheme = "red" | "orange" | "green" | "blue" | "grey";
 
 const mapColorToStatus = {
   red: ["overdue", "none", "out-of-stock"],
