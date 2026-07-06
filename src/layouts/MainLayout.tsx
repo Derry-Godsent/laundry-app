@@ -65,7 +65,7 @@ export default function MainLayout() {
       {/* ✅ Mobile overlay to close sidebar when clicking outside */}
       {isMobile && sidebarOpen && (
         <div 
-          className="sidebar-overlay" 
+          className="sidebar-overlay active" 
           onClick={() => setSidebarOpen(false)}
         />
       )}
