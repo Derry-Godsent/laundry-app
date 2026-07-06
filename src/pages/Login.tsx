@@ -398,7 +398,7 @@ export const Login = () => {
               WebkitBackgroundClip: "text",
               backgroundClip: "text",
               color: "transparent"
-            }}>Laundry Operations</span>
+            }}>Operations Hub</span>
           </h1>
 
           <p className="auth-sub" style={{
