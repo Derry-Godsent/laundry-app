@@ -194,3 +194,28 @@
   .icon-btn { width: 36px; height: 36px; }
   .notification-badge { top: 4px; right: 4px; min-width: 16px; height: 16px; font-size: 9px; }
 }
+
+/* ─── MOBILE SIDEBAR OVERLAY ────────────────────── */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 35;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Ensure hamburger is hidden on desktop */
+@media (min-width: 1025px) {
+  .sidebar-toggle-mobile {
+    display: none !important;
+  }
+}
