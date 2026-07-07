@@ -94,12 +94,12 @@ export default function MainLayout() {
          defined on .sidebar-overlay actually has a "before" state to
          animate from/to. Rendering it conditionally on sidebarOpen
          meant it just popped in/out with no fade. */}
-      {isMobile && (
-        <div
-          className={`sidebar-overlay${sidebarOpen ? " active" : ""}`}
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {isMobile && sidebarOpen && (
+  <div 
+    className="sidebar-overlay" 
+    onClick={() => setSidebarOpen(false)}
+  />
+)}
     </div>
   );
 }
