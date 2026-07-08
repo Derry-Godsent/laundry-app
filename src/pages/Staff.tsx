@@ -228,8 +228,7 @@ export const Staff = () => {
         }));
         setStaff(mapped);
       }
-      // supabase status     
-      setStaff([]);
+
     } catch (err) {
       console.error('Staff fetch error:', err);
       // silently fall back to supabase
@@ -350,16 +349,18 @@ export const Staff = () => {
     setSaving(true);
     try {
       const payload = {
-        first_name: form.firstName.trim(),
-        last_name:  form.lastName.trim(),
-        phone:      form.phone.trim(),
-        role:       form.role,
-        status:     "active",
-        efficiency: 100,
-        active_orders: 0,
-        completed_orders: 0,
-        assigned_order_ids: [],
-      };
+  first_name: form.firstName.trim(),
+  last_name:  form.lastName.trim(),
+  phone:      form.phone.trim(),
+  role:       form.role,
+  status:     "active",
+  efficiency: 100,
+  active_orders: 0,
+  completed_orders: 0,
+  assigned_order_ids: [],
+  joined_date: new Date().toISOString().split('T')[0],
+  branch_id: (await supabase.from("branches").select("id").eq("city", "Kumasi").single()).data?.id, // ✅ Added
+};
 
       const { data, error } = await supabase.from("staff").insert([payload]).select().single();
 
@@ -1019,13 +1020,10 @@ export const Staff = () => {
               </div>
               <div className="sm-fg">
                 <label className="sm-lbl">Branch</label>
-                <select className="sm-sel" value={form.branch}
-                  onChange={e => setForm(f => ({ ...f, branch: e.target.value }))}>
-                  <option>Main Branch</option>
-                  <option>East Legon</option>
-                  <option>Airport Hills</option>
-                  <option>Kumasi Central</option>
-                </select>
+                <select className="sm-sel" value={form.branch} onChange={e => setForm(f => ({ ...f, branch: e.target.value }))}>
+  <option value="Chapman Prestige Limited - Kumasi">Chapman Prestige Limited - Kumasi</option>
+  {/* Add more branches here when you expand */}
+</select>
               </div>
             </div>
           </div>

@@ -1,23 +1,35 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Building2, ChevronDown } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
 import "./WorkspaceSwitcher.css";
 
 export const WorkspaceSwitcher = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [branchName, setBranchName] = useState("Chapman Prestige Limited");
+
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+    const fetchBranch = async () => {
+      const { data, error } = await supabase
+        .from("branches")
+        .select("name")
+        .eq("is_active", true)
+        .single();
+
+      if (!error && data?.name) {
+        setBranchName(data.name);
+      }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    fetchBranch();
   }, []);
 
   return (
-    <div ref={ref} className="ws-switcher" onClick={() => setIsOpen(!isOpen)}>
-      <div className="ws-icon"><Building2 size={16} /></div>
-      <div className="ws-info"><div className="ws-name">Main Branch</div></div>
-      <ChevronDown size={16} className={isOpen ? "rotate" : ""} />
+    <div className="ws-switcher">
+      <div className="ws-icon">
+        <Building2 size={16} />
+      </div>
+      <div className="ws-info">
+        <div className="ws-name">{branchName}</div>
+      </div>
+      <ChevronDown size={16} className="rotate" />
     </div>
   );
 };
