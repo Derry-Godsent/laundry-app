@@ -11,6 +11,7 @@ export const PAGE_PERMISSIONS: Record<string, Record<string, PermissionLevel>> =
   '/payments':  { admin: 'edit', gm: 'edit', manager: 'edit', staff: 'view', courier: 'view' },
   '/security':  { admin: 'edit', gm: 'view', manager: 'view', staff: 'view', courier: 'view' },
   '/settings':  { admin: 'edit', gm: 'view', manager: 'view', staff: 'view', courier: 'view' },
+  '/system':    { admin: 'edit', gm: 'view', manager: 'view', staff: 'view', courier: 'view' },
 };
 
 export const getUserPermission = (path: string, role: string): PermissionLevel => {

@@ -14,6 +14,7 @@ import { Security } from "./pages/Security";
 import { Clients } from "./pages/Clients";
 import { Receipt } from "./pages/Receipt";
 import { Login } from "./pages/Login";
+import { SystemAdmin } from "./pages/SystemAdmin";
 
 // ─── PROTECTED ROUTE WRAPPER ──────────────────────────────────────────────
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -92,7 +93,7 @@ export const router = createBrowserRouter([
       { path: "security", element: <Security /> },
       { path: "clients", element: <Clients /> },
       { path: "receipt", element: <Receipt /> },
-      
+      { path: "system", element: <SystemAdmin /> },
     ],
   },
   { path: "*", element: <Navigate to="/dashboard" replace /> }, 

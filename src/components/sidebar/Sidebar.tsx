@@ -47,7 +47,32 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
     { icon: CreditCard, label: "Payments", path: "/payments" },
     { icon: Shield, label: "Security", path: "/security" },
     { icon: Settings, label: "Settings", path: "/settings" },
+    { icon: Shield, label: "System Admin", path: "/system" },
   ], [orderCount]);
+
+  // Show System Admin only for admin role
+const [userRole, setUserRole] = useState<string>("");
+
+useEffect(() => {
+  const fetchRole = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const { data: staffData } = await supabase
+        .from("staff")
+        .select("role")
+        .eq("id", session.user.id)
+        .maybeSingle();
+      if (staffData?.role) setUserRole(staffData.role);
+    }
+  };
+  fetchRole();
+}, []);
+
+// Filter nav items based on role
+const filteredNavItems = useMemo(() => {
+  if (userRole === "admin") return navItems;
+  return navItems.filter(item => item.path !== "/system");
+}, [navItems, userRole]);
 
   return (
     <div className={`sidebar-wrapper ${isCollapsed ? "collapsed" : "expanded"} ${isMobile ? "mobile" : ""} ${isOpen ? "open" : ""}`}>
@@ -64,7 +89,7 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
       </div>
 
       <nav className="sidebar-nav">
-        {navItems.map((item) => (
+        {filteredNavItems.map((item) => (
           <NavItem 
             key={item.path} 
             {...item} 

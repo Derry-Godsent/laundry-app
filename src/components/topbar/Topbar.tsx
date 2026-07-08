@@ -23,39 +23,41 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // ✅ Fetch current user session
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        // Fetch user role for display
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-        if (roleData?.role) setUserRole(roleData.role);
-      }
-    };
-    fetchUser();
-
-    //Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-  (_event: string, session: any) => {
+  // Fetch current user session + staff profile
+useEffect(() => {
+  const fetchUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       setUser(session.user);
-    } else {
-      setUser(null);
-      setUserRole("");
+      
+      // Fetch staff profile (role + full_name) from your staff table
+      const { data: staffData } = await supabase
+        .from("staff")
+        .select("role, first_name, last_name")
+        .eq("id", session.user.id)  // staff.id matches auth.users.id
+        .maybeSingle();
+      
+      if (staffData?.role) setUserRole(staffData.role);
     }
-  }
-);
+  };
+  fetchUser();
 
-    return () => subscription.unsubscribe();
-  }, []);
+  // Listen for auth changes
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    (_event: string, session: any) => {
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        setUser(null);
+        setUserRole("");
+      }
+    }
+  );
 
-  // ✅ Listen for real-time notifications (prepare for your NotificationDropdown)
+  return () => subscription.unsubscribe();
+}, []);
+
+  // Listen for real-time notifications (prepare for your NotificationDropdown)
   useEffect(() => {
     if (!user) return;
 
@@ -86,7 +88,7 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
     };
   }, [user]);
 
-  // ✅ Keyboard shortcuts
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -102,21 +104,28 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // ✅ Handle logout
+  // Handle logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login");
   };
 
-  // ✅ Format user display name
-  const getUserDisplay = () => {
-    if (!user) return "Guest";
-    if (user.user_metadata?.full_name) return user.user_metadata.full_name;
-    if (user.email) return user.email.split("@")[0];
-    return "User";
-  };
+  // Format user display name (fetches from staff table via state)
+const getUserDisplay = () => {
+  if (!user) return "Guest";
+  
+  // We'll fetch full_name from staff table in the effect above
+  // For now, fallback to email prefix if staff data not yet loaded
+  if (user.email) {
+    // Try to get first name from email prefix as temporary fallback
+    const prefix = user.email.split("@")[0];
+    // Capitalize first letter: "admin" → "Admin"
+    return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+  }
+  return "User";
+};
 
-  // ✅ Get user avatar initial
+  // Get user avatar initial
   const getUserInitial = () => {
     const name = getUserDisplay();
     return name.charAt(0).toUpperCase();
@@ -126,7 +135,7 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
     <>
       <div className="topbar">
         <div className="topbar-left">
-          {/* ✅ Mobile Hamburger Button */}
+          {/* Mobile Hamburger Button */}
           {isMobile && onMenuClick && (
             <button 
               className="sidebar-toggle-mobile" 
@@ -154,14 +163,14 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
             <kbd className="command-key">Ctrl K</kbd>
           </button>
 
-          {/* ✅ Notifications with live count */}
+          {/* Notifications with live count */}
           <NotificationDropdown 
             notifications={notifications}
             unreadCount={unreadCount}
             onMarkRead={() => setUnreadCount(0)}
           />
 
-          {/* ✅ Profile Dropdown with user info */}
+          {/* Profile Dropdown with user info */}
           <ProfileDropdown 
             user={user}
             userName={getUserDisplay()}

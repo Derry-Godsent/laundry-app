@@ -8,32 +8,50 @@ export const usePermission = (path: string) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkPermission = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        
         if (!session?.user) {
-          setPermission('view');
-          setLoading(false);
+          if (isMounted) {
+            setPermission('view');
+            setLoading(false);
+          }
           return;
         }
 
-        const { data: roleData } = await supabase
-          .from("user_roles")
+        // Query staff table directly. staff.id is guaranteed to match auth.users.id
+        const { data: staffData, error: staffError } = await supabase
+          .from("staff")
           .select("role")
-          .eq("user_id", session.user.id)
+          .eq("id", session.user.id)
           .maybeSingle();
 
-        const role = roleData?.role || "staff";
-        setPermission(getUserPermission(path, role));
+        if (staffError) {
+          console.warn("Staff role fetch error:", staffError);
+        }
+
+        const role = staffData?.role?.toLowerCase() || "staff";
+        const perm = getUserPermission(path, role);
+        
+        if (isMounted) {
+          setPermission(perm);
+          setLoading(false);
+        }
       } catch (err) {
-        console.error("Permission check error:", err);
-        setPermission('view');
-      } finally {
-        setLoading(false);
+        console.error("Permission check failed:", err);
+        if (isMounted) {
+          setPermission('view');
+          setLoading(false);
+        }
       }
     };
 
     checkPermission();
+
+    return () => { isMounted = false; };
   }, [path]);
 
   return { permission, loading, canEdit: permission === 'edit' };

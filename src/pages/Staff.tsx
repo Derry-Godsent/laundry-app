@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // ✅ Added useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Plus, X, Search, Phone, MapPin, Shield, Package, ArrowRight,
   Check, ChevronLeft, ChevronRight, RefreshCw, Download, Users,
@@ -7,8 +7,32 @@ import {
 } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
-import { usePermission } from "../hooks/usePermission"; // ✅ Added
-import { PermissionGuard } from "../components/PermissionGuard"; // ✅ Added
+import { usePermission } from "../hooks/usePermission"; 
+import { PermissionGuard } from "../components/PermissionGuard";
+
+// Format phone number: accepts digits only, returns +233 XX XXX XXXX display format
+function formatPhoneInput(value: string): string {
+  // Remove all non-digit characters
+  const digits = value.replace(/\D/g, '');
+  
+  // Remove Ghana code if user typed it
+  const cleanDigits = digits.startsWith('233') ? digits.slice(3) : digits;
+  
+  // Limit to 10 digits max
+  const limited = cleanDigits.slice(0, 10);
+  
+  // Format as XX XXX XXXX for display
+  if (limited.length <= 2) return limited;
+  if (limited.length <= 5) return `${limited.slice(0, 2)} ${limited.slice(2)}`;
+  return `${limited.slice(0, 2)} ${limited.slice(2, 5)} ${limited.slice(5)}`;
+}
+
+// Get clean phone number for storage: +233XXXXXXXXXX
+function getCleanPhone(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  const cleanDigits = digits.startsWith('233') ? digits : `233${digits}`;
+  return `+${cleanDigits.slice(0, 12)}`; // +233 + 9 digits = 12 chars total
+}
 
 // Types
 type StaffRole   = "admin" | "worker" | "courier" | "manager" | "strategist";
@@ -26,6 +50,7 @@ interface StaffMember {
   assignedOrderIds: string[];
   joinedDate: string;
   address?: string;
+  is_banned?: boolean;
 }
 
 interface NewStaffForm {
@@ -34,8 +59,9 @@ interface NewStaffForm {
   phone: string;
   role: StaffRole;
   branch: string;
+  email: string; 
+  password: string;
 }
-
 // Constants
 const ROLE_META: Record<StaffRole, { label: string; color: string; bg: string }> = {
   admin:      { label: "Admin",      color: "#6c72f3", bg: "rgba(108,114,243,0.12)" },
@@ -188,10 +214,12 @@ export const Staff = () => {
   const [openStaff, setOpenStaff] = useState<StaffMember | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving]       = useState(false);
-  const [form, setForm]           = useState<NewStaffForm>({
-    firstName: "", lastName: "", phone: "", role: "worker", branch: "Main Branch",
-  });
-  const [formErr, setFormErr]     = useState<Partial<NewStaffForm>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState<NewStaffForm>({
+  firstName: "", lastName: "", phone: "", role: "worker", branch: "Main Branch",
+  email: "", password: "",
+}); 
+ const [formErr, setFormErr]     = useState<Partial<NewStaffForm>>({});
   const searchRef = useRef<HTMLInputElement>(null);
 
   // Permission hook for guard
@@ -225,6 +253,7 @@ export const Staff = () => {
           assignedOrderIds: s.assigned_order_ids ?? [],
           joinedDate:       s.joined_date ?? new Date(s.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
           address:          s.address ?? "",
+          is_banned: s.is_banned ?? false, 
         }));
         setStaff(mapped);
       }
@@ -335,79 +364,111 @@ export const Staff = () => {
   }, [staff]);
 
   const validateForm = (): boolean => {
-    const errs: Partial<NewStaffForm> = {};
-    if (!form.firstName.trim()) errs.firstName = "Required";
-    if (!form.lastName.trim())  errs.lastName  = "Required";
-    if (!form.phone.trim())     errs.phone     = "Required";
-    setFormErr(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  /* ─── SUPABASE: Create Staff ────────────────────────────────────────────── */
-  const handleCreate = async () => {
-    if (!validateForm()) return;
-    setSaving(true);
-    try {
-      const payload = {
-  first_name: form.firstName.trim(),
-  last_name:  form.lastName.trim(),
-  phone:      form.phone.trim(),
-  role:       form.role,
-  status:     "active",
-  efficiency: 100,
-  active_orders: 0,
-  completed_orders: 0,
-  assigned_order_ids: [],
-  joined_date: new Date().toISOString().split('T')[0],
-  branch_id: (await supabase.from("branches").select("id").eq("city", "Kumasi").single()).data?.id, // ✅ Added
+  const errs: Partial<NewStaffForm> = {};
+  if (!form.firstName.trim()) errs.firstName = "Required";
+  if (!form.lastName.trim())  errs.lastName  = "Required";
+  
+  // Validate phone: must have exactly 10 digits (excluding +233)
+  const phoneDigits = form.phone.replace(/\D/g, '');
+  if (!form.phone.trim()) {
+    errs.phone = "Required";
+  } else if (phoneDigits.length !== 10) {
+    errs.phone = "Enter 10 digits";
+  }
+  
+  if (!form.email.trim())     errs.email     = "Required";
+  if (!form.password.trim())  errs.password  = "Required";
+  setFormErr(errs);
+  return Object.keys(errs).length === 0;
 };
 
-      const { data, error } = await supabase.from("staff").insert([payload]).select().single();
+  /* ─── SUPABASE: Create Staff ────────────────────────────────────────────── */
+ const handleCreate = async () => {
+  if (!validateForm()) return;
+  setSaving(true);
+  try {
+    // Step 1: Create auth user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: form.email.trim(),
+      password: form.password,
+      options: {
+        data: { full_name: `${form.firstName} ${form.lastName}`, role: form.role },
+        emailRedirectTo: undefined,
+      },
+    });
 
-      if (error) throw error;
-
-      const newMember: StaffMember = {
-        id:              data?.id ?? `ST${Date.now()}`,
-        name:            `${form.firstName} ${form.lastName}`,
-        role:            form.role,
-        phone:           form.phone,
-        status:          "active",
-        activeOrders:    0,
-        completedOrders: 0,
-        efficiency:      100,
-        assignedOrderIds: [],
-        joinedDate:      new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-        address:         form.branch,
-      };
-
-      setStaff(prev => [newMember, ...prev]);
-      setModalOpen(false);
-      setForm({ firstName: "", lastName: "", phone: "", role: "worker", branch: "Main Branch" });
-      setIsOffline(false);
-    } catch (err) {
-      console.error('Create staff error:', err);
-      setIsOffline(true);
-      // Supabase failed — add locally anyway for demo (your original fallback)
-      const newMember: StaffMember = {
-        id:              `ST${Date.now()}`,
-        name:            `${form.firstName} ${form.lastName}`,
-        role:            form.role,
-        phone:           form.phone,
-        status:          "active",
-        activeOrders:    0,
-        completedOrders: 0,
-        efficiency:      100,
-        assignedOrderIds: [],
-        joinedDate:      new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-        address:         form.branch,
-      };
-      setStaff(prev => [newMember, ...prev]);
-      setModalOpen(false);
-      setForm({ firstName: "", lastName: "", phone: "", role: "worker", branch: "Main Branch" });
-    } finally {
-      setSaving(false);
+    if (authError) {
+      // Supabase enforces 8+ char passwords with at least 1 number/symbol by default
+      throw new Error(`Auth creation failed: ${authError.message}`);
     }
-  };
+
+    if (!authData.user) {
+      throw new Error("Auth user was not created. Check Supabase Auth settings.");
+    }
+
+    // Step 2: Get branch ID
+    const { data: branchData, error: branchError } = await supabase
+      .from("branches")
+      .select("id")
+      .eq("city", "Kumasi")
+      .single();
+
+    if (branchError) throw new Error(`Branch lookup failed: ${branchError.message}`);
+
+    // Step 3: Insert into staff table using the EXACT auth user ID
+    const payload = {
+      id: authData.user.id, // Critical: must match auth.users.id
+      first_name: form.firstName.trim(),
+      last_name: form.lastName.trim(),
+      phone: getCleanPhone(form.phone),
+      role: form.role,
+      status: "active",
+      efficiency: 100,
+      active_orders: 0,
+      completed_orders: 0,
+      assigned_order_ids: [],
+      joined_date: new Date().toISOString().split('T')[0],
+      branch_id: branchData.id,
+    };
+
+    const { data: staffData, error: staffError } = await supabase
+      .from("staff")
+      .insert([payload])
+      .select()
+      .single();
+
+    if (staffError) throw new Error(`Staff insert failed: ${staffError.message}`);
+
+    // Step 4: Update local state ONLY after full success
+    const newMember: StaffMember = {
+      id: staffData.id,
+      name: `${form.firstName} ${form.lastName}`,
+      role: form.role,
+      phone: form.phone,
+      status: "active",
+      activeOrders: 0,
+      completedOrders: 0,
+      efficiency: 100,
+      assignedOrderIds: [],
+      joinedDate: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+      address: form.branch,
+    };
+
+    setStaff(prev => [newMember, ...prev]);
+    setModalOpen(false);
+    setForm({ 
+      firstName: "", lastName: "", phone: "", role: "worker", branch: "Main Branch",
+      email: "", password: "" 
+    });
+    setIsOffline(false);
+  } catch (err: any) {
+    console.error('Create staff error:', err);
+    setIsOffline(true);
+    alert(err.message || "Failed to create staff. Check console for details.");
+  } finally {
+    setSaving(false);
+  }
+};
 
   /* ─── SUPABASE: Export CSV ────────────────────────────────────────────── */
   const handleExport = () => {
@@ -689,7 +750,7 @@ export const Staff = () => {
           .sf-panel { width: 100%; }
         }
 
-        /* ✅ MOBILE TWEAKS (added only) */
+        /* MOBILE TWEAKS (added only) */
         @media (max-width: 480px) {
           .sf-tbl thead { display: none; }
           .sf-row { display: block; padding: 12px 16px; border-bottom: 1px solid var(--sf-border-faint); }
@@ -699,6 +760,8 @@ export const Staff = () => {
           .sf-pag { flex-direction: column; align-items: flex-start; gap: 12px; }
           .sf-pag-r { width: 100%; justify-content: space-between; }
         }
+
+        
       `}</style>
 
       {/* OFFLINE BANNER */}
@@ -812,7 +875,7 @@ export const Staff = () => {
                           <Avatar name={s.name} ring={STATUS_META[s.status].color} />
                           <div>
                             <div className="sf-nm">{s.name}</div>
-                            <div className="sf-ph">{s.phone}</div>
+                            <div className="sf-ph">{formatPhoneInput(s.phone.replace('+233', ''))}</div>
                           </div>
                         </div>
                       </td>
@@ -880,13 +943,13 @@ export const Staff = () => {
               </div>
 
               <div className="sp-body">
-                {/* Contact */}
+                                {/* Contact */}
                 <div className="sp-sec">
                   <div className="sp-sec-lbl">Contact & Info</div>
                   <div className="sp-grid">
                     <div className="sp-gi">
                       <span className="sp-gk"><Phone size={11} /> Phone</span>
-                      <span className="sp-gv">{openStaff.phone}</span>
+                      <span className="sp-gv">{formatPhoneInput(openStaff.phone.replace('+233', ''))}</span>
                     </div>
                     <div className="sp-gi">
                       <span className="sp-gk"><MapPin size={11} /> Location</span>
@@ -901,6 +964,34 @@ export const Staff = () => {
                       <span className="sp-gv">{ROLE_META[openStaff.role].label}</span>
                     </div>
                   </div>
+
+                  {/* Ban/Unban Toggle - Admin only */}
+                  {canEdit && (
+                    <div className="sp-gi" style={{ gridColumn: '1 / -1', marginTop: '12px' }}>
+                      <span className="sp-gk"><Shield size={11} /> Account Status</span>
+                      <button 
+                        className="status-chip" 
+                        style={{ 
+                          color: openStaff.is_banned ? "#f87171" : "#34d399", 
+                          borderColor: (openStaff.is_banned ? "#f87171" : "#34d399") + "40", 
+                          background: (openStaff.is_banned ? "#f87171" : "#34d399") + "12" 
+                        }}
+                        onClick={async () => {
+                          const newBannedStatus = !openStaff.is_banned;
+                          try {
+                            await supabase.from('staff').update({ is_banned: newBannedStatus }).eq('id', openStaff.id);
+                            setOpenStaff(prev => prev ? { ...prev, is_banned: newBannedStatus } : prev);
+                            setStaff(prev => prev.map(s => s.id === openStaff.id ? { ...s, is_banned: newBannedStatus } : s));
+                          } catch (err) {
+                            console.error('Update ban status error:', err);
+                          }
+                        }}
+                      >
+                        <span className="sc-dot" style={{ background: openStaff.is_banned ? "#f87171" : "#34d399" }} />
+                        {openStaff.is_banned ? "Banned" : "Active"}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Performance */}
@@ -1003,13 +1094,74 @@ export const Staff = () => {
               </div>
             </div>
             <div className="sm-fg">
-              <label className="sm-lbl">Phone Number</label>
-              <input className={`sm-inp ${formErr.phone ? "err" : ""}`}
-                placeholder="+233 XX XXX XXXX"
-                value={form.phone}
-                onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
-              {formErr.phone && <span className="sm-err">{formErr.phone}</span>}
-            </div>
+  <label className="sm-lbl">Phone Number</label>
+  <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+    <span style={{ 
+      padding: '10px 12px', 
+      background: 'var(--sf-bg-raised)', 
+      border: '1px solid var(--sf-border-soft)', 
+      borderRight: 'none',
+      borderRadius: '8px 0 0 8px',
+      color: 'var(--sf-text-sec)',
+      fontSize: '13.5px',
+      fontFamily: 'var(--sf-font)'
+    }}>+233</span>
+    <input className={`sm-inp ${formErr.phone ? "err" : ""}`}
+      placeholder="XX XXX XXXX"
+      value={form.phone}
+      onChange={e => {
+        const formatted = formatPhoneInput(e.target.value);
+        setForm(f => ({ ...f, phone: formatted }));
+      }}
+      onBlur={e => {
+        // Validate 10 digits on blur
+        const digits = e.target.value.replace(/\s/g, '');
+        if (digits.length !== 10 && form.phone) {
+          setFormErr(prev => ({ ...prev, phone: "Enter 10 digits" }));
+        }
+      }}
+      style={{ borderRadius: '0 8px 8px 0', borderLeft: 'none' }}
+      maxLength={14} // 2 + 1 space + 3 + 1 space + 4 = 11 chars max display
+    />
+  </div>
+  {formErr.phone && <span className="sm-err">{formErr.phone}</span>}
+</div>
+            <div className="sm-fg">
+  <label className="sm-lbl">Email Address</label>
+  <input className={`sm-inp ${formErr.email ? "err" : ""}`}
+    placeholder="staff@chapmanprestigelimited.com"
+    type="email"
+    value={form.email}
+    onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+  {formErr.email && <span className="sm-err">{formErr.email}</span>}
+</div>
+
+<div className="sm-fg">
+  <label className="sm-lbl">Password</label>
+  <div style={{ position: 'relative' }}>
+    <input 
+      className={`sm-inp ${formErr.password ? "err" : ""}`}
+      placeholder="Enter secure password"
+      type={showPassword ? "text" : "password"}
+      value={form.password}
+      onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+      style={{ paddingRight: '40px' }}
+    />
+    <button 
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      style={{
+        position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+        background: 'none', border: 'none', color: '#9aa3b5', cursor: 'pointer',
+        padding: '4px', display: 'flex'
+      }}
+      title={showPassword ? "Hide password" : "Show password"}
+    >
+      {showPassword ? "Hide" : "Show"}
+    </button>
+  </div>
+  {formErr.password && <span className="sm-err">{formErr.password}</span>}
+</div>
             <div className="sm-row">
               <div className="sm-fg">
                 <label className="sm-lbl">Role</label>
@@ -1028,7 +1180,7 @@ export const Staff = () => {
             </div>
           </div>
           <div className="sm-foot">
-            <button className="smf-s" onClick={() => setModalOpen(false)}>Cancel</button>
+            <button className="smf-s" onClick={() => { setModalOpen(false); setShowPassword(false); }}>Cancel</button>
             <button 
               className="smf-p" 
               onClick={handleCreate} 
