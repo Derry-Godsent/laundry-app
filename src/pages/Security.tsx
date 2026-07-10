@@ -37,6 +37,11 @@ const T = {
 const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
 const MONO = "'DM Mono', 'Fira Mono', ui-monospace, monospace";
 
+interface RoleGroupData {
+  count: number;
+  lastLogin: string | null;
+}
+
 interface AuditLog {
   id: number | string;
   user: string;
@@ -186,13 +191,13 @@ export const Security = () => {
       if (!configError && configData) {
         setConfig(prev => ({
           ...prev,
-          sheetPass: configData.sheet_password || prev.sheetPass,
-          sessionTimeout: configData.session_timeout ?? prev.sessionTimeout,
-          require2FA: configData.require_2fa ?? prev.require2FA,
-          passwordExpiry: configData.password_expiry ?? prev.passwordExpiry,
-          auditRetention: configData.audit_retention ?? prev.auditRetention,
-          allowRemote: configData.allow_remote ?? prev.allowRemote,
-          ipWhitelist: configData.ip_whitelist || prev.ipWhitelist,
+          sheetPass: configData?.sheet_password || prev.sheetPass,
+          sessionTimeout: configData?.session_timeout ?? prev.sessionTimeout,
+          require2FA: configData?.require_2fa ?? prev.require2FA,
+          passwordExpiry: configData?.password_expiry ?? prev.passwordExpiry,
+          auditRetention: configData?.audit_retention ?? prev.auditRetention,
+          allowRemote: configData?.allow_remote ?? prev.allowRemote,
+          ipWhitelist: configData?.ip_whitelist || prev.ipWhitelist,
         }));
       }
 
@@ -210,7 +215,7 @@ const { data: rolesData, error: rolesError } = await supabase
   .not('role', 'is', null);
 
 if (!rolesError && rolesData) {
-  const grouped = rolesData.reduce((acc: Record<string, { count: number; lastLogin: string | null }>, r: any) => {
+  const grouped = rolesData.reduce((acc: Record<string, RoleGroupData>, r: any) => {
     if (!acc[r.role]) acc[r.role] = { count: 0, lastLogin: null };
     acc[r.role].count += 1;
     if (!acc[r.role].lastLogin || (r.last_login && r.last_login > acc[r.role].lastLogin)) {
@@ -219,7 +224,7 @@ if (!rolesError && rolesData) {
     return acc;
   }, {});
 
-  const formattedRoles: Role[] = Object.entries(grouped).map(([role, data]) => {
+const formattedRoles: Role[] = Object.entries(grouped).map(([role, data]: [string, RoleGroupData]) => {
     let lastActive = 'Never';
     if (data?.lastLogin) {
       try {
