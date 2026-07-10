@@ -212,41 +212,47 @@ if (!permError && permData) {
 const { data: rolesData, error: rolesError } = await supabase
   .from('staff')
   .select('role, last_login')
-  .not('role', 'is', null);
-
+  .not('role', 'is', null) as { data: { role: string; last_login: string | null }[] | null, error: any };
 if (!rolesError && rolesData) {
   const grouped = rolesData.reduce((acc: Record<string, RoleGroupData>, r: any) => {
     if (!acc[r.role]) acc[r.role] = { count: 0, lastLogin: null };
     acc[r.role].count += 1;
-    if (!acc[r.role].lastLogin || (r.last_login && r.last_login > acc[r.role].lastLogin)) {
+    const currentLast = acc[r.role]?.lastLogin;
+if (!currentLast || (r.last_login && r.last_login > currentLast)) {
+  acc[r.role].lastLogin = r.last_login;
+}
       acc[r.role].lastLogin = r.last_login;
     }
     return acc;
   }, {});
 
-const formattedRoles: Role[] = Object.entries(grouped).map(([role, data]: [string, RoleGroupData]) => {
-    let lastActive = 'Never';
-    if (data?.lastLogin) {
-      try {
-        const diff = Date.now() - new Date(data?.lastLogin).getTime();
-        if (diff < 0) lastActive = 'Just now';
-        else if (diff < 60000) lastActive = 'Just now';
-        else if (diff < 3600000) lastActive = `${Math.floor(diff / 60000)}m ago`;
-        else if (diff < 86400000) lastActive = `${Math.floor(diff / 3600000)}h ago`;
-        else if (diff < 604800000) lastActive = `${Math.floor(diff / 86400000)}d ago`;
-        else lastActive = new Date(data?.lastLogin).toLocaleDateString();
-      } catch { lastActive = 'Recently'; }
-    }
-    
-    return {
-      id: role,
-      name: role.charAt(0).toUpperCase() + role.slice(1),
-      users: data?.count,
-      permissions: permMap[role] || ['dashboard'],
-      lastActive
-    };
+const formattedRoles: Role[] = [];
+for (const role in grouped) {
+  const data = grouped[role];
+  let lastActive = 'Never';
+  
+  // ✅ Safe null check for lastLogin
+  if (data && data.lastLogin) {
+    try {
+      const diff = Date.now() - new Date(data.lastLogin).getTime();
+      if (diff < 0) lastActive = 'Just now';
+      else if (diff < 60000) lastActive = 'Just now';
+      else if (diff < 3600000) lastActive = `${Math.floor(diff / 60000)}m ago`;
+      else if (diff < 86400000) lastActive = `${Math.floor(diff / 3600000)}h ago`;
+      else if (diff < 604800000) lastActive = `${Math.floor(diff / 86400000)}d ago`;
+      else lastActive = new Date(data.lastLogin).toLocaleDateString();
+    } catch { lastActive = 'Recently'; }
+  }
+  
+  formattedRoles.push({
+    id: role,
+    name: role.charAt(0).toUpperCase() + role.slice(1),
+    users: data?.count || 0,  // ✅ Safe fallback
+    permissions: permMap[role] || ['dashboard'],
+    lastActive
   });
-  setRoles(formattedRoles);
+}
+setRoles(formattedRoles);
 }
       // Fetch audit logs
       const { data: logs, error: logsError } = await supabase
