@@ -229,29 +229,42 @@ export const Login = () => {
   };
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (!isOnline) {
-      setError("You're offline. Check your connection and try again.");
-      return;
+  if (!isOnline) {
+    setError("You're offline. Check your connection and try again.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+
+    // Update last_login in staff table (non-blocking)
+    // We don't await this so a DB hiccup doesn't prevent login
+    if (data?.user) {
+      supabase
+        .from("staff")
+        .update({ last_login: new Date().toISOString() })
+        .eq("id", data.user.id)
+        .then((res) => {
+          if (res.error) console.warn("Failed to update last_login:", res.error);
+        });
     }
 
-    setLoading(true);
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-    } catch (err: any) {
-      setError(err.message || "Authentication failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err: any) {
+    setError(err.message || "Authentication failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (rafRef.current) return;

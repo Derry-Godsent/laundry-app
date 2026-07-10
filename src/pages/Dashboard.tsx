@@ -386,25 +386,29 @@ export const Dashboard = () => {
       })));
 
       // ─── CONNECT SERVICE MIX TO SUPABASE (Live Data) ─────────────────
-      const [{ data: orderItems }] = await supabase
-        .from('order_items')
-        .select('service_id, quantity, services(name, category)')
-        .limit(500);
-      
-      if (orderItems) {
-        const serviceCounts: Record<string, number> = {};
-        orderItems.forEach((item: any) => {
-          const cat = item.services?.category || 'Other';
-          serviceCounts[cat] = (serviceCounts[cat] || 0) + (item.quantity || 1);
-        });
-        const colors = ['#6c72f3', '#22d3ee', '#dba96a', '#34d399', '#a78bfa'];
-        const totalSvc = Object.values(serviceCounts).reduce((a, b) => a + b, 0) || 1;
-        setServices(Object.entries(serviceCounts).slice(0, 4).map(([label, value], i) => ({
-          label,
-          value: Math.round(((value as number) / totalSvc) * 100),
-          color: colors[i % colors.length]
-        })));
-      }
+      // ✅ Fixed version:
+const { data: orderItems, error } = await supabase
+  .from('order_items')
+  .select('service_id, quantity, services(name, category)')
+  .limit(500);
+
+// 🔒 Guard against null/undefined
+const items = orderItems || [];
+
+if (items.length > 0) {  // ✅ Check array length, not truthiness
+  const serviceCounts: Record<string, number> = {};
+  items.forEach((item: any) => {  // ✅ Use 'items', not 'orderItems'
+    const cat = item.services?.category || 'Other';
+    serviceCounts[cat] = (serviceCounts[cat] || 0) + (item.quantity || 1);
+  });
+  const colors = ['#6c72f3', '#22d3ee', '#dba96a', '#34d399', '#a78bfa'];
+  const totalSvc = Object.values(serviceCounts).reduce((a, b) => a + b, 0) || 1;
+  setServices(Object.entries(serviceCounts).slice(0, 4).map(([label, value], i) => ({
+    label,
+    value: Math.round(((value as number) / totalSvc) * 100),
+    color: colors[i % colors.length]
+  })));
+}
       // ──────────────────────────────────────────────────────────────────────
 
       // Activity

@@ -7,7 +7,20 @@ import {
 } from "lucide-react";
 import { usePermission } from "../hooks/usePermission";
 import { useLocation } from "react-router-dom";
-import { PermissionGuard } from "../components/PermissionGuard"; // ✅ Added import
+import { PermissionGuard } from "../components/PermissionGuard";
+
+const PAGE_CONFIG = [
+  { label: 'Dashboard', key: 'dashboard' },
+  { label: 'New Order', key: 'new-order' },
+  { label: 'Orders', key: 'orders' },
+  { label: 'Staff', key: 'staff' },
+  { label: 'Clients', key: 'clients' },
+  { label: 'Services', key: 'services' },
+  { label: 'Receipts', key: 'receipts' },
+  { label: 'Payments', key: 'payments' },
+  { label: 'Security', key: 'security' },
+  { label: 'Settings', key: 'settings' },
+];
 
 /* ── DESIGN TOKENS ───────────────────────────────────────── */
 const T = {
@@ -120,6 +133,8 @@ export const Security = () => {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [rolePermissions, setRolePermissions] = useState<string[]>([]);
 
   // Connectivity awareness — additive only, does not alter existing fetch/save mechanics
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
@@ -136,12 +151,12 @@ export const Security = () => {
     ipWhitelist: "192.168.1.0/24",
   });
 
-  // ✅ Roles now fetched from Supabase (no more placeholders)
+  // Roles now fetched from Supabase (no more placeholders)
   const [roles, setRoles] = useState<Role[]>([]);
 
   const [auditLog, setAuditLog] = useState<AuditLog[]>([]);
 
-  // ✅ Permission hook for guard
+  // Permission hook for guard
   const location = useLocation();
   const { permission, loading: permLoading, canEdit } = usePermission(location.pathname);
 
@@ -181,23 +196,53 @@ export const Security = () => {
         }));
       }
 
-      // ✅ Fetch roles from user_roles table (real data)
-      const { data: rolesData, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('role, count:user_id')
-        .group('role');
-      
-      if (!rolesError && rolesData) {
-        const formattedRoles: Role[] = rolesData.map((r: { role: string; count: number }) => ({
-          id: r.role,
-          name: r.role.charAt(0).toUpperCase() + r.role.slice(1),
-          users: Number(r.count) || 0,
-          permissions: getPermissionsForRole(r.role), // Helper function below
-          lastActive: 'Recently' // Could fetch last_login from auth.users if needed
-        }));
-        setRoles(formattedRoles);
-      }
+//  Fetch permissions map from DB
+const { data: permData, error: permError } = await supabase.from('role_permissions').select('role, permissions');
+const permMap: Record<string, string[]> = {};
+if (!permError && permData) {
+  permData.forEach((p: any) => { permMap[p.role] = p.permissions || []; });
+}
 
+// Fetch roles from staff table
+const { data: rolesData, error: rolesError } = await supabase
+  .from('staff')
+  .select('role, last_login')
+  .not('role', 'is', null);
+
+if (!rolesError && rolesData) {
+  const grouped = rolesData.reduce((acc: Record<string, { count: number; lastLogin: string | null }>, r: any) => {
+    if (!acc[r.role]) acc[r.role] = { count: 0, lastLogin: null };
+    acc[r.role].count += 1;
+    if (!acc[r.role].lastLogin || (r.last_login && r.last_login > acc[r.role].lastLogin)) {
+      acc[r.role].lastLogin = r.last_login;
+    }
+    return acc;
+  }, {});
+
+  const formattedRoles: Role[] = Object.entries(grouped).map(([role, data]) => {
+    let lastActive = 'Never';
+    if (data.lastLogin) {
+      try {
+        const diff = Date.now() - new Date(data.lastLogin).getTime();
+        if (diff < 0) lastActive = 'Just now';
+        else if (diff < 60000) lastActive = 'Just now';
+        else if (diff < 3600000) lastActive = `${Math.floor(diff / 60000)}m ago`;
+        else if (diff < 86400000) lastActive = `${Math.floor(diff / 3600000)}h ago`;
+        else if (diff < 604800000) lastActive = `${Math.floor(diff / 86400000)}d ago`;
+        else lastActive = new Date(data.lastLogin).toLocaleDateString();
+      } catch { lastActive = 'Recently'; }
+    }
+    
+    return {
+      id: role,
+      name: role.charAt(0).toUpperCase() + role.slice(1),
+      users: data.count,
+      permissions: permMap[role] || ['dashboard'],
+      lastActive
+    };
+  });
+  setRoles(formattedRoles);
+}
       // Fetch audit logs
       const { data: logs, error: logsError } = await supabase
         .from('audit_logs')
@@ -216,26 +261,20 @@ export const Security = () => {
       }
       setSyncFailed(false);
       setIsOnline(true);
-    } catch (err) {
-      console.error('Security fetch error:', err);
-      setSyncFailed(true);
-    } finally {
+    } catch (err: any) {
+  console.error('Security fetch error:', err);
+  // Only mark as sync failed if it's a network error, not a missing table
+  if (err.message?.includes('network') || err.message?.includes('Failed to fetch')) {
+    setSyncFailed(true);
+  } else {
+    // Log the error but don't show offline banner for schema issues
+    console.warn('Non-network error (likely missing table or RLS):', err);
+  }
+} finally {
       setLoading(false);
       setRefreshing(false);
     }
   }, []);
-
-  // ✅ Helper: Map role names to permission labels
-  const getPermissionsForRole = (role: string): string[] => {
-    const map: Record<string, string[]> = {
-      admin: ['All'],
-      gm: ['Dashboard', 'Reports', 'Settings'],
-      manager: ['Orders', 'Services', 'Clients', 'Reports'],
-      staff: ['Orders', 'Services', 'Clients'],
-      courier: ['Orders (View Only)'],
-    };
-    return map[role] || ['View Only'];
-  };
 
   useEffect(() => {
     fetchSecurity();
@@ -312,7 +351,7 @@ export const Security = () => {
   const statusColor = isOnline ? T.emerald : T.ember;
   const statusGlow = isOnline ? T.emeraldGlow : T.emberGlow;
 
-  // ✅ Wait for both data AND permissions to load
+  // Wait for both data AND permissions to load
   if (loading || permLoading) return (
     <div className="sec-root" style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT }}>
       <StyleSheet />
@@ -463,8 +502,29 @@ export const Security = () => {
                         </td>
                         <td style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{role.lastActive}</td>
                         <td style={{ padding: "16px 20px" }}>
-                          <button className="sec-edit-btn" style={{ padding: "6px 12px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 6, color: T.textSec, fontSize: 12, cursor: "pointer", fontFamily: FONT }}>Edit</button>
-                        </td>
+  <button 
+  className="sec-edit-btn" 
+  onClick={(e) => {
+    e.stopPropagation();
+    
+    // 1. Safely extract DB permissions
+    const rawPerms = Array.isArray(role.permissions) ? role.permissions : [];
+    
+    // 2. Map DB keys → UI labels for the modal state
+    const uiLabels = rawPerms.map(key => {
+      const match = PAGE_CONFIG.find(p => p.key === key);
+      return match ? match.label : key;
+    });
+    
+    // 3. Open modal with correct state
+    setEditingRole(role);
+    setRolePermissions(uiLabels);
+  }}
+  style={{ padding: "6px 12px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 6, color: T.textSec, fontSize: 12, cursor: "pointer", fontFamily: FONT }}
+>
+  Edit
+</button>
+</td>
                       </tr>
                     ))
                   )}
@@ -581,6 +641,96 @@ export const Security = () => {
           )}
 
         </div>
+        {/* Role Edit Modal */}
+{/* Role Edit Modal */}
+{editingRole && (
+  <div style={{
+    position: 'fixed', inset: 0, background: 'rgba(4,5,9,0.8)', backdropFilter: 'blur(4px)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 20
+  }} onClick={() => setEditingRole(null)}>
+    <div style={{
+      background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 16,
+      width: 420, maxWidth: '100%', padding: 24, boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+    }} onClick={e => e.stopPropagation()}>
+      <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, fontFamily: FONT }}>
+        Edit Role: {editingRole.name}
+      </h3>
+      <p style={{ margin: '0 0 16px', fontSize: 12.5, color: T.textTert, fontFamily: FONT }}>
+        Select permissions for this role
+      </p>
+      
+      {/* Checkboxes */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+        {PAGE_CONFIG.map(({ label, key }) => {
+          // Check if this label is currently in our state
+          const isChecked = rolePermissions.includes(label);
+          
+          return (
+            <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: T.textPrimary, fontFamily: FONT, cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    // Add to list if not already there
+                    setRolePermissions(prev => [...new Set([...prev, label])]);
+                  } else {
+                    // Remove from list
+                    setRolePermissions(prev => prev.filter(p => p !== label));
+                  }
+                }}
+                style={{ accentColor: T.accent, cursor: 'pointer' }}
+              />
+              {label}
+            </label>
+          );
+        })}
+      </div>
+
+      {/* Buttons */}
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button 
+          onClick={() => setEditingRole(null)} 
+          style={{ 
+            flex: 1, padding: 10, background: T.bgElevated, border: `1px solid ${T.borderSoft}`, 
+            borderRadius: 8, color: T.textSec, fontWeight: 600, cursor: 'pointer', fontFamily: FONT 
+          }}
+        >
+          Cancel
+        </button>
+        <button 
+          onClick={async () => {
+            try {
+              // Convert UI Labels back to DB Keys for saving
+              const dbKeys = rolePermissions.map(l => 
+                PAGE_CONFIG.find(p => p.label === l)?.key
+              ).filter(Boolean); // filter(Boolean) removes any undefineds
+
+              const { error } = await supabase.from('role_permissions').upsert({
+                role: editingRole.id,
+                permissions: dbKeys,
+                updated_at: new Date().toISOString()
+              }, { onConflict: 'role' });
+              
+              if (error) throw error;
+              
+window.dispatchEvent(new Event('permissions-updated'));
+              
+              setEditingRole(null);
+              fetchSecurity(); // Refresh data to ensure sync
+            } catch (err) {
+              alert('Failed to save permissions.');
+            }
+          }}
+          style={{ flex: 1.5, padding: 10, background: T.accent, border: 'none', borderRadius: 8, color: '#fff', fontWeight: 700, cursor: 'pointer', fontFamily: FONT }}
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </PermissionGuard>
     </div>
   );

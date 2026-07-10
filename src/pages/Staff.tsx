@@ -35,7 +35,7 @@ function getCleanPhone(value: string): string {
 }
 
 // Types
-type StaffRole   = "admin" | "worker" | "courier" | "manager" | "strategist";
+type StaffRole   = "admin" | "staff" | "courier" | "manager" | "strategist";
 type StaffStatus = "active" | "onduty" | "offline";
 
 interface StaffMember {
@@ -65,7 +65,7 @@ interface NewStaffForm {
 // Constants
 const ROLE_META: Record<StaffRole, { label: string; color: string; bg: string }> = {
   admin:      { label: "Admin",      color: "#6c72f3", bg: "rgba(108,114,243,0.12)" },
-  worker:     { label: "Worker",     color: "#34d399", bg: "rgba(52,211,153,0.12)"  },
+  staff:     { label: "Staff",     color: "#34d399", bg: "rgba(52,211,153,0.12)"  },
   courier:    { label: "Courier",    color: "#dba96a", bg: "rgba(219,169,106,0.12)" },
   manager:    { label: "Manager",    color: "#a78bfa", bg: "rgba(167,139,250,0.12)" },
   strategist: { label: "Strategist", color: "#22d3ee", bg: "rgba(34,211,238,0.12)"  },
@@ -216,7 +216,7 @@ export const Staff = () => {
   const [saving, setSaving]       = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState<NewStaffForm>({
-  firstName: "", lastName: "", phone: "", role: "worker", branch: "Main Branch",
+  firstName: "", lastName: "", phone: "", role: "staff", branch: "Main Branch",
   email: "", password: "",
 }); 
  const [formErr, setFormErr]     = useState<Partial<NewStaffForm>>({});
@@ -244,7 +244,7 @@ export const Staff = () => {
         const mapped = data.map((s: any): StaffMember => ({
           id:               s.id ?? s.staff_id,
           name:             `${s.first_name ?? ""} ${s.last_name ?? ""}`.trim() || s.name,
-          role:             (s.role ?? "worker").toLowerCase() as StaffRole,
+          role:             (s.role ?? "staff").toLowerCase() as StaffRole,
           phone:            s.phone ?? s.phone_number ?? "",
           status:           (s.status ?? "active").toLowerCase() as StaffStatus,
           activeOrders:     s.active_orders ?? 0,
@@ -457,7 +457,7 @@ export const Staff = () => {
     setStaff(prev => [newMember, ...prev]);
     setModalOpen(false);
     setForm({ 
-      firstName: "", lastName: "", phone: "", role: "worker", branch: "Main Branch",
+      firstName: "", lastName: "", phone: "", role: "staff", branch: "Main Branch",
       email: "", password: "" 
     });
     setIsOffline(false);
