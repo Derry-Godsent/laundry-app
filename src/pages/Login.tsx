@@ -254,7 +254,7 @@ export const Login = () => {
         .from("staff")
         .update({ last_login: new Date().toISOString() })
         .eq("id", data.user.id)
-        .then((res) => {
+        .then((res:any) => {
           if (res.error) console.warn("Failed to update last_login:", res.error);
         });
     }
@@ -393,7 +393,7 @@ export const Login = () => {
               <Building2 size={24} color="#fff" />
             </div>
             <div style={{ fontSize: 28, fontWeight: 800, color: T.textPrimary, letterSpacing: "-0.03em" }}>
-              Chapman Prestige Limited
+              Chapman Prestige Limited Limited
             </div>
           </div>
 

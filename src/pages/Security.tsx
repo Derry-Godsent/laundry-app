@@ -221,22 +221,22 @@ if (!rolesError && rolesData) {
 
   const formattedRoles: Role[] = Object.entries(grouped).map(([role, data]) => {
     let lastActive = 'Never';
-    if (data.lastLogin) {
+    if (data?.lastLogin) {
       try {
-        const diff = Date.now() - new Date(data.lastLogin).getTime();
+        const diff = Date.now() - new Date(data?.lastLogin).getTime();
         if (diff < 0) lastActive = 'Just now';
         else if (diff < 60000) lastActive = 'Just now';
         else if (diff < 3600000) lastActive = `${Math.floor(diff / 60000)}m ago`;
         else if (diff < 86400000) lastActive = `${Math.floor(diff / 3600000)}h ago`;
         else if (diff < 604800000) lastActive = `${Math.floor(diff / 86400000)}d ago`;
-        else lastActive = new Date(data.lastLogin).toLocaleDateString();
+        else lastActive = new Date(data?.lastLogin).toLocaleDateString();
       } catch { lastActive = 'Recently'; }
     }
     
     return {
       id: role,
       name: role.charAt(0).toUpperCase() + role.slice(1),
-      users: data.count,
+      users: data?.count,
       permissions: permMap[role] || ['dashboard'],
       lastActive
     };
@@ -713,7 +713,7 @@ if (!rolesError && rolesData) {
               }, { onConflict: 'role' });
               
               if (error) throw error;
-              
+
 window.dispatchEvent(new Event('permissions-updated'));
               
               setEditingRole(null);
