@@ -177,115 +177,138 @@ export const Security = () => {
   }, []);
 
   const fetchSecurity = useCallback(async () => {
-    if (!navigator.onLine) {
-      setIsOnline(false);
-      setSyncFailed(true);
-      setLoading(false);
-      setRefreshing(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      // Fetch security config
-      const { data: configData, error: configError } = await supabase.from('security_config').select('*').maybeSingle();
-      if (!configError && configData) {
-        setConfig(prev => ({
-          ...prev,
-          sheetPass: configData?.sheet_password || prev.sheetPass,
-          sessionTimeout: configData?.session_timeout ?? prev.sessionTimeout,
-          require2FA: configData?.require_2fa ?? prev.require2FA,
-          passwordExpiry: configData?.password_expiry ?? prev.passwordExpiry,
-          auditRetention: configData?.audit_retention ?? prev.auditRetention,
-          allowRemote: configData?.allow_remote ?? prev.allowRemote,
-          ipWhitelist: configData?.ip_whitelist || prev.ipWhitelist,
-        }));
-      }
-
-//  Fetch permissions map from DB
-const { data: permData, error: permError } = await supabase.from('role_permissions').select('role, permissions');
-const permMap: Record<string, string[]> = {};
-if (!permError && permData) {
-  permData.forEach((p: any) => { permMap[p.role] = p.permissions || []; });
-}
-
-// Fetch roles from staff table
-const { data: rolesData, error: rolesError } = await supabase
-  .from('staff')
-  .select('role, last_login')
-  .not('role', 'is', null) as { data: { role: string; last_login: string | null }[] | null, error: any };
-if (!rolesError && rolesData) {
-  const grouped = rolesData.reduce((acc: Record<string, RoleGroupData>, r: any) => {
-    if (!acc[r.role]) acc[r.role] = { count: 0, lastLogin: null };
-    acc[r.role].count += 1;
-    const currentLast = acc[r.role]?.lastLogin;
-if (!currentLast || (r.last_login && r.last_login > currentLast)) {
-  acc[r.role].lastLogin = r.last_login;
-}
-      acc[r.role].lastLogin = r.last_login;
-    }
-    return acc;
-  }, {});
-
-const formattedRoles: Role[] = [];
-for (const role in grouped) {
-  const data = grouped[role];
-  let lastActive = 'Never';
-  
-  // ✅ Safe null check for lastLogin
-  if (data && data.lastLogin) {
-    try {
-      const diff = Date.now() - new Date(data.lastLogin).getTime();
-      if (diff < 0) lastActive = 'Just now';
-      else if (diff < 60000) lastActive = 'Just now';
-      else if (diff < 3600000) lastActive = `${Math.floor(diff / 60000)}m ago`;
-      else if (diff < 86400000) lastActive = `${Math.floor(diff / 3600000)}h ago`;
-      else if (diff < 604800000) lastActive = `${Math.floor(diff / 86400000)}d ago`;
-      else lastActive = new Date(data.lastLogin).toLocaleDateString();
-    } catch { lastActive = 'Recently'; }
-  }
-  
-  formattedRoles.push({
-    id: role,
-    name: role.charAt(0).toUpperCase() + role.slice(1),
-    users: data?.count || 0,  // ✅ Safe fallback
-    permissions: permMap[role] || ['dashboard'],
-    lastActive
-  });
-}
-setRoles(formattedRoles);
-}
-      // Fetch audit logs
-      const { data: logs, error: logsError } = await supabase
-        .from('audit_logs')
-        .select('id, user_name, action, created_at, ip_address')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (!logsError && logs) {
-        setAuditLog(logs.map((l: any) => ({
-          id: l.id,
-          user: l.user_name || 'System',
-          action: l.action || 'Configuration update',
-          time: new Date(l.created_at).toLocaleString(),
-          ip: l.ip_address || '—'
-        })));
-      }
-      setSyncFailed(false);
-      setIsOnline(true);
-    } catch (err: any) {
-  console.error('Security fetch error:', err);
-  // Only mark as sync failed if it's a network error, not a missing table
-  if (err.message?.includes('network') || err.message?.includes('Failed to fetch')) {
+  if (!navigator.onLine) {
+    setIsOnline(false);
     setSyncFailed(true);
-  } else {
-    // Log the error but don't show offline banner for schema issues
-    console.warn('Non-network error (likely missing table or RLS):', err);
+    setLoading(false);
+    setRefreshing(false);
+    return;
   }
-} finally {
-      setLoading(false);
-      setRefreshing(false);
+  
+  setLoading(true);
+  
+  try {
+    // 1️⃣ Fetch security config
+    const { data: configData, error: configError } = await supabase
+      .from('security_config')
+      .select('*')
+      .maybeSingle();
+      
+    if (!configError && configData) {
+      setConfig(prev => ({
+        ...prev,
+        sheetPass: configData.sheet_password || prev.sheetPass,
+        sessionTimeout: configData.session_timeout ?? prev.sessionTimeout,
+        require2FA: configData.require_2fa ?? prev.require2FA,
+        passwordExpiry: configData.password_expiry ?? prev.passwordExpiry,
+        auditRetention: configData.audit_retention ?? prev.auditRetention,
+        allowRemote: configData.allow_remote ?? prev.allowRemote,
+        ipWhitelist: configData.ip_whitelist || prev.ipWhitelist,
+      }));
     }
-  }, []);
+
+    // 2️⃣ Fetch permissions map
+    const { data: permData, error: permError } = await supabase
+      .from('role_permissions')
+      .select('role, permissions');
+      
+    const permMap: Record<string, string[]> = {};
+    if (!permError && permData) {
+      permData.forEach((p: any) => {
+        if (p?.role && Array.isArray(p.permissions)) {
+          permMap[p.role] = p.permissions;
+        }
+      });
+    }
+
+    // 3️⃣ Fetch roles from staff table
+    const { data: rolesData, error: rolesError } = await supabase
+      .from('staff')
+      .select('role, last_login')
+      .not('role', 'is', null);
+
+    if (!rolesError && rolesData && rolesData.length > 0) {
+      // Group by role using simple for loop (avoids TS inference issues)
+      const grouped: Record<string, { count: number; lastLogin: string | null }> = {};
+      
+      for (const r of rolesData) {
+        const roleKey = r?.role;
+        if (!roleKey) continue;
+        
+        if (!grouped[roleKey]) {
+          grouped[roleKey] = { count: 0, lastLogin: null };
+        }
+        grouped[roleKey].count += 1;
+        
+        if (r?.last_login) {
+          const existing = grouped[roleKey].lastLogin;
+          if (!existing || r.last_login > existing) {
+            grouped[roleKey].lastLogin = r.last_login;
+          }
+        }
+      }
+
+      // Build formatted roles array
+      const formattedRoles: Role[] = [];
+      for (const roleKey in grouped) {
+        const data = grouped[roleKey];
+        let lastActive = 'Never';
+        
+        if (data?.lastLogin) {
+          try {
+            const diff = Date.now() - new Date(data.lastLogin).getTime();
+            if (diff < 0) lastActive = 'Just now';
+            else if (diff < 60000) lastActive = 'Just now';
+            else if (diff < 3600000) lastActive = `${Math.floor(diff / 60000)}m ago`;
+            else if (diff < 86400000) lastActive = `${Math.floor(diff / 3600000)}h ago`;
+            else if (diff < 604800000) lastActive = `${Math.floor(diff / 86400000)}d ago`;
+            else lastActive = new Date(data.lastLogin).toLocaleDateString();
+          } catch {
+            lastActive = 'Recently';
+          }
+        }
+        
+        formattedRoles.push({
+          id: roleKey,
+          name: roleKey.charAt(0).toUpperCase() + roleKey.slice(1),
+          users: data?.count || 0,
+          permissions: permMap[roleKey] || ['dashboard'],
+          lastActive
+        });
+      }
+      setRoles(formattedRoles);
+    }
+
+    // 4️⃣ Fetch audit logs
+    const { data: logs, error: logsError } = await supabase
+      .from('audit_logs')
+      .select('id, user_name, action, created_at, ip_address')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (!logsError && logs) {
+      setAuditLog(logs.map((l: any) => ({
+        id: l?.id ?? '',
+        user: l?.user_name || 'System',
+        action: l?.action || 'Configuration update',
+        time: l?.created_at ? new Date(l.created_at).toLocaleString() : '',
+        ip: l?.ip_address || '—'
+      })));
+    }
+    
+    setSyncFailed(false);
+    setIsOnline(true);
+    
+  } catch (err: any) {
+    console.error('Security fetch error:', err);
+    if (err?.message?.includes('network') || err?.message?.includes('Failed to fetch')) {
+      setSyncFailed(true);
+    }
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+}, []);
 
   useEffect(() => {
     fetchSecurity();
