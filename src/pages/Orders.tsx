@@ -233,7 +233,7 @@ export const Orders = () => {
 
       const { data, error } = await query
         .order('created_at', { ascending: false })
-        .limit(100);
+        .range(0, 1999);
       
       if (error) {
         console.error('Supabase orders fetch error:', error);
@@ -362,7 +362,8 @@ const clearFilters = () => {
         `)
         .gte('created_at', toQueryDate(startDate, 'start'))
         .lte('created_at', toQueryDate(endDate, 'end'))
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+        .range(0, 1999);
 
       if (error) throw error;
 
@@ -375,7 +376,6 @@ const clearFilters = () => {
           service: o.notes || 'Laundry',
           items: o.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1,
           amount: Number(o.total_due) || 0,
-          amount_paid: Number(o.amount_paid) || 0, 
           status: (o.status?.toLowerCase() as OrderStatus) || 'received',
           worker: 'Staff',
           date: formatDateOnly(o.created_at),
