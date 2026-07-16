@@ -411,7 +411,7 @@ const clearFilters = () => {
   // 🔹 ADDED: Print view (hidden on screen, visible when printing)
   if (printMode) {
     return (
-      <div id="print-area" style={{ background: '#fff', color: '#000', padding: '40px', fontFamily: 'system-ui' }}>
+      <div id="print-area" style={{ background: '#fff', color: '#000', padding: '40px', fontFamily: 'system-ui', minHeight: 'auto', height: 'auto' }}>
         {/* Company Header */}
         <div style={{ textAlign: 'center', borderBottom: '3px solid #000', paddingBottom: 20, marginBottom: 30 }}>
           <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>CHAPMAN PRESTIGE LIMITED</h1>
@@ -455,7 +455,7 @@ const clearFilters = () => {
         </table>
 
         {/* Summary */}
-        <div style={{ textAlign: 'right', marginTop: 20 }}>
+        <div style={{ textAlign: 'right', marginTop: 20, }}>
           <p style={{ margin: '4px 0', fontSize: 14 }}>
             <strong>Total Orders:</strong> {bulkOrders.length}
           </p>
@@ -488,16 +488,72 @@ const clearFilters = () => {
 
         {/* CSS for print media */}
         <style>{`
-          @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
-            .no-print { display: none !important; }
-          }
-          @media screen {
-            .no-print { display: flex; }
-          }
-        `}</style>
+  @media print {
+    /* Reset all visibility */
+    body * {
+      visibility: hidden;
+    }
+    
+    /* Show only print area */
+    #print-area, #print-area * {
+      visibility: visible;
+    }
+    
+    /* Position print area at top-left */
+    #print-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      padding: 20px;
+      background: white;
+      color: black;
+    }
+    
+    /* Allow natural page breaks */
+    #print-area table {
+      page-break-inside: auto;
+    }
+    
+    #print-area tr {
+      page-break-inside: avoid;
+      page-break-after: auto;
+    }
+    
+    #print-area thead {
+      display: table-header-group;
+    }
+    
+    #print-area tfoot {
+      display: table-footer-group;
+    }
+    
+    /* Remove hidden elements */
+    .no-print {
+      display: none !important;
+    }
+    
+    /* Ensure proper page size */
+    @page {
+      size: auto;
+      margin: 15mm;
+    }
+    
+    /* Prevent content from being cut off */
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+  
+  @media screen {
+    .no-print {
+      display: flex;
+    }
+  }
+`}
+
+</style>
       </div>
     );
   }
