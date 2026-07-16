@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, Plus, Minus, Trash2, Check, X, Package, Users,
-  Receipt, Truck, Percent, Zap, Clock, Save
+  Receipt, Truck, Percent, Zap, Clock, Save, Calendar
 } from "lucide-react";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
@@ -19,9 +19,25 @@ const T = {
 const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
 const MONO = "'DM Mono', 'Fira Mono', ui-monospace, monospace";
 
+// 🔹 ADDED: Helper to format date as DD/MM/YY (no time)
+const formatDateOnly = (isoString: string) => {
+  if (!isoString) return '';
+  const d = new Date(isoString);
+  return d.toLocaleDateString('en-GB').replace(/\//g, '/');
+};
+
 type Service = { id: string; name: string; category: string; price_wash: number; price_iron: number; price_fold: number; price_hang: number };
 type Client = { id: string; name: string; type: string; tier: string; phone: string };
-type CartItem = { serviceId: string; name: string; treatment: string; quantity: number; unitPrice: number; total: number };
+type CartItem = { 
+  serviceId: string; 
+  name: string; 
+  treatment: string; 
+  quantity: number; 
+  unitPrice: number; 
+  total: number;
+  // 🔹 ADDED: Allow custom price override flag
+  useCustomPrice?: boolean;
+};
 
 export const OrderBuilder = () => {
   const [clients, setClients] = useState<Client[]>([]);
@@ -40,6 +56,17 @@ export const OrderBuilder = () => {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [amountPaid, setAmountPaid] = useState(0);
   const [notes, setNotes] = useState("");
+  
+  // 🔹 ADDED: Order date picker (defaults to today in YYYY-MM-DD format)
+  const [orderDate, setOrderDate] = useState(() => {
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const local = new Date(today.getTime() - offset * 60 * 1000);
+    return local.toISOString().split('T')[0];
+  });
+  
+  // 🔹 ADDED: Global pricing toggle + per-item custom price tracking
+  const [useCurrentPricing, setUseCurrentPricing] = useState(true);
   
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -77,8 +104,17 @@ export const OrderBuilder = () => {
         : i
       ));
     } else {
-      const price = getClientPrice(service, 'Wash');
-      setCart([...cart, { serviceId: service.id, name: service.name, treatment: 'Wash', quantity: 1, unitPrice: price, total: price }]);
+      // 🔹 MODIFIED: Respect custom pricing toggle
+      const price = !useCurrentPricing ? 0 : getClientPrice(service, 'Wash');
+      setCart([...cart, { 
+        serviceId: service.id, 
+        name: service.name, 
+        treatment: 'Wash', 
+        quantity: 1, 
+        unitPrice: price, 
+        total: price,
+        useCustomPrice: !useCurrentPricing // 🔹 Track if this item should use custom price
+      }]);
     }
     setServiceSearch("");
   };
@@ -96,10 +132,23 @@ export const OrderBuilder = () => {
     const newCart = [...cart];
     const service = services.find(s => s.id === newCart[index].serviceId);
     if (service) {
-      const price = getClientPrice(service, treatment);
+      // 🔹 MODIFIED: Only auto-calc price if not using custom pricing
+      const price = !newCart[index].useCustomPrice ? getClientPrice(service, treatment) : newCart[index].unitPrice;
       newCart[index] = { ...newCart[index], treatment, unitPrice: price, total: newCart[index].quantity * price };
       setCart(newCart);
     }
+  };
+
+  // 🔹 ADDED: Update custom price for a cart item
+  const updateCustomPrice = (index: number, price: number) => {
+    const newCart = [...cart];
+    newCart[index] = { 
+      ...newCart[index], 
+      unitPrice: price, 
+      total: price * newCart[index].quantity,
+      useCustomPrice: true 
+    };
+    setCart(newCart);
   };
 
   // Calculations
@@ -112,21 +161,22 @@ export const OrderBuilder = () => {
  const handleSubmit = async () => {
   if (!selectedClient) { 
     setToast({ msg: "Please select a client", type: 'error' }); 
-    setTimeout(() => setToast(null), 3500); // ✅ Added
+    setTimeout(() => setToast(null), 3500);
     return; 
   }
   if (cart.length === 0) { 
     setToast({ msg: "Add at least one item", type: 'error' }); 
-    setTimeout(() => setToast(null), 3500); // ✅ Added
+    setTimeout(() => setToast(null), 3500);
     return; 
   }
-  // ... rest of your handleSubmit stays exactly the same
   
   setSubmitting(true);
   try {
     const orderId = `CPL-ORD-${Date.now().toString().slice(-6)}`;
     
-    // ✅ FIXED: Added 'data:' so Supabase correctly returns the order object
+    // 🔹 MODIFIED: Use selected order date with timezone-safe format
+    const created_at = `${orderDate}T12:00:00.000Z`;
+    
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert([{
@@ -138,26 +188,26 @@ export const OrderBuilder = () => {
         discount_percent: discountPercent,
         total_due: totalDue,
         amount_paid: amountPaid,
-        notes: notes || null
+        notes: notes || null,
+        created_at // 🔹 Override with selected date
       }])
       .select()
       .single();
       
     if (orderError) throw orderError;
 
-    // ✅ Now 'order' is defined, so order.id works
     const itemsPayload = cart.map(i => ({
       order_id: order.id,
       service_id: i.serviceId,
       quantity: i.quantity,
-      unit_price: i.unitPrice
+      unit_price: i.unitPrice // ✅ Already storing unit_price - now supports custom values
     }));
     
     const { error: itemsError } = await supabase.from('order_items').insert(itemsPayload);
     if (itemsError) throw itemsError;
 
     setToast({ msg: `Order ${orderId} created successfully!`, type: 'success' });
-    setTimeout(() => setToast(null), 3500); // ✅ Auto-hide after 3.5s
+    setTimeout(() => setToast(null), 3500);
     
     // Reset form
     setSelectedClient(null);
@@ -168,10 +218,16 @@ export const OrderBuilder = () => {
     setDiscountPercent(0);
     setAmountPaid(0);
     setNotes("");
+    // Reset date to today
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const local = new Date(today.getTime() - offset * 60 * 1000);
+    setOrderDate(local.toISOString().split('T')[0]);
+    setUseCurrentPricing(true);
   } catch (err: any) {
     console.error(err);
     setToast({ msg: err.message || "Failed to create order", type: 'error' });
-    setTimeout(() => setToast(null), 4000); // ✅ Auto-hide error after 4s
+    setTimeout(() => setToast(null), 4000);
   } finally {
     setSubmitting(false);
   }
@@ -182,34 +238,23 @@ export const OrderBuilder = () => {
   return (
     <div style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary }}>
        <style>{`
-        /* ✅ MOBILE TWEAKS (added only) */
         @media (max-width: 900px) {
-          /* Stack the two columns vertically */
           [style*="gridTemplateColumns: \"1fr 380px\""] {
             grid-template-columns: 1fr !important;
             gap: 16px !important;
           }
-          
-          /* Make cart table scrollable on small screens */
           table { min-width: 680px !important; }
-          
-          /* Adjust header padding */
           [style*="padding: \"20px 32px\""] {
             padding: 16px !important;
           }
-          
-          /* Make inputs touch-friendly */
-          input, select, textarea { font-size: 16px !important; } /* Prevents iOS zoom */
+          input, select, textarea { font-size: 16px !important; }
           button, [role="button"] { min-height: 44px !important; }
         }
         
         @media (max-width: 480px) {
-          /* Further compact spacing */
           [style*="padding: \"24px 32px\""] {
             padding: 16px !important;
           }
-          
-          /* Hide less critical labels on very small screens */
           [style*="textTransform: \"uppercase\""] {
             font-size: 10px !important;
           }
@@ -345,7 +390,19 @@ export const OrderBuilder = () => {
                           <button onClick={() => updateQuantity(idx, 1)} style={{ width: 24, height: 24, borderRadius: 4, background: T.bgElevated, border: "none", color: T.textSec, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Plus size={12} /></button>
                         </div>
                       </td>
-                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: MONO, color: T.textSec }}>₵{item.unitPrice}</td>
+                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: MONO, color: T.textSec }}>
+                        {/* 🔹 MODIFIED: Show editable price input if using custom pricing */}
+                        {!useCurrentPricing || item.useCustomPrice ? (
+                          <input 
+                            type="number" 
+                            value={item.unitPrice} 
+                            onChange={(e) => updateCustomPrice(idx, Number(e.target.value))}
+                            style={{ width: 70, padding: "4px 6px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 4, color: T.textPrimary, fontSize: 12, outline: "none", fontFamily: MONO, textAlign: 'right' }}
+                          />
+                        ) : (
+                          `₵${item.unitPrice}`
+                        )}
+                      </td>
                       <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: MONO, fontWeight: 600 }}>₵{item.total}</td>
                       <td style={{ padding: "12px 16px", textAlign: "center" }}>
                         <button onClick={() => removeItem(idx)} style={{ background: "transparent", border: "none", color: T.textHint, cursor: "pointer" }}><Trash2 size={14} /></button>
@@ -364,6 +421,30 @@ export const OrderBuilder = () => {
             <div style={{ fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
               <Zap size={16} color={T.gold} /> Order Options
             </div>
+            
+            {/* 🔹 ADDED: Order Date Picker */}
+            <div>
+              <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em", display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Calendar size={12} /> Order Date
+              </div>
+              <input 
+                type="date" 
+                value={orderDate} 
+                onChange={(e) => setOrderDate(e.target.value)}
+                style={{ width: "100%", padding: "10px 12px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT }} 
+              />
+            </div>
+
+            {/* 🔹 ADDED: Pricing Toggle */}
+            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: T.bgSurface, borderRadius: 8, cursor: "pointer" }}>
+              <span style={{ fontSize: 13, color: T.textSec }}>Use Current Service Prices</span>
+              <input type="checkbox" checked={useCurrentPricing} onChange={e => setUseCurrentPricing(e.target.checked)} style={{ width: 18, height: 18, accentColor: T.gold }} />
+            </label>
+            {!useCurrentPricing && (
+              <div style={{ fontSize: 11, color: T.textTert, padding: "4px 12px", background: T.goldDim, borderRadius: 6 }}>
+                💡 Enter custom prices per item in the cart
+              </div>
+            )}
             
             <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: T.bgSurface, borderRadius: 8, cursor: "pointer" }}>
               <span style={{ fontSize: 13, color: T.textSec }}>Express Service (+₵10/item)</span>
