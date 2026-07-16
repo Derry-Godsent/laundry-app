@@ -184,6 +184,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 /* ── Bulk Bar ────────────────────────────────────────────────────── */
@@ -226,11 +227,19 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: 100%;
+  min-width: 0;
 }
 
 .tbl-wrap {
   flex: 1;
   overflow: auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.tbl th, .tbl td {
+  white-space: nowrap;
 }
 
 .tbl {
