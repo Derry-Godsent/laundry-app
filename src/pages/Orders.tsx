@@ -306,15 +306,38 @@ export const Orders = () => {
     setOpen(p => p?.id === id ? { ...p, status } : p);
   };
 
-  const advance = (order: Order) => {
-    const i = STAGES.findIndex(s => s.key === order.status);
-    if (i < STAGES.length - 1) updateStatus(order.id, STAGES[i + 1].key);
-  };
+  // ... existing advance function ...
+const advance = (order: Order) => {
+  const i = STAGES.findIndex(s => s.key === order.status);
+  if (i < STAGES.length - 1) updateStatus(order.id, STAGES[i + 1].key);
+};
 
-  const clearFilters = () => { 
-    setSf("all"); setSvf("all"); setPf("all"); setQ(""); 
-    setStartDate(''); setEndDate(''); // 🔹 Clear date filters too
-  };
+// 🔹 ADD THIS NEW FUNCTION HERE:
+const handleDeleteSingle = async (orderId: string) => {
+  if (!confirm('Delete this order?')) return;
+  
+  const { error } = await supabase
+    .from('orders')
+    .delete()
+    .eq('order_id', orderId);
+  
+  if (error) {
+    console.error('Delete error:', error);
+    alert('Failed to delete order');
+    return;
+  }
+  
+  // Remove from local state
+  setOrders(prev => prev.filter(o => o.id !== orderId));
+  
+  // Close slide panel if this order was open
+  if (open?.id === orderId) setOpen(null);
+};
+
+const clearFilters = () => { 
+  setSf("all"); setSvf("all"); setPf("all"); setQ(""); 
+  setStartDate(''); setEndDate('');
+};
 
   // 🔹 ADDED: Fetch orders for bulk print
   const fetchBulkOrders = async () => {
@@ -620,12 +643,26 @@ export const Orders = () => {
                     a.click();
                     URL.revokeObjectURL(url);
                   }}>Export CSV</button>
-                  <button className="blk-b red" onClick={async () => {
-                    if (!window.confirm(`Delete ${sel.length} order(s)?`)) return;
-                    await supabase.from('orders').delete().match({ order_id: sel[0] });
-                    setSel([]);
-                    fetchFromSupabase();
-                  }}><X size={11} style={{marginRight:4}}/> Delete</button>
+                  {/* NEW CODE - Deletes ALL selected orders */}
+<button className="blk-b red" onClick={async () => {
+  if (!window.confirm(`Delete ${sel.length} order(s)?`)) return;
+  
+  // Delete all selected orders from database
+  const { error } = await supabase
+    .from('orders')
+    .delete()
+    .in('order_id', sel);
+  
+  if (error) {
+    console.error('Delete error:', error);
+    alert('Failed to delete orders');
+    return;
+  }
+  
+  // Clear selection and refresh list
+  setSel([]);
+  fetchFromSupabase();
+}}><X size={11} style={{marginRight:4}}/> Delete</button>
                   <button className="blk-x" onClick={() => setSel([])}><X size={13} /></button>
                 </div>
               )}
@@ -688,11 +725,22 @@ export const Orders = () => {
                           {/* 🔹 MODIFIED: Show date only, no time */}
                           <td className="td-dim">{o.date}</td>
                           <td className="td-act" onClick={e => e.stopPropagation()}>
-                            <button className="ra" onClick={() => setOpen(o)}>View</button>
-                            <button className="ra icon" onClick={() => advance(o)} disabled={o.status === "completed"} title="Next stage">
-                              <ArrowRight size={13} />
-                            </button>
-                          </td>
+  <button className="ra" onClick={() => setOpen(o)}>View</button>
+  <button className="ra icon" onClick={() => advance(o)} disabled={o.status === "completed"} title="Next stage">
+    <ArrowRight size={13} />
+  </button>
+  {/* 🔹 NEW: Delete button */}
+  {canEdit && (
+    <button 
+      className="ra icon" 
+      onClick={(e) => { e.stopPropagation(); handleDeleteSingle(o.id); }} 
+      title="Delete order"
+      style={{ color: "#f87171" }}
+    >
+      <X size={13} />
+    </button>
+  )}
+</td>
                         </tr>
                       ))
                     )}
