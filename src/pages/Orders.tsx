@@ -411,7 +411,8 @@ const clearFilters = () => {
   // 🔹 ADDED: Print view (hidden on screen, visible when printing)
   if (printMode) {
     return (
-      <div id="print-area" style={{ background: '#fff', color: '#000', padding: '40px', fontFamily: 'system-ui', minHeight: 'auto', height: 'auto' }}>
+      <div id="print-area" style={{ background: '#fff', color: '#000', padding: '40px', fontFamily: 'system-ui', minHeight: 'auto', height: 'auto', maxHeight: 'none',
+    overflow: 'visible' }}>
         {/* Company Header */}
         <div style={{ textAlign: 'center', borderBottom: '3px solid #000', paddingBottom: 20, marginBottom: 30 }}>
           <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>CHAPMAN PRESTIGE LIMITED</h1>
@@ -489,17 +490,17 @@ const clearFilters = () => {
         {/* CSS for print media */}
         <style>{`
   @media print {
-    /* Reset all visibility */
+    /* Hide everything by default */
     body * {
       visibility: hidden;
     }
     
-    /* Show only print area */
+    /* Show only the print area */
     #print-area, #print-area * {
       visibility: visible;
     }
     
-    /* Position print area at top-left */
+    /* Position and size the print area */
     #print-area {
       position: absolute;
       left: 0;
@@ -508,41 +509,45 @@ const clearFilters = () => {
       padding: 20px;
       background: white;
       color: black;
+      overflow: visible !important;  /* ✅ Allow overflow */
+      height: auto !important;       /* ✅ No height constraint */
     }
     
-    /* Allow natural page breaks */
+    /* Table settings for multi-page printing */
     #print-area table {
-      page-break-inside: auto;
-    }
-    
-    #print-area tr {
-      page-break-inside: avoid;
-      page-break-after: auto;
+      width: 100%;
+      border-collapse: collapse;
+      page-break-inside: auto;      /* ✅ Allow table to break across pages */
     }
     
     #print-area thead {
-      display: table-header-group;
+      display: table-header-group;  /* ✅ Repeat header on each page */
     }
     
-    #print-area tfoot {
-      display: table-footer-group;
+    #print-area tr {
+      page-break-inside: avoid;     /* ✅ Try to keep rows together */
+      page-break-after: auto;       /* ✅ Allow breaks after rows */
     }
     
-    /* Remove hidden elements */
+    #print-area tbody {
+      display: table-row-group;     /* ✅ Allow body to flow */
+    }
+    
+    /* Hide print controls */
     .no-print {
       display: none !important;
     }
     
-    /* Ensure proper page size */
+    /* Page size settings */
     @page {
-      size: auto;
-      margin: 15mm;
+      size: auto;                    /* ✅ Let browser determine size */
+      margin: 10mm;                  /* Reasonable margins */
     }
     
-    /* Prevent content from being cut off */
-    body {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+    /* Ensure colors print correctly */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
   }
   
@@ -551,9 +556,7 @@ const clearFilters = () => {
       display: flex;
     }
   }
-`}
-
-</style>
+`}</style>
       </div>
     );
   }
