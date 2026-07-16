@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // ✅ Added useNavigate + useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
-import { usePermission } from "../hooks/usePermission"; // ✅ Added
-import { PermissionGuard } from "../components/PermissionGuard"; // ✅ Added
+import { usePermission } from "../hooks/usePermission";
+import { PermissionGuard } from "../components/PermissionGuard";
 import { Printer, ArrowLeft, Search, Download, AlertCircle, Package } from "lucide-react";
 
 const T = {
@@ -20,15 +20,14 @@ const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
 const MONO = "'DM Mono', 'Fira Mono', ui-monospace, monospace";
 
 export const Receipt = () => {
-  const navigate = useNavigate(); // ✅ Added for Back button
-  const location = useLocation(); // ✅ Added for permission hook
+  const navigate = useNavigate();
+  const location = useLocation();
   const [orders, setOrders] = useState<any[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string>("");
   const [receipt, setReceipt] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [debugMsg, setDebugMsg] = useState("");
 
-  // ✅ Permission hook for guard
   const { permission, loading: permLoading, canEdit } = usePermission(location.pathname);
 
   useEffect(() => {
@@ -67,7 +66,6 @@ export const Receipt = () => {
         order_items (
           quantity,
           unit_price,
-          line_total,
           services:service_id (name, category)
         )
       `)
@@ -89,13 +87,20 @@ export const Receipt = () => {
   const handlePrint = () => window.print();
 
   // Calculate totals
-  const subtotal = receipt?.order_items?.reduce((sum: number, i: any) => sum + (i.line_total || 0), 0) || 0;
-  const expressSurcharge = receipt?.is_express ? receipt.order_items.reduce((sum: number, i: any) => sum + (i.quantity * 10), 0) : 0;
+  const subtotal = receipt?.order_items?.reduce((sum: number, i: any) => {
+    // 🔹 MODIFIED: Calculate line_total client-side (quantity * unit_price)
+    const lineTotal = (i.quantity || 1) * (i.unit_price || 0);
+    return sum + lineTotal;
+  }, 0) || 0;
+  
+  const expressSurcharge = receipt?.is_express 
+    ? receipt.order_items.reduce((sum: number, i: any) => sum + ((i.quantity || 1) * 10), 0) 
+    : 0;
+    
   const discountAmount = subtotal * ((receipt?.discount_percent || 0) / 100);
   const totalDue = subtotal + expressSurcharge + (receipt?.delivery_fee || 0) - discountAmount;
   const balance = totalDue - (receipt?.amount_paid || 0);
 
-  // ✅ Wait for permissions to load
   if (permLoading) return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: T.textTert, fontFamily: FONT }}>
       Loading...
@@ -114,7 +119,6 @@ export const Receipt = () => {
           .receipt-footer { border-top: 2px solid #000; }
         }
 
-        /* ✅ MOBILE TWEAKS (added only) */
         @media (max-width: 720px) {
           .top-bar { padding: 12px 16px !important; flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
           .top-bar select { width: 100% !important; min-width: auto !important; }
@@ -132,7 +136,6 @@ export const Receipt = () => {
       {/* Top Bar */}
       <div className="no-print top-bar" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "16px 32px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          {/* ✅ Fixed Back button with onClick handler */}
           <button 
             onClick={() => navigate(-1)} 
             style={{ display: "flex", alignItems: "center", gap: 8, background: "transparent", border: "none", color: T.textSec, cursor: "pointer", fontFamily: FONT, fontSize: 14 }}
@@ -143,7 +146,6 @@ export const Receipt = () => {
         </div>
         
         <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-          {/* 🔽 PROMINENT DROPDOWN */}
           <select 
             value={selectedOrderId} 
             onChange={e => setSelectedOrderId(e.target.value)}
@@ -223,7 +225,8 @@ export const Receipt = () => {
                 </div>
                 <div>
                   <div style={{ fontSize: 10, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 4 }}>Date</div>
-                  <div style={{ fontSize: 15, fontWeight: 600 }}>{new Date(receipt.created_at).toLocaleDateString()}</div>
+                  {/* ✅ Date-only display (no time) */}
+                  <div style={{ fontSize: 15, fontWeight: 600 }}>{new Date(receipt.created_at).toLocaleDateString('en-GB')}</div>
                 </div>
                 <div style={{ gridColumn: "span 2" }}>
                   <div style={{ fontSize: 10, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 4 }}>Client</div>
@@ -240,14 +243,20 @@ export const Receipt = () => {
                 <div className="receipt-items-grid" style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr", gap: 12, paddingBottom: 10, borderBottom: `1px solid ${T.borderSoft}`, fontSize: 10, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>
                   <div>Item</div><div style={{ textAlign: "center" }}>Qty</div><div style={{ textAlign: "right" }}>Unit</div><div style={{ textAlign: "right" }}>Total</div>
                 </div>
-                {receipt.order_items?.map((item: any, i: number) => (
-                  <div key={i} style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr", gap: 12, padding: "10px 0", borderBottom: `1px solid ${T.borderFaint}`, fontSize: 14 }}>
-                    <div style={{ fontWeight: 500 }}>{item.services?.name || "Service"}</div>
-                    <div style={{ textAlign: "center", color: T.textSec }}>{item.quantity}</div>
-                    <div style={{ textAlign: "right", color: T.textSec, fontFamily: MONO }}>{item.unit_price}</div>
-                    <div style={{ textAlign: "right", fontWeight: 600, fontFamily: MONO }}>₵{item.line_total}</div>
-                  </div>
-                ))}
+                {receipt.order_items?.map((item: any, i: number) => {
+                  // 🔹 MODIFIED: Calculate line_total client-side
+                  const lineTotal = (item.quantity || 1) * (item.unit_price || 0);
+                  return (
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr", gap: 12, padding: "10px 0", borderBottom: `1px solid ${T.borderFaint}`, fontSize: 14 }}>
+                      <div style={{ fontWeight: 500 }}>{item.services?.name || "Service"}</div>
+                      <div style={{ textAlign: "center", color: T.textSec }}>{item.quantity}</div>
+                      {/* 🔹 MODIFIED: Format unit_price with .toFixed(2) */}
+                      <div style={{ textAlign: "right", color: T.textSec, fontFamily: MONO }}>₵{(item.unit_price || 0).toFixed(2)}</div>
+                      {/* 🔹 MODIFIED: Display calculated line_total with .toFixed(2) */}
+                      <div style={{ textAlign: "right", fontWeight: 600, fontFamily: MONO }}>₵{lineTotal.toFixed(2)}</div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="receipt-summary" style={{ padding: "24px 32px", background: T.bgSurface, borderTop: `1px solid ${T.borderFaint}` }}>
@@ -275,7 +284,7 @@ export const Receipt = () => {
                     <span>TOTAL DUE</span><span style={{ fontFamily: MONO }}>₵{totalDue.toFixed(2)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: T.textSec }}>
-                    <span>Paid</span><span style={{ fontFamily: MONO }}>₵{receipt.amount_paid.toFixed(2)}</span>
+                    <span>Paid</span><span style={{ fontFamily: MONO }}>₵{(receipt.amount_paid || 0).toFixed(2)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, color: balance > 0 ? T.ember : T.emerald, fontWeight: 600 }}>
                     <span>BALANCE</span><span style={{ fontFamily: MONO }}>₵{balance.toFixed(2)}</span>

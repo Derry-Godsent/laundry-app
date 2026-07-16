@@ -18,6 +18,7 @@ type OrderStatus =
 
 type PaymentStatus = "paid" | "pending" | "partial";
 
+
 interface Order {
   id: string;
   customer: string;
@@ -28,10 +29,12 @@ interface Order {
   amount: number;
   status: OrderStatus;
   worker: string;
-  date: string; // 🔹 Now stores formatted date only (DD/MM/YY)
+  date: string;
   payment: PaymentStatus;
   notes?: string;
-  created_at?: string; // 🔹 Added: raw ISO string for filtering
+  created_at?: string;
+  amount_paid?: number;
+  order_items?: any[];
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
