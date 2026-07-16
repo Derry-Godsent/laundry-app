@@ -217,6 +217,7 @@ export const Orders = () => {
         status,
         created_at,
         clients ( name, phone )
+        order_items ( quantity )
       `);
 
       // 🔹 ADDED: Apply date range filters if provided
@@ -246,7 +247,7 @@ export const Orders = () => {
           phone: o.clients?.phone || '+233 XX XXX XXXX',
           address: 'Kumasi, Ghana',
           service: o.notes || 'Laundry',
-          items: (o.notes ? parseInt(o.notes.match(/\d+/)?.[0] || '1') : 1),
+          items: o.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0,
           amount: Number(o.total_due) || 0,
           status: (o.status?.toLowerCase() as OrderStatus) || 'received',
           worker: 'Staff',
