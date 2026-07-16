@@ -244,7 +244,7 @@ export const Orders = () => {
         const mapped = (data || []).map((o: any): Order => ({
           id: o.order_id || o.id,
           customer: o.clients?.name || 'Walk-in',
-          phone: o.clients?.phone || '+233 XX XXX XXXX',
+          phone: o.clients?.phone || '+233 53 413 4809',
           address: 'Kumasi, Ghana',
           service: o.notes || 'Laundry',
           items: o.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0,
@@ -370,7 +370,7 @@ const clearFilters = () => {
         const mapped = data.map((o: any): Order => ({
           id: o.order_id || o.id,
           customer: o.clients?.name || 'Walk-in',
-          phone: o.clients?.phone || '+233 XX XXX XXXX',
+          phone: o.clients?.phone || '+233 53 413 4809',
           address: 'Kumasi, Ghana',
           service: o.notes || 'Laundry',
           items: o.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1,
@@ -415,7 +415,7 @@ const clearFilters = () => {
         {/* Company Header */}
         <div style={{ textAlign: 'center', borderBottom: '3px solid #000', paddingBottom: 20, marginBottom: 30 }}>
           <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>CHAPMAN PRESTIGE LIMITED</h1>
-          <p style={{ margin: '8px 0 0', fontSize: 14 }}>Kumasi, Ghana • +233 XX XXX XXXX</p>
+          <p style={{ margin: '8px 0 0', fontSize: 14 }}>Kumasi, Ghana • +233 53 413 4809</p>
           <p style={{ margin: '4px 0 0', fontSize: 14, fontWeight: 600 }}>
             Bulk Receipt: {startDate} → {endDate}
           </p>
