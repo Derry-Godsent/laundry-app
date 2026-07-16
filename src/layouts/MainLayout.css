@@ -83,6 +83,7 @@
   overflow-y: auto;
   padding: 24px 32px;
   scroll-behavior: smooth;
+  min-height: 0;
 }
 
 /* Custom scrollbar — subtle, matches the dark palette instead of

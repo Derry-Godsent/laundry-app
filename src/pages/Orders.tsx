@@ -600,17 +600,36 @@ const clearFilters = () => {
           <button className="fp-clr" onClick={clearFilters}><X size={11} /> Clear</button>
         )}
 
-        {/* 🔹 ADDED: Bulk Print Button */}
-        {(startDate && endDate) && (
-          <button 
-            className="os-btn ghost" 
-            title="Print orders in date range"
-            onClick={fetchBulkOrders}
-            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-          >
-            <Printer size={13} /> Print Range
-          </button>
-        )}
+        {/* UPDATED: Bulk Print Button with cache clear */}
+{(startDate && endDate) && (
+  <button 
+    className="os-btn ghost" 
+    title="Print orders in date range"
+    onClick={async () => {
+      // Clear cached bulk orders
+      setBulkOrders([]);
+      setPrintMode(false);
+      
+      // Force fresh fetch
+      await fetchBulkOrders();
+    }}
+    style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+  >
+    <Printer size={13} /> Print Range
+  </button>
+)}
+  <button 
+  className="os-btn ghost" 
+  onClick={async () => {
+    setLoading(true);
+    await fetchFromSupabase();
+    setBulkOrders([]); // Clear bulk cache
+    alert('Data refreshed!');
+    setLoading(false);
+  }}
+>
+  <RefreshCw size={15} /> Refresh Data
+</button>
 
         <div className="vt">
           <button className={`vt-b ${view === "list" ? "on" : ""}`} onClick={() => setView("list")} title="List view"><List size={14} /></button>

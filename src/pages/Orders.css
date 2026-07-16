@@ -8,7 +8,7 @@
 .os {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background: #07090e;
   color: #edf0f8;
   font-family: 'Outfit', system-ui, sans-serif;
@@ -185,6 +185,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-height: 0;
 }
 
 /* ── Bulk Bar ────────────────────────────────────────────────────── */
@@ -199,6 +200,7 @@
   font-weight: 500;
   color: #9aa3b5;
   animation: slideIn 0.2s ease;
+  flex-shrink: 0;
 }
 .blk-b {
   padding: 5px 12px;
@@ -229,6 +231,7 @@
   overflow: hidden;
   width: 100%;
   min-width: 0;
+  min-height: 0;
 }
 
 .tbl-wrap {
@@ -236,6 +239,7 @@
   overflow: auto;
   width: 100%;
   min-width: 0;
+  min-height: 0;
 }
 
 .tbl th, .tbl td {
@@ -384,6 +388,7 @@
   overflow-x: auto;
   padding: 20px 28px;
   align-items: flex-start;
+  min-height: 0;
 }
 .pv::-webkit-scrollbar { height: 5px; }
 .pv::-webkit-scrollbar-track { background: transparent; }
@@ -548,6 +553,7 @@
   flex: 1; overflow-y: auto;
   padding: 20px 24px;
   display: flex; flex-direction: column; gap: 22px;
+  min-height: 0;
 }
 .op-b::-webkit-scrollbar { width: 4px; }
 .op-b::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 99px; }
