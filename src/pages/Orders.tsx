@@ -246,7 +246,7 @@ export const Orders = () => {
           phone: o.clients?.phone || '+233 XX XXX XXXX',
           address: 'Kumasi, Ghana',
           service: o.notes || 'Laundry',
-          items: Math.floor(Math.random() * 10) + 1,
+          items: (o.notes ? parseInt(o.notes.match(/\d+/)?.[0] || '1') : 1),
           amount: Number(o.total_due) || 0,
           status: (o.status?.toLowerCase() as OrderStatus) || 'received',
           worker: 'Staff',
