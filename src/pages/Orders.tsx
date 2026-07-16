@@ -375,6 +375,7 @@ const clearFilters = () => {
           service: o.notes || 'Laundry',
           items: o.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1,
           amount: Number(o.total_due) || 0,
+          amount_paid: Number(o.amount_paid) || 0, 
           status: (o.status?.toLowerCase() as OrderStatus) || 'received',
           worker: 'Staff',
           date: formatDateOnly(o.created_at),
@@ -490,6 +491,19 @@ const clearFilters = () => {
         {/* CSS for print media */}
         <style>{`
   @media print {
+    html, body, #root {
+      height: auto !important;
+      overflow: visible !important;
+    }
+
+    /* Safety net: force EVERY ancestor to stop clipping, no matter
+       what container (#root, a wrapper div, etc.) has overflow:hidden
+       baked in. Everything outside #print-area is already
+       visibility:hidden below, so this is safe. */
+    * {
+      overflow: visible !important;
+    }
+
     /* Hide everything by default */
     body * {
       visibility: hidden;
