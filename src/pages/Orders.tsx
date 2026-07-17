@@ -10,6 +10,7 @@ import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
 import { PermissionGuard } from "../components/PermissionGuard";
 import "./Orders.css";
+import React from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type OrderStatus =
@@ -241,22 +242,23 @@ export const Orders = () => {
       }
       
       if (data && data.length > 0) {
-        const mapped = (data || []).map((o: any): Order => ({
-          id: o.order_id || o.id,
-          customer: o.clients?.name || 'Walk-in',
-          phone: o.clients?.phone || '+233 53 413 4809',
-          address: 'Kumasi, Ghana',
-          service: o.notes || 'Laundry',
-          items: o.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0) || 0,
-          amount: Number(o.total_due) || 0,
-          status: (o.status?.toLowerCase() as OrderStatus) || 'received',
-          worker: 'Staff',
-          // 🔹 MODIFIED: Store formatted date only (no time)
-          date: formatDateOnly(o.created_at),
-          created_at: o.created_at, // 🔹 Keep raw for filtering
-          payment: (o.amount_paid >= o.total_due ? 'paid' : o.amount_paid > 0 ? 'partial' : 'pending') as PaymentStatus,
-          notes: o.notes,
-        }));
+const mapped = data.map((o: any): Order => ({
+  id: o.order_id || o.id,
+  customer: o.clients?.name || 'Walk-in',
+  phone: o.clients?.phone || '+233 53 413 4809',
+  address: 'Kumasi, Ghana',
+  service: o.notes || 'Laundry',
+  items: o.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1,
+  amount: Number(o.total_due) || 0,
+  amount_paid: Number(o.amount_paid) || 0,
+  status: (o.status?.toLowerCase() as OrderStatus) || 'received',
+  worker: 'Staff',
+  date: formatDateOnly(o.created_at),
+  created_at: o.created_at,
+  payment: (o.amount_paid >= o.total_due ? 'paid' : o.amount_paid > 0 ? 'partial' : 'pending') as PaymentStatus,
+  notes: o.notes,
+  order_items: o.order_items
+}));
         setOrders(mapped);
       } else {
         setOrders([]);
@@ -376,6 +378,7 @@ const clearFilters = () => {
           service: o.notes || 'Laundry',
           items: o.order_items?.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0) || 1,
           amount: Number(o.total_due) || 0,
+          amount_paid: Number(o.amount_paid) || 0, // 🔹 FIX: was missing, causing "Paid" to always show ₵0.00 on receipts
           status: (o.status?.toLowerCase() as OrderStatus) || 'received',
           worker: 'Staff',
           date: formatDateOnly(o.created_at),
@@ -411,6 +414,16 @@ const clearFilters = () => {
 
   // 🔹 ADDED: Print view (hidden on screen, visible when printing)
   if (printMode) {
+    // 🔹 ADDED: Group bulk orders by month (created_at) for subtotals
+    const monthGroups: Record<string, Order[]> = {};
+    bulkOrders.forEach(o => {
+      const d = o.created_at ? new Date(o.created_at) : null;
+      const key = d ? d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : 'Unknown';
+      if (!monthGroups[key]) monthGroups[key] = [];
+      monthGroups[key].push(o);
+    });
+    const monthKeys = Object.keys(monthGroups); // bulkOrders fetched ascending, so this stays chronological
+
     return (
       <div id="print-area" style={{ background: '#fff', color: '#000', padding: '40px', fontFamily: 'system-ui', minHeight: 'auto', height: 'auto', maxHeight: 'none',
     overflow: 'visible' }}>
@@ -421,40 +434,66 @@ const clearFilters = () => {
           <p style={{ margin: '4px 0 0', fontSize: 14, fontWeight: 600 }}>
             Bulk Receipt: {startDate} → {endDate}
           </p>
-          <p style={{ margin: '4px 0 0', fontSize: 12, color: '#666' }}>
-            Printed: {new Date().toLocaleDateString('en-GB')} {new Date().toLocaleTimeString()}
-          </p>
-        </div>
+          </div>
 
-        {/* Orders Table */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 30 }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #000' }}>
-              <th style={{ textAlign: 'left', padding: 8 }}>Order ID</th>
-              <th style={{ textAlign: 'left', padding: 8 }}>Customer</th>
-              <th style={{ textAlign: 'left', padding: 8 }}>Date</th>
-              <th style={{ textAlign: 'right', padding: 8 }}>Items</th>
-              <th style={{ textAlign: 'right', padding: 8 }}>Amount</th>
-              <th style={{ textAlign: 'right', padding: 8 }}>Paid</th>
-              <th style={{ textAlign: 'right', padding: 8 }}>Balance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bulkOrders.map(order => (
-              <tr key={order.id} style={{ borderBottom: '1px solid #ddd' }}>
-                <td style={{ padding: 8, fontFamily: 'monospace' }}>{order.id}</td>
-                <td style={{ padding: 8 }}>{order.customer}</td>
-                <td style={{ padding: 8 }}>{order.date}</td>
-                <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace' }}>{order.items}</td>
-                <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace' }}>₵{order.amount.toFixed(2)}</td>
-                <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace' }}>₵{order.amount_paid?.toFixed(2) || '0.00'}</td>
-                <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
-                  ₵{(order.amount - (order.amount_paid || 0)).toFixed(2)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* 🔹 ADDED: Orders grouped by month, each with its own subtotal */}
+        {monthKeys.map(monthKey => {
+          const rows = monthGroups[monthKey];
+          const monthAmount = rows.reduce((sum, o) => sum + (Number(o.amount) || 0), 0);
+          const monthPaid = rows.reduce((sum, o) => sum + (Number(o.amount_paid) || 0), 0);
+          const monthBalance = monthAmount - monthPaid;
+
+          return (
+            <div key={monthKey} style={{ marginBottom: 24 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 8px', borderBottom: '1px solid #999', paddingBottom: 4 }}>
+                {monthKey}
+              </h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 8 }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid #000' }}>
+                    <th style={{ textAlign: 'left', padding: 8 }}>Order ID</th>
+                    <th style={{ textAlign: 'left', padding: 8 }}>Customer</th>
+                    <th style={{ textAlign: 'left', padding: 8 }}>Date</th>
+                    <th style={{ textAlign: 'right', padding: 8 }}>Items</th>
+                    <th style={{ textAlign: 'right', padding: 8 }}>Amount</th>
+                    <th style={{ textAlign: 'right', padding: 8 }}>Paid</th>
+                    <th style={{ textAlign: 'right', padding: 8 }}>Balance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((order: any) => {
+                    // ✅ Safe number conversion (handles null, undefined, or strings)
+                    const amount = Number(order.amount) || 0;
+                    const paid = Number(order.amount_paid) || 0;
+                    const balance = amount - paid;
+
+                    return (
+                      <tr key={order.id} style={{ borderBottom: '1px solid #ddd' }}>
+                        <td style={{ padding: 8, fontFamily: 'monospace' }}>{order.id}</td>
+                        <td style={{ padding: 8 }}>{order.customer}</td>
+                        <td style={{ padding: 8 }}>{order.date}</td>
+                        <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace' }}>{order.items}</td>
+                        <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace' }}>₵{amount.toFixed(2)}</td>
+                        <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace' }}>₵{paid.toFixed(2)}</td>
+                        <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
+                          ₵{balance.toFixed(2)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr style={{ borderTop: '2px solid #000' }}>
+                    <td colSpan={4} style={{ padding: 8, textAlign: 'right', fontWeight: 700 }}>Month Total ({rows.length} orders)</td>
+                    <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>₵{monthAmount.toFixed(2)}</td>
+                    <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>₵{monthPaid.toFixed(2)}</td>
+                    <td style={{ padding: 8, textAlign: 'right', fontFamily: 'monospace', fontWeight: 700 }}>₵{monthBalance.toFixed(2)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          );
+        })}
 
         {/* Summary */}
         <div style={{ textAlign: 'right', marginTop: 20, }}>
