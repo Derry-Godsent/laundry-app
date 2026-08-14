@@ -1,507 +1,807 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useLocation } from "react-router-dom"; // ✅ Added
+// @ts-ignore
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, Plus, Minus, Trash2, Check, X, Package, Users,
-  Receipt, Truck, Percent, Zap, Clock, Save, Calendar
+  Receipt, Truck, Percent, Zap, Clock, Save, Calendar,
+  Phone, Lightbulb, Inbox
 } from "lucide-react";
+import "./OrderBuilder.css";
 
-/* ─── DESIGN TOKENS ─────────────────────────────────────────── */
-const T = {
-  bgBase: "#07090e", bgSurface: "#0c0f18", bgRaised: "#111520", bgElevated: "#161c2c",
-  borderFaint: "rgba(255,255,255,0.05)", borderSoft: "rgba(255,255,255,0.09)", borderMid: "rgba(255,255,255,0.15)",
-  textPrimary: "#edf0f8", textSec: "#9aa3b5", textTert: "#556070", textHint: "#2e3a4e",
-  accent: "#6c72f3", accentDim: "rgba(108,114,243,0.13)", accentBord: "rgba(108,114,243,0.28)",
-  gold: "#dba96a", goldDim: "rgba(219,169,106,0.1)", goldBord: "rgba(219,169,106,0.22)",
-  emerald: "#34d399", emeraldDim: "rgba(52,211,153,0.1)", emeraldBord: "rgba(52,211,153,0.2)",
-  ember: "#f87171", emberDim: "rgba(248,113,113,0.1)", emberBord: "rgba(248,113,113,0.25)",
-};
+// ✅ Added permission imports
+import { usePermission } from "../hooks/usePermission";
+import { PermissionGuard } from "../components/PermissionGuard";
 
-const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
-const MONO = "'DM Mono', 'Fira Mono', ui-monospace, monospace";
+interface Service {
+  id: string;
+  name: string;
+  category: string;
+  price_wash: number;
+  price_iron: number;
+  price_fold: number;
+  price_hang: number;
+}
 
-// 🔹 ADDED: Helper to format date as DD/MM/YY (no time)
-const formatDateOnly = (isoString: string) => {
-  if (!isoString) return '';
-  const d = new Date(isoString);
-  return d.toLocaleDateString('en-GB').replace(/\//g, '/');
-};
+interface Client {
+  id: string;
+  name: string;
+  type: string;
+  tier: string;
+  phone: string;
+}
 
-type Service = { id: string; name: string; category: string; price_wash: number; price_iron: number; price_fold: number; price_hang: number };
-type Client = { id: string; name: string; type: string; tier: string; phone: string };
-type CartItem = { 
-  serviceId: string; 
-  name: string; 
-  treatment: string; 
-  quantity: number; 
-  unitPrice: number; 
+interface CartItem {
+  serviceId: string;
+  name: string;
+  treatment: string;
+  quantity: number;
+  unitPrice: number;
   total: number;
-  // 🔹 ADDED: Allow custom price override flag
   useCustomPrice?: boolean;
+}
+
+interface Toast {
+  msg: string;
+  type: "success" | "error";
+}
+
+const formatDateOnly = (isoString: string): string => {
+  if (!isoString) return "";
+  const d = new Date(isoString);
+  return d.toLocaleDateString("en-GB");
+};
+
+const getTodayDate = (): string => {
+  const today = new Date();
+  const offset = today.getTimezoneOffset();
+  const local = new Date(today.getTime() - offset * 60 * 1000);
+  return local.toISOString().split("T")[0];
+};
+
+const parseDateInput = (input: string): string | null => {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  const ddmmyyyy = trimmed.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
+  if (ddmmyyyy) {
+    const [, d, m, y] = ddmmyyyy;
+    const date = new Date(Number(y), Number(m) - 1, Number(d));
+    if (date.getMonth() === Number(m) - 1) {
+      return date.toISOString().split("T")[0];
+    }
+  }
+
+  const mmddyyyy = trimmed.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
+  if (mmddyyyy) {
+    const [, m, d, y] = mmddyyyy;
+    const date = new Date(Number(y), Number(m) - 1, Number(d));
+    if (date.getMonth() === Number(m) - 1) {
+      return date.toISOString().split("T")[0];
+    }
+  }
+
+  const iso = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) {
+    return trimmed;
+  }
+
+  const lower = trimmed.toLowerCase();
+  const now = new Date();
+  if (lower === "today") return getTodayDate();
+  if (lower === "yesterday") {
+    const yest = new Date(now.getTime() - 86400000);
+    return yest.toISOString().split("T")[0];
+  }
+  if (lower === "tomorrow") {
+    const tom = new Date(now.getTime() + 86400000);
+    return tom.toISOString().split("T")[0];
+  }
+
+  return null;
 };
 
 export const OrderBuilder = () => {
+  const location = useLocation();
+  // ✅ Get permission state for this specific page
+  const { canEdit } = usePermission(location.pathname);
+
   const [clients, setClients] = useState<Client[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clientSearch, setClientSearch] = useState("");
   const [showClientDropdown, setShowClientDropdown] = useState(false);
-  
+  const clientDropdownRef = useRef<HTMLDivElement>(null);
+
   const [serviceSearch, setServiceSearch] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
-  
+
   const [isExpress, setIsExpress] = useState(false);
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [discountPercent, setDiscountPercent] = useState(0);
   const [amountPaid, setAmountPaid] = useState(0);
   const [notes, setNotes] = useState("");
-  
-  // 🔹 ADDED: Order date picker (defaults to today in YYYY-MM-DD format)
-  const [orderDate, setOrderDate] = useState(() => {
-    const today = new Date();
-    const offset = today.getTimezoneOffset();
-    const local = new Date(today.getTime() - offset * 60 * 1000);
-    return local.toISOString().split('T')[0];
-  });
-  
-  // 🔹 ADDED: Global pricing toggle + per-item custom price tracking
+
+  const [orderDate, setOrderDate] = useState(getTodayDate);
+  const [dateInput, setDateInput] = useState(getTodayDate);
+
   const [useCurrentPricing, setUseCurrentPricing] = useState(true);
-  
+
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<Toast | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        clientDropdownRef.current &&
+        !clientDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowClientDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!toast) return;
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => setToast(null), 3500);
+    return () => {
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, [toast]);
+
+  useEffect(() => {
+    let mounted = true;
     async function fetchData() {
       const [{ data: cData }, { data: sData }] = await Promise.all([
-        supabase.from('clients').select('id, name, type, tier, phone').order('name'),
-        supabase.from('services').select('id, name, category, price_wash, price_iron, price_fold, price_hang').order('category, name')
+        supabase.from("clients").select("id, name, type, tier, phone").order("name"),
+        supabase.from("services").select("id, name, category, price_wash, price_iron, price_fold, price_hang").order("category, name"),
       ]);
+      if (!mounted) return;
       if (cData) setClients(cData);
       if (sData) setServices(sData);
       setLoading(false);
     }
     fetchData();
+    return () => { mounted = false; };
   }, []);
 
-  const filteredClients = clients.filter(c => c.name.toLowerCase().includes(clientSearch.toLowerCase()));
-  const filteredServices = services.filter(s => s.name.toLowerCase().includes(serviceSearch.toLowerCase()));
+  const filteredClients = useMemo(
+    () => clients.filter((c) => c.name.toLowerCase().includes(clientSearch.toLowerCase())),
+    [clients, clientSearch]
+  );
 
-  const getClientPrice = (service: Service, treatment: string) => {
-    switch(treatment) {
-      case 'Iron': return service.price_iron || service.price_wash;
-      case 'Fold': return service.price_fold || service.price_wash;
-      case 'Hang': return service.price_hang || service.price_wash;
+  const filteredServices = useMemo(
+    () => services.filter((s) => s.name.toLowerCase().includes(serviceSearch.toLowerCase())),
+    [services, serviceSearch]
+  );
+
+  const getClientPrice = useCallback((service: Service, treatment: string): number => {
+    switch (treatment) {
+      case "Iron": return service.price_iron || service.price_wash;
+      case "Fold": return service.price_fold || service.price_wash;
+      case "Hang": return service.price_hang || service.price_wash;
       default: return service.price_wash;
     }
-  };
+  }, []);
 
-  const addToCart = (service: Service) => {
-    const existing = cart.find(i => i.serviceId === service.id && i.treatment === 'Wash');
-    if (existing) {
-      setCart(cart.map(i => i.serviceId === service.id && i.treatment === 'Wash' 
-        ? { ...i, quantity: i.quantity + 1, total: (i.quantity + 1) * i.unitPrice } 
-        : i
-      ));
+  const addToCart = useCallback(
+    (service: Service) => {
+      setCart((prev) => {
+        const existing = prev.find(
+          (i) => i.serviceId === service.id && i.treatment === "Wash"
+        );
+        if (existing) {
+          return prev.map((i) =>
+            i.serviceId === service.id && i.treatment === "Wash"
+              ? { ...i, quantity: i.quantity + 1, total: (i.quantity + 1) * i.unitPrice }
+              : i
+          );
+        }
+        const price = !useCurrentPricing ? 0 : getClientPrice(service, "Wash");
+        return [
+          ...prev,
+          {
+            serviceId: service.id,
+            name: service.name,
+            treatment: "Wash",
+            quantity: 1,
+            unitPrice: price,
+            total: price,
+            useCustomPrice: !useCurrentPricing,
+          },
+        ];
+      });
+      setServiceSearch("");
+    },
+    [useCurrentPricing, getClientPrice]
+  );
+
+  const updateQuantity = useCallback((index: number, delta: number) => {
+    setCart((prev) => {
+      const newCart = [...prev];
+      const qty = Math.max(1, newCart[index].quantity + delta);
+      newCart[index] = {
+        ...newCart[index],
+        quantity: qty,
+        total: qty * newCart[index].unitPrice,
+      };
+      return newCart;
+    });
+  }, []);
+
+  const removeItem = useCallback((index: number) => {
+    setCart((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const updateTreatment = useCallback(
+    (index: number, treatment: string) => {
+      setCart((prev) => {
+        const newCart = [...prev];
+        const service = services.find((s) => s.id === newCart[index].serviceId);
+        if (service) {
+          const price = !newCart[index].useCustomPrice
+            ? getClientPrice(service, treatment)
+            : newCart[index].unitPrice;
+          newCart[index] = {
+            ...newCart[index],
+            treatment,
+            unitPrice: price,
+            total: newCart[index].quantity * price,
+          };
+        }
+        return newCart;
+      });
+    },
+    [services, getClientPrice]
+  );
+
+  const updateCustomPrice = useCallback((index: number, price: number) => {
+    setCart((prev) => {
+      const newCart = [...prev];
+      newCart[index] = {
+        ...newCart[index],
+        unitPrice: price,
+        total: price * newCart[index].quantity,
+        useCustomPrice: true,
+      };
+      return newCart;
+    });
+  }, []);
+
+  const subtotal = useMemo(
+    () => cart.reduce((sum, i) => sum + i.total, 0),
+    [cart]
+  );
+  const expressSurcharge = useMemo(
+    () => (isExpress ? cart.reduce((sum, i) => sum + i.quantity * 10, 0) : 0),
+    [isExpress, cart]
+  );
+  const discountAmount = useMemo(
+    () => subtotal * (discountPercent / 100),
+    [subtotal, discountPercent]
+  );
+  const totalDue = useMemo(
+    () => subtotal + expressSurcharge + deliveryFee - discountAmount,
+    [subtotal, expressSurcharge, deliveryFee, discountAmount]
+  );
+  const balance = useMemo(() => totalDue - amountPaid, [totalDue, amountPaid]);
+
+  const handleDateChange = useCallback((value: string) => {
+    setDateInput(value);
+    const parsed = parseDateInput(value);
+    if (parsed) {
+      setOrderDate(parsed);
+    }
+  }, []);
+
+  const handleDateBlur = useCallback(() => {
+    const parsed = parseDateInput(dateInput);
+    if (parsed) {
+      setDateInput(parsed);
+      setOrderDate(parsed);
     } else {
-      // 🔹 MODIFIED: Respect custom pricing toggle
-      const price = !useCurrentPricing ? 0 : getClientPrice(service, 'Wash');
-      setCart([...cart, { 
-        serviceId: service.id, 
-        name: service.name, 
-        treatment: 'Wash', 
-        quantity: 1, 
-        unitPrice: price, 
-        total: price,
-        useCustomPrice: !useCurrentPricing // 🔹 Track if this item should use custom price
-      }]);
+      setDateInput(orderDate);
     }
-    setServiceSearch("");
-  };
+  }, [dateInput, orderDate]);
 
-  const updateQuantity = (index: number, delta: number) => {
-    const newCart = [...cart];
-    const qty = Math.max(1, newCart[index].quantity + delta);
-    newCart[index] = { ...newCart[index], quantity: qty, total: qty * newCart[index].unitPrice };
-    setCart(newCart);
-  };
-
-  const removeItem = (index: number) => setCart(cart.filter((_, i) => i !== index));
-
-  const updateTreatment = (index: number, treatment: string) => {
-    const newCart = [...cart];
-    const service = services.find(s => s.id === newCart[index].serviceId);
-    if (service) {
-      // 🔹 MODIFIED: Only auto-calc price if not using custom pricing
-      const price = !newCart[index].useCustomPrice ? getClientPrice(service, treatment) : newCart[index].unitPrice;
-      newCart[index] = { ...newCart[index], treatment, unitPrice: price, total: newCart[index].quantity * price };
-      setCart(newCart);
+  const handleSubmit = useCallback(async () => {
+    if (!selectedClient) {
+      setToast({ msg: "Please select a client", type: "error" });
+      return;
     }
-  };
+    if (cart.length === 0) {
+      setToast({ msg: "Add at least one item", type: "error" });
+      return;
+    }
 
-  // 🔹 ADDED: Update custom price for a cart item
-  const updateCustomPrice = (index: number, price: number) => {
-    const newCart = [...cart];
-    newCart[index] = { 
-      ...newCart[index], 
-      unitPrice: price, 
-      total: price * newCart[index].quantity,
-      useCustomPrice: true 
-    };
-    setCart(newCart);
-  };
+    setSubmitting(true);
+    try {
+      const orderId = `CPL-ORD-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+      const created_at = `${orderDate}T12:00:00.000Z`;
 
-  // Calculations
-  const subtotal = cart.reduce((sum, i) => sum + i.total, 0);
-  const expressSurcharge = isExpress ? cart.reduce((sum, i) => sum + (i.quantity * 10), 0) : 0;
-  const discountAmount = subtotal * (discountPercent / 100);
-  const totalDue = subtotal + expressSurcharge + deliveryFee - discountAmount;
-  const balance = totalDue - amountPaid;
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert([
+          {
+            order_id: orderId,
+            client_id: selectedClient.id,
+            status: "Pending",
+            is_express: isExpress,
+            delivery_fee: deliveryFee,
+            discount_percent: discountPercent,
+            total_due: totalDue,
+            amount_paid: amountPaid,
+            notes: notes || null,
+            created_at,
+          },
+        ])
+        .select()
+        .single();
 
- const handleSubmit = async () => {
-  if (!selectedClient) { 
-    setToast({ msg: "Please select a client", type: 'error' }); 
-    setTimeout(() => setToast(null), 3500);
-    return; 
+      if (orderError) throw orderError;
+
+      const itemsPayload = cart.map((i) => ({
+        order_id: order.id,
+        service_id: i.serviceId,
+        quantity: i.quantity,
+        unit_price: i.unitPrice,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .insert(itemsPayload);
+
+      if (itemsError) throw itemsError;
+
+      setToast({ msg: `Order ${orderId} created successfully`, type: "success" });
+
+      setSelectedClient(null);
+      setClientSearch("");
+      setCart([]);
+      setIsExpress(false);
+      setDeliveryFee(0);
+      setDiscountPercent(0);
+      setAmountPaid(0);
+      setNotes("");
+      const today = getTodayDate();
+      setOrderDate(today);
+      setDateInput(today);
+      setUseCurrentPricing(true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create order";
+      console.error(err);
+      setToast({ msg: message, type: "error" });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [selectedClient, cart, orderDate, isExpress, deliveryFee, discountPercent, totalDue, amountPaid, notes]);
+
+  const handleFormKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && e.target instanceof HTMLTextAreaElement) {
+      return;
+    }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  }, [handleSubmit]);
+
+  if (loading) {
+    return <div className="ob-loading">Loading order builder...</div>;
   }
-  if (cart.length === 0) { 
-    setToast({ msg: "Add at least one item", type: 'error' }); 
-    setTimeout(() => setToast(null), 3500);
-    return; 
-  }
-  
-  setSubmitting(true);
-  try {
-    const orderId = `CPL-ORD-${Date.now().toString().slice(-6)}`;
-    
-    // 🔹 MODIFIED: Use selected order date with timezone-safe format
-    const created_at = `${orderDate}T12:00:00.000Z`;
-    
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert([{
-        order_id: orderId,
-        client_id: selectedClient.id,
-        status: 'Pending',
-        is_express: isExpress,
-        delivery_fee: deliveryFee,
-        discount_percent: discountPercent,
-        total_due: totalDue,
-        amount_paid: amountPaid,
-        notes: notes || null,
-        created_at // 🔹 Override with selected date
-      }])
-      .select()
-      .single();
-      
-    if (orderError) throw orderError;
-
-    const itemsPayload = cart.map(i => ({
-      order_id: order.id,
-      service_id: i.serviceId,
-      quantity: i.quantity,
-      unit_price: i.unitPrice // ✅ Already storing unit_price - now supports custom values
-    }));
-    
-    const { error: itemsError } = await supabase.from('order_items').insert(itemsPayload);
-    if (itemsError) throw itemsError;
-
-    setToast({ msg: `Order ${orderId} created successfully!`, type: 'success' });
-    setTimeout(() => setToast(null), 3500);
-    
-    // Reset form
-    setSelectedClient(null);
-    setClientSearch("");
-    setCart([]);
-    setIsExpress(false);
-    setDeliveryFee(0);
-    setDiscountPercent(0);
-    setAmountPaid(0);
-    setNotes("");
-    // Reset date to today
-    const today = new Date();
-    const offset = today.getTimezoneOffset();
-    const local = new Date(today.getTime() - offset * 60 * 1000);
-    setOrderDate(local.toISOString().split('T')[0]);
-    setUseCurrentPricing(true);
-  } catch (err: any) {
-    console.error(err);
-    setToast({ msg: err.message || "Failed to create order", type: 'error' });
-    setTimeout(() => setToast(null), 4000);
-  } finally {
-    setSubmitting(false);
-  }
-};
-
-  if (loading) return <div style={{ padding: 40, color: T.textTert, fontFamily: FONT }}>Loading order builder...</div>;
 
   return (
-    <div style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary }}>
-       <style>{`
-        @media (max-width: 900px) {
-          [style*="gridTemplateColumns: \"1fr 380px\""] {
-            grid-template-columns: 1fr !important;
-            gap: 16px !important;
-          }
-          table { min-width: 680px !important; }
-          [style*="padding: \"20px 32px\""] {
-            padding: 16px !important;
-          }
-          input, select, textarea { font-size: 16px !important; }
-          button, [role="button"] { min-height: 44px !important; }
-        }
-        
-        @media (max-width: 480px) {
-          [style*="padding: \"24px 32px\""] {
-            padding: 16px !important;
-          }
-          [style*="textTransform: \"uppercase\""] {
-            font-size: 10px !important;
-          }
-        }
-      `}</style>
+    <div className="ob-root">
       {toast && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, background: toast.type === 'error' ? T.emberDim : T.emeraldDim, border: `1px solid ${toast.type === 'error' ? T.ember : T.emerald}`, borderRadius: 10, padding: "12px 20px", display: "flex", alignItems: "center", gap: 12, boxShadow: "0 4px 24px rgba(0,0,0,0.3)", zIndex: 10000 }}>
-          <span style={{ fontSize: 14, color: toast.type === 'error' ? T.ember : T.emerald, fontWeight: 500 }}>{toast.msg}</span>
-          <button onClick={() => setToast(null)} style={{ padding: 4, background: "transparent", border: "none", color: T.textSec, cursor: "pointer" }}><X size={14} /></button>
+        <div className={`ob-toast ${toast.type}`}>
+          <span className="ob-toast-text">{toast.msg}</span>
+          <button
+            className="ob-toast-close"
+            onClick={() => setToast(null)}
+            aria-label="Close notification"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 
-      {/* Header */}
-      <div style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "20px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div className="ob-header">
         <div>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>New Order</div>
-          <div style={{ fontSize: 12, color: T.textTert }}>Build unlimited-item orders instantly</div>
+          <div className="ob-header-title">New Order</div>
+          <div className="ob-header-sub">Build unlimited-item orders instantly</div>
         </div>
-        <button onClick={handleSubmit} disabled={submitting} style={{ 
-          padding: "10px 24px", background: submitting ? T.textHint : T.accent, border: "none", borderRadius: 9, 
-          color: "#fff", fontSize: 14, fontWeight: 600, cursor: submitting ? "not-allowed" : "pointer", 
-          display: "flex", alignItems: "center", gap: 8, opacity: submitting ? 0.7 : 1 
-        }}>
-          <Save size={16} /> {submitting ? "Saving..." : "Create Order"}
+        {/* ✅ Disabled if user lacks edit access */}
+        <button
+          className="ob-submit-btn"
+          onClick={handleSubmit}
+          disabled={submitting || !canEdit}
+          style={{ opacity: !canEdit ? 0.6 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}
+        >
+          <Save size={16} />
+          {submitting ? "Saving..." : "Create Order"}
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 24, padding: "24px 32px", alignItems: "start" }}>
-        
-        {/* LEFT: Client & Cart */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          
-          {/* Client Selector */}
-          <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, padding: 20 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-              <Users size={16} color={T.accent} /> Client
-            </div>
-            <div style={{ position: "relative" }}>
-              <input 
-                value={clientSearch} 
-                onChange={e => { setClientSearch(e.target.value); setShowClientDropdown(true); setSelectedClient(null); }}
-                onFocus={() => setShowClientDropdown(true)}
-                placeholder="Search client name..." 
-                style={{ width: "100%", padding: "10px 12px", background: T.bgSurface, border: `1px solid ${selectedClient ? T.emeraldBord : T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT }} 
-              />
-              {showClientDropdown && clientSearch && (
-                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, marginTop: 4, background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, maxHeight: 200, overflowY: "auto", zIndex: 50, boxShadow: "0 8px 24px rgba(0,0,0,0.4)" }}>
-                  {filteredClients.length === 0 ? (
-                    <div style={{ padding: 12, color: T.textTert, fontSize: 13 }}>No clients found</div>
-                  ) : filteredClients.map(c => (
-                    <div key={c.id} onClick={() => { setSelectedClient(c); setClientSearch(c.name); setShowClientDropdown(false); }} 
-                      style={{ padding: "10px 14px", cursor: "pointer", fontSize: 14, borderBottom: `1px solid ${T.borderFaint}`, background: selectedClient?.id === c.id ? T.accentDim : "transparent" }}>
-                      <div style={{ fontWeight: 500 }}>{c.name}</div>
-                      <div style={{ fontSize: 11, color: T.textTert }}>{c.type} • {c.tier}</div>
-                    </div>
-                  ))}
+      {/* ✅ Wrapped in PermissionGuard to show "View-only" banner if needed */}
+      <PermissionGuard>
+        <div className="ob-layout" onKeyDown={handleFormKeyDown} role="form" aria-label="Order form">
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div className="ob-panel">
+              <div className="ob-panel-title">
+                <Users size={16} color="#6c72f3" /> Client
+              </div>
+              <div style={{ position: "relative" }} ref={clientDropdownRef}>
+                <input
+                  value={clientSearch}
+                  onChange={(e) => {
+                    setClientSearch(e.target.value);
+                    setShowClientDropdown(true);
+                    setSelectedClient(null);
+                  }}
+                  onFocus={() => setShowClientDropdown(true)}
+                  placeholder="Search client name..."
+                  className="ob-input"
+                  disabled={!canEdit}
+                  style={{
+                    borderColor: selectedClient ? "rgba(52, 211, 153, 0.2)" : undefined,
+                    opacity: !canEdit ? 0.7 : 1,
+                    cursor: !canEdit ? "not-allowed" : "text"
+                  }}
+                />
+                {showClientDropdown && clientSearch && (
+                  <div className="ob-dropdown">
+                    {filteredClients.length === 0 ? (
+                      <div className="ob-dropdown-empty">No clients found</div>
+                    ) : (
+                      filteredClients.map((c) => (
+                        <div
+                          key={c.id}
+                          className={`ob-dropdown-item ${selectedClient?.id === c.id ? "active" : ""}`}
+                          onClick={() => {
+                            if (!canEdit) return;
+                            setSelectedClient(c);
+                            setClientSearch(c.name);
+                            setShowClientDropdown(false);
+                          }}
+                          style={{ cursor: !canEdit ? "not-allowed" : "pointer" }}
+                        >
+                          <div className="ob-dropdown-name">{c.name}</div>
+                          <div className="ob-dropdown-meta">
+                            {c.type} &middot; {c.tier}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+              {selectedClient && (
+                <div className="ob-client-info">
+                  <span className="ob-client-phone">
+                    <Phone size={14} />
+                    {selectedClient.phone || "No phone"}
+                  </span>
+                  <span className="ob-client-tier">{selectedClient.tier}</span>
                 </div>
               )}
             </div>
-            {selectedClient && (
-              <div style={{ marginTop: 12, padding: 10, background: T.bgSurface, borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 }}>
-                <span style={{ color: T.textSec }}>📞 {selectedClient.phone || "No phone"}</span>
-                <span style={{ padding: "4px 8px", background: T.goldDim, color: T.gold, borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{selectedClient.tier}</span>
-              </div>
-            )}
-          </div>
 
-          {/* Service Search */}
-          <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, padding: 20 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
-              <Package size={16} color={T.gold} /> Add Items
-            </div>
-            <div style={{ position: "relative" }}>
-              <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: T.textHint }} />
-              <input 
-                value={serviceSearch} 
-                onChange={e => setServiceSearch(e.target.value)}
-                placeholder="Search service (e.g. Shirt, Suit)..." 
-                style={{ width: "100%", padding: "10px 12px 10px 36px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT }} 
-              />
-            </div>
-            {serviceSearch && (
-              <div style={{ marginTop: 8, background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, maxHeight: 240, overflowY: "auto" }}>
-                {filteredServices.length === 0 ? (
-                  <div style={{ padding: 12, color: T.textTert, fontSize: 13 }}>No services found</div>
-                ) : filteredServices.map(s => (
-                  <div key={s.id} onClick={() => addToCart(s)} 
-                    style={{ padding: "10px 14px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${T.borderFaint}`, fontSize: 13 }}>
-                    <div>
-                      <div style={{ fontWeight: 500 }}>{s.name}</div>
-                      <div style={{ fontSize: 11, color: T.textTert }}>{s.category}</div>
-                    </div>
-                    <div style={{ fontFamily: MONO, color: T.emerald, fontWeight: 600 }}>₵{s.price_wash}</div>
-                  </div>
-                ))}
+            <div className="ob-panel">
+              <div className="ob-panel-title">
+                <Package size={16} color="#dba96a" /> Add Items
               </div>
-            )}
-          </div>
-
-          {/* Cart Table */}
-          <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, overflow: "hidden", flex: 1 }}>
-            <div style={{ padding: "14px 20px", borderBottom: `1px solid ${T.borderSoft}`, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
-              <Receipt size={16} color={T.emerald} /> Cart ({cart.length} items)
-            </div>
-            {cart.length === 0 ? (
-              <div style={{ padding: 40, textAlign: "center", color: T.textTert, fontSize: 14 }}>No items added yet</div>
-            ) : (
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead>
-                  <tr style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}` }}>
-                    <th style={{ padding: "12px 16px", textAlign: "left", color: T.textTert, fontSize: 11, textTransform: "uppercase" }}>Item</th>
-                    <th style={{ padding: "12px 16px", textAlign: "center", color: T.textTert, fontSize: 11, textTransform: "uppercase" }}>Treatment</th>
-                    <th style={{ padding: "12px 16px", textAlign: "center", color: T.textTert, fontSize: 11, textTransform: "uppercase" }}>Qty</th>
-                    <th style={{ padding: "12px 16px", textAlign: "right", color: T.textTert, fontSize: 11, textTransform: "uppercase" }}>Price</th>
-                    <th style={{ padding: "12px 16px", textAlign: "right", color: T.textTert, fontSize: 11, textTransform: "uppercase" }}>Total</th>
-                    <th style={{ width: 40 }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cart.map((item, idx) => (
-                    <tr key={idx} style={{ borderBottom: `1px solid ${T.borderFaint}` }}>
-                      <td style={{ padding: "12px 16px", fontWeight: 500 }}>{item.name}</td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <select value={item.treatment} onChange={e => updateTreatment(idx, e.target.value)} 
-                          style={{ background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 6, padding: "4px 8px", color: T.textPrimary, fontSize: 12, outline: "none", fontFamily: FONT }}>
-                          <option>Wash</option><option>Iron</option><option>Fold</option><option>Hang</option>
-                        </select>
-                      </td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                          <button onClick={() => updateQuantity(idx, -1)} style={{ width: 24, height: 24, borderRadius: 4, background: T.bgElevated, border: "none", color: T.textSec, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Minus size={12} /></button>
-                          <span style={{ width: 24, textAlign: "center", fontFamily: MONO }}>{item.quantity}</span>
-                          <button onClick={() => updateQuantity(idx, 1)} style={{ width: 24, height: 24, borderRadius: 4, background: T.bgElevated, border: "none", color: T.textSec, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}><Plus size={12} /></button>
+              <div className="ob-search-wrap">
+                <Search size={14} className="ob-search-icon" />
+                <input
+                  value={serviceSearch}
+                  onChange={(e) => setServiceSearch(e.target.value)}
+                  placeholder="Search service (e.g. Shirt, Suit)..."
+                  className="ob-input ob-input-search"
+                  disabled={!canEdit}
+                  style={{ opacity: !canEdit ? 0.7 : 1, cursor: !canEdit ? "not-allowed" : "text" }}
+                />
+              </div>
+              {serviceSearch && (
+                <div className="ob-service-list">
+                  {filteredServices.length === 0 ? (
+                    <div className="ob-dropdown-empty">No services found</div>
+                  ) : (
+                    filteredServices.map((s) => (
+                      <div
+                        key={s.id}
+                        className="ob-service-item"
+                        onClick={() => {
+                          if (!canEdit) return;
+                          addToCart(s);
+                        }}
+                        style={{ cursor: !canEdit ? "not-allowed" : "pointer" }}
+                      >
+                        <div>
+                          <div className="ob-service-name">{s.name}</div>
+                          <div className="ob-service-category">{s.category}</div>
                         </div>
-                      </td>
-                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: MONO, color: T.textSec }}>
-                        {/* 🔹 MODIFIED: Show editable price input if using custom pricing */}
-                        {!useCurrentPricing || item.useCustomPrice ? (
-                          <input 
-                            type="number" 
-                            value={item.unitPrice} 
-                            onChange={(e) => updateCustomPrice(idx, Number(e.target.value))}
-                            style={{ width: 70, padding: "4px 6px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 4, color: T.textPrimary, fontSize: 12, outline: "none", fontFamily: MONO, textAlign: 'right' }}
-                          />
-                        ) : (
-                          `₵${item.unitPrice}`
-                        )}
-                      </td>
-                      <td style={{ padding: "12px 16px", textAlign: "right", fontFamily: MONO, fontWeight: 600 }}>₵{item.total}</td>
-                      <td style={{ padding: "12px 16px", textAlign: "center" }}>
-                        <button onClick={() => removeItem(idx)} style={{ background: "transparent", border: "none", color: T.textHint, cursor: "pointer" }}><Trash2 size={14} /></button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                        <div className="ob-service-price">₵{s.price_wash}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="ob-panel" style={{ overflow: "hidden", flex: 1, padding: 0 }}>
+              <div className="ob-cart-header">
+                <Receipt size={16} color="#34d399" /> Cart ({cart.length} items)
+              </div>
+              {cart.length === 0 ? (
+                <div className="ob-cart-empty">
+                  <Inbox size={32} style={{ marginBottom: 8, opacity: 0.5 }} />
+                  <div>No items added yet</div>
+                </div>
+              ) : (
+                <div style={{ overflowX: "auto" }}>
+                  <table className="ob-cart-table">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th style={{ textAlign: "center" }}>Treatment</th>
+                        <th style={{ textAlign: "center" }}>Qty</th>
+                        <th style={{ textAlign: "right" }}>Price</th>
+                        <th style={{ textAlign: "right" }}>Total</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cart.map((item, idx) => (
+                        <tr key={`${item.serviceId}-${item.treatment}`}>
+                          <td style={{ fontWeight: 500 }}>{item.name}</td>
+                          <td>
+                            <select
+                              value={item.treatment}
+                              onChange={(e) => updateTreatment(idx, e.target.value)}
+                              className="ob-select"
+                              disabled={!canEdit}
+                              style={{ opacity: !canEdit ? 0.7 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}
+                            >
+                              <option>Wash</option>
+                              <option>Iron</option>
+                              <option>Fold</option>
+                              <option>Hang</option>
+                            </select>
+                          </td>
+                          <td>
+                            <div className="ob-cart-qty">
+                              <button
+                                className="ob-qty-btn"
+                                onClick={() => updateQuantity(idx, -1)}
+                                aria-label="Decrease quantity"
+                                disabled={!canEdit}
+                                style={{ opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}
+                              >
+                                <Minus size={12} />
+                              </button>
+                              <span className="ob-qty-value">{item.quantity}</span>
+                              <button
+                                className="ob-qty-btn"
+                                onClick={() => updateQuantity(idx, 1)}
+                                aria-label="Increase quantity"
+                                disabled={!canEdit}
+                                style={{ opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}
+                              >
+                                <Plus size={12} />
+                              </button>
+                            </div>
+                          </td>
+                          <td className="ob-cart-price">
+                            {!useCurrentPricing || item.useCustomPrice ? (
+                              <input
+                                type="number"
+                                value={item.unitPrice}
+                                onChange={(e) => updateCustomPrice(idx, Number(e.target.value))}
+                                className="ob-input ob-input-number"
+                                style={{ width: 70, padding: "4px 6px", opacity: !canEdit ? 0.7 : 1, cursor: !canEdit ? "not-allowed" : "text" }}
+                                disabled={!canEdit}
+                              />
+                            ) : (
+                              `₵${item.unitPrice}`
+                            )}
+                          </td>
+                          <td className="ob-cart-total">₵{item.total}</td>
+                          <td style={{ textAlign: "center" }}>
+                            <button
+                              className="ob-cart-remove"
+                              onClick={() => removeItem(idx)}
+                              aria-label="Remove item"
+                              disabled={!canEdit}
+                              style={{ opacity: !canEdit ? 0.5 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div className="ob-panel" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div className="ob-panel-title">
+                <Zap size={16} color="#dba96a" /> Order Options
+              </div>
+
+              <div>
+                <div className="ob-date-label">
+                  <Calendar size={12} /> Order Date
+                </div>
+                <div className="ob-date-wrap">
+                  <input
+                    type="text"
+                    value={dateInput}
+                    onChange={(e) => handleDateChange(e.target.value)}
+                    onBlur={handleDateBlur}
+                    placeholder="DD/MM/YYYY or today"
+                    className="ob-input ob-date-text"
+                    disabled={!canEdit}
+                    style={{ opacity: !canEdit ? 0.7 : 1, cursor: !canEdit ? "not-allowed" : "text" }}
+                  />
+                  <input
+                    type="date"
+                    value={orderDate}
+                    onChange={(e) => {
+                      setOrderDate(e.target.value);
+                      setDateInput(e.target.value);
+                    }}
+                    className="ob-date-picker"
+                    disabled={!canEdit}
+                    style={{ opacity: !canEdit ? 0.7 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}
+                  />
+                  <Calendar size={16} className="ob-date-icon" />
+                </div>
+              </div>
+
+              <label className="ob-option-row" style={{ opacity: !canEdit ? 0.6 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}>
+                <span className="ob-option-label">Use Current Service Prices</span>
+                <input
+                  type="checkbox"
+                  checked={useCurrentPricing}
+                  onChange={(e) => setUseCurrentPricing(e.target.checked)}
+                  className="ob-option-input"
+                  disabled={!canEdit}
+                />
+              </label>
+              {!useCurrentPricing && (
+                <div className="ob-option-hint">
+                  <Lightbulb size={12} />
+                  Enter custom prices per item in the cart
+                </div>
+              )}
+
+              <label className="ob-option-row" style={{ opacity: !canEdit ? 0.6 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}>
+                <span className="ob-option-label">
+                  Express Service (+₵10/item)
+                </span>
+                <input
+                  type="checkbox"
+                  checked={isExpress}
+                  onChange={(e) => setIsExpress(e.target.checked)}
+                  className="ob-option-input"
+                  disabled={!canEdit}
+                />
+              </label>
+
+              <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
+                <div style={{ fontSize: 11, color: "#556070", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Delivery Fee
+                </div>
+                <input
+                  type="number"
+                  value={deliveryFee}
+                  onChange={(e) => setDeliveryFee(Number(e.target.value))}
+                  className="ob-input ob-input-number"
+                  disabled={!canEdit}
+                  style={{ cursor: !canEdit ? "not-allowed" : "text" }}
+                />
+              </div>
+
+              <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
+                <div style={{ fontSize: 11, color: "#556070", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Discount (%)
+                </div>
+                <input
+                  type="number"
+                  value={discountPercent}
+                  onChange={(e) => setDiscountPercent(Number(e.target.value))}
+                  className="ob-input ob-input-number"
+                  disabled={!canEdit}
+                  style={{ cursor: !canEdit ? "not-allowed" : "text" }}
+                />
+              </div>
+
+              <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
+                <div style={{ fontSize: 11, color: "#556070", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Amount Paid
+                </div>
+                <input
+                  type="number"
+                  value={amountPaid}
+                  onChange={(e) => setAmountPaid(Number(e.target.value))}
+                  className="ob-input ob-input-number"
+                  disabled={!canEdit}
+                  style={{
+                    borderColor: balance > 0 ? "rgba(248, 113, 113, 0.2)" : "rgba(52, 211, 153, 0.2)",
+                    cursor: !canEdit ? "not-allowed" : "text"
+                  }}
+                />
+              </div>
+
+              <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
+                <div style={{ fontSize: 11, color: "#556070", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                  Notes
+                </div>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={2}
+                  className="ob-input ob-textarea"
+                  disabled={!canEdit}
+                  style={{ cursor: !canEdit ? "not-allowed" : "text" }}
+                />
+              </div>
+            </div>
+
+            <div className="ob-totals">
+              <div className="ob-total-row secondary">
+                <span>Subtotal</span>
+                <span className="ob-total-mono">₵{subtotal.toFixed(2)}</span>
+              </div>
+              {expressSurcharge > 0 && (
+                <div className="ob-total-row gold">
+                  <span>Express Surcharge</span>
+                  <span className="ob-total-mono">
+                    +₵{expressSurcharge.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              {deliveryFee > 0 && (
+                <div className="ob-total-row secondary">
+                  <span>Delivery</span>
+                  <span className="ob-total-mono">
+                    +₵{deliveryFee.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              {discountAmount > 0 && (
+                <div className="ob-total-row emerald">
+                  <span>Discount ({discountPercent}%)</span>
+                  <span className="ob-total-mono">
+                    -₵{discountAmount.toFixed(2)}
+                  </span>
+                </div>
+              )}
+              <div className="ob-total-divider" />
+              <div className="ob-total-final">
+                <span>TOTAL DUE</span>
+                <span className="ob-total-mono">₵{totalDue.toFixed(2)}</span>
+              </div>
+              <div className={`ob-total-balance ${balance > 0 ? "ember" : "emerald"}`}>
+                <span>BALANCE</span>
+                <span className="ob-total-mono">₵{balance.toFixed(2)}</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* RIGHT: Summary & Options */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
-              <Zap size={16} color={T.gold} /> Order Options
-            </div>
-            
-            {/* 🔹 ADDED: Order Date Picker */}
-            <div>
-              <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em", display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Calendar size={12} /> Order Date
-              </div>
-              <input 
-                type="date" 
-                value={orderDate} 
-                onChange={(e) => setOrderDate(e.target.value)}
-                style={{ width: "100%", padding: "10px 12px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT }} 
-              />
-            </div>
-
-            {/* 🔹 ADDED: Pricing Toggle */}
-            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: T.bgSurface, borderRadius: 8, cursor: "pointer" }}>
-              <span style={{ fontSize: 13, color: T.textSec }}>Use Current Service Prices</span>
-              <input type="checkbox" checked={useCurrentPricing} onChange={e => setUseCurrentPricing(e.target.checked)} style={{ width: 18, height: 18, accentColor: T.gold }} />
-            </label>
-            {!useCurrentPricing && (
-              <div style={{ fontSize: 11, color: T.textTert, padding: "4px 12px", background: T.goldDim, borderRadius: 6 }}>
-                💡 Enter custom prices per item in the cart
-              </div>
-            )}
-            
-            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", background: T.bgSurface, borderRadius: 8, cursor: "pointer" }}>
-              <span style={{ fontSize: 13, color: T.textSec }}>Express Service (+₵10/item)</span>
-              <input type="checkbox" checked={isExpress} onChange={e => setIsExpress(e.target.checked)} style={{ width: 18, height: 18, accentColor: T.gold }} />
-            </label>
-
-            <div>
-              <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Delivery Fee</div>
-              <input type="number" value={deliveryFee} onChange={e => setDeliveryFee(Number(e.target.value))} style={{ width: "100%", padding: "10px 12px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: MONO }} />
-            </div>
-
-            <div>
-              <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Discount (%)</div>
-              <input type="number" value={discountPercent} onChange={e => setDiscountPercent(Number(e.target.value))} style={{ width: "100%", padding: "10px 12px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: MONO }} />
-            </div>
-
-            <div>
-              <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Amount Paid</div>
-              <input type="number" value={amountPaid} onChange={e => setAmountPaid(Number(e.target.value))} style={{ width: "100%", padding: "10px 12px", background: T.bgSurface, border: `1px solid ${balance > 0 ? T.emberBord : T.emeraldBord}`, borderRadius: 8, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: MONO }} />
-            </div>
-
-            <div>
-              <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Notes</div>
-              <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} style={{ width: "100%", padding: "10px 12px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontSize: 13, outline: "none", fontFamily: FONT, resize: "none" }} />
-            </div>
-          </div>
-
-          {/* Totals */}
-          <div style={{ background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 12, padding: 20, display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.textSec }}>
-              <span>Subtotal</span><span style={{ fontFamily: MONO }}>₵{subtotal.toFixed(2)}</span>
-            </div>
-            {expressSurcharge > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.gold }}>
-                <span>Express Surcharge</span><span style={{ fontFamily: MONO }}>+₵{expressSurcharge.toFixed(2)}</span>
-              </div>
-            )}
-            {deliveryFee > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.textSec }}>
-                <span>Delivery</span><span style={{ fontFamily: MONO }}>+₵{deliveryFee.toFixed(2)}</span>
-              </div>
-            )}
-            {discountAmount > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.emerald }}>
-                <span>Discount ({discountPercent}%)</span><span style={{ fontFamily: MONO }}>-₵{discountAmount.toFixed(2)}</span>
-              </div>
-            )}
-            <div style={{ height: 1, background: T.borderSoft, margin: "4px 0" }} />
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 18, fontWeight: 700 }}>
-              <span>TOTAL DUE</span><span style={{ fontFamily: MONO }}>₵{totalDue.toFixed(2)}</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: balance > 0 ? T.ember : T.emerald, fontWeight: 600 }}>
-              <span>BALANCE</span><span style={{ fontFamily: MONO }}>₵{balance.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      </PermissionGuard>
     </div>
   );
 };
+
+export default OrderBuilder;

@@ -1,7 +1,5 @@
-/* ─────────────────────────────────────────────────────────────
-   SHARED PALETTE — same family used across Payments/Security,
-   exposed as CSS variables so the whole app shares one language.
-───────────────────────────────────────────────────────────── */
+/* Shared palette — same family used across Payments/Security,
+   exposed as CSS variables so the whole app shares one language. */
 .layout-container {
   --bg-base: #05060a;
   --bg-surface: #0a0c13;
@@ -81,9 +79,13 @@
 .main-body {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 32px;
+  overflow-x: hidden;
+  padding: 0; /* Removed horizontal padding so the container fits perfectly */
   scroll-behavior: smooth;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Custom scrollbar — subtle, matches the dark palette instead of
@@ -128,9 +130,7 @@
   border-radius: 4px;
 }
 
-/* ─── MOBILE RESPONSIVE NAVIGATION ─────────────────────── */
-
-/* Mobile: Hide sidebar by default, show as slide-over */
+/* Mobile responsive navigation */
 @media (max-width: 1024px) {
   .layout-container {
     flex-direction: column;
@@ -151,25 +151,7 @@
 
   .sidebar.open {
     transform: translateX(0);
-  }
-
-  /* Overlay when sidebar is open on mobile */
-  .sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 40;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.28s ease;
-  }
-
-  .sidebar-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
+  }  
 
   /* Main content full width on mobile */
   .main-content {
@@ -195,6 +177,7 @@
   /* Show mobile hamburger in topbar */
   .sidebar-toggle-mobile {
     display: flex !important;
+    touch-action: manipulation;
     transition: transform 0.16s ease;
   }
   .sidebar-toggle-mobile:active {
@@ -202,12 +185,12 @@
   }
 
   /* Tables: horizontal scroll instead of squash */
-  .table-wrapper {
+  .main-body .table-wrapper {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  .data-table {
+  .main-body .data-table {
     min-width: 680px;
   }
 
@@ -215,13 +198,17 @@
   button, [role="button"], input, select {
     min-height: 44px;
     min-width: 44px;
+    touch-action: manipulation;
   }
-}
 
-/* Tablet: 2-column grids */
-@media (max-width: 1024px) {
+  /* Tablet: 2-column grids */
   .grid-4, .grid-3 {
     grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
   }
 }
 
@@ -242,13 +229,6 @@
   /* Safe area for notched devices */
   body {
     padding-bottom: env(safe-area-inset-bottom);
-  }
-}
-
-/* Prevent iOS zoom on input focus */
-@media (max-width: 1024px) {
-  input, select, textarea {
-    font-size: 16px !important;
   }
 }
 

@@ -1,3 +1,5 @@
+/* FAB Styles - Chapman Prestige Limited */
+
 .fab-container {
   position: fixed;
   bottom: 32px;
@@ -17,12 +19,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .fab-button:hover {
   transform: scale(1.1) rotate(90deg);
   background: #4f46e5;
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
+}
+
+.fab-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
+}
+
+.fab-button:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 3px;
+}
+
+.fab-icon-wrapper {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fab-icon-wrapper.rotate {
+  transform: rotate(135deg);
 }
 
 .fab-menu {
@@ -35,7 +58,8 @@
   opacity: 0;
   pointer-events: none;
   transform: translateY(20px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .fab-container.open .fab-menu {
@@ -49,22 +73,43 @@
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
+  min-height: 48px;
   background: #12141c;
   border: 1px solid #1e212b;
   border-radius: 12px;
   color: #ffffff;
-  text-decoration: none;
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: background-color 0.2s ease,
+              border-color 0.2s ease,
+              transform 0.2s ease;
+  opacity: 0;
+  transform: translateY(12px) scale(0.95);
+  animation: none;
+}
+
+.fab-container.open .fab-item {
+  animation: fabItemIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: var(--delay, 0s);
 }
 
 .fab-item:hover {
   background: #1e212b;
   border-color: #2d3140;
   transform: translateX(-4px);
+}
+
+.fab-item:active {
+  transform: translateX(-2px) scale(0.98);
+}
+
+.fab-item:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 12px;
 }
 
 .fab-item-icon {
@@ -76,4 +121,127 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+@keyframes fabItemIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .fab-button,
+  .fab-icon-wrapper,
+  .fab-menu,
+  .fab-item {
+    transition: none;
+    animation: none;
+  }
+
+  .fab-button:hover {
+    transform: none;
+  }
+
+  .fab-icon-wrapper.rotate {
+    transform: none;
+  }
+
+  .fab-container.open .fab-item {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .fab-container {
+    bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    right: 16px;
+  }
+
+  .fab-button {
+    width: 52px;
+    height: 52px;
+  }
+
+  .fab-menu {
+    bottom: 64px;
+    gap: 10px;
+  }
+
+  .fab-item {
+    padding: 10px 14px;
+    min-height: 44px;
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  .fab-item-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fab-container {
+    bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    right: 12px;
+  }
+
+  .fab-button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .fab-menu {
+    bottom: 60px;
+    right: 0;
+    gap: 8px;
+  }
+
+  .fab-item {
+    padding: 10px 12px;
+    min-height: 44px;
+    font-size: 13px;
+    gap: 8px;
+    border-radius: 10px;
+  }
+
+  .fab-item-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .fab-item-label {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Landscape small height */
+@media (max-height: 500px) and (orientation: landscape) {
+  .fab-menu {
+    bottom: 60px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .fab-menu::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .fab-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 99px;
+  }
 }

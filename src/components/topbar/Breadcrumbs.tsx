@@ -1,44 +1,50 @@
 import { useLocation, Link } from "react-router-dom";
-import { ChevronRight, Home } from "lucide-react";
+import { useMemo } from "react";
+import { ChevronRight } from "lucide-react"; // Removed 'Home' import
 import "./Breadcrumbs.css";
 
-// Map route segments to human-readable labels
 const routeLabels: Record<string, string> = {
   dashboard: "Dashboard",
   orders: "Orders",
+  "new-order": "New Order",
   staff: "Staff",
+  clients: "Clients",
   services: "Services",
+  receipt: "Receipt",
   payments: "Payments",
   security: "Security",
   settings: "Settings",
-  // Add more as your app grows
+  system: "System Admin",
+  profile: "Profile",
+  help: "Help",
 };
+
+function formatLabel(raw: string): string {
+  return raw
+    .split(/[-_]/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
 
 export const Breadcrumbs = () => {
   const location = useLocation();
-  // Clean path: strip query params & hashes, split, filter empty segments
-  const cleanPath = location.pathname.split("?")[0].split("#")[0];
-  const paths = cleanPath.split("/").filter(Boolean);
+
+  const paths = useMemo(() => {
+    const cleanPath = location.pathname.split("?")[0].split("#")[0];
+    return cleanPath.split("/").filter(Boolean);
+  }, [location.pathname]);
 
   if (paths.length === 0) return null;
 
   return (
     <nav className="breadcrumbs" aria-label="Breadcrumb">
-      {/* Home Link */}
-      <div className="breadcrumb-item">
-        <Link to="/" className="breadcrumb-link home-link" aria-label="Home">
-          <Home size={14} />
-        </Link>
-        <ChevronRight size={14} className="breadcrumb-separator" aria-hidden="true" />
-      </div>
-
       {paths.map((path, index) => {
         const isLast = index === paths.length - 1;
-        const label = routeLabels[path] || path.charAt(0).toUpperCase() + path.slice(1);
+        const label = routeLabels[path] || formatLabel(path);
         const url = `/${paths.slice(0, index + 1).join("/")}`;
 
         return (
-          <div key={`${path}-${index}`} className="breadcrumb-item">
+          <div key={path} className="breadcrumb-item">
             {!isLast ? (
               <Link to={url} className="breadcrumb-link">{label}</Link>
             ) : (
@@ -53,3 +59,5 @@ export const Breadcrumbs = () => {
     </nav>
   );
 };
+
+export default Breadcrumbs;

@@ -1,20 +1,31 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Search, Plus, Edit2, Trash2, Archive, Building2, User, Check, X,
   ArrowUp, ArrowDown, ArrowUpDown, AlertTriangle, RefreshCw, Download,
-  ChevronLeft, ChevronRight, Users, Star, Briefcase, Crown,
+  ChevronLeft, ChevronRight, Users, Star, Briefcase, Crown, Shield,
 } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
+import { usePermission } from "../hooks/usePermission";
 
-// ─── CSS injected once ────────────────────────────────────────────────────────
+/* ─── HELPERS ────────────────────────────────────────────────────────────── */
+function formatPhoneInput(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  const clean = digits.startsWith('233') ? digits.slice(3) : digits;
+  const limited = clean.slice(0, 10);
+  if (limited.length <= 2) return limited;
+  if (limited.length <= 5) return `${limited.slice(0, 2)} ${limited.slice(2)}`;
+  return `${limited.slice(0, 2)} ${limited.slice(2, 5)} ${limited.slice(5)}`;
+}
+
+/* ─── STYLES ─────────────────────────────────────────────────────────────── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
 .cl-shell *{box-sizing:border-box;margin:0;padding:0}
 .cl-shell{display:flex;flex-direction:column;height:100vh;background:#07090e;color:#edf0f8;font-family:'Outfit',system-ui,sans-serif;overflow:hidden}
 
-/* top bar */
 .cl-top{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 0;flex-shrink:0;animation:clDown .4s cubic-bezier(.4,0,.2,1) both}
 .cl-h2{font-size:22px;font-weight:700;color:#edf0f8;letter-spacing:-.4px;margin-bottom:4px}
 .cl-sub{font-size:13px;color:#556070;display:flex;align-items:center;gap:6px}
@@ -27,7 +38,8 @@ const CSS = `
 .cl-btn.primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .cl-spin{animation:clSpin .7s linear infinite}
 
-/* kpi row */
+.cl-view-banner{display:flex;align-items:center;gap:10px;padding:10px 28px;background:rgba(108,114,243,.08);border-bottom:1px solid rgba(108,114,243,.2);font-size:13px;font-weight:500;color:#9aa3b5;flex-shrink:0}
+
 .cl-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:18px 28px 0;flex-shrink:0;animation:clDown .4s .04s cubic-bezier(.4,0,.2,1) both}
 .cl-kpi{position:relative;background:#0f1320;border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:16px 18px;overflow:hidden;transition:transform .22s,box-shadow .22s,border-color .22s;cursor:default;animation:clUp .5s cubic-bezier(.4,0,.2,1) both}
 .cl-kpi:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(0,0,0,.4);border-color:rgba(255,255,255,.09)}
@@ -40,7 +52,6 @@ const CSS = `
 .cl-kpi-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.03)}
 .cl-kpi-fill{height:100%;width:0;opacity:.5;animation:clBarGrow 1.2s cubic-bezier(.4,0,.2,1) .3s forwards}
 
-/* filter bar */
 .cl-filters{display:flex;align-items:center;gap:10px;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0;flex-wrap:wrap;animation:clDown .4s .08s cubic-bezier(.4,0,.2,1) both}
 .cl-srch{position:relative;display:flex;align-items:center;flex:1;min-width:180px;max-width:260px}
 .cl-srch-ico{position:absolute;left:11px;color:#3a4460;pointer-events:none}
@@ -59,13 +70,11 @@ const CSS = `
 .cl-clr{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:9px;color:#f87171;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s}
 .cl-clr:hover{background:rgba(248,113,113,.18)}
 
-/* tier pills in toolbar */
 .tier-pills{display:flex;gap:5px;flex-wrap:wrap}
 .tier-p{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;border:1px solid rgba(255,255,255,.07);background:transparent;color:#556070;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s;white-space:nowrap}
 .tier-p:hover{color:#9aa3b5;border-color:rgba(255,255,255,.12)}
 .tier-p.on{border-color:currentColor;opacity:1}
 
-/* bulk bar */
 .cl-bulk{display:flex;align-items:center;gap:10px;padding:10px 28px;background:rgba(52,211,153,.06);border-bottom:1px solid rgba(52,211,153,.15);font-size:13px;font-weight:500;color:#9aa3b5;animation:clSlideIn .2s ease;flex-shrink:0}
 .cl-bulk-b{padding:6px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:#edf0f8;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s;display:inline-flex;align-items:center;gap:6px}
 .cl-bulk-b:hover{background:rgba(255,255,255,.1)}
@@ -74,9 +83,8 @@ const CSS = `
 .cl-bulk-x{margin-left:auto;width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:#556070;border-radius:6px;transition:all .15s}
 .cl-bulk-x:hover{background:rgba(255,255,255,.06);color:#9aa3b5}
 
-/* body / table */
-.cl-body{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.cl-tbl-wrap{flex:1;overflow:auto}
+.cl-body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.cl-tbl-wrap{flex:1;overflow:auto;min-height:0}
 .cl-tbl-wrap::-webkit-scrollbar{width:5px;height:5px}
 .cl-tbl-wrap::-webkit-scrollbar-track{background:transparent}
 .cl-tbl-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:99px}
@@ -92,32 +100,23 @@ const CSS = `
 .cl-row.archived{opacity:.5}
 .cl-row:hover .cl-row-acts{opacity:1}
 
-/* client cell */
 .cl-cell{display:flex;align-items:center;gap:10px}
 .cl-av{width:34px;height:34px;min-width:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cl-nm{font-size:13.5px;font-weight:600;color:#edf0f8}
 .cl-arch-tag{font-size:10px;color:#3a4460;font-weight:500;background:rgba(255,255,255,.05);padding:1px 6px;border-radius:4px;margin-left:4px}
 
-/* tier badge */
 .cl-tier{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
-
-/* type badge */
 .cl-type{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;color:#9aa3b5}
 
-/* row actions */
 .cl-row-acts{display:flex;gap:6px;opacity:0;transition:opacity .18s}
 .cl-ra{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#9aa3b5;cursor:pointer;transition:all .18s}
 .cl-ra:hover{background:rgba(255,255,255,.1);color:#edf0f8}
 .cl-ra.red{border-color:rgba(248,113,113,.2);background:rgba(248,113,113,.08);color:#f87171}
 .cl-ra.red:hover{background:rgba(248,113,113,.18)}
 
-/* checkbox */
 .cl-chk{width:15px;height:15px;border-radius:4px;cursor:pointer;accent-color:#34d399}
-
-/* empty */
 .cl-empty{padding:64px!important;text-align:center;color:#2e3a4e;font-size:14px}
 
-/* pagination */
 .cl-pag{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-top:1px solid rgba(255,255,255,.05);background:#0c0f18;flex-shrink:0}
 .cl-pag-info{font-size:12.5px;color:#3a4460}
 .cl-pag-r{display:flex;align-items:center;gap:6px}
@@ -129,7 +128,6 @@ const CSS = `
 .cl-pag-n:hover{color:#edf0f8;border-color:rgba(255,255,255,.08)}
 .cl-pag-n.on{background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3)}
 
-/* ── MODAL OVERLAY ── */
 .cl-mo{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
 .cl-mo.on{opacity:1;pointer-events:auto}
 .cl-mc{background:#0f1320;border:1px solid rgba(255,255,255,.1);border-radius:20px;width:480px;max-width:92vw;overflow:hidden;transform:scale(.94) translateY(12px);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 24px 80px rgba(0,0,0,.7)}
@@ -156,35 +154,24 @@ const CSS = `
 .cl-mf-p:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
 .cl-mf-p:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
-/* ── CONFIRM MODAL ── */
 .cl-conf-ico{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
 .cl-conf-title{font-size:17px;font-weight:700;color:#edf0f8;text-align:center;margin-bottom:8px}
 .cl-conf-desc{font-size:13px;color:#556070;text-align:center;line-height:1.6}
 .cl-conf-warn{margin-top:10px;padding:8px 14px;background:rgba(248,113,113,.1);border-radius:8px;font-size:12px;color:#f87171;display:flex;align-items:center;gap:6px;justify-content:center}
 
-/* ── TOAST ── */
 .cl-toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:12px;font-size:13.5px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.4);animation:clSlideIn .3s cubic-bezier(.4,0,.2,1);border:1px solid;white-space:nowrap}
 .cl-toast.ok{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.3);color:#34d399}
 .cl-toast.err{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.3);color:#f87171}
 .cl-toast-x{background:none;border:none;cursor:pointer;color:inherit;opacity:.6;display:flex;align-items:center;transition:opacity .15s}
 .cl-toast-x:hover{opacity:1}
 
-/* ── KEYFRAMES ── */
 @keyframes clDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes clUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes clRowIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
 @keyframes clSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes clSpin{to{transform:rotate(360deg)}}
 @keyframes clBarGrow{from{width:0}to{width:75%}}
-@keyframes clCount{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── RESPONSIVE ── */
-@media(max-width:1000px){.cl-kpi-row{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:700px){.cl-top{padding:16px 18px 0}.cl-filters{padding:12px 18px}.cl-kpi-row{padding:14px 18px 0}.cl-h2{font-size:18px}.cl-m-row{grid-template-columns:1fr}}
-button:focus-visible{outline:2px solid #34d399;outline-offset:2px}
-
-
-/* ── RESPONSIVE ── */
 @media(max-width:1000px){.cl-kpi-row{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){
   .cl-top{padding:16px 18px 0}
@@ -193,29 +180,23 @@ button:focus-visible{outline:2px solid #34d399;outline-offset:2px}
   .cl-h2{font-size:18px}
   .cl-m-row{grid-template-columns:1fr}
   
-  /* ✅ MOBILE TABLE TWEAKS (added only) */
   .cl-tbl thead { display: none; }
-  .cl-row { 
-    display: block; 
-    padding: 12px 16px !important; 
-    border-bottom: 1px solid rgba(255,255,255,.035) !important;
-  }
-  .cl-row td { 
-    display: block; 
-    padding: 6px 0 !important; 
-    border: none !important; 
-    text-align: left !important;
+  .cl-row { display: block; padding: 12px 16px !important; border-bottom: 1px solid rgba(255,255,255,.035) !important; }
+  .cl-row td { display: block; padding: 6px 0 6px 40% !important; border: none !important; text-align: left !important; position: relative; }
+  .cl-row td:first-child::before { display: none; }
+  .cl-row td::before {
+    content: attr(data-label);
+    position: absolute; left: 0; top: 6px; font-size: 10px; color: #556070; text-transform: uppercase; font-weight: 700;
   }
   .cl-cell { margin-bottom: 8px; }
   .cl-nm { font-size: 14px !important; }
   .cl-tier, .cl-type { margin: 4px 0; }
-  .cl-row-acts { 
-    opacity: 1 !important; 
-    justify-content: flex-end; 
-    margin-top: 8px;
-  }
+  .cl-row-acts { opacity: 1 !important; justify-content: flex-end; margin-top: 8px; }
   .cl-pag { flex-direction: column; align-items: flex-start !important; gap: 12px; }
   .cl-pag-r { width: 100%; justify-content: space-between; }
+  
+  .cl-srch-x { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+  .cl-ra { min-width: 44px; min-height: 44px; width: 44px; height: 44px; }
 }
 
 @media(max-width:480px){
@@ -224,16 +205,14 @@ button:focus-visible{outline:2px solid #34d399;outline-offset:2px}
   .cl-srch{max-width:100% !important; width:100% !important;}
   .tier-pills{justify-content: center; flex-wrap: wrap;}
   .cl-kpi-row{grid-template-columns:1fr !important;}
-  
-  /* Ensure inputs are touch-friendly */
-  .cl-m-inp, .cl-m-sel { font-size: 16px !important; } /* Prevents iOS zoom */
+  .cl-m-inp, .cl-m-sel { font-size: 16px !important; }
   button, [role="button"] { min-height: 44px !important; }
 }
 
 button:focus-visible{outline:2px solid #34d399;outline-offset:2px}
 `;
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+/* ─── TYPES ──────────────────────────────────────────────────────────────── */
 interface Client {
   id: string;
   name: string;
@@ -251,7 +230,7 @@ interface FormState {
 type SortKey = "name" | "type" | "tier" | "phone";
 type SortDir = "asc" | "desc";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+/* ─── CONSTANTS ──────────────────────────────────────────────────────────── */
 const TIER_META: Record<string, { color: string; bg: string; border: string; icon: JSX.Element; label: string }> = {
   Standard:  { color: "#556070", bg: "rgba(85,96,112,.12)",   border: "rgba(85,96,112,.2)",   icon: <User size={10} />,   label: "Standard"   },
   Bronze:    { color: "#cd8a44", bg: "rgba(205,138,68,.12)",  border: "rgba(205,138,68,.25)", icon: <Star size={10} />,   label: "Bronze"     },
@@ -273,7 +252,7 @@ const TIER_PILL_COLORS: Record<string, { active: string }> = {
   Corporate: { active: "#6c72f3" },
 };
 
-// ─── Animated counter ─────────────────────────────────────────────────────────
+/* ─── SUB-COMPONENTS ─────────────────────────────────────────────────────── */
 function useCountUp(target: number, delay = 0) {
   const [val, setVal] = useState(0);
   useEffect(() => {
@@ -292,7 +271,6 @@ function useCountUp(target: number, delay = 0) {
   return val;
 }
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
 function KpiCard({ label, value, icon, accent, sub, delay = 0 }: {
   label: string; value: number; icon: JSX.Element;
   accent: string; sub?: string; delay?: number;
@@ -310,7 +288,6 @@ function KpiCard({ label, value, icon, accent, sub, delay = 0 }: {
   );
 }
 
-// ─── Avatar ───────────────────────────────────────────────────────────────────
 function Avatar({ name, type }: { name: string; type: string }) {
   const isCorp = type === "Corporate";
   const hue = (name.charCodeAt(0) * 37 + (name.charCodeAt(1) || 0) * 11) % 360;
@@ -324,13 +301,11 @@ function Avatar({ name, type }: { name: string; type: string }) {
   );
 }
 
-// ─── Sort icon ────────────────────────────────────────────────────────────────
 function SortIcon({ col, sortKey, dir }: { col: string; sortKey: SortKey; dir: SortDir }) {
   if (col !== sortKey) return <ArrowUpDown size={11} style={{ opacity: .35 }} />;
   return dir === "asc" ? <ArrowUp size={11} color="#34d399" /> : <ArrowDown size={11} color="#34d399" />;
 }
 
-// ─── Tier Badge ───────────────────────────────────────────────────────────────
 function TierBadge({ tier }: { tier: string }) {
   const m = TIER_META[tier] ?? TIER_META.Standard;
   return (
@@ -340,10 +315,9 @@ function TierBadge({ tier }: { tier: string }) {
   );
 }
 
-// ─── Client Form Modal ────────────────────────────────────────────────────────
-function ClientModal({ client, onClose, onSave, saving }: {
+function ClientModal({ client, onClose, onSave, saving, canEdit }: {
   client: Partial<Client> | null; onClose: () => void;
-  onSave: (f: FormState) => void; saving: boolean;
+  onSave: (f: FormState) => void; saving: boolean; canEdit: boolean;
 }) {
   const isEdit = !!(client as Client)?.id;
   const [form, setForm] = useState<FormState>({
@@ -364,6 +338,7 @@ function ClientModal({ client, onClose, onSave, saving }: {
   };
 
   const submit = () => {
+    if (!canEdit) return;
     const e: Partial<FormState> = {};
     if (!form.name.trim())  e.name  = "Name is required";
     if (!form.phone.trim()) e.phone = "Phone is required";
@@ -386,20 +361,20 @@ function ClientModal({ client, onClose, onSave, saving }: {
             <label className="cl-m-lbl">Client Name</label>
             <input ref={firstRef} className={`cl-m-inp${errs.name ? " err" : ""}`}
               placeholder="e.g. St. Martins Hospital"
-              value={form.name} onChange={e => set("name", e.target.value)} />
+              value={form.name} onChange={e => set("name", e.target.value)} disabled={!canEdit} />
             {errs.name && <span className="cl-m-err">{errs.name}</span>}
           </div>
           <div className="cl-m-row">
             <div className="cl-m-fg">
               <label className="cl-m-lbl">Type</label>
-              <select className="cl-m-sel" value={form.type} onChange={e => set("type", e.target.value)}>
+              <select className="cl-m-sel" value={form.type} onChange={e => set("type", e.target.value)} disabled={!canEdit}>
                 <option>Individual</option>
                 <option>Corporate</option>
               </select>
             </div>
             <div className="cl-m-fg">
               <label className="cl-m-lbl">Tier</label>
-              <select className="cl-m-sel" value={form.tier} onChange={e => set("tier", e.target.value)}>
+              <select className="cl-m-sel" value={form.tier} onChange={e => set("tier", e.target.value)} disabled={!canEdit}>
                 {["Standard","Bronze","Silver","Gold","VIP","Corporate"].map(t => <option key={t}>{t}</option>)}
               </select>
             </div>
@@ -407,20 +382,21 @@ function ClientModal({ client, onClose, onSave, saving }: {
           <div className="cl-m-fg">
             <label className="cl-m-lbl">Phone</label>
             <input className={`cl-m-inp${errs.phone ? " err" : ""}`}
-              placeholder="+233 XX XXX XXXX"
-              value={form.phone} onChange={e => set("phone", e.target.value)} />
+              placeholder="XX XXX XXXX"
+              value={formatPhoneInput(form.phone)} 
+              onChange={e => set("phone", formatPhoneInput(e.target.value))} disabled={!canEdit} />
             {errs.phone && <span className="cl-m-err">{errs.phone}</span>}
           </div>
           <div className="cl-m-fg">
             <label className="cl-m-lbl">Notes <span style={{ color: "#2e3a4e", fontWeight: 400 }}>(optional)</span></label>
             <input className="cl-m-inp"
               placeholder="Any important notes..."
-              value={form.notes} onChange={e => set("notes", e.target.value)} />
+              value={form.notes} onChange={e => set("notes", e.target.value)} disabled={!canEdit} />
           </div>
         </div>
         <div className="cl-m-foot">
           <button className="cl-mf-s" onClick={onClose}>Cancel</button>
-          <button className="cl-mf-p" onClick={submit} disabled={saving}>
+          <button className="cl-mf-p" onClick={submit} disabled={saving || !canEdit}>
             {saving ? "Saving..." : <><Check size={14} />{isEdit ? "Save Changes" : "Add Client"}</>}
           </button>
         </div>
@@ -429,7 +405,6 @@ function ClientModal({ client, onClose, onSave, saving }: {
   );
 }
 
-// ─── Confirm Modal ────────────────────────────────────────────────────────────
 function ConfirmModal({ count, type, onClose, onConfirm }: {
   count: number; type: "archive" | "delete";
   onClose: () => void; onConfirm: () => void;
@@ -469,7 +444,6 @@ function ConfirmModal({ count, type, onClose, onConfirm }: {
   );
 }
 
-// ─── Toast ────────────────────────────────────────────────────────────────────
 function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error"; onClose: () => void }) {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
   return (
@@ -481,8 +455,9 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
   );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+/* ─── MAIN COMPONENT ─────────────────────────────────────────────────────── */
 export const Clients = () => {
+  const location = useLocation();
   const [clients, setClients]           = useState<Client[]>([]);
   const [loading, setLoading]           = useState(true);
   const [refreshing, setRefreshing]     = useState(false);
@@ -500,28 +475,31 @@ export const Clients = () => {
   const [pp, setPp]                     = useState(10);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // ── Keyboard ─────────────────────────────────────────────────────────────
+  const { permission, loading: permLoading, canEdit } = usePermission(location.pathname);
+
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key === "/" && document.activeElement?.tagName !== "INPUT") { e.preventDefault(); searchRef.current?.focus(); }
       if (e.key === "Escape") { setEditing(null); setConfirm(null); }
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setEditing({}); }
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); canEdit && setEditing({}); }
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, []);
+  }, [canEdit]);
 
-  // ── Fetch ─────────────────────────────────────────────────────────────────
   const fetchClients = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true); else setLoading(true);
     try {
-      let q = supabase.from("clients").select("*").order("name");
-      if (!showArchived) q = q.neq("active", false);
+      let q = supabase.from("clients").select("*").order("name", { ascending: true });
+      if (!showArchived) {
+        q = q.or('active.eq.true,active.is.null');
+      }
       const { data, error } = await q;
       if (error) throw error;
       if (data) setClients(data);
-    } catch {
-      // keep whatever is already in state
+    } catch (err: any) {
+      console.error("Fetch clients error:", err);
+      setToast({ msg: `Failed to load clients: ${err.message || 'Unknown error'}`, type: "error" });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -530,48 +508,82 @@ export const Clients = () => {
 
   useEffect(() => { fetchClients(); }, [fetchClients]);
 
-  // ── Save ──────────────────────────────────────────────────────────────────
   const handleSave = async (form: FormState) => {
+    if (!canEdit) return;
     setSaving(true);
     try {
-      const payload = { name: form.name.trim(), type: form.type, tier: form.tier, phone: form.phone.trim(), notes: form.notes, active: true };
+      const payload: any = { 
+        name: form.name.trim(), 
+        type: form.type, 
+        tier: form.tier, 
+        phone: form.phone.trim(), 
+        notes: form.notes, 
+        active: true 
+      };
+      
       if ((editing as Client)?.id) {
-        await supabase.from("clients").update(payload).eq("id", (editing as Client).id);
+        const { error } = await supabase.from("clients").update(payload).eq("id", (editing as Client).id);
+        if (error) throw error;
         setToast({ msg: "Client updated", type: "success" });
       } else {
-        await supabase.from("clients").insert([payload]);
+        const { error } = await supabase.from("clients").insert([payload]);
+        if (error) throw error;
         setToast({ msg: "Client added", type: "success" });
       }
       setEditing(null);
-      fetchClients(true);
-    } catch {
-      setToast({ msg: "Failed to save", type: "error" });
+      await fetchClients(true);
+    } catch (err: any) {
+      console.error("Save client error:", err);
+      setToast({ msg: `Failed to save: ${err.message}`, type: "error" });
     } finally {
       setSaving(false);
     }
   };
 
-  // ── Confirm action ────────────────────────────────────────────────────────
   const handleConfirm = async () => {
-    if (!confirm) return;
+    if (!canEdit || !confirm) return;
     const { ids, type } = confirm;
     setConfirm(null);
     try {
       if (type === "archive") {
-        await supabase.from("clients").update({ active: false }).in("id", ids);
+        const { error } = await supabase.from("clients").update({ active: false }).in("id", ids);
+        if (error) throw error;
         setToast({ msg: `${ids.length} client${ids.length > 1 ? "s" : ""} archived`, type: "success" });
       } else {
-        await supabase.from("clients").delete().in("id", ids);
+        const { error } = await supabase.from("clients").delete().in("id", ids);
+        if (error) throw error;
         setToast({ msg: `${ids.length} client${ids.length > 1 ? "s" : ""} deleted`, type: "success" });
       }
       setSelected(new Set());
-      fetchClients(true);
-    } catch {
-      setToast({ msg: "Action failed", type: "error" });
+      await fetchClients(true);
+    } catch (err: any) {
+      console.error("Confirm action error:", err);
+      setToast({ msg: `Action failed: ${err.message}`, type: "error" });
     }
   };
 
-  // ── Derived ───────────────────────────────────────────────────────────────
+  const handleExport = () => {
+    const escapeCsv = (val: any) => `"${String(val).replace(/"/g, '""')}"`;
+    const headers = ["Name", "Type", "Tier", "Phone", "Notes", "Status"];
+    const rows = filtered.map(c => [
+      c.name,
+      c.type,
+      c.tier,
+      c.phone,
+      c.notes || "",
+      c.active === false ? "Archived" : "Active"
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(escapeCsv).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chapman-clients-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setToast({ msg: "CSV exported successfully", type: "success" });
+  };
+
   const filtered = useMemo(() => {
     return [...clients].filter(c => {
       if (tierFilter !== "All" && c.tier !== tierFilter) return false;
@@ -585,7 +597,7 @@ export const Clients = () => {
         if (a.type !== "Corporate" && b.type === "Corporate") return 1 * mul;
         return a.name.localeCompare(b.name) * mul;
       }
-      const av = a[sort.key] ?? ""; const bv = b[sort.key] ?? "";
+      const av = String(a[sort.key] ?? ""); const bv = String(b[sort.key] ?? "");
       return av < bv ? -mul : av > bv ? mul : 0;
     });
   }, [clients, tierFilter, typeFilter, search, sort]);
@@ -608,22 +620,28 @@ export const Clients = () => {
     ns.has(id) ? ns.delete(id) : ns.add(id);
     setSelected(ns);
   };
+  
   const toggleAll = () =>
     setSelected(selected.size === filtered.length && filtered.length > 0 ? new Set() : new Set(filtered.map(c => c.id)));
 
   const hasFilters = tierFilter !== "All" || typeFilter !== "All" || search;
 
-  // ─────────────────────────────────────────────────────────────────────────
+  if (loading || permLoading) return (
+    <div className="cl-shell" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
+      <div style={{ color: "#3a4460", fontSize: 14, display: "flex", alignItems: "center" }}>
+        <RefreshCw size={18} className="cl-spin" style={{ marginRight: 10 }} /> Loading clients...
+      </div>
+    </div>
+  );
+
   return (
     <div className="cl-shell">
       <style>{CSS}</style>
 
-      {/* Modals */}
-      {editing  !== null && <ClientModal client={editing}  onClose={() => setEditing(null)} onSave={handleSave} saving={saving} />}
+      {editing  !== null && <ClientModal client={editing} onClose={() => setEditing(null)} onSave={handleSave} saving={saving} canEdit={canEdit} />}
       {confirm  !== null && <ConfirmModal count={confirm.ids.length} type={confirm.type} onClose={() => setConfirm(null)} onConfirm={handleConfirm} />}
       {toast    !== null && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
-      {/* Top bar */}
       <div className="cl-top">
         <div>
           <h2 className="cl-h2">Clients</h2>
@@ -639,14 +657,25 @@ export const Clients = () => {
           <button className="cl-btn ghost" title="Refresh" onClick={() => fetchClients(true)}>
             <RefreshCw size={14} className={refreshing ? "cl-spin" : ""} />
           </button>
-          <button className="cl-btn ghost" title="Export"><Download size={14} /></button>
-          <button className="cl-btn primary" onClick={() => setEditing({})}>
-            <Plus size={14} /> Add Client
+          <button className="cl-btn ghost" title="Export" onClick={handleExport}><Download size={14} /></button>
+          <button 
+            className="cl-btn primary" 
+            onClick={() => canEdit && setEditing({})}
+            disabled={!canEdit}
+            style={{ opacity: canEdit ? 1 : 0.7, cursor: canEdit ? "pointer" : "not-allowed" }}
+          >
+            <Plus size={14} /> {canEdit ? "Add Client" : "View Only"}
           </button>
         </div>
       </div>
 
-      {/* KPI row */}
+      {!canEdit && (
+        <div className="cl-view-banner">
+          <Shield size={14} color="#6c72f3" />
+          <span>View-only access — modifications disabled</span>
+        </div>
+      )}
+
       <div className="cl-kpi-row">
         <KpiCard label="Total Clients"   value={stats.total}     icon={<Users size={18} />}     accent="#6c72f3" sub="All types"    delay={0}   />
         <KpiCard label="Corporate"       value={stats.corporate} icon={<Building2 size={18} />} accent="#22d3ee" sub="B2B clients"  delay={80}  />
@@ -654,9 +683,7 @@ export const Clients = () => {
         <KpiCard label="Active"          value={stats.active}    icon={<Check size={18} />}     accent="#34d399" sub="Not archived" delay={240} />
       </div>
 
-      {/* Filter bar */}
       <div className="cl-filters">
-        {/* Search */}
         <div className="cl-srch">
           <Search size={13} className="cl-srch-ico" />
           <input ref={searchRef} className="cl-srch-inp"
@@ -665,7 +692,6 @@ export const Clients = () => {
           {search && <button className="cl-srch-x" onClick={() => setSearch("")}><X size={11} /></button>}
         </div>
 
-        {/* Tier pills */}
         <div className="tier-pills">
           {TIERS.map(t => {
             const on = tierFilter === t;
@@ -680,14 +706,12 @@ export const Clients = () => {
           })}
         </div>
 
-        {/* Type filter */}
         <select className="cl-fp" value={typeFilter} onChange={e => { setTypeFilter(e.target.value); setPg(1); }}>
           <option value="All">All Types</option>
           <option value="Corporate">Corporate</option>
           <option value="Individual">Individual</option>
         </select>
 
-        {/* Show archived */}
         <button className={`cl-pill arch ${showArchived ? "on" : ""}`} onClick={() => setShowArchived(v => !v)}>
           <Archive size={12} /> {showArchived ? "Hide Archived" : "Archived"}
         </button>
@@ -699,8 +723,7 @@ export const Clients = () => {
         )}
       </div>
 
-      {/* Bulk bar */}
-      {selected.size > 0 && (
+      {selected.size > 0 && canEdit && (
         <div className="cl-bulk">
           <span>{selected.size} selected</span>
           <button className="cl-bulk-b" onClick={() => setConfirm({ ids: Array.from(selected), type: "archive" })}>
@@ -713,71 +736,67 @@ export const Clients = () => {
         </div>
       )}
 
-      {/* Body */}
       <div className="cl-body">
         <div className="cl-tbl-wrap">
-          {loading ? (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200, color: "#3a4460", fontSize: 14 }}>
-              <RefreshCw size={18} className="cl-spin" style={{ marginRight: 10 }} /> Loading clients...
-            </div>
-          ) : (
-            <table className="cl-tbl">
-              <thead>
-                <tr>
-                  <th style={{ width: 44, paddingLeft: 20 }}>
-                    <input type="checkbox" className="cl-chk"
-                      checked={selected.size === filtered.length && filtered.length > 0}
-                      onChange={toggleAll} />
-                  </th>
-                  <th><div className="cl-th-sort" onClick={() => toggleSort("name")}>Client <SortIcon col="name" sortKey={sort.key} dir={sort.dir} /></div></th>
-                  <th><div className="cl-th-sort" onClick={() => toggleSort("type")}>Type <SortIcon col="type" sortKey={sort.key} dir={sort.dir} /></div></th>
-                  <th><div className="cl-th-sort" onClick={() => toggleSort("tier")}>Tier <SortIcon col="tier" sortKey={sort.key} dir={sort.dir} /></div></th>
-                  <th><div className="cl-th-sort" onClick={() => toggleSort("phone")}>Phone <SortIcon col="phone" sortKey={sort.key} dir={sort.dir} /></div></th>
-                  <th></th>
+          <table className="cl-tbl">
+            <thead>
+              <tr>
+                <th style={{ width: 44, paddingLeft: 20 }}>
+                  <input type="checkbox" className="cl-chk"
+                    checked={selected.size === filtered.length && filtered.length > 0}
+                    onChange={toggleAll} disabled={!canEdit} />
+                </th>
+                <th><div className="cl-th-sort" onClick={() => toggleSort("name")}>Client <SortIcon col="name" sortKey={sort.key} dir={sort.dir} /></div></th>
+                <th><div className="cl-th-sort" onClick={() => toggleSort("type")}>Type <SortIcon col="type" sortKey={sort.key} dir={sort.dir} /></div></th>
+                <th><div className="cl-th-sort" onClick={() => toggleSort("tier")}>Tier <SortIcon col="tier" sortKey={sort.key} dir={sort.dir} /></div></th>
+                <th><div className="cl-th-sort" onClick={() => toggleSort("phone")}>Phone <SortIcon col="phone" sortKey={sort.key} dir={sort.dir} /></div></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {paged.length === 0 ? (
+                <tr><td colSpan={6} className="cl-empty">No clients match your filters</td></tr>
+              ) : paged.map((c, i) => (
+                <tr key={c.id}
+                  className={`cl-row${selected.has(c.id) ? " sel" : ""}${c.active === false ? " archived" : ""}`}
+                  style={{ animationDelay: `${i * 22}ms` }}>
+                  <td data-label="Select" style={{ paddingLeft: 20, width: 44 }} onClick={e => e.stopPropagation()}>
+                    <input type="checkbox" className="cl-chk" checked={selected.has(c.id)} onChange={() => toggleSel(c.id)} disabled={!canEdit} />
+                  </td>
+                  <td data-label="Client">
+                    <div className="cl-cell">
+                      <Avatar name={c.name} type={c.type} />
+                      <div>
+                        <div className="cl-nm">{c.name}</div>
+                        {c.active === false && <span className="cl-arch-tag">Archived</span>}
+                      </div>
+                    </div>
+                  </td>
+                  <td data-label="Type">
+                    <div className="cl-type">
+                      {c.type === "Corporate" ? <Building2 size={13} color="#6c72f3" /> : <User size={13} color="#556070" />}
+                      {c.type}
+                    </div>
+                  </td>
+                  <td data-label="Tier"><TierBadge tier={c.tier} /></td>
+                  <td data-label="Phone" style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, color: "#9aa3b5" }}>{c.phone}</td>
+                  <td data-label="Actions">
+                    <div className="cl-row-acts">
+                      {canEdit && (
+                        <>
+                          <button className="cl-ra" title="Edit" onClick={() => setEditing(c)}><Edit2 size={13} /></button>
+                          <button className="cl-ra" title="Archive" onClick={() => setConfirm({ ids: [c.id], type: "archive" })}><Archive size={13} /></button>
+                          <button className="cl-ra red" title="Delete" onClick={() => setConfirm({ ids: [c.id], type: "delete" })}><Trash2 size={13} /></button>
+                        </>
+                      )}
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {paged.length === 0 ? (
-                  <tr><td colSpan={6} className="cl-empty">No clients match your filters</td></tr>
-                ) : paged.map((c, i) => (
-                  <tr key={c.id}
-                    className={`cl-row${selected.has(c.id) ? " sel" : ""}${c.active === false ? " archived" : ""}`}
-                    style={{ animationDelay: `${i * 22}ms` }}>
-                    <td style={{ paddingLeft: 20, width: 44 }} onClick={e => e.stopPropagation()}>
-                      <input type="checkbox" className="cl-chk" checked={selected.has(c.id)} onChange={() => toggleSel(c.id)} />
-                    </td>
-                    <td>
-                      <div className="cl-cell">
-                        <Avatar name={c.name} type={c.type} />
-                        <div>
-                          <div className="cl-nm">{c.name}</div>
-                          {c.active === false && <span className="cl-arch-tag">Archived</span>}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="cl-type">
-                        {c.type === "Corporate" ? <Building2 size={13} color="#6c72f3" /> : <User size={13} color="#556070" />}
-                        {c.type}
-                      </div>
-                    </td>
-                    <td><TierBadge tier={c.tier} /></td>
-                    <td style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, color: "#9aa3b5" }}>{c.phone}</td>
-                    <td>
-                      <div className="cl-row-acts">
-                        <button className="cl-ra" title="Edit"    onClick={() => setEditing(c)}><Edit2 size={13} /></button>
-                        <button className="cl-ra" title="Archive" onClick={() => setConfirm({ ids: [c.id], type: "archive" })}><Archive size={13} /></button>
-                        <button className="cl-ra red" title="Delete" onClick={() => setConfirm({ ids: [c.id], type: "delete" })}><Trash2 size={13} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        {/* Pagination */}
         <div className="cl-pag">
           <span className="cl-pag-info">
             {filtered.length === 0 ? "No results"
@@ -799,3 +818,5 @@ export const Clients = () => {
     </div>
   );
 };
+
+export default Clients;

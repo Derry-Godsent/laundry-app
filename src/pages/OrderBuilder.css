@@ -1,0 +1,711 @@
+/* OrderBuilder Styles - Chapman Prestige Limited */
+
+.ob-root {
+  background: #07090e;
+  min-height: 100vh;
+  font-family: 'DM Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #edf0f8;
+}
+
+/* ── Header ────────────────────────────────────── */
+.ob-header {
+  background: #0c0f18;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 20px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ob-header-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.ob-header-sub {
+  font-size: 12px;
+  color: #556070;
+}
+
+.ob-submit-btn {
+  padding: 10px 24px;
+  background: #6c72f3;
+  border: none;
+  border-radius: 9px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s ease;
+}
+
+.ob-submit-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.ob-submit-btn:disabled {
+  background: #2e3a4e;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ── Layout ────────────────────────────────────── */
+.ob-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  padding: 24px 32px;
+  align-items: start;
+}
+
+/* ── Panel ─────────────────────────────────────── */
+.ob-panel {
+  background: #111520;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.ob-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Inputs ────────────────────────────────────── */
+.ob-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #0c0f18;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  color: #edf0f8;
+  font-size: 14px;
+  outline: none;
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ob-input:focus {
+  border-color: #6c72f3;
+  box-shadow: 0 0 0 3px rgba(108, 114, 243, 0.13);
+}
+
+.ob-input::placeholder {
+  color: #2e3a4e;
+}
+
+.ob-input-search {
+  padding-left: 36px;
+}
+
+.ob-input-number {
+  font-family: 'DM Mono', 'Fira Mono', ui-monospace, monospace;
+  text-align: right;
+}
+
+
+
+/* ── Date Input ────────────────────────────────── */
+.ob-date-label {
+  font-size: 11px;
+  color: #556070;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ob-date-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ob-date-text {
+  flex: 1;
+  padding-right: 40px;
+  cursor: text;
+}
+
+.ob-date-picker {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.ob-date-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #556070;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.ob-date-wrap:hover .ob-date-icon {
+  color: #6c72f3;
+}
+
+.ob-date-wrap:focus-within .ob-date-icon {
+  color: #6c72f3;
+}
+
+/* Webkit date picker icon */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 40px;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Firefox date picker */
+input[type="date"]::-moz-calendar-picker-indicator {
+  width: 40px;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ob-textarea {
+  resize: none;
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+}
+
+.ob-select {
+  background: #0c0f18;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: #edf0f8;
+  font-size: 12px;
+  outline: none;
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+}
+
+/* ── Search Icon ───────────────────────────────── */
+.ob-search-wrap {
+  position: relative;
+}
+
+.ob-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #2e3a4e;
+  pointer-events: none;
+}
+
+/* ── Dropdown ──────────────────────────────────── */
+.ob-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #161c2c;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.ob-dropdown-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background-color 0.15s ease;
+}
+
+.ob-dropdown-item:hover,
+.ob-dropdown-item.active {
+  background: rgba(108, 114, 243, 0.1);
+}
+
+.ob-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.ob-dropdown-name {
+  font-weight: 500;
+}
+
+.ob-dropdown-meta {
+  font-size: 11px;
+  color: #556070;
+}
+
+.ob-dropdown-empty {
+  padding: 12px;
+  color: #556070;
+  font-size: 13px;
+}
+
+/* ── Client Info ───────────────────────────────── */
+.ob-client-info {
+  margin-top: 12px;
+  padding: 10px;
+  background: #0c0f18;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.ob-client-phone {
+  color: #9aa3b5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ob-client-tier {
+  padding: 4px 8px;
+  background: rgba(219, 169, 106, 0.1);
+  color: #dba96a;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ── Service List ──────────────────────────────── */
+.ob-service-list {
+  margin-top: 8px;
+  background: #161c2c;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.ob-service-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background-color 0.15s ease;
+}
+
+.ob-service-item:hover {
+  background: rgba(108, 114, 243, 0.08);
+}
+
+.ob-service-item:last-child {
+  border-bottom: none;
+}
+
+.ob-service-name {
+  font-weight: 500;
+}
+
+.ob-service-category {
+  font-size: 11px;
+  color: #556070;
+}
+
+.ob-service-price {
+  font-family: 'DM Mono', monospace;
+  color: #34d399;
+  font-weight: 600;
+}
+
+/* ── Cart ──────────────────────────────────────── */
+.ob-cart-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ob-cart-empty {
+  padding: 40px;
+  text-align: center;
+  color: #556070;
+  font-size: 14px;
+}
+
+.ob-cart-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ob-cart-table th {
+  padding: 12px 16px;
+  text-align: left;
+  color: #556070;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: #0c0f18;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
+}
+
+.ob-cart-table th:last-child {
+  width: 40px;
+}
+
+.ob-cart-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
+}
+
+.ob-cart-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ob-cart-qty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ob-qty-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: #161c2c;
+  border: none;
+  color: #9aa3b5;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.ob-qty-btn:hover {
+  color: #edf0f8;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ob-qty-value {
+  width: 24px;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+}
+
+.ob-cart-price {
+  font-family: 'DM Mono', monospace;
+  color: #9aa3b5;
+}
+
+.ob-cart-total {
+  font-family: 'DM Mono', monospace;
+  font-weight: 600;
+}
+
+.ob-cart-remove {
+  background: transparent;
+  border: none;
+  color: #2e3a4e;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.ob-cart-remove:hover {
+  color: #f87171;
+}
+
+/* ── Options ───────────────────────────────────── */
+.ob-option-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #0c0f18;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ob-option-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.ob-option-label {
+  font-size: 13px;
+  color: #9aa3b5;
+}
+
+.ob-option-hint {
+  font-size: 11px;
+  color: #556070;
+  padding: 4px 12px;
+  background: rgba(219, 169, 106, 0.1);
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.ob-option-input {
+  width: 18px;
+  height: 18px;
+  accent-color: #dba96a;
+  cursor: pointer;
+}
+
+/* ── Totals ────────────────────────────────────── */
+.ob-totals {
+  background: #0c0f18;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ob-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.ob-total-row.secondary {
+  color: #9aa3b5;
+}
+
+.ob-total-row.gold {
+  color: #dba96a;
+}
+
+.ob-total-row.emerald {
+  color: #34d399;
+}
+
+.ob-total-mono {
+  font-family: 'DM Mono', monospace;
+}
+
+.ob-total-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.09);
+  margin: 4px 0;
+}
+
+.ob-total-final {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.ob-total-balance {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ob-total-balance.ember {
+  color: #f87171;
+}
+
+.ob-total-balance.emerald {
+  color: #34d399;
+}
+
+/* ── Toast ─────────────────────────────────────── */
+.ob-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  border-radius: 10px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  animation: obToastIn 0.3s ease both;
+  max-width: 400px;
+}
+
+.ob-toast.error {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.ob-toast.success {
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.ob-toast-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ob-toast.error .ob-toast-text {
+  color: #f87171;
+}
+
+.ob-toast.success .ob-toast-text {
+  color: #34d399;
+}
+
+.ob-toast-close {
+  background: transparent;
+  border: none;
+  color: #9aa3b5;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.ob-toast-close:hover {
+  color: #edf0f8;
+}
+
+/* ── Loading ───────────────────────────────────── */
+.ob-loading {
+  padding: 40px;
+  color: #556070;
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+}
+
+/* ── Animations ────────────────────────────────── */
+@keyframes obToastIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Reduced Motion ────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ob-toast {
+    animation: none;
+  }
+}
+
+/* ── Mobile ────────────────────────────────────── */
+@media (max-width: 900px) {
+  .ob-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .ob-header {
+    padding: 16px;
+  }
+
+  .ob-cart-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ob-cart-table thead,
+  .ob-cart-table tbody,
+  .ob-cart-table th,
+  .ob-cart-table td,
+  .ob-cart-table tr {
+    white-space: nowrap;
+  }
+
+  .ob-input,
+  .ob-select,
+  .ob-textarea {
+    font-size: 16px;
+  }
+
+  .ob-submit-btn,
+  .ob-qty-btn,
+  .ob-cart-remove,
+  .ob-toast-close {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .ob-toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .ob-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .ob-panel {
+    padding: 16px;
+  }
+
+  .ob-cart-table th,
+  .ob-cart-table td {
+    padding: 10px 12px;
+  }
+
+  .ob-total-final {
+    font-size: 16px;
+  }
+}
+
+/* ── Focus / A11y ──────────────────────────────── */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #6c72f3;
+  outline-offset: 2px;
+}
+
+/* ── Scrollbar ─────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.14);
+}

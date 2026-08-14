@@ -14,9 +14,12 @@ import { Security } from "./pages/Security";
 import { Clients } from "./pages/Clients";
 import { Receipt } from "./pages/Receipt";
 import { Login } from "./pages/Login";
+import { Reports } from "./pages/Reports";
 import { SystemAdmin } from "./pages/SystemAdmin";
+import { Profile } from "./pages/Profile";
+import { Help } from "./pages/Help";
 
-// ─── PROTECTED ROUTE WRAPPER ──────────────────────────────────────────────
+/* ─── PROTECTED ROUTE WRAPPER ────────────────────────────────────────────── */
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -35,40 +38,18 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) return <div style={{ padding: 40, color: "#fff", fontFamily: "'DM Sans', sans-serif" }}>Loading...</div>;
-  if (!session) return <Navigate to="/login" replace />;
+  if (loading) {
+    return (
+      <div style={{ 
+        display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", 
+        color: "#9aa3b5", fontFamily: "'DM Sans', sans-serif", background: "#07090e" 
+      }}>
+        Loading...
+      </div>
+    );
+  }
   
-  return <>{children}</>;
-};
-
-// ─── ROLE-BASED ROUTE GUARD (Optional) ────────────────────────────────────
-const RoleGuard = ({ children, allowedRoles }: { children: ReactNode; allowedRoles: string[] }) => {
-  const [role, setRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkRole = async () => {
-      const { data: { session } }: { data: { session: any } } = await supabase.auth.getSession();
-      if (!session) {
-        setLoading(false);
-        return;
-      }
-      
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-      
-      setRole(roleData?.role || session.user.user_metadata?.role || 'staff');
-      setLoading(false);
-    };
-    
-    checkRole();
-  }, []);
-
-  if (loading) return <div style={{ padding: 40, color: "#fff", fontFamily: "'DM Sans', sans-serif" }}>Checking access...</div>;
-  if (!role || !allowedRoles.includes(role)) return <Navigate to="/dashboard" replace />;
+  if (!session) return <Navigate to="/login" replace />;
   
   return <>{children}</>;
 };
@@ -94,6 +75,9 @@ export const router = createBrowserRouter([
       { path: "clients", element: <Clients /> },
       { path: "receipt", element: <Receipt /> },
       { path: "system", element: <SystemAdmin /> },
+      { path: "profile", element: <Profile /> },
+      { path: "reports", element: <Reports /> },
+      { path: "help", element: <Help /> },
     ],
   },
   { path: "*", element: <Navigate to="/dashboard" replace /> }, 

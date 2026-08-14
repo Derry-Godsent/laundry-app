@@ -1,4 +1,4 @@
-/* ─── BREADCRUMB LAYOUT ─────────────────────────────── */
+/* Breadcrumb layout */
 .breadcrumbs {
   display: flex;
   align-items: center;
@@ -7,9 +7,12 @@
   font-weight: 500;
   color: #8b8f99;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
-.breadcrumbs::-webkit-scrollbar { display: none; }
+
+.breadcrumbs::-webkit-scrollbar {
+  display: none;
+}
 
 .breadcrumb-item {
   display: flex;
@@ -27,7 +30,7 @@
   text-decoration: none;
   padding: 4px 6px;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
 .breadcrumb-link:hover {
@@ -36,14 +39,21 @@
   transform: translateY(-1px);
 }
 
+.breadcrumb-link:active {
+  transform: translateY(0);
+}
+
 .breadcrumb-link:focus-visible {
   outline: 2px solid #6366f1;
   outline-offset: 2px;
 }
 
-.home-link { padding: 4px; margin-right: -2px; }
+.home-link {
+  padding: 4px;
+  margin-right: -2px;
+}
 
-/* Current Page Indicator */
+/* Current page indicator */
 .breadcrumb-current {
   color: #ffffff;
   font-weight: 600;
@@ -51,40 +61,39 @@
   border-radius: 6px;
   background: rgba(99, 102, 241, 0.1);
   border: 1px solid rgba(99, 102, 241, 0.2);
-  transition: all 0.2s ease;
 }
 
 /* Separators */
 .breadcrumb-separator {
   color: #2d3140;
   flex-shrink: 0;
-  transition: color 0.2s ease;
 }
 
-.breadcrumb-item:hover .breadcrumb-separator {
-  color: #4a4f60;
-}
-
-/* ─── MOBILE RESPONSIVE ─────────────────────────────── */
+/* Mobile responsive */
 @media (max-width: 768px) {
   .breadcrumbs {
     font-size: 12px;
     gap: 4px;
   }
-  .breadcrumb-link, .breadcrumb-current {
+  .breadcrumb-link,
+  .breadcrumb-current {
     padding: 3px 5px;
   }
 }
 
 @media (max-width: 480px) {
-  .topbar-left { min-width: 0; }
-  .breadcrumbs { max-width: 100%; }
+  .breadcrumbs {
+    max-width: 100%;
+  }
 }
 
-/* ─── ACCESSIBILITY & REDUCED MOTION ────────────────── */
+/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  .breadcrumb-link, .breadcrumb-current, .breadcrumb-separator {
-    transition: none !important;
-    transform: none !important;
+  .breadcrumb-link {
+    transition: none;
+  }
+  .breadcrumb-link:hover,
+  .breadcrumb-link:active {
+    transform: none;
   }
 }

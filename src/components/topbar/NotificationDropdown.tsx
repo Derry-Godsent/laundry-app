@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Bell, Check, X } from "lucide-react";
+import { Bell, Check, X, CheckCircle, Info, AlertTriangle, AlertCircle } from "lucide-react";
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
@@ -16,10 +16,11 @@ const CSS = `
   color: #556070;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
-  transition: all 0.18s;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 .nd-bell:hover { background: rgba(255,255,255,0.07); color: #9aa3b5; border-color: rgba(255,255,255,0.11); }
 .nd-bell.open  { background: rgba(108,114,243,0.12); color: #6c72f3; border-color: rgba(108,114,243,0.3); }
+.nd-bell:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* Unread badge */
 .nd-badge {
@@ -31,6 +32,15 @@ const CSS = `
   display: flex; align-items: center; justify-content: center;
   border: 2px solid #07090e;
   animation: ndPop 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+.nd-badge.pulse {
+  animation: ndPop 0.3s cubic-bezier(0.4,0,0.2,1), ndPulse 2s infinite;
+}
+
+@keyframes ndPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
 }
 
 /* Panel */
@@ -68,6 +78,7 @@ const CSS = `
   transition: color 0.15s; padding: 0;
 }
 .nd-mark-all:hover { color: #9aa3b5; }
+.nd-mark-all:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* List */
 .nd-list { max-height: 320px; overflow-y: auto; }
@@ -90,7 +101,7 @@ const CSS = `
   padding: 12px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background-color 0.15s ease;
   animation: ndRowIn 0.3s cubic-bezier(0.4,0,0.2,1) both;
   position: relative;
 }
@@ -108,7 +119,7 @@ const CSS = `
 .nd-ico {
   width: 34px; height: 34px; border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; flex-shrink: 0;
+  flex-shrink: 0;
 }
 
 .nd-content { flex: 1; min-width: 0; }
@@ -129,7 +140,7 @@ const CSS = `
 .nd-item-acts {
   display: flex; align-items: center; gap: 4px;
   flex-shrink: 0; opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s ease;
 }
 .nd-item:hover .nd-item-acts { opacity: 1; }
 .nd-act-btn {
@@ -138,10 +149,11 @@ const CSS = `
   background: rgba(255,255,255,0.04);
   color: #9aa3b5; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 .nd-act-btn:hover { background: rgba(255,255,255,0.1); color: #edf0f8; }
 .nd-act-btn.dismiss:hover { background: rgba(248,113,113,0.12); color: #f87171; border-color: rgba(248,113,113,0.2); }
+.nd-act-btn:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* Unread dot */
 .nd-unread-dot {
@@ -161,13 +173,27 @@ const CSS = `
   border-radius: 8px;
   color: #556070; font-size: 12.5px; font-weight: 600;
   cursor: pointer; font-family: 'Outfit', sans-serif;
-  transition: all 0.18s;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 .nd-view-all:hover { background: rgba(255,255,255,0.06); color: #9aa3b5; }
+.nd-view-all:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 @keyframes ndSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes ndPop     { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 @keyframes ndRowIn   { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: translateX(0); } }
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .nd-bell, .nd-act-btn, .nd-view-all, .nd-mark-all {
+    transition: none;
+  }
+  .nd-panel, .nd-item, .nd-badge {
+    animation: none;
+  }
+  .nd-badge.pulse {
+    animation: none;
+  }
+}
 `;
 
 interface Notification {
@@ -183,40 +209,61 @@ interface NotificationDropdownProps {
   notifications: Notification[];
   unreadCount: number;
   onMarkRead: (id?: string | number) => void;
+  onMarkAllRead?: () => void;
+  onViewAll?: () => void;
+  pulseBadge?: boolean;
 }
 
-const TYPE_META: Record<string, { color: string; bg: string; emoji: string }> = {
-  success: { color: "#34d399", bg: "rgba(52,211,153,0.12)",  emoji: "✅" },
-  info:    { color: "#6c72f3", bg: "rgba(108,114,243,0.12)", emoji: "📋" },
-  warning: { color: "#dba96a", bg: "rgba(219,169,106,0.12)", emoji: "⚠️" },
-  error:   { color: "#f87171", bg: "rgba(248,113,113,0.12)", emoji: "🔴" },
+const TYPE_META: Record<string, { color: string; bg: string; icon: React.ElementType }> = {
+  success: { color: "#34d399", bg: "rgba(52,211,153,0.12)",  icon: CheckCircle },
+  info:    { color: "#6c72f3", bg: "rgba(108,114,243,0.12)", icon: Info },
+  warning: { color: "#dba96a", bg: "rgba(219,169,106,0.12)", icon: AlertTriangle },
+  error:   { color: "#f87171", bg: "rgba(248,113,113,0.12)", icon: AlertCircle },
 };
 
 export const NotificationDropdown = ({
   notifications,
   unreadCount,
   onMarkRead,
+  onMarkAllRead,
+  onViewAll,
+  pulseBadge = false,
 }: NotificationDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const h = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
     };
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === "Escape") setIsOpen(false); };
-    window.addEventListener("keydown", h);
-    return () => window.removeEventListener("keydown", h);
+    const handleEscape = (e: KeyboardEvent) => { if (e.key === "Escape") setIsOpen(false); };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
   }, []);
 
   const handleDismiss = (id: string | number, e: React.MouseEvent) => {
     e.stopPropagation();
     onMarkRead(id);
+  };
+
+  const handleMarkAllRead = () => {
+    if (onMarkAllRead) {
+      onMarkAllRead();
+    } else {
+      onMarkRead();
+    }
+  };
+
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    }
+    setIsOpen(false);
   };
 
   return (
@@ -231,7 +278,9 @@ export const NotificationDropdown = ({
       >
         <Bell size={16} />
         {unreadCount > 0 && (
-          <span className="nd-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+          <span className={`nd-badge ${pulseBadge ? "pulse" : ""}`}>
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
         )}
       </button>
 
@@ -245,7 +294,7 @@ export const NotificationDropdown = ({
               {unreadCount > 0 && <span className="nd-unread-chip">{unreadCount} new</span>}
             </span>
             {unreadCount > 0 && (
-              <button className="nd-mark-all" onClick={() => onMarkRead()} aria-label="Mark all as read">
+              <button className="nd-mark-all" onClick={handleMarkAllRead} aria-label="Mark all as read">
                 Mark all read
               </button>
             )}
@@ -261,6 +310,7 @@ export const NotificationDropdown = ({
             ) : (
               notifications.map((n, i) => {
                 const meta = TYPE_META[n.type] ?? TYPE_META.info;
+                const IconComponent = meta.icon;
                 return (
                   <div
                     key={n.id}
@@ -270,7 +320,9 @@ export const NotificationDropdown = ({
                     role="listitem"
                   >
                     <div className="nd-strip" style={{ background: meta.color }} />
-                    <div className="nd-ico" style={{ background: meta.bg }}>{meta.emoji}</div>
+                    <div className="nd-ico" style={{ background: meta.bg }}>
+                      <IconComponent size={16} color={meta.color} />
+                    </div>
                     <div className="nd-content">
                       <div className="nd-item-title">{n.title}</div>
                       <div className="nd-item-desc">{n.message}</div>
@@ -295,7 +347,9 @@ export const NotificationDropdown = ({
 
           {notifications.length > 0 && (
             <div className="nd-footer">
-              <button className="nd-view-all">View all notifications</button>
+              <button className="nd-view-all" onClick={handleViewAll}>
+                View all notifications
+              </button>
             </div>
           )}
         </div>

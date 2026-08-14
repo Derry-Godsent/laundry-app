@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search, Plus, X, Check, CreditCard, ArrowUpRight, ArrowDownRight,
@@ -6,15 +7,9 @@ import {
 } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
-import { usePermission } from "../hooks/usePermission"; // ✅ Already present
-import { PermissionGuard } from "../components/PermissionGuard"; // ✅ Already present
+import { usePermission } from "../hooks/usePermission";
+import { PermissionGuard } from "../components/PermissionGuard";
 
-/* ─────────────────────────────────────────────────────────────
-   DESIGN TOKENS
-   A "ledger" palette — near-black base with an inked-emerald
-   surface tint, warm brass for money-in-motion, and a violet
-   accent reserved for interactive/focus states only.
-───────────────────────────────────────────────────────────── */
 const T = {
   bgBase:      "#05060a",
   bgSurface:   "#0a0c13",
@@ -52,17 +47,10 @@ const T = {
   emberBord:   "rgba(251,118,118,0.24)",
 };
 
-// ✅ System font stack (no custom fonts)
 const FONT    = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 const MONO    = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace";
 const DISPLAY = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
 
-// ❌ REMOVED: const TRANSACTIONS = [...] — no more generic data
-
-/* ─────────────────────────────────────────────────────────────
-   GLOBAL STYLE — keyframes, responsive rules, focus states.
-   Kept in one <style> block so this stays a single file.
-───────────────────────────────────────────────────────────── */
 const GlobalStyle = () => (
   <style>{`
     @keyframes fadeInUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
@@ -106,10 +94,9 @@ const GlobalStyle = () => (
     .pay-close-btn:hover { background:${T.emberDim}; border-color:${T.emberBord}; color:${T.ember}; transform:rotate(90deg); }
 
     .pay-skeleton { background:linear-gradient(90deg, ${T.bgElevated} 0%, rgba(255,255,255,0.06) 50%, ${T.bgElevated} 100%); background-size:800px 100%; animation:shimmer 1.6s infinite linear; }
-
     .pay-orb { animation:drift 14s ease-in-out infinite; }
-
     .pay-cards-view { display:none; }
+
     @media (max-width: 880px) {
       .pay-table-view { display:none; }
       .pay-cards-view { display:flex; }
@@ -121,13 +108,10 @@ const GlobalStyle = () => (
     @media (max-width: 520px) {
       .pay-stats-grid { grid-template-columns:1fr !important; }
     }
-
     @media (prefers-reduced-motion: reduce) {
       .pay-row, .pay-card, .pay-stat, .pay-orb { animation:none !important; }
       .pay-primary-btn:hover, .pay-filter-btn:hover { transform:none !important; }
     }
-
-    /* ✅ MOBILE TWEAKS (added only) */
     @media (max-width: 480px) {
       .pay-header-row { padding: 16px !important; }
       .pay-controls-row { padding: 12px 16px !important; flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
@@ -139,7 +123,6 @@ const GlobalStyle = () => (
   `}</style>
 );
 
-/* ─── Small hook: animate a number counting up when it changes ─── */
 const useCountUp = (target: number, duration = 700) => {
   const [value, setValue] = useState(0);
   const prevTarget = useRef(0);
@@ -157,12 +140,10 @@ const useCountUp = (target: number, duration = 700) => {
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target]);
   return value;
 };
 
-/* ─── Hook: real browser connectivity, not a guess ─── */
 const useOnlineStatus = () => {
   const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
   useEffect(() => {
@@ -178,33 +159,74 @@ const useOnlineStatus = () => {
   return isOnline;
 };
 
-/* ─── PAYMENT MODAL ────────────────────────────────────────── */
-const PaymentModal = ({ onClose, onSave }: { onClose: () => void; onSave: (data: any) => void }) => {
-  const [orderId, setOrderId] = useState("");
+const Toast = ({ msg, type, onClose }: { msg: string; type: 'success' | 'error'; onClose: () => void }) => {
+  useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
+  return (
+    <div style={{ position:"fixed", bottom:24, right:24, zIndex:100000,
+      background: type==='error' ? T.emberDim : T.emeraldDim,
+      border:`1px solid ${type==='error' ? T.emberBord : T.emeraldBord}`,
+      borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12,
+      boxShadow:"0 14px 36px rgba(0,0,0,0.45)", animation: "fadeInUp 0.3s ease both" }}>
+      {type==='error' ? <AlertCircle size={15} color={T.ember}/> : <Check size={15} color={T.emerald}/>}
+      <span style={{ fontSize:14, color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
+      <button onClick={onClose} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><X size={14}/></button>
+    </div>
+  );
+};
+
+const PaymentModal = ({ onClose, onSave, outstandingOrders }: { 
+  onClose: () => void; 
+  onSave: (data: any) => void;
+  outstandingOrders: any[];
+}) => {
+  const [selectedOrderId, setSelectedOrderId] = useState("");
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("Cash");
   const [ref, setRef] = useState("");
-  const [touched, setTouched] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const isValid = Boolean(orderId && amount);
+  const selectedOrder = outstandingOrders.find(o => o.orderId === selectedOrderId);
+
+  useEffect(() => {
+    if (selectedOrder) {
+      setAmount(String(selectedOrder.balance));
+    } else {
+      setAmount("");
+    }
+  }, [selectedOrder]);
+
+  useEffect(() => {
+    const originalBody = document.body.style.overflow;
+    const originalHtml = document.documentElement.style.overflow;
+    const mainBody = document.querySelector('.main-body') as HTMLElement;
+    const originalMainBody = mainBody ? mainBody.style.overflow : '';
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    if (mainBody) mainBody.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = originalBody;
+      document.documentElement.style.overflow = originalHtml;
+      if (mainBody) mainBody.style.overflow = originalMainBody;
+    };
+  }, []);
 
   const handleSave = async () => {
-    setTouched(true);
-    if (!orderId || !amount) return;
+    if (!selectedOrderId || !amount) return;
     setSaving(true);
-    await onSave({ orderId, amount: Number(amount), method, ref });
+    await onSave({ orderId: selectedOrderId, amount: Number(amount), method, ref, total: selectedOrder.total });
     setSaving(false);
-    onClose();
   };
 
-  return (
+  return createPortal(
     <div
       style={{
-        position: "fixed", inset: 0, zIndex: 9999,
-        background: "rgba(4,6,12,0.78)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)",
-        display: "flex", alignItems: "center", justifyContent: "center", padding: "20px",
+        position: "fixed", inset: 0, zIndex: 99999,
+        background: "rgba(4,6,12,0.85)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+        display: "flex", alignItems: "center", justifyContent: "center", // ✅ Centered perfectly
         animation: "fadeIn 0.2s ease both",
+        overscrollBehavior: "none",
       }}
       onClick={onClose}
     >
@@ -212,8 +234,9 @@ const PaymentModal = ({ onClose, onSave }: { onClose: () => void; onSave: (data:
         onClick={(e) => e.stopPropagation()}
         style={{
           background: `linear-gradient(180deg, ${T.bgElevated} 0%, ${T.bgRaised} 100%)`,
-          border: `1px solid ${T.borderMid}`, borderRadius: 18, width: 480, maxWidth: "94vw",
-          display: "flex", flexDirection: "column", overflow: "hidden",
+          border: `1px solid ${T.borderMid}`, borderRadius: 18, width: 520, maxWidth: "94vw",
+          maxHeight: "85vh", overflowY: "auto",
+          display: "flex", flexDirection: "column",
           boxShadow: "0 30px 80px -20px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.02)",
           animation: "scaleIn 0.25s cubic-bezier(.2,.8,.2,1) both",
         }}
@@ -222,10 +245,11 @@ const PaymentModal = ({ onClose, onSave }: { onClose: () => void; onSave: (data:
           padding: "22px 26px", borderBottom: `1px solid ${T.borderFaint}`,
           display: "flex", justifyContent: "space-between", alignItems: "center",
           background: `linear-gradient(135deg, ${T.emeraldDim}, transparent 60%)`,
+          position: "sticky", top: 0, zIndex: 2,
         }}>
           <div>
             <div style={{ fontSize: 18, fontWeight: 700, color: T.textPrimary, fontFamily: DISPLAY, letterSpacing: "-0.01em" }}>Record Payment</div>
-            <div style={{ fontSize: 11.5, color: T.textTert, marginTop: 4, fontFamily: FONT }}>Add a payment against an outstanding order</div>
+            <div style={{ fontSize: 11.5, color: T.textTert, marginTop: 4, fontFamily: FONT }}>Select an outstanding order to pay</div>
           </div>
           <button className="pay-close-btn" onClick={onClose} style={{ width: 32, height: 32, borderRadius: 9, border: `1px solid ${T.borderSoft}`, background: "transparent", color: T.textSec, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <X size={15} />
@@ -234,20 +258,45 @@ const PaymentModal = ({ onClose, onSave }: { onClose: () => void; onSave: (data:
 
         <div style={{ padding: "24px 26px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Order ID</div>
-            <input
-              className="pay-input"
-              value={orderId}
-              onChange={(e) => setOrderId(e.target.value)}
-              placeholder="e.g. CPL-ORD-012"
-              style={{
-                width: "100%", padding: "11px 13px", background: T.bgSurface,
-                border: `1px solid ${touched && !orderId ? T.emberBord : T.borderMid}`,
-                borderRadius: 9, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT,
-                transition: "border-color .16s ease, box-shadow .16s ease",
-              }}
-            />
+            <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Select Order</div>
+            <select
+              className="pay-select"
+              value={selectedOrderId}
+              onChange={(e) => setSelectedOrderId(e.target.value)}
+              style={{ width: "100%", padding: "11px 13px", background: T.bgSurface, border: `1px solid ${T.borderMid}`, borderRadius: 9, color: T.textPrimary, fontSize: 13.5, outline: "none", fontFamily: FONT, transition: "border-color .16s ease, box-shadow .16s ease" }}
+            >
+              <option value="">Choose an order with a balance...</option>
+              {outstandingOrders.map(o => (
+                <option key={o.orderId} value={o.orderId}>
+                  {o.orderId} — {o.client} (Balance: ₵{o.balance})
+                </option>
+              ))}
+            </select>
           </div>
+
+          {selectedOrder && (
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 10, color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Client</div>
+                <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textPrimary, fontSize: 14, fontFamily: FONT, fontWeight: 500 }}>
+                  {selectedOrder.client}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Total Due</div>
+                <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textPrimary, fontSize: 14, fontFamily: MONO, fontWeight: 600 }}>
+                  ₵{selectedOrder.total}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Remaining</div>
+                <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.emberBord}`, borderRadius: 9, color: T.ember, fontSize: 14, fontFamily: MONO, fontWeight: 600 }}>
+                  ₵{selectedOrder.balance}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
               <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Amount (GH₵)</div>
@@ -259,7 +308,7 @@ const PaymentModal = ({ onClose, onSave }: { onClose: () => void; onSave: (data:
                 placeholder="0.00"
                 style={{
                   width: "100%", padding: "11px 13px", background: T.bgSurface,
-                  border: `1px solid ${touched && !amount ? T.emberBord : T.borderMid}`,
+                  border: `1px solid ${T.borderMid}`,
                   borderRadius: 9, color: T.gold, fontSize: 14.5, outline: "none", fontFamily: MONO, fontWeight: 600,
                   transition: "border-color .16s ease, box-shadow .16s ease",
                 }}
@@ -281,7 +330,7 @@ const PaymentModal = ({ onClose, onSave }: { onClose: () => void; onSave: (data:
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Reference / Note</div>
+            <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Reference / Note (Optional)</div>
             <input
               className="pay-input"
               value={ref}
@@ -292,18 +341,18 @@ const PaymentModal = ({ onClose, onSave }: { onClose: () => void; onSave: (data:
           </div>
         </div>
 
-        <div style={{ padding: "16px 26px", borderTop: `1px solid ${T.borderFaint}`, display: "flex", justifyContent: "flex-end", gap: 10 }}>
+        <div style={{ padding: "16px 26px", borderTop: `1px solid ${T.borderFaint}`, display: "flex", justifyContent: "flex-end", gap: 10, position: "sticky", bottom: 0, background: T.bgRaised }}>
           <button onClick={onClose} className="pay-ghost-btn" style={{ padding: "9px 20px", background: "transparent", border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textSec, fontSize: 13.5, fontWeight: 500, cursor: "pointer", fontFamily: FONT }}>
             Cancel
           </button>
           <button
             onClick={handleSave}
             className="pay-primary-btn"
-            disabled={saving}
+            disabled={saving || !selectedOrderId || !amount}
             style={{
               padding: "9px 22px", background: T.emerald, border: "none", borderRadius: 9, color: "#03261a",
-              fontSize: 13.5, fontWeight: 700, cursor: saving ? "default" : "pointer", display: "flex", alignItems: "center", gap: 8,
-              fontFamily: FONT, opacity: saving ? 0.75 : 1,
+              fontSize: 13.5, fontWeight: 700, cursor: saving || !selectedOrderId || !amount ? "default" : "pointer", display: "flex", alignItems: "center", gap: 8,
+              fontFamily: FONT, opacity: saving || !selectedOrderId || !amount ? 0.75 : 1,
             }}
           >
             {saving ? <RefreshCw size={14} className="pay-orb" style={{ animation: "spin 0.8s linear infinite" }} /> : <Check size={14} />}
@@ -311,21 +360,15 @@ const PaymentModal = ({ onClose, onSave }: { onClose: () => void; onSave: (data:
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
-/* ─── STAT CARD ─────────────────────────────────────────────── */
-const StatCard = ({ label, value, prefix = "", icon, accentColor, delay, isCurrency = true }: any) => {
+const StatCard = ({ label, value, prefix = "", icon, delay, isCurrency = true }: any) => {
   const animated = useCountUp(value);
   return (
-    <div
-      className="pay-stat"
-      style={{
-        padding: "18px 26px", display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-        animationDelay: `${delay}ms`, position: "relative", overflow: "hidden",
-      }}
-    >
+    <div className="pay-stat" style={{ padding: "18px 26px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", animationDelay: `${delay}ms`, position: "relative", overflow: "hidden" }}>
       <div>
         <div style={{ fontSize: 10.5, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>{label}</div>
         <div style={{ fontSize: 27, fontWeight: 600, color: T.textPrimary, letterSpacing: "-0.03em", lineHeight: 1, marginTop: 8, fontFamily: DISPLAY }}>
@@ -339,61 +382,45 @@ const StatCard = ({ label, value, prefix = "", icon, accentColor, delay, isCurre
   );
 };
 
-/* ─── CONNECTIVITY BANNER ───────────────────────────────────── */
 const ConnectivityBanner = ({ isOnline, syncError, onRetry }: { isOnline: boolean; syncError: string | null; onRetry: () => void }) => {
   if (isOnline && !syncError) return null;
   const offline = !isOnline;
   return (
-    <div
-      style={{
-        margin: "0 32px", marginTop: 16, padding: "12px 16px", borderRadius: 10,
-        background: offline ? T.emberDim : T.goldDim,
-        border: `1px solid ${offline ? T.emberBord : T.goldBord}`,
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-        animation: "slideBanner 0.3s ease both", fontFamily: FONT,
-      }}
-    >
+    <div style={{ margin: "0 32px", marginTop: 16, padding: "12px 16px", borderRadius: 10, background: offline ? T.emberDim : T.goldDim, border: `1px solid ${offline ? T.emberBord : T.goldBord}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, animation: "slideBanner 0.3s ease both", fontFamily: FONT }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         {offline ? <WifiOff size={16} color={T.ember} /> : <CloudOff size={16} color={T.gold} />}
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: offline ? T.ember : T.gold }}>
-            {offline ? "You're offline" : "Couldn't reach the server"}
-          </div>
-          <div style={{ fontSize: 12, color: T.textSec, marginTop: 1 }}>
-            {offline
-              ? "Showing cached data from this session. Changes made now won't be saved until you're back online."
-              : "Showing cached data — this list may not reflect the latest payments."}
-          </div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: offline ? T.ember : T.gold }}>{offline ? "You're offline" : "Couldn't reach the server"}</div>
+          <div style={{ fontSize: 12, color: T.textSec, marginTop: 1 }}>{offline ? "Showing cached data from this session." : "Showing cached data — list may not reflect latest payments."}</div>
         </div>
       </div>
-      <button
-        onClick={onRetry}
-        className="pay-ghost-btn"
-        style={{ padding: "7px 14px", background: "transparent", border: `1px solid ${offline ? T.emberBord : T.goldBord}`, borderRadius: 8, color: offline ? T.ember : T.gold, fontSize: 12.5, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0, fontFamily: FONT }}
-      >
+      <button onClick={onRetry} className="pay-ghost-btn" style={{ padding: "7px 14px", background: "transparent", border: `1px solid ${offline ? T.emberBord : T.goldBord}`, borderRadius: 8, color: offline ? T.ember : T.gold, fontSize: 12.5, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0, fontFamily: FONT }}>
         <RefreshCw size={12.5} /> Retry
       </button>
     </div>
   );
 };
 
-/* ─── MAIN COMPONENT ────────────────────────────────────────── */
 export const Payments = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [transactions, setTransactions] = useState<any[]>([]); // ✅ Start empty, no mock
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [showModal, setShowModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // ✅ Start loading
+  const [isLoading, setIsLoading] = useState(true);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  
   const isOnline = useOnlineStatus();
-
-  // ✅ Permission hook for guard
   const { permission, loading: permLoading, canEdit } = usePermission(location.pathname);
 
-  /* ─── SUPABASE: Fetch ONLY — NO FALLBACK ───────────────────── */
+  const showToast = (msg: string, type: 'success' | 'error') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
   const fetchFromSupabase = useCallback(async () => {
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       setIsLoading(false);
@@ -405,24 +432,12 @@ export const Payments = () => {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select(`
-          id,
-          order_id,
-          total_due,
-          amount_paid,
-          status,
-          created_at,
-          clients ( name )
-        `)
+        .select(`id, order_id, total_due, amount_paid, status, created_at, clients ( name )`)
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) {
-        console.error('Supabase payments fetch error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // Map real data ONLY — no mock fallback
       if (data && data.length > 0) {
         const mapped = (data || []).map((o: any) => {
           const paymentStatus = o.amount_paid >= o.total_due ? 'Paid' : o.amount_paid > 0 ? 'Partial' : 'Pending';
@@ -437,34 +452,26 @@ export const Payments = () => {
             balance: Number(o.total_due - o.amount_paid) || 0,
             status: paymentStatus,
             method: methodMap[o.payment_method || 'Cash'] || 'Cash',
-            date: new Date(o.created_at).toISOString().split('T')[0],
+            date: o.created_at ? new Date(o.created_at).toISOString().split('T')[0] : 'N/A',
             ref: o.payment_ref || '-',
           };
         });
         setTransactions(mapped);
       } else {
-        // ✅ Supabase returned empty — show true empty state
         setTransactions([]);
       }
       setLastSynced(new Date());
     } catch (err: any) {
       console.error('Payments fetch failed:', err);
       setSyncError('error');
-      setTransactions([]); // ✅ Clear any old data on error
+      setTransactions([]);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  /* ─── SUPABASE: Fetch on mount ───────────────────────────────────────────── */
-  useEffect(() => {
-    fetchFromSupabase();
-  }, [fetchFromSupabase]);
-
-  /* Re-sync automatically the moment connectivity returns */
-  useEffect(() => {
-    if (isOnline) fetchFromSupabase();
-  }, [isOnline, fetchFromSupabase]);
+  useEffect(() => { fetchFromSupabase(); }, [fetchFromSupabase]);
+  useEffect(() => { if (isOnline) fetchFromSupabase(); }, [isOnline, fetchFromSupabase]);
 
   const filtered = useMemo(() => {
     return transactions.filter(t => {
@@ -474,6 +481,8 @@ export const Payments = () => {
     });
   }, [transactions, search, statusFilter]);
 
+  const outstandingOrders = useMemo(() => transactions.filter(t => t.balance > 0), [transactions]);
+
   const stats = {
     totalCollected: transactions.reduce((a, t) => a + t.paid, 0),
     outstanding: transactions.reduce((a, t) => a + t.balance, 0),
@@ -481,36 +490,35 @@ export const Payments = () => {
     pending: transactions.filter(t => t.status === "Pending").length,
   };
 
-  /* ─── SUPABASE: Add Payment ────────────────────────────────────────────── */
   const addPayment = async (data: any) => {
-    // Update the order in Supabase
-    const { error } = await supabase
-      .from('orders')
-      .update({
-        amount_paid: data.amount,
-        payment_method: data.method,
-        payment_ref: data.ref,
-        status: data.amount >= data.total ? 'Delivered' : 'Pending'
-      })
-      .eq('order_id', data.orderId);
+    try {
+      const { data: currentOrder, error: fetchError } = await supabase
+        .from('orders')
+        .select('amount_paid, total_due')
+        .eq('order_id', data.orderId)
+        .single();
 
-    if (error) console.error('Payment update error:', error);
+      if (fetchError || !currentOrder) throw new Error("Order ID not found in database.");
 
-    // Update local state regardless (fallback if Supabase fails)
-    const newTx = {
-      id: `PAY-${String(transactions.length + 1).padStart(3, "0")}`,
-      ...data,
-      client: "New Client",
-      total: data.amount,
-      paid: data.amount,
-      balance: 0,
-      status: "Paid",
-      date: new Date().toISOString().split("T")[0],
-    };
-    setTransactions(prev => [newTx, ...prev]);
+      const existingPaid = Number(currentOrder.amount_paid || 0);
+      const totalDue = Number(currentOrder.total_due || 0);
+      const newPaidAmount = existingPaid + Number(data.amount);
+      const newStatus = newPaidAmount >= totalDue ? 'completed' : 'received';
 
-    // Refresh to reflect changes
-    fetchFromSupabase();
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({ amount_paid: newPaidAmount, status: newStatus })
+        .eq('order_id', data.orderId);
+
+      if (updateError) throw updateError;
+
+      showToast('Payment recorded successfully', 'success');
+      setShowModal(false);
+      fetchFromSupabase();
+    } catch (err: any) {
+      console.error('Payment update error:', err);
+      showToast(`Failed to record payment: ${err.message}`, 'error');
+    }
   };
 
   const statusStyle = (status: string) => {
@@ -529,7 +537,6 @@ export const Payments = () => {
     { label: "Pending Payments", val: stats.pending, prefix: "", icon: <AlertCircle size={18} color={T.accent} />, isCurrency: false },
   ];
 
-  // ✅ Wait for both data AND permissions to load
   if (isLoading || permLoading) return (
     <div className="pay-root" style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary }}>
       <GlobalStyle />
@@ -537,9 +544,7 @@ export const Payments = () => {
         <div style={{ width: 44, height: 44, borderRadius: 12, background: T.bgElevated, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <CreditCard size={22} color={T.accent} className="pay-orb" style={{ animation: "spin 0.8s linear infinite" }} />
         </div>
-        <div style={{ color: T.textTert, fontSize: 13, fontFamily: FONT }}>
-          {isOnline ? "Loading payments…" : "Waiting for connection…"}
-        </div>
+        <div style={{ color: T.textTert, fontSize: 13, fontFamily: FONT }}>{isOnline ? "Loading payments…" : "Waiting for connection…"}</div>
       </div>
     </div>
   );
@@ -547,32 +552,24 @@ export const Payments = () => {
   return (
     <>
       <GlobalStyle />
-      {showModal && <PaymentModal onClose={() => setShowModal(false)} onSave={addPayment} />}
+      {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+      {showModal && <PaymentModal onClose={() => setShowModal(false)} onSave={addPayment} outstandingOrders={outstandingOrders} />}
+      
       <div className="pay-root" style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary, position: "relative", overflow: "hidden" }}>
-
-        {/* Ambient background glow — quiet, slow-drifting, purely atmospheric */}
         <div aria-hidden style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
           <div className="pay-orb" style={{ position: "absolute", top: "-10%", right: "8%", width: 420, height: 420, borderRadius: "50%", background: `radial-gradient(circle, ${T.accentGlow} 0%, transparent 70%)`, opacity: 0.12, filter: "blur(40px)" }} />
           <div className="pay-orb" style={{ position: "absolute", bottom: "-15%", left: "4%", width: 480, height: 480, borderRadius: "50%", background: `radial-gradient(circle, ${T.goldGlow} 0%, transparent 70%)`, opacity: 0.08, filter: "blur(50px)", animationDelay: "3s" }} />
         </div>
 
         <div style={{ position: "relative", zIndex: 1 }}>
-          {/* HEADER */}
           <div className="pay-header-row" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "22px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <div style={{ fontSize: 22, fontWeight: 600, color: T.textPrimary, letterSpacing: "-0.02em", fontFamily: DISPLAY }}>Payments &amp; Balances</div>
               <div style={{ fontSize: 12.5, color: T.textTert, marginTop: 5, fontFamily: FONT, display: "flex", alignItems: "center", gap: 8 }}>
                 Track collections, outstanding balances, and payment history
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 5, marginLeft: 4 }}>
-                  <span style={{
-                    width: 6, height: 6, borderRadius: "50%",
-                    background: isOnline && !syncError ? T.emerald : isOnline ? T.gold : T.ember,
-                    animation: isOnline && !syncError ? "ringPulse 2s infinite" : "pulseDot 1.4s infinite",
-                    color: isOnline && !syncError ? T.emerald : isOnline ? T.gold : T.ember,
-                  }} />
-                  <span style={{ fontSize: 11, color: T.textHint, fontFamily: MONO }}>
-                    {isOnline && !syncError ? "live" : isOnline ? "sync issue" : "offline"}
-                  </span>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: isOnline && !syncError ? T.emerald : isOnline ? T.gold : T.ember, animation: isOnline && !syncError ? "ringPulse 2s infinite" : "pulseDot 1.4s infinite", color: isOnline && !syncError ? T.emerald : isOnline ? T.gold : T.ember }} />
+                  <span style={{ fontSize: 11, color: T.textHint, fontFamily: MONO }}>{isOnline && !syncError ? "live" : isOnline ? "sync issue" : "offline"}</span>
                 </span>
               </div>
             </div>
@@ -580,21 +577,7 @@ export const Payments = () => {
               onClick={() => canEdit && setShowModal(true)} 
               disabled={!canEdit}
               className="pay-primary-btn" 
-              style={{ 
-                padding: "11px 22px", 
-                background: canEdit ? T.emerald : T.bgElevated, 
-                border: canEdit ? "none" : `1px solid ${T.borderSoft}`,
-                borderRadius: 10, 
-                color: canEdit ? "#03261a" : T.textTert, 
-                fontSize: 14, 
-                fontWeight: 600, 
-                cursor: canEdit ? "pointer" : "not-allowed", 
-                display: "flex", 
-                alignItems: "center", 
-                gap: 8, 
-                fontFamily: FONT,
-                opacity: canEdit ? 1 : 0.7
-              }}
+              style={{ padding: "11px 22px", background: canEdit ? T.emerald : T.bgElevated, border: canEdit ? "none" : `1px solid ${T.borderSoft}`, borderRadius: 10, color: canEdit ? "#03261a" : T.textTert, fontSize: 14, fontWeight: 600, cursor: canEdit ? "pointer" : "not-allowed", display: "flex", alignItems: "center", gap: 8, fontFamily: FONT, opacity: canEdit ? 1 : 0.7 }}
             >
               <Plus size={16} /> {canEdit ? "Record Payment" : "View Only"}
             </button>
@@ -602,7 +585,6 @@ export const Payments = () => {
 
           <ConnectivityBanner isOnline={isOnline} syncError={syncError} onRetry={fetchFromSupabase} />
 
-          {/* STATS BAR */}
           <div className="pay-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, marginTop: 16 }}>
             {statCards.map((st, i) => (
               <div key={st.label} style={{ borderRight: i < 3 ? `1px solid ${T.borderFaint}` : "none" }}>
@@ -611,62 +593,35 @@ export const Payments = () => {
             ))}
           </div>
 
-          {/* CONTROLS */}
           <div className="pay-controls-row" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20 }}>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {["All", "Paid", "Partial", "Pending"].map(st => (
-                <button
-                  key={st}
-                  className="pay-filter-btn"
-                  onClick={() => setStatusFilter(st)}
-                  style={{
-                    padding: "7px 15px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: FONT,
-                    border: `1px solid ${statusFilter === st ? T.accentBord : "transparent"}`,
-                    background: statusFilter === st ? T.accentDim : "transparent",
-                    color: statusFilter === st ? "#b3b6fa" : T.textTert,
-                    boxShadow: statusFilter === st ? `0 0 0 1px ${T.accentBord} inset` : "none",
-                  }}
-                >
+                <button key={st} className="pay-filter-btn" onClick={() => setStatusFilter(st)} style={{ padding: "7px 15px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: FONT, border: `1px solid ${statusFilter === st ? T.accentBord : "transparent"}`, background: statusFilter === st ? T.accentDim : "transparent", color: statusFilter === st ? "#b3b6fa" : T.textTert, boxShadow: statusFilter === st ? `0 0 0 1px ${T.accentBord} inset` : "none" }}>
                   {st}
                 </button>
               ))}
             </div>
             <div className="pay-searchbox" style={{ position: "relative", width: 260, border: `1px solid ${T.borderSoft}`, borderRadius: 9, background: T.bgRaised, transition: "border-color .16s ease, box-shadow .16s ease" }}>
               <Search size={14} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: T.textHint, pointerEvents: "none" }} />
-              <input
-                placeholder="Search client or order ID…"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                style={{ width: "100%", padding: "9px 12px 9px 34px", background: "transparent", border: "none", borderRadius: 9, color: T.textPrimary, fontSize: 13.5, outline: "none", fontFamily: FONT }}
-              />
+              <input placeholder="Search client or order ID…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: "100%", padding: "9px 12px 9px 34px", background: "transparent", border: "none", borderRadius: 9, color: T.textPrimary, fontSize: 13.5, outline: "none", fontFamily: FONT }} />
             </div>
           </div>
 
-          {/* CONTENT - Wrapped with PermissionGuard */}
           <PermissionGuard>
             <div style={{ padding: "20px 32px 48px" }}>
               {isLoading ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {[0,1,2,3,4].map(i => (
-                    <div key={i} className="pay-skeleton" style={{ height: 54, borderRadius: 10, border: `1px solid ${T.borderFaint}` }} />
-                  ))}
+                  {[0,1,2,3,4].map(i => <div key={i} className="pay-skeleton" style={{ height: 54, borderRadius: 10, border: `1px solid ${T.borderFaint}` }} />)}
                 </div>
               ) : filtered.length === 0 ? (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "70px 0", gap: 14, color: T.textTert, animation: "fadeIn 0.3s ease both" }}>
                   <div style={{ width: 64, height: 64, borderRadius: "50%", background: T.bgElevated, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <CreditCard size={28} color={T.textHint} />
                   </div>
-                  <span style={{ fontSize: 14, fontFamily: FONT }}>
-                    {syncError 
-                      ? "Connection issue — retry to load payments" 
-                      : transactions.length === 0 
-                        ? "No payments recorded yet" 
-                        : "No transactions match your filters"}
-                  </span>
+                  <span style={{ fontSize: 14, fontFamily: FONT }}>{syncError ? "Connection issue — retry to load payments" : transactions.length === 0 ? "No payments recorded yet" : "No transactions match your filters"}</span>
                 </div>
               ) : (
                 <>
-                  {/* DESKTOP TABLE */}
                   <div className="pay-table-view" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, overflow: "hidden", boxShadow: "0 20px 50px -30px rgba(0,0,0,0.6)" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
                       <thead>
@@ -684,7 +639,7 @@ export const Payments = () => {
                               <td style={{ padding: "16px 20px", fontFamily: MONO, color: T.accent, fontWeight: 500 }}>{t.id}</td>
                               <td style={{ padding: "16px 20px", fontFamily: MONO, color: T.textSec }}>{t.orderId}</td>
                               <td style={{ padding: "16px 20px", fontWeight: 500 }}>{t.client}</td>
-                              <td style={{ padding: "16px 20px", fontFamily: MONO }}>₵{t.total}</td>
+                              <td style={{ padding: "16px 20px", fontFamily: MONO }}>{t.total}</td>
                               <td style={{ padding: "16px 20px", fontFamily: MONO, color: T.emerald }}>₵{t.paid}</td>
                               <td style={{ padding: "16px 20px", fontFamily: MONO, color: t.balance > 0 ? T.ember : T.textTert }}>₵{t.balance}</td>
                               <td style={{ padding: "16px 20px" }}>
@@ -696,11 +651,7 @@ export const Payments = () => {
                               <td style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{t.method}</td>
                               <td style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{t.date}</td>
                               <td style={{ padding: "16px 20px" }}>
-                                <button
-                                  className="pay-receipt-btn"
-                                  style={{ padding: "6px 12px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 7, color: T.textSec, fontSize: 12, cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", gap: 5 }}
-                                  onClick={() => navigate(`/receipt?order=${t.orderId}`)}
-                                >
+                                <button className="pay-receipt-btn" style={{ padding: "6px 12px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 7, color: T.textSec, fontSize: 12, cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", gap: 5 }} onClick={() => navigate(`/receipt?order=${t.orderId}`)}>
                                   View Receipt <ChevronRight size={12} />
                                 </button>
                               </td>
@@ -711,20 +662,11 @@ export const Payments = () => {
                     </table>
                   </div>
 
-                  {/* MOBILE CARD LIST */}
                   <div className="pay-cards-view" style={{ flexDirection: "column", gap: 12 }}>
                     {filtered.map((t, i) => {
                       const s = statusStyle(t.status);
                       return (
-                        <div
-                          key={t.id}
-                          className="pay-card"
-                          style={{
-                            background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, padding: 16,
-                            animationDelay: `${Math.min(i, 10) * 35}ms`,
-                          }}
-                          onClick={() => navigate(`/receipt?order=${t.orderId}`)}
-                        >
+                        <div key={t.id} className="pay-card" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, padding: 16, animationDelay: `${Math.min(i, 10) * 35}ms` }} onClick={() => navigate(`/receipt?order=${t.orderId}`)}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                             <div>
                               <div style={{ fontFamily: MONO, color: T.accent, fontSize: 13, fontWeight: 500 }}>{t.id}</div>

@@ -1,4 +1,4 @@
- .nav-item {
+.nav-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -8,7 +8,7 @@
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   position: relative;
   cursor: pointer;
 }
@@ -20,8 +20,8 @@
 
 .nav-item.active {
   background: rgba(99, 102, 241, 0.15);
-  color: #6c72f3;
-  border: 1px solid rgba(108, 114, 243, 0.3);
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
 .nav-icon {
@@ -40,7 +40,7 @@
 }
 
 .nav-badge {
-  background: #6c72f3;
+  background: #6366f1;
   color: #ffffff;
   font-size: 10px;
   font-weight: 700;
@@ -64,17 +64,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* Collapsed state */
-.nav-item.collapsed {
-  justify-content: center;
-  padding: 12px;
-}
-
-.nav-item.collapsed .nav-label,
-.nav-item.collapsed .nav-badge {
-  display: none;
+  z-index: 1;
 }
 
 /* Focus states */

@@ -1,0 +1,46 @@
+.pg-banner {
+  padding: 10px 14px;
+  background: rgba(219, 169, 106, 0.1);
+  border: 1px solid rgba(219, 169, 106, 0.22);
+  border-radius: 8px;
+  color: #dba96a;
+  font-size: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+.pg-content {
+  position: relative;
+}
+
+.pg-error, .pg-access-denied {
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+@media (max-width: 768px) {
+  .pg-banner, .pg-error, .pg-access-denied {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pg-banner, .pg-error, .pg-access-denied {
+    padding: 10px 12px;
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+}

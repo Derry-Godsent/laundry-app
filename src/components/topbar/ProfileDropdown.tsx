@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { User, Settings, LogOut, HelpCircle, ChevronDown } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../../lib/supabaseClient";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -17,10 +18,11 @@ const CSS = `
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.18s;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
 }
 .pd-trigger:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.11); }
 .pd-trigger.open  { background: rgba(108,114,243,0.08); border-color: rgba(108,114,243,0.25); }
+.pd-trigger:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* Avatar */
 .pd-av {
@@ -28,7 +30,7 @@ const CSS = `
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 700;
   flex-shrink: 0;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s ease;
 }
 .pd-trigger:hover .pd-av, .pd-trigger.open .pd-av {
   box-shadow: 0 0 0 2px rgba(108,114,243,0.4);
@@ -42,7 +44,7 @@ const CSS = `
   max-width: 110px; line-height: 1;
 }
 .pd-role {
-  font-size: 10px; font-weight: 600;
+  font-size: 10px; font-weight: 600; text-transform: capitalize;
   margin-top: 2px; padding: 1px 6px; border-radius: 20px;
   white-space: nowrap;
 }
@@ -50,15 +52,22 @@ const CSS = `
 /* Chevron */
 .pd-chev {
   color: #3a4460; flex-shrink: 0;
-  transition: transform 0.2s, color 0.18s;
+  transition: transform 0.2s ease, color 0.18s ease;
 }
 .pd-trigger.open .pd-chev { transform: rotate(180deg); color: #6c72f3; }
 .pd-trigger:hover .pd-chev { color: #556070; }
 
+/* Mobile: collapse to avatar only */
+@media (max-width: 480px) {
+  .pd-trigger { padding: 4px; gap: 0; }
+  .pd-info { display: none; }
+  .pd-chev { display: none; }
+}
+
 /* Dropdown panel */
 .pd-panel {
   position: absolute; top: calc(100% + 10px); right: 0;
-  width: 230px;
+  width: 230px; max-width: 90vw; /* Prevents overflow on small screens */
   background: #0f1320;
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 14px;
@@ -97,16 +106,17 @@ const CSS = `
   background: transparent; border: none;
   color: #8892a4; font-size: 13px; font-weight: 500;
   cursor: pointer; font-family: 'Outfit', sans-serif;
-  text-align: left;
-  transition: background 0.15s, color 0.15s;
+  text-align: left; text-transform: capitalize;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 .pd-item:hover { background: rgba(255,255,255,0.05); color: #edf0f8; }
+.pd-item:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 .pd-item-ico {
   width: 28px; height: 28px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
   background: rgba(255,255,255,0.04); flex-shrink: 0;
-  transition: background 0.15s;
+  transition: background-color 0.15s ease;
 }
 .pd-item:hover .pd-item-ico { background: rgba(255,255,255,0.08); }
 
@@ -121,31 +131,36 @@ const CSS = `
   color: #556070; font-size: 13px; font-weight: 500;
   cursor: pointer; font-family: 'Outfit', sans-serif;
   text-align: left;
-  transition: background 0.15s, color 0.15s;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 .pd-logout:hover { background: rgba(248,113,113,0.08); color: #f87171; }
+.pd-logout:focus-visible { outline: 2px solid #ef4444; outline-offset: 2px; }
 .pd-logout:hover .pd-logout-ico { background: rgba(248,113,113,0.12); }
 .pd-logout-ico {
   width: 28px; height: 28px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
   background: rgba(255,255,255,0.04); flex-shrink: 0;
-  transition: background 0.15s;
+  transition: background-color 0.15s ease;
 }
 
 @keyframes pdSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pd-trigger, .pd-av, .pd-chev, .pd-item, .pd-logout, .pd-item-ico, .pd-logout-ico { transition: none; }
+  .pd-panel { animation: none; }
+}
 `;
 
 const ROLE_META: Record<string, { color: string }> = {
   admin:      { color: "#6c72f3" },
-  gm:         { color: "#a78bfa" },
   manager:    { color: "#22d3ee" },
+  strategist: { color: "#a78bfa" },
   staff:      { color: "#34d399" },
   courier:    { color: "#dba96a" },
-  strategist: { color: "#f87171" },
 };
 
 interface ProfileDropdownProps {
-  user: any;
+  user: SupabaseUser | null;
   userName: string;
   userRole: string;
   userInitial: string;
@@ -167,17 +182,17 @@ export const ProfileDropdown = ({
   const email    = user?.email ?? "";
 
   useEffect(() => {
-    const h = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
     };
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === "Escape") setIsOpen(false); };
-    window.addEventListener("keydown", h);
-    return () => window.removeEventListener("keydown", h);
+    const handleEscape = (e: KeyboardEvent) => { if (e.key === "Escape") setIsOpen(false); };
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
   }, []);
 
   const handleNavigate = (path: string) => { navigate(path); setIsOpen(false); };
@@ -185,8 +200,8 @@ export const ProfileDropdown = ({
 
   const menuItems = [
     { icon: User,        label: "My Profile",    path: "/profile",  show: true },
-    { icon: Settings,    label: "Settings",       path: "/settings", show: userRole === "admin" || userRole === "gm" },
-    { icon: HelpCircle,  label: "Help & Support", path: "/help",     show: true },
+    { icon: Settings,    label: "Settings",      path: "/settings", show: userRole === "admin" || userRole === "manager" },
+    { icon: HelpCircle,  label: "Help & Support",path: "/help",     show: true },
   ].filter(item => item.show);
 
   return (
@@ -215,8 +230,6 @@ export const ProfileDropdown = ({
 
       {isOpen && (
         <div className="pd-panel" role="menu">
-
-          {/* Profile card */}
           <div className="pd-card">
             <div className="pd-card-av" style={{ background: roleMeta.color + "22", color: roleMeta.color }}>
               {userInitial}
@@ -227,11 +240,10 @@ export const ProfileDropdown = ({
             </div>
           </div>
 
-          {/* Menu items */}
           <div className="pd-menu">
-            {menuItems.map((item, i) => (
+            {menuItems.map((item) => (
               <button
-                key={i}
+                key={item.label}
                 className="pd-item"
                 onClick={() => handleNavigate(item.path)}
                 role="menuitem"
@@ -248,7 +260,6 @@ export const ProfileDropdown = ({
               Log out
             </button>
           </div>
-
         </div>
       )}
     </div>

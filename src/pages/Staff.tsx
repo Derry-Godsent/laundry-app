@@ -10,31 +10,24 @@ import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission"; 
 import { PermissionGuard } from "../components/PermissionGuard";
 
-// Format phone number: accepts digits only, returns +233 XX XXX XXXX display format
+/* ─── HELPERS ────────────────────────────────────────────────────────────── */
 function formatPhoneInput(value: string): string {
-  // Remove all non-digit characters
   const digits = value.replace(/\D/g, '');
-  
-  // Remove Ghana code if user typed it
   const cleanDigits = digits.startsWith('233') ? digits.slice(3) : digits;
-  
-  // Limit to 10 digits max
   const limited = cleanDigits.slice(0, 10);
-  
-  // Format as XX XXX XXXX for display
   if (limited.length <= 2) return limited;
   if (limited.length <= 5) return `${limited.slice(0, 2)} ${limited.slice(2)}`;
   return `${limited.slice(0, 2)} ${limited.slice(2, 5)} ${limited.slice(5)}`;
 }
 
-// Get clean phone number for storage: +233XXXXXXXXXX
 function getCleanPhone(value: string): string {
   const digits = value.replace(/\D/g, '');
-  const cleanDigits = digits.startsWith('233') ? digits : `233${digits}`;
-  return `+${cleanDigits.slice(0, 12)}`; // +233 + 9 digits = 12 chars total
+  const cleanDigits = digits.startsWith('233') ? digits.slice(3) : digits;
+  const noLeadingZero = cleanDigits.startsWith('0') ? cleanDigits.slice(1) : cleanDigits;
+  return `+233${noLeadingZero.slice(0, 9)}`;
 }
 
-// Types
+/* ─── TYPES ──────────────────────────────────────────────────────────────── */
 type StaffRole   = "admin" | "staff" | "courier" | "manager" | "strategist";
 type StaffStatus = "active" | "onduty" | "offline";
 
@@ -62,10 +55,11 @@ interface NewStaffForm {
   email: string; 
   password: string;
 }
-// Constants
+
+/* ─── CONSTANTS ──────────────────────────────────────────────────────────── */
 const ROLE_META: Record<StaffRole, { label: string; color: string; bg: string }> = {
   admin:      { label: "Admin",      color: "#6c72f3", bg: "rgba(108,114,243,0.12)" },
-  staff:     { label: "Staff",     color: "#34d399", bg: "rgba(52,211,153,0.12)"  },
+  staff:      { label: "Staff",      color: "#34d399", bg: "rgba(52,211,153,0.12)"  },
   courier:    { label: "Courier",    color: "#dba96a", bg: "rgba(219,169,106,0.12)" },
   manager:    { label: "Manager",    color: "#a78bfa", bg: "rgba(167,139,250,0.12)" },
   strategist: { label: "Strategist", color: "#22d3ee", bg: "rgba(34,211,238,0.12)"  },
@@ -79,7 +73,7 @@ const STATUS_META: Record<StaffStatus, { label: string; color: string; next: Sta
 
 const STATUS_CYCLE: StaffStatus[] = ["active", "onduty", "offline"];
 
-// Animated Counter
+/* ─── SUB-COMPONENTS ─────────────────────────────────────────────────────── */
 function useCountUp(target: number, duration = 900, delay = 0) {
   const [val, setVal] = useState(0);
   useEffect(() => {
@@ -99,7 +93,6 @@ function useCountUp(target: number, duration = 900, delay = 0) {
   return val;
 }
 
-// Efficiency Ring
 function EfficiencyRing({ value, size = 52, color }: { value: number; size?: number; color: string }) {
   const [anim, setAnim] = useState(0);
   const R = (size - 6) / 2;
@@ -130,10 +123,10 @@ function EfficiencyRing({ value, size = 52, color }: { value: number; size?: num
   );
 }
 
-// Avatar
 function Avatar({ name, size = 36, ring }: { name: string; size?: number; ring?: string }) {
-  const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
-  const hue = (name.charCodeAt(0) * 37 + (name.charCodeAt(1) || 0) * 11) % 360;
+  const safeName = name || "U";
+  const initials = safeName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+  const hue = (safeName.charCodeAt(0) * 37 + (safeName.charCodeAt(1) || 0) * 11) % 360;
   return (
     <div className="stf-av" style={{
       width: size, height: size, minWidth: size,
@@ -145,25 +138,33 @@ function Avatar({ name, size = 36, ring }: { name: string; size?: number; ring?:
   );
 }
 
-// Role Badge
 function RoleBadge({ role }: { role: StaffRole }) {
-  const m = ROLE_META[role];
+  const m = ROLE_META[role] || { label: role || "Staff", color: "#9aa3b5", bg: "rgba(154,163,181,0.12)" };
   return <span className="role-badge" style={{ color: m.color, background: m.bg, borderColor: m.color + "35" }}>{m.label}</span>;
 }
 
-// Status Chip
-function StatusChip({ status, onClick }: { status: StaffStatus; onClick?: (e?: any) => void }) {
-  const m = STATUS_META[status];
+function StatusChip({ status, onClick, canEdit }: { status: StaffStatus; onClick?: (e?: any) => void; canEdit?: boolean }) {
+  const m = STATUS_META[status] || { label: status || "Unknown", color: "#9aa3b5", next: "active" as StaffStatus };
+  const nextMeta = STATUS_META[m.next];
   return (
-    <button className="status-chip" style={{ color: m.color, borderColor: m.color + "40", background: m.color + "12" }}
-      onClick={onClick} title={onClick ? `Click to set → ${STATUS_META[m.next].label}` : undefined}>
+    <button 
+      className="status-chip" 
+      style={{ 
+        color: m.color, 
+        borderColor: m.color + "40", 
+        background: m.color + "12",
+        opacity: canEdit === false ? 0.6 : 1,
+        cursor: canEdit === false ? "not-allowed" : "pointer"
+      }}
+      onClick={(e) => canEdit && onClick?.(e)} 
+      title={canEdit ? `Click to set to ${nextMeta?.label || "Active"}` : "View only"}
+    >
       <span className="sc-dot" style={{ background: m.color }} />
       {m.label}
     </button>
   );
 }
 
-// KPI Card
 function KpiCard({ label, value, icon, accent, sub, delay = 0 }: {
   label: string; value: number; icon: JSX.Element;
   accent: string; sub?: string; delay?: number;
@@ -183,7 +184,6 @@ function KpiCard({ label, value, icon, accent, sub, delay = 0 }: {
   );
 }
 
-// Inline efficiency bar
 function EffBar({ value, color }: { value: number; color: string }) {
   const [w, setW] = useState(0);
   useEffect(() => { const t = setTimeout(() => setW(value), 300); return () => clearTimeout(t); }, [value]);
@@ -198,7 +198,32 @@ function EffBar({ value, color }: { value: number; color: string }) {
   );
 }
 
-//  Main Component
+/* ─── TOAST COMPONENT ────────────────────────────────────────────────────── */
+function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error"; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3500);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  return (
+    <div style={{ 
+      position: "fixed", bottom: 24, right: 24, zIndex: 10000, 
+      background: type === 'error' ? "rgba(248,113,113,0.1)" : "rgba(52,211,153,0.1)", 
+      border: `1px solid ${type === 'error' ? "rgba(248,113,113,0.2)" : "rgba(52,211,153,0.2)"}`, 
+      borderRadius: 10, padding: "12px 20px", display: "flex", alignItems: "center", gap: 12, 
+      boxShadow: "0 14px 36px rgba(0,0,0,0.45)", animation: "sfFadeUp 0.3s ease both" 
+    }}>
+      <span style={{ fontSize: 14, color: type === 'error' ? "#f87171" : "#34d399", fontWeight: 500, fontFamily: "var(--sf-font)" }}>
+        {msg}
+      </span>
+      <button onClick={onClose} style={{ padding: 4, background: "transparent", border: "none", color: "#556070", cursor: "pointer" }}>
+        <X size={14} />
+      </button>
+    </div>
+  );
+}
+
+/* ─── MAIN COMPONENT ─────────────────────────────────────────────────────── */
 export const Staff = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -216,17 +241,16 @@ export const Staff = () => {
   const [saving, setSaving]       = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState<NewStaffForm>({
-  firstName: "", lastName: "", phone: "", role: "staff", branch: "Main Branch",
-  email: "", password: "",
-}); 
- const [formErr, setFormErr]     = useState<Partial<NewStaffForm>>({});
+    firstName: "", lastName: "", phone: "", role: "staff", branch: "Chapman Prestige Limited - Kumasi",
+    email: "", password: "",
+  }); 
+  const [formErr, setFormErr]     = useState<Partial<NewStaffForm>>({});
+  const [toast, setToast]         = useState<{ msg: string; type: "success" | "error" } | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Permission hook for guard
   const { permission, loading: permLoading, canEdit } = usePermission(location.pathname);
 
-  /* ─── SUPABASE: fetch───────────────────── */
- const fetchStaff = useCallback(async () => {
+  const fetchStaff = useCallback(async () => {
     setLoading(true);
     setIsOffline(false);
     try {
@@ -253,16 +277,14 @@ export const Staff = () => {
           assignedOrderIds: s.assigned_order_ids ?? [],
           joinedDate:       s.joined_date ?? new Date(s.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
           address:          s.address ?? "",
-          is_banned: s.is_banned ?? false, 
+          is_banned:        s.is_banned ?? false, 
         }));
         setStaff(mapped);
       }
-
     } catch (err) {
       console.error('Staff fetch error:', err);
-      // silently fall back to supabase
       setIsOffline(true);
-       setStaff([]);
+      setStaff([]);
     } finally {
       setLoading(false);
       setRetrying(false);
@@ -276,7 +298,6 @@ export const Staff = () => {
     fetchStaff();
   };
 
-  // Keyboard shortcuts
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
       if (e.key === "/" && document.activeElement?.tagName !== "INPUT") { e.preventDefault(); searchRef.current?.focus(); }
@@ -287,11 +308,13 @@ export const Staff = () => {
     return () => window.removeEventListener("keydown", h);
   }, []);
 
-  // Derived data
   const filtered = useMemo(() => staff.filter(s => {
     if (roleFilter   !== "all" && s.role   !== roleFilter)   return false;
     if (statusFilter !== "all" && s.status !== statusFilter) return false;
-    if (q) { const lq = q.toLowerCase(); if (!s.name.toLowerCase().includes(lq) && !s.id.toLowerCase().includes(lq)) return false; }
+    if (q) { 
+      const lq = q.toLowerCase(); 
+      if (!s.name.toLowerCase().includes(lq) && !s.id.toLowerCase().includes(lq)) return false; 
+    }
     return true;
   }), [staff, roleFilter, statusFilter, q]);
 
@@ -311,14 +334,13 @@ export const Staff = () => {
     totalAssigned: staff.reduce((a, s) => a + s.activeOrders, 0),
   }), [staff]);
 
-  /* ─── SUPABASE: Toggle Status ────────────────────────────────────────────── */
   const toggleStatus = useCallback(async (id: string) => {
+    if (!canEdit) return;
     const current = staff.find(s => s.id === id);
     if (!current) return;
 
     const newStatus = STATUS_CYCLE[(STATUS_CYCLE.indexOf(current.status) + 1) % STATUS_CYCLE.length];
 
-    // Update Supabase first
     try {
       const { error } = await supabase.from('staff').update({ status: newStatus }).eq('id', id);
       if (error) throw error;
@@ -328,17 +350,15 @@ export const Staff = () => {
       setIsOffline(true);
     }
 
-    // Then update local state (your original behavior)
     setStaff(prev => prev.map(s => s.id === id ? { ...s, status: newStatus } : s));
     setOpenStaff(prev => prev?.id === id ? { ...prev, status: newStatus } : prev);
-  }, [staff]);
+  }, [staff, canEdit]);
 
-  /* ─── SUPABASE: Unassign Order ───────────────────────────────────────────── */
   const unassignOrder = useCallback(async (staffId: string, orderId: string) => {
+    if (!canEdit) return;
     const current = staff.find(s => s.id === staffId);
     if (!current) return;
 
-    // Update Supabase: remove from assigned_order_ids array
     const newAssigned = current.assignedOrderIds.filter(x => x !== orderId);
     try {
       const { error } = await supabase.from('staff').update({
@@ -352,7 +372,6 @@ export const Staff = () => {
       setIsOffline(true);
     }
 
-    // Update local state
     setStaff(prev => prev.map(s => s.id === staffId
       ? { ...s, assignedOrderIds: newAssigned, activeOrders: newAssigned.length }
       : s
@@ -361,117 +380,118 @@ export const Staff = () => {
       ? { ...prev, assignedOrderIds: newAssigned, activeOrders: newAssigned.length }
       : prev
     );
-  }, [staff]);
+  }, [staff, canEdit]);
 
   const validateForm = (): boolean => {
-  const errs: Partial<NewStaffForm> = {};
-  if (!form.firstName.trim()) errs.firstName = "Required";
-  if (!form.lastName.trim())  errs.lastName  = "Required";
-  
-  // Validate phone: must have exactly 10 digits (excluding +233)
-  const phoneDigits = form.phone.replace(/\D/g, '');
-  if (!form.phone.trim()) {
-    errs.phone = "Required";
-  } else if (phoneDigits.length !== 10) {
-    errs.phone = "Enter 10 digits";
-  }
-  
-  if (!form.email.trim())     errs.email     = "Required";
-  if (!form.password.trim())  errs.password  = "Required";
-  setFormErr(errs);
-  return Object.keys(errs).length === 0;
-};
-
-  /* ─── SUPABASE: Create Staff ────────────────────────────────────────────── */
- const handleCreate = async () => {
-  if (!validateForm()) return;
-  setSaving(true);
-  try {
-    // Step 1: Create auth user
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: form.email.trim(),
-      password: form.password,
-      options: {
-        data: { full_name: `${form.firstName} ${form.lastName}`, role: form.role },
-        emailRedirectTo: undefined,
-      },
-    });
-
-    if (authError) {
-      // Supabase enforces 8+ char passwords with at least 1 number/symbol by default
-      throw new Error(`Auth creation failed: ${authError.message}`);
+    const errs: Partial<NewStaffForm> = {};
+    if (!form.firstName.trim()) errs.firstName = "Required";
+    if (!form.lastName.trim())  errs.lastName  = "Required";
+    
+    const phoneDigits = form.phone.replace(/\D/g, '');
+    if (!form.phone.trim()) {
+      errs.phone = "Required";
+    } else if (phoneDigits.length !== 10) {
+      errs.phone = "Enter 10 digits";
     }
+    
+    if (!form.email.trim())     errs.email     = "Required";
+    if (!form.password.trim())  errs.password  = "Required";
+    setFormErr(errs);
+    return Object.keys(errs).length === 0;
+  };
 
-    if (!authData.user) {
-      throw new Error("Auth user was not created. Check Supabase Auth settings.");
+  const handleCreate = async () => {
+    if (!validateForm()) return;
+    setSaving(true);
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email.trim(),
+        password: form.password,
+        options: {
+          data: { full_name: `${form.firstName} ${form.lastName}`, role: form.role },
+          emailRedirectTo: undefined,
+        },
+      });
+
+      if (authError) {
+        throw new Error(`Auth creation failed: ${authError.message}`);
+      }
+
+      if (!authData.user) {
+        throw new Error("Auth user was not created. Check Supabase Auth settings.");
+      }
+
+      const { data: branchData, error: branchError } = await supabase
+        .from("branches")
+        .select("id")
+        .eq("city", "Kumasi")
+        .single();
+
+      if (branchError) throw new Error(`Branch lookup failed: ${branchError.message}`);
+
+      const payload = {
+        id: authData.user.id,
+        first_name: form.firstName.trim(),
+        last_name: form.lastName.trim(),
+        phone: getCleanPhone(form.phone),
+        role: form.role,
+        status: "active",
+        efficiency: 100,
+        active_orders: 0,
+        completed_orders: 0,
+        assigned_order_ids: [],
+        joined_date: new Date().toISOString().split('T')[0],
+        branch_id: branchData.id,
+      };
+
+      const { data: staffData, error: staffError } = await supabase
+        .from("staff")
+        .insert([payload])
+        .select()
+        .single();
+
+      if (staffError) {
+        try {
+          await supabase.auth.signOut();
+        } catch (cleanupErr) {
+          console.error("Auth cleanup error:", cleanupErr);
+        }
+        throw new Error(`Staff insert failed: ${staffError.message}`);
+      }
+
+      const newMember: StaffMember = {
+        id: staffData.id,
+        name: `${form.firstName} ${form.lastName}`,
+        role: form.role,
+        phone: form.phone,
+        status: "active",
+        activeOrders: 0,
+        completedOrders: 0,
+        efficiency: 100,
+        assignedOrderIds: [],
+        joinedDate: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+        address: form.branch,
+      };
+
+      setStaff(prev => [newMember, ...prev]);
+      setModalOpen(false);
+      setForm({ 
+        firstName: "", lastName: "", phone: "", role: "staff", branch: "Chapman Prestige Limited - Kumasi",
+        email: "", password: "" 
+      });
+      setIsOffline(false);
+      setToast({ msg: "Staff member created successfully", type: "success" });
+    } catch (err: any) {
+      console.error('Create staff error:', err);
+      setIsOffline(true);
+      setToast({ msg: err.message || "Failed to create staff", type: "error" });
+    } finally {
+      setSaving(false);
     }
+  };
 
-    // Step 2: Get branch ID
-    const { data: branchData, error: branchError } = await supabase
-      .from("branches")
-      .select("id")
-      .eq("city", "Kumasi")
-      .single();
-
-    if (branchError) throw new Error(`Branch lookup failed: ${branchError.message}`);
-
-    // Step 3: Insert into staff table using the EXACT auth user ID
-    const payload = {
-      id: authData.user.id, // Critical: must match auth.users.id
-      first_name: form.firstName.trim(),
-      last_name: form.lastName.trim(),
-      phone: getCleanPhone(form.phone),
-      role: form.role,
-      status: "active",
-      efficiency: 100,
-      active_orders: 0,
-      completed_orders: 0,
-      assigned_order_ids: [],
-      joined_date: new Date().toISOString().split('T')[0],
-      branch_id: branchData.id,
-    };
-
-    const { data: staffData, error: staffError } = await supabase
-      .from("staff")
-      .insert([payload])
-      .select()
-      .single();
-
-    if (staffError) throw new Error(`Staff insert failed: ${staffError.message}`);
-
-    // Step 4: Update local state ONLY after full success
-    const newMember: StaffMember = {
-      id: staffData.id,
-      name: `${form.firstName} ${form.lastName}`,
-      role: form.role,
-      phone: form.phone,
-      status: "active",
-      activeOrders: 0,
-      completedOrders: 0,
-      efficiency: 100,
-      assignedOrderIds: [],
-      joinedDate: new Date().toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-      address: form.branch,
-    };
-
-    setStaff(prev => [newMember, ...prev]);
-    setModalOpen(false);
-    setForm({ 
-      firstName: "", lastName: "", phone: "", role: "staff", branch: "Main Branch",
-      email: "", password: "" 
-    });
-    setIsOffline(false);
-  } catch (err: any) {
-    console.error('Create staff error:', err);
-    setIsOffline(true);
-    alert(err.message || "Failed to create staff. Check console for details.");
-  } finally {
-    setSaving(false);
-  }
-};
-
-  /* ─── SUPABASE: Export CSV ────────────────────────────────────────────── */
   const handleExport = () => {
+    const escapeCsv = (val: any) => `"${String(val).replace(/"/g, '""')}"`;
     const headers = ["ID", "Name", "Role", "Phone", "Status", "Active Orders", "Completed", "Efficiency", "Joined"];
     const rows = filtered.map(s => [
       s.id,
@@ -484,7 +504,7 @@ export const Staff = () => {
       s.efficiency,
       s.joinedDate,
     ]);
-    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const csv = [headers, ...rows].map(r => r.map(escapeCsv).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -492,12 +512,12 @@ export const Staff = () => {
     a.download = `chapman-staff-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    setToast({ msg: "CSV exported successfully", type: "success" });
   };
 
   const hasFilters = roleFilter !== "all" || statusFilter !== "all" || q;
   const effColor = (e: number) => e >= 95 ? "#34d399" : e >= 85 ? "#dba96a" : "#f87171";
 
-  // Wait for both data AND permissions to load
   if (loading || permLoading) return (
     <div className="sf" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
       <div style={{ color: "var(--sf-text-tert)", fontSize: 13, fontFamily: "var(--sf-font)" }}>
@@ -529,7 +549,6 @@ export const Staff = () => {
 
         .sf { background: var(--sf-bg-base); min-height: 100vh; font-family: var(--sf-font); color: var(--sf-text-primary); padding: 28px 32px 60px; position: relative; }
 
-        /* ── offline banner ── */
         .sf-offline { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
           background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); border-radius: 10px;
           padding: 10px 16px; margin-bottom: 18px; animation: sfFadeUp .3s ease; }
@@ -542,7 +561,6 @@ export const Staff = () => {
         .sf-offline-retry:active { transform: scale(.96); }
         .sf-spin-icon { animation: sfSpin .8s linear infinite; }
 
-        /* ── top bar ── */
         .sf-top { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 22px; gap: 16px; flex-wrap: wrap;
           position: relative; padding-bottom: 4px; }
         .sf-title { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; margin: 0; color: var(--sf-text-primary); }
@@ -558,8 +576,7 @@ export const Staff = () => {
         .sf-btn.primary:active, .sf-btn.ghost:active { transform: translateY(0) scale(.97); }
         .spin { animation: sfSpin .8s linear infinite; }
 
-        /* ── kpi row ── */
-        .kpi-row { display:grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 22px; }
+        .kpi-row { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 22px; }
         .kpi { position:relative; overflow:hidden; background: var(--sf-bg-raised); border:1px solid var(--sf-border-soft); border-radius: 14px;
           padding: 16px 16px 14px; animation: sfFadeUp .5s cubic-bezier(.16,1,.3,1) both; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
         .kpi:hover { transform: translateY(-3px); border-color: var(--kpi-accent, var(--sf-border-mid)); box-shadow: 0 16px 32px -18px rgba(0,0,0,.6); }
@@ -572,7 +589,6 @@ export const Staff = () => {
         .kpi-bar { height: 3px; border-radius: 3px; background: rgba(255,255,255,.05); margin-top: 12px; overflow:hidden; }
         .kpi-bar-fill { height: 100%; width: 62%; border-radius: 3px; opacity: .8; }
 
-        /* ── filters ── */
         .sf-filters { display:flex; align-items:center; gap:10px; margin-bottom: 16px; flex-wrap: wrap; }
         .sf-srch { position:relative; display:flex; align-items:center; flex: 1 1 240px; min-width: 200px; background: var(--sf-bg-raised);
           border:1px solid var(--sf-border-soft); border-radius: 9px; padding: 0 10px; transition: border-color .18s ease, box-shadow .18s ease; }
@@ -593,7 +609,6 @@ export const Staff = () => {
           font-family: var(--sf-font); transition: background .18s ease; }
         .sfp-clr:hover { background: rgba(248,113,113,.15); }
 
-        /* ── table ── */
         .sf-body { background: var(--sf-bg-raised); border: 1px solid var(--sf-border-soft); border-radius: 14px; overflow:hidden; }
         .sf-tbl-wrap { overflow-x: auto; }
         .sf-tbl { width: 100%; border-collapse: collapse; min-width: 760px; }
@@ -617,7 +632,6 @@ export const Staff = () => {
           transition: border-color .15s ease, color .15s ease, transform .15s ease; }
         .sf-ra:hover { border-color: var(--sf-accent-bord); color: var(--sf-text-primary); transform: translateY(-1px); }
 
-        /* ── pagination ── */
         .sf-pag { display:flex; align-items:center; justify-content:space-between; padding: 13px 18px; border-top: 1px solid var(--sf-border-faint);
           flex-wrap: wrap; gap: 10px; }
         .sf-pag-info { font-size: 12px; color: var(--sf-text-tert); }
@@ -634,11 +648,10 @@ export const Staff = () => {
         .sf-pag-n:hover { color: var(--sf-text-primary); background: rgba(255,255,255,.04); }
         .sf-pag-n.on { background: var(--sf-accent-dim); color: var(--sf-accent); border-color: var(--sf-accent-bord); font-weight: 700; }
 
-        /* ── shared bits ── */
         .stf-av { border-radius: 50%; display:flex; align-items:center; justify-content:center; font-weight: 700; flex-shrink:0; }
         .role-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid transparent; white-space: nowrap; }
         .status-chip { display:inline-flex; align-items:center; gap: 6px; border: 1px solid; border-radius: 20px; padding: 5px 11px;
-          font-size: 11.5px; font-weight: 700; cursor:pointer; font-family: var(--sf-font); background: transparent;
+          font-size: 11.5px; font-weight: 700; font-family: var(--sf-font); background: transparent;
           transition: transform .15s ease, filter .15s ease; }
         .status-chip:hover { transform: translateY(-1px); filter: brightness(1.15); }
         .sc-dot { width: 6px; height: 6px; border-radius: 50%; }
@@ -649,11 +662,10 @@ export const Staff = () => {
         .eff-shine { position: absolute; top:0; left:0; height: 100%; width: 30%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
           animation: sfShine 2.6s ease-in-out infinite; }
 
-        /* ── side panel ── */
         .sf-ov { position: fixed; inset:0; background: rgba(4,5,9,0.6); backdrop-filter: blur(2px); opacity:0; pointer-events:none;
           transition: opacity .25s ease; z-index: 60; }
         .sf-ov.on { opacity:1; pointer-events:auto; }
-        .sf-panel { position: fixed; top:0; right:0; height: 100vh; width: 420px; max-width: 92vw; background: var(--sf-bg-surface);
+        .sf-panel { position: fixed; top:0; right:0; height: 100dvh; width: 420px; max-width: 92vw; background: var(--sf-bg-surface);
           border-left: 1px solid var(--sf-border-soft); z-index: 61; display:flex; flex-direction: column;
           transform: translateX(100%); transition: transform .32s cubic-bezier(.16,1,.3,1); }
         .sf-panel.on { transform: translateX(0); }
@@ -702,7 +714,6 @@ export const Staff = () => {
           font-family: var(--sf-font); transition: transform .15s ease, box-shadow .15s ease; }
         .spf-p:hover { transform: translateY(-1px); box-shadow: 0 10px 22px -10px var(--sf-accent-glow); }
 
-        /* ── modal ── */
         .sf-modal-ov { position: fixed; inset:0; background: rgba(4,5,9,0.66); backdrop-filter: blur(3px); opacity:0; pointer-events:none;
           display:flex; align-items:center; justify-content:center; transition: opacity .22s ease; z-index: 70; padding: 20px; }
         .sf-modal-ov.on { opacity:1; pointer-events:auto; }
@@ -738,7 +749,6 @@ export const Staff = () => {
         .smf-p:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 22px -10px var(--sf-accent-glow); }
         .smf-p:disabled { opacity: .6; cursor: not-allowed; }
 
-        /* ── responsive ── */
         @media (max-width: 1180px) {
           .kpi-row { grid-template-columns: repeat(3, 1fr); }
         }
@@ -750,27 +760,30 @@ export const Staff = () => {
           .sf-panel { width: 100%; }
         }
 
-        /* MOBILE TWEAKS (added only) */
         @media (max-width: 480px) {
           .sf-tbl thead { display: none; }
           .sf-row { display: block; padding: 12px 16px; border-bottom: 1px solid var(--sf-border-faint); }
-          .sf-row td { display: block; padding: 6px 0; border: none; text-align: left; }
+          .sf-row td { display: block; padding: 8px 12px 8px 40%; border: none; text-align: left; position: relative; }
+          .sf-row td::before { content: attr(data-label); position: absolute; left: 12px; top: 8px; font-size: 10px; color: var(--sf-text-tert); text-transform: uppercase; font-weight: 700; }
           .sf-member { margin-bottom: 8px; }
           .sf-num, .sf-dim, .sf-act-cell { text-align: left; }
           .sf-pag { flex-direction: column; align-items: flex-start; gap: 12px; }
           .sf-pag-r { width: 100%; justify-content: space-between; }
+          
+          .sf-srch-x { padding: 8px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+          .sp-unassign { padding: 12px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+          .sf-btn.ghost { padding: 10px 12px; }
         }
-
-        
       `}</style>
 
-      {/* OFFLINE BANNER */}
+      {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+
       {isOffline && (
         <div className="sf-offline">
           <div className="sf-offline-l">
             <span className="sf-offline-dot" />
             <WifiOff size={15} color="#f87171" />
-            <span>System is offline — showing local cached data, not live records. Changes may not be saved.</span>
+            <span>System is offline. Showing local cached data. Changes may not be saved.</span>
           </div>
           <button className="sf-offline-retry" onClick={handleRetry}>
             <RefreshCw size={13} className={retrying ? "sf-spin-icon" : ""} /> Retry
@@ -778,10 +791,9 @@ export const Staff = () => {
         </div>
       )}
 
-      {/* Top bar */}
       <div className="sf-top">
         <div>
-          <h2 className="sf-title">Staff & Workers</h2>
+          <h2 className="sf-title">Staff and Workers</h2>
           <p className="sf-sub">
             <span>{stats.total} members</span>
             <span className="dsep">·</span>
@@ -791,8 +803,7 @@ export const Staff = () => {
           </p>
         </div>
         <div className="sf-acts">
-          <button className="sf-btn ghost" title="Refresh"
-            onClick={() => { fetchStaff(); }}>
+          <button className="sf-btn ghost" title="Refresh" onClick={() => { fetchStaff(); }}>
             <RefreshCw size={14} className={loading ? "spin" : ""} />
           </button>
           <button className="sf-btn ghost" title="Export" onClick={handleExport}><Download size={14} /></button>
@@ -807,7 +818,6 @@ export const Staff = () => {
         </div>
       </div>
 
-      {/* KPI row */}
       <div className="kpi-row">
         <KpiCard label="Total Staff"    value={stats.total}       icon={<Users size={18} />}      accent="#6c72f3" sub="All roles" delay={0}   />
         <KpiCard label="On Duty Now"    value={stats.onDuty}      icon={<Zap size={18} />}         accent="#dba96a" sub="Working"   delay={80}  />
@@ -816,7 +826,6 @@ export const Staff = () => {
         <KpiCard label="Orders Assigned" value={stats.totalAssigned} icon={<Package size={18} />} accent="#22d3ee" sub="Active now" delay={320} />
       </div>
 
-      {/* Filter bar */}
       <div className="sf-filters">
         <div className="sf-srch">
           <Search size={13} className="sf-srch-ico" />
@@ -846,7 +855,6 @@ export const Staff = () => {
         )}
       </div>
 
-      {/* Table - Wrapped with PermissionGuard */}
       <PermissionGuard>
         <div className="sf-body">
           <div className="sf-tbl-wrap">
@@ -870,26 +878,26 @@ export const Staff = () => {
                     <tr key={s.id} className="sf-row"
                       style={{ animationDelay: `${i * 28}ms` }}
                       onClick={() => setOpenStaff(s)}>
-                      <td>
+                      <td data-label="Staff Member">
                         <div className="sf-member">
-                          <Avatar name={s.name} ring={STATUS_META[s.status].color} />
+                          <Avatar name={s.name} ring={STATUS_META[s.status]?.color || "#3a4460"} />
                           <div>
-                            <div className="sf-nm">{s.name}</div>
-                            <div className="sf-ph">{formatPhoneInput(s.phone.replace('+233', ''))}</div>
+                            <div className="sf-nm">{s.name || "Unnamed Staff"}</div>
+                            <div className="sf-ph">{formatPhoneInput((s.phone || "").replace('+233', ''))}</div>
                           </div>
                         </div>
                       </td>
-                      <td><RoleBadge role={s.role} /></td>
-                      <td>
-                        <StatusChip status={s.status} onClick={(e: any) => { e?.stopPropagation?.(); toggleStatus(s.id); }} />
+                      <td data-label="Role"><RoleBadge role={s.role} /></td>
+                      <td data-label="Status">
+                        <StatusChip status={s.status} canEdit={canEdit} onClick={(e: any) => { e?.stopPropagation?.(); toggleStatus(s.id); }} />
                       </td>
-                      <td className="sf-num">{s.activeOrders}</td>
-                      <td className="sf-num">{s.completedOrders}</td>
-                      <td style={{ minWidth: 130 }}>
+                      <td data-label="Active" className="sf-num">{s.activeOrders}</td>
+                      <td data-label="Completed" className="sf-num">{s.completedOrders}</td>
+                      <td data-label="Efficiency" style={{ minWidth: 130 }}>
                         <EffBar value={s.efficiency} color={effColor(s.efficiency)} />
                       </td>
-                      <td className="sf-dim">{s.joinedDate}</td>
-                      <td className="sf-act-cell" onClick={e => e.stopPropagation()}>
+                      <td data-label="Joined" className="sf-dim">{s.joinedDate}</td>
+                      <td data-label="Action" className="sf-act-cell" onClick={e => e.stopPropagation()}>
                         <button className="sf-ra" onClick={() => setOpenStaff(s)}>View</button>
                       </td>
                     </tr>
@@ -899,7 +907,6 @@ export const Staff = () => {
             </table>
           </div>
 
-          {/* Pagination */}
           <div className="sf-pag">
             <span className="sf-pag-info">
               {filtered.length === 0 ? "No results"
@@ -920,14 +927,12 @@ export const Staff = () => {
         </div>
       </PermissionGuard>
 
-      {/*  SLIDE PANEL */}
       <div className={`sf-ov ${openStaff ? "on" : ""}`} onClick={() => setOpenStaff(null)} />
       <aside className={`sf-panel ${openStaff ? "on" : ""}`}>
         {openStaff && (() => {
           const ec = effColor(openStaff.efficiency);
           return (
             <>
-              {/* Panel header / hero */}
               <div className="sp-hero">
                 <button className="sp-cl" onClick={() => setOpenStaff(null)}><X size={16} /></button>
                 <div className="sp-av-wrap">
@@ -938,14 +943,13 @@ export const Staff = () => {
                 <div className="sp-id">{openStaff.id}</div>
                 <div className="sp-badges">
                   <RoleBadge role={openStaff.role} />
-                  <StatusChip status={openStaff.status} onClick={() => toggleStatus(openStaff.id)} />
+                  <StatusChip status={openStaff.status} canEdit={canEdit} onClick={() => toggleStatus(openStaff.id)} />
                 </div>
               </div>
 
               <div className="sp-body">
-                                {/* Contact */}
                 <div className="sp-sec">
-                  <div className="sp-sec-lbl">Contact & Info</div>
+                  <div className="sp-sec-lbl">Contact and Info</div>
                   <div className="sp-grid">
                     <div className="sp-gi">
                       <span className="sp-gk"><Phone size={11} /> Phone</span>
@@ -961,11 +965,12 @@ export const Staff = () => {
                     </div>
                     <div className="sp-gi">
                       <span className="sp-gk"><Shield size={11} /> Role</span>
-                      <span className="sp-gv">{ROLE_META[openStaff.role].label}</span>
+                      <span className="sp-gv">
+                        {ROLE_META[openStaff.role as StaffRole]?.label || "Unknown Role"}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Ban/Unban Toggle - Admin only */}
                   {canEdit && (
                     <div className="sp-gi" style={{ gridColumn: '1 / -1', marginTop: '12px' }}>
                       <span className="sp-gk"><Shield size={11} /> Account Status</span>
@@ -994,7 +999,6 @@ export const Staff = () => {
                   )}
                 </div>
 
-                {/* Performance */}
                 <div className="sp-sec">
                   <div className="sp-sec-lbl">Performance</div>
                   <div className="sp-perf-row">
@@ -1016,7 +1020,6 @@ export const Staff = () => {
                   </div>
                 </div>
 
-                {/* Assignments */}
                 <div className="sp-sec">
                   <div className="sp-sec-lbl" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span>Current Assignments</span>
@@ -1037,8 +1040,12 @@ export const Staff = () => {
                             <div className="sp-oid">{oid}</div>
                             <div className="sp-ostg">In Progress</div>
                           </div>
-                          <button className="sp-unassign" title="Unassign"
-                            onClick={() => unassignOrder(openStaff.id, oid)}>
+                          <button 
+                            className="sp-unassign" 
+                            title="Unassign"
+                            onClick={() => canEdit && unassignOrder(openStaff.id, oid)}
+                            style={{ opacity: canEdit ? 1 : 0.5, cursor: canEdit ? "pointer" : "not-allowed" }}
+                          >
                             <X size={12} />
                           </button>
                         </div>
@@ -1064,13 +1071,12 @@ export const Staff = () => {
         })()}
       </aside>
 
-      {/* ADD STAFF MODAL */}
       <div className={`sf-modal-ov ${modalOpen ? "on" : ""}`} onClick={() => setModalOpen(false)}>
         <div className="sf-modal" onClick={e => e.stopPropagation()}>
           <div className="sm-head">
             <div>
               <div className="sm-title">Add New Staff</div>
-              <div className="sm-sub">They'll be added as active immediately</div>
+              <div className="sm-sub">They will be added as active immediately</div>
             </div>
             <button className="sm-cl" onClick={() => setModalOpen(false)}><X size={16} /></button>
           </div>
@@ -1094,74 +1100,73 @@ export const Staff = () => {
               </div>
             </div>
             <div className="sm-fg">
-  <label className="sm-lbl">Phone Number</label>
-  <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-    <span style={{ 
-      padding: '10px 12px', 
-      background: 'var(--sf-bg-raised)', 
-      border: '1px solid var(--sf-border-soft)', 
-      borderRight: 'none',
-      borderRadius: '8px 0 0 8px',
-      color: 'var(--sf-text-sec)',
-      fontSize: '13.5px',
-      fontFamily: 'var(--sf-font)'
-    }}>+233</span>
-    <input className={`sm-inp ${formErr.phone ? "err" : ""}`}
-      placeholder="XX XXX XXXX"
-      value={form.phone}
-      onChange={e => {
-        const formatted = formatPhoneInput(e.target.value);
-        setForm(f => ({ ...f, phone: formatted }));
-      }}
-      onBlur={e => {
-        // Validate 10 digits on blur
-        const digits = e.target.value.replace(/\s/g, '');
-        if (digits.length !== 10 && form.phone) {
-          setFormErr(prev => ({ ...prev, phone: "Enter 10 digits" }));
-        }
-      }}
-      style={{ borderRadius: '0 8px 8px 0', borderLeft: 'none' }}
-      maxLength={14} // 2 + 1 space + 3 + 1 space + 4 = 11 chars max display
-    />
-  </div>
-  {formErr.phone && <span className="sm-err">{formErr.phone}</span>}
-</div>
+              <label className="sm-lbl">Phone Number</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                <span style={{ 
+                  padding: '10px 12px', 
+                  background: 'var(--sf-bg-raised)', 
+                  border: '1px solid var(--sf-border-soft)', 
+                  borderRight: 'none',
+                  borderRadius: '8px 0 0 8px',
+                  color: 'var(--sf-text-sec)',
+                  fontSize: '13.5px',
+                  fontFamily: 'var(--sf-font)'
+                }}>+233</span>
+                <input className={`sm-inp ${formErr.phone ? "err" : ""}`}
+                  placeholder="XX XXX XXXX"
+                  value={form.phone}
+                  onChange={e => {
+                    const formatted = formatPhoneInput(e.target.value);
+                    setForm(f => ({ ...f, phone: formatted }));
+                  }}
+                  onBlur={e => {
+                    const digits = e.target.value.replace(/\s/g, '');
+                    if (digits.length !== 10 && form.phone) {
+                      setFormErr(prev => ({ ...prev, phone: "Enter 10 digits" }));
+                    }
+                  }}
+                  style={{ borderRadius: '0 8px 8px 0', borderLeft: 'none' }}
+                  maxLength={14}
+                />
+              </div>
+              {formErr.phone && <span className="sm-err">{formErr.phone}</span>}
+            </div>
             <div className="sm-fg">
-  <label className="sm-lbl">Email Address</label>
-  <input className={`sm-inp ${formErr.email ? "err" : ""}`}
-    placeholder="staff@chapmanprestigelimited.com"
-    type="email"
-    value={form.email}
-    onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-  {formErr.email && <span className="sm-err">{formErr.email}</span>}
-</div>
+              <label className="sm-lbl">Email Address</label>
+              <input className={`sm-inp ${formErr.email ? "err" : ""}`}
+                placeholder="staff@chapmanprestigelimited.com"
+                type="email"
+                value={form.email}
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+              {formErr.email && <span className="sm-err">{formErr.email}</span>}
+            </div>
 
-<div className="sm-fg">
-  <label className="sm-lbl">Password</label>
-  <div style={{ position: 'relative' }}>
-    <input 
-      className={`sm-inp ${formErr.password ? "err" : ""}`}
-      placeholder="Enter secure password"
-      type={showPassword ? "text" : "password"}
-      value={form.password}
-      onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-      style={{ paddingRight: '40px' }}
-    />
-    <button 
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-      style={{
-        position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
-        background: 'none', border: 'none', color: '#9aa3b5', cursor: 'pointer',
-        padding: '4px', display: 'flex'
-      }}
-      title={showPassword ? "Hide password" : "Show password"}
-    >
-      {showPassword ? "Hide" : "Show"}
-    </button>
-  </div>
-  {formErr.password && <span className="sm-err">{formErr.password}</span>}
-</div>
+            <div className="sm-fg">
+              <label className="sm-lbl">Password</label>
+              <div style={{ position: 'relative' }}>
+                <input 
+                  className={`sm-inp ${formErr.password ? "err" : ""}`}
+                  placeholder="Enter secure password"
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  style={{ paddingRight: '40px' }}
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', color: '#9aa3b5', cursor: 'pointer',
+                    padding: '4px', display: 'flex'
+                  }}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+              {formErr.password && <span className="sm-err">{formErr.password}</span>}
+            </div>
             <div className="sm-row">
               <div className="sm-fg">
                 <label className="sm-lbl">Role</label>
@@ -1173,9 +1178,8 @@ export const Staff = () => {
               <div className="sm-fg">
                 <label className="sm-lbl">Branch</label>
                 <select className="sm-sel" value={form.branch} onChange={e => setForm(f => ({ ...f, branch: e.target.value }))}>
-  <option value="Chapman Prestige Limited - Kumasi">Chapman Prestige Limited - Kumasi</option>
-  {/* Add more branches here when you expand */}
-</select>
+                  <option value="Chapman Prestige Limited - Kumasi">Chapman Prestige Limited - Kumasi</option>
+                </select>
               </div>
             </div>
           </div>
@@ -1192,7 +1196,6 @@ export const Staff = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

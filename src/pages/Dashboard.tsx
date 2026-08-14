@@ -1,14 +1,77 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
+import {
+  Shield, Package, Users, FileText, DollarSign,
+  RefreshCw, Plus, ArrowRight, AlertCircle,
+  BarChart3, TrendingUp, CheckCircle2, Clock,
+  Inbox, Settings, Receipt, ClipboardList
+} from "lucide-react";
 import "./Dashboard.css";
 
-// ─── Animated Counter Hook ────────────────────────────────────────────────────
+// ✅ Added permission imports
+import { usePermission } from "../hooks/usePermission";
+import { PermissionGuard } from "../components/PermissionGuard";
+
+import type { Session } from "@supabase/supabase-js";
+
+interface Order {
+  id: string;
+  order_id: string;
+  status: string;
+  created_at: string;
+  amount_paid: number;
+  clients?: { name: string };
+}
+
+interface OrderItem {
+  service_id: string;
+  quantity: number;
+  services?: { name: string; category: string };
+}
+
+interface Activity {
+  text: string;
+  time: string;
+  meta: string;
+  type: "success" | "warning" | "info" | "danger";
+}
+
+interface WorkflowStage {
+  label: string;
+  key: string;
+  value: number;
+  count: number;
+  color: string;
+}
+
+interface ServiceSegment {
+  label: string;
+  value: number;
+  color: string;
+}
+
+interface ChartPoint {
+  label: string;
+  value: number;
+}
+
+interface Metrics {
+  totalOrders: number;
+  todayOrders: number;
+  yesterdayOrders: number;
+  inProgress: number;
+  pendingReview: number;
+  revenueToday: number;
+  revenueYesterday: number;
+  completed: number;
+  completedYesterday: number;
+}
+
 function useCountUp(target: number, duration = 1200, delay = 0) {
   const [value, setValue] = useState(0);
   useEffect(() => {
-    let start = 0;
     let startTime: number | null = null;
     const timeout = setTimeout(() => {
       const step = (timestamp: number) => {
@@ -26,7 +89,6 @@ function useCountUp(target: number, duration = 1200, delay = 0) {
   return value;
 }
 
-// ─── Sparkline SVG ───────────────────────────────────────────────────────────
 function Sparkline({ data, color, height = 40 }: { data: number[]; color: string; height?: number }) {
   if (!data.length) return null;
   const max = Math.max(...data, 1);
@@ -34,23 +96,23 @@ function Sparkline({ data, color, height = 40 }: { data: number[]; color: string
   const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - (v / max) * (h - 6) - 3}`);
   const path = `M ${pts.join(" L ")}`;
   const area = `M ${pts[0]} L ${pts.join(" L ")} L ${w},${h} L 0,${h} Z`;
+  const gradId = `sg-${color.replace("#", "")}`;
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="sparkline" fill="none">
       <defs>
-        <linearGradient id={`sg-${color.replace("#","")}`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.25" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={area} fill={`url(#sg-${color.replace("#","")})`} />
+      <path d={area} fill={`url(#${gradId})`} />
       <path d={path} stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx={pts[pts.length - 1].split(",")[0]} cy={pts[pts.length - 1].split(",")[1]} r="3" fill={color} />
     </svg>
   );
 }
 
-// ─── Animated Area Chart ──────────────────────────────────────────────────────
-function AreaChart({ data, timeRange }: { data: { label: string; value: number }[]; timeRange: string }) {
+function AreaChart({ data, timeRange }: { data: ChartPoint[]; timeRange: string }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const [animated, setAnimated] = useState(false);
@@ -61,7 +123,14 @@ function AreaChart({ data, timeRange }: { data: { label: string; value: number }
     return () => clearTimeout(t);
   }, [data]);
 
-  if (!data.length) return <div className="chart-empty">No data for this period</div>;
+  if (!data.length) {
+    return (
+      <div className="chart-empty-state">
+        <BarChart3 size={32} />
+        <span>No data for this period</span>
+      </div>
+    );
+  }
 
   const W = 600, H = 200;
   const max = Math.max(...data.map(d => d.value), 1);
@@ -90,10 +159,12 @@ function AreaChart({ data, timeRange }: { data: { label: string; value: number }
       <svg
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="none"
+        preserveAspectRatio="xMidYMid meet"
         className={`area-svg ${animated ? "animated" : ""}`}
         onMouseLeave={() => setHovered(null)}
         style={{ overflow: "visible" }}
+        role="img"
+        aria-label={`Order volume chart for the last ${timeRange}`}
       >
         <defs>
           <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
@@ -163,8 +234,7 @@ function AreaChart({ data, timeRange }: { data: { label: string; value: number }
   );
 }
 
-// ─── Donut Chart ─────────────────────────────────────────────────────────────
-function DonutChart({ segments }: { segments: { label: string; value: number; color: string }[] }) {
+function DonutChart({ segments }: { segments: ServiceSegment[] }) {
   const total = segments.reduce((s, x) => s + x.value, 0) || 1;
   const R = 54, cx = 70, cy = 70, stroke = 18;
   let offset = -90;
@@ -177,7 +247,7 @@ function DonutChart({ segments }: { segments: { label: string; value: number; co
     return arc;
   });
   return (
-    <svg viewBox="0 0 140 140" className="donut-svg">
+    <svg viewBox="0 0 140 140" className="donut-svg" role="img" aria-label="Service mix distribution">
       {arcs.map((a, i) => (
         <circle key={i} cx={cx} cy={cy} r={R}
           fill="none" stroke={a.color} strokeWidth={stroke}
@@ -196,7 +266,6 @@ function DonutChart({ segments }: { segments: { label: string; value: number; co
   );
 }
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
 interface StatCardProps {
   label: string;
   value: number;
@@ -204,7 +273,7 @@ interface StatCardProps {
   suffix?: string;
   delta?: number;
   deltaLabel?: string;
-  icon: string;
+  icon: React.ReactNode;
   accent: string;
   sparkData?: number[];
   delay?: number;
@@ -216,10 +285,10 @@ function StatCard({ label, value, prefix = "", suffix = "", delta, deltaLabel, i
   const isUp = delta === undefined ? true : delta >= 0;
 
   return (
-    <div className="stat-card-new" style={{ "--accent": accent } as any}>
+    <div className="stat-card-new" style={{ "--accent": accent } as React.CSSProperties}>
       <div className="sc-glow" style={{ background: accent }} />
       <div className="sc-top">
-        <div className="sc-icon">{icon}</div>
+        <div className="sc-icon-lucide" style={{ color: accent }}>{icon}</div>
         {delta !== undefined && (
           <div className={`sc-badge ${isUp ? "up" : "dn"}`}>
             <span>{isUp ? "↑" : "↓"}</span>
@@ -240,7 +309,6 @@ function StatCard({ label, value, prefix = "", suffix = "", delta, deltaLabel, i
   );
 }
 
-// ─── Progress Bar ─────────────────────────────────────────────────────────────
 function LiveBar({ label, value, color, count, delay = 0 }: { label: string; value: number; color: string; count: number; delay?: number }) {
   const [width, setWidth] = useState(0);
   useEffect(() => {
@@ -264,9 +332,13 @@ function LiveBar({ label, value, color, count, delay = 0 }: { label: string; val
   );
 }
 
-// ─── Activity Item ────────────────────────────────────────────────────────────
-function ActivityItem({ text, time, meta, type, index }: any) {
-  const colors: Record<string, string> = { success: "#34d399", warning: "#dba96a", info: "#6c72f3", danger: "#f87171" };
+function ActivityItem({ text, time, meta, type, index }: Activity & { index: number }) {
+  const colors: Record<string, string> = {
+    success: "#34d399",
+    warning: "#dba96a",
+    info: "#6c72f3",
+    danger: "#f87171",
+  };
   return (
     <div className="act-item" style={{ animationDelay: `${index * 0.07}s` }}>
       <div className="act-pip" style={{ background: colors[type] ?? colors.info }}>
@@ -283,29 +355,34 @@ function ActivityItem({ text, time, meta, type, index }: any) {
   );
 }
 
-// ─── Main Dashboard ───────────────────────────────────────────────────────────
 export const Dashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // ✅ Get permission state for this specific page
+  const { canEdit } = usePermission(location.pathname);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("month");
   const [now] = useState(new Date());
 
-  const [metrics, setMetrics] = useState({
+  const [metrics, setMetrics] = useState<Metrics>({
     totalOrders: 0, todayOrders: 0, yesterdayOrders: 0,
     inProgress: 0, pendingReview: 0, revenueToday: 0, revenueYesterday: 0,
     completed: 0, completedYesterday: 0,
   });
-  const [chartData, setChartData] = useState<{ label: string; value: number }[]>([]);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [workflow, setWorkflow] = useState([
+  const [chartData, setChartData] = useState<ChartPoint[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [workflow, setWorkflow] = useState<WorkflowStage[]>([
     { label: "Received & Sorted", key: "Pending", value: 0, count: 0, color: "#6c72f3" },
     { label: "Washing", key: "Washing", value: 0, count: 0, color: "#22d3ee" },
     { label: "Ironing", key: "Ironing", value: 0, count: 0, color: "#dba96a" },
     { label: "Ready for Delivery", key: "Ready", value: 0, count: 0, color: "#34d399" },
     { label: "Delivered", key: "Delivered", value: 0, count: 0, color: "#a78bfa" },
   ]);
-  const [services, setServices] = useState([
+  const [services, setServices] = useState<ServiceSegment[]>([
     { label: "Laundry", value: 42, color: "#6c72f3" },
     { label: "Cleaning", value: 28, color: "#22d3ee" },
     { label: "Fumigation", value: 18, color: "#dba96a" },
@@ -316,6 +393,8 @@ export const Dashboard = () => {
   const fetchData = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
+    setError(null);
+
     try {
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
       const yesterdayStart = new Date(now.getTime() - 86400000).toISOString();
@@ -326,93 +405,91 @@ export const Dashboard = () => {
         supabase.from("orders").select("id", { count: "exact", head: true }),
       ]);
 
-      if (!orders) return;
+      if (!orders) throw new Error("Failed to load orders");
 
-      const todayO = orders.filter((o: any) => new Date(o.created_at) >= new Date(todayStart));
-      const yestO  = orders.filter((o: any) => { const d = new Date(o.created_at); return d >= new Date(yesterdayStart) && d < new Date(todayStart); });
-      const completedToday = todayO.filter((o: any) => o.status === "Delivered").length;
-      const completedYest  = yestO.filter((o: any) => o.status === "Delivered").length;
+      const todayO = orders.filter((o: Order) => new Date(o.created_at) >= new Date(todayStart));
+      const yestO = orders.filter((o: Order) => {
+        const d = new Date(o.created_at);
+        return d >= new Date(yesterdayStart) && d < new Date(todayStart);
+      });
+      const completedToday = todayO.filter((o: Order) => o.status === "Delivered").length;
+      const completedYest = yestO.filter((o: Order) => o.status === "Delivered").length;
 
       setMetrics({
         totalOrders: totalOrders ?? 0,
         todayOrders: todayO.length,
         yesterdayOrders: yestO.length,
-        inProgress: orders.filter((o: any) => ["Washing","Ironing","Ready"].includes(o.status)).length,
-        pendingReview: orders.filter((o: any) => o.status === "Pending").length,
-        revenueToday: todayO.reduce((s: number, o: any) => s + (Number(o.amount_paid) || 0), 0),
-        revenueYesterday: yestO.reduce((s: number, o: any) => s + (Number(o.amount_paid) || 0), 0),
+        inProgress: orders.filter((o: Order) => ["Washing", "Ironing", "Ready"].includes(o.status)).length,
+        pendingReview: orders.filter((o: Order) => o.status === "Pending").length,
+        revenueToday: todayO.reduce((s: number, o: Order) => s + (Number(o.amount_paid) || 0), 0),
+        revenueYesterday: yestO.reduce((s: number, o: Order) => s + (Number(o.amount_paid) || 0), 0),
         completed: completedToday,
         completedYesterday: completedYest,
       });
 
-      // Chart
-      const daysMap = new Map<string, { label: string; value: number }>();
+      const daysMap = new Map<string, ChartPoint>();
       for (let i = rangeDays - 1; i >= 0; i--) {
         const d = new Date(now.getTime() - i * 86400000);
         const key = d.toISOString().split("T")[0];
         const lbl = rangeDays <= 7
           ? d.toLocaleDateString("en-US", { weekday: "short" })
           : rangeDays <= 30
-          ? d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-          : d.toLocaleDateString("en-US", { month: "short" });
+            ? d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+            : d.toLocaleDateString("en-US", { month: "short" });
         if (!daysMap.has(key)) daysMap.set(key, { label: lbl, value: 0 });
       }
-      orders.forEach((o: any) => {
+      orders.forEach((o: Order) => {
         const key = o.created_at.split("T")[0];
         const entry = daysMap.get(key);
         if (entry) entry.value++;
       });
-      const cd = Array.from(daysMap.values());
-      setChartData(cd);
+      setChartData(Array.from(daysMap.values()));
 
-      // Sparklines
       const last10: Record<string, number[]> = { orders: [], revenue: [], completed: [] };
       for (let i = 9; i >= 0; i--) {
         const d = new Date(now.getTime() - i * 86400000);
         const key = d.toISOString().split("T")[0];
-        const dayOrders = orders.filter((o: any) => o.created_at.startsWith(key));
+        const dayOrders = orders.filter((o: Order) => o.created_at.startsWith(key));
         last10.orders.push(dayOrders.length);
-        last10.revenue.push(dayOrders.reduce((s: number, o: any) => s + (Number(o.amount_paid) || 0), 0));
-        last10.completed.push(dayOrders.filter((o: any) => o.status === "Delivered").length);
+        last10.revenue.push(dayOrders.reduce((s: number, o: Order) => s + (Number(o.amount_paid) || 0), 0));
+        last10.completed.push(dayOrders.filter((o: Order) => o.status === "Delivered").length);
       }
       setSparklines(last10);
 
-      // Workflow
       const total = Math.max(orders.length, 1);
-      const counts: Record<string, number> = orders.reduce((a: any, o: any) => ({ ...a, [o.status]: (a[o.status] || 0) + 1 }), {});
+      const counts: Record<string, number> = orders.reduce((a: Record<string, number>, o: Order) => {
+        a[o.status] = (a[o.status] || 0) + 1;
+        return a;
+      }, {});
       setWorkflow(prev => prev.map(s => ({
-        ...s, count: counts[s.key] || 0,
+        ...s,
+        count: counts[s.key] || 0,
         value: Math.round(((counts[s.key] || 0) / total) * 100),
       })));
 
-      // ─── CONNECT SERVICE MIX TO SUPABASE (Live Data) ─────────────────
-      // ✅ Fixed version:
-const { data: orderItems, error } = await supabase
-  .from('order_items')
-  .select('service_id, quantity, services(name, category)')
-  .limit(500);
+      const { data: orderItems } = await supabase
+        .from("order_items")
+        .select("service_id, quantity, services(name, category)")
+        .limit(500);
 
-// 🔒 Guard against null/undefined
-const items = orderItems || [];
+      const items = orderItems || [];
 
-if (items.length > 0) {  // ✅ Check array length, not truthiness
-  const serviceCounts: Record<string, number> = {};
-  items.forEach((item: any) => {  // ✅ Use 'items', not 'orderItems'
-    const cat = item.services?.category || 'Other';
-    serviceCounts[cat] = (serviceCounts[cat] || 0) + (item.quantity || 1);
-  });
-  const colors = ['#6c72f3', '#22d3ee', '#dba96a', '#34d399', '#a78bfa'];
-  const totalSvc = Object.values(serviceCounts).reduce((a, b) => a + b, 0) || 1;
-  setServices(Object.entries(serviceCounts).slice(0, 4).map(([label, value], i) => ({
-    label,
-    value: Math.round(((value as number) / totalSvc) * 100),
-    color: colors[i % colors.length]
-  })));
-}
-      // ──────────────────────────────────────────────────────────────────────
+      if (items.length > 0) {
+        const serviceCounts: Record<string, number> = {};
+        items.forEach((item: OrderItem) => {
+          const cat = item.services?.category || "Other";
+          serviceCounts[cat] = (serviceCounts[cat] || 0) + (item.quantity || 1);
+        });
+        const colors = ["#6c72f3", "#22d3ee", "#dba96a", "#34d399", "#a78bfa"];
+        const totalSvc = Object.values(serviceCounts).reduce((a, b) => a + b, 0) || 1;
+        setServices(Object.entries(serviceCounts).slice(0, 4).map(([label, value], i) => ({
+          label,
+          value: Math.round(((value as number) / totalSvc) * 100),
+          color: colors[i % colors.length],
+        })));
+      }
 
-      // Activity
-      setActivities(orders.slice(0, 8).map((o: any) => ({
+      setActivities(orders.slice(0, 8).map((o: Order) => ({
         text: `Order ${o.order_id || "#???"}`,
         time: new Date(o.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         type: o.status === "Delivered" ? "success" : o.status === "Pending" ? "info" : o.status === "Cancelled" ? "danger" : "warning",
@@ -420,6 +497,8 @@ if (items.length > 0) {  // ✅ Check array length, not truthiness
       })));
 
     } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load dashboard data";
+      setError(message);
       console.error("Dashboard error:", err);
     } finally {
       setLoading(false);
@@ -427,73 +506,105 @@ if (items.length > 0) {  // ✅ Check array length, not truthiness
     }
   }, [timeRange, now]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  const fmt = (v: number) => `₵${v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-  const delta = (a: number, b: number) => b === 0 ? 0 : Math.round(((a - b) / b) * 100);
+  const fmt = useCallback((v: number) => {
+    return `₵${v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  }, []);
 
-  if (loading) return (
-    <div className="dash-loader">
-      <div className="loader-ring">
-        <div className="loader-inner">
-          <span className="loader-icon">◈</span>
+  const delta = useCallback((a: number, b: number) => {
+    return b === 0 ? 0 : Math.round(((a - b) / b) * 100);
+  }, []);
+
+  const statCards = useMemo(() => [
+    {
+      label: "Total Orders",
+      value: metrics.totalOrders,
+      icon: <ClipboardList size={22} />,
+      accent: "#6c72f3",
+      delta: delta(metrics.todayOrders, metrics.yesterdayOrders),
+      deltaLabel: `${metrics.todayOrders} today`,
+      sparkData: sparklines.orders,
+      delay: 0,
+    },
+    {
+      label: "In Progress",
+      value: metrics.inProgress,
+      icon: <Clock size={22} />,
+      accent: "#22d3ee",
+      delta: 0,
+      deltaLabel: `${metrics.pendingReview} pending review`,
+      sparkData: sparklines.orders?.map(v => Math.floor(v * 0.4)),
+      delay: 80,
+    },
+    {
+      label: "Completed Today",
+      value: metrics.completed,
+      icon: <CheckCircle2 size={22} />,
+      accent: "#34d399",
+      delta: delta(metrics.completed, metrics.completedYesterday),
+      deltaLabel: "vs yesterday",
+      sparkData: sparklines.completed,
+      delay: 160,
+    },
+    {
+      label: "Revenue Today",
+      value: metrics.revenueToday,
+      prefix: "₵",
+      icon: <DollarSign size={22} />,
+      accent: "#dba96a",
+      delta: delta(metrics.revenueToday, metrics.revenueYesterday),
+      deltaLabel: `${fmt(metrics.revenueToday - metrics.revenueYesterday)} vs yesterday`,
+      sparkData: sparklines.revenue,
+      delay: 240,
+    },
+  ], [metrics, sparklines, delta, fmt]);
+
+  const quickActions = useMemo(() => [
+    { icon: <ClipboardList size={20} />, label: "New Order", color: "#6c72f3", path: "/new-order" },
+    { icon: <Users size={20} />, label: "Add Client", color: "#22d3ee", path: "/clients" },
+    { icon: <Receipt size={20} />, label: "Receipts", color: "#dba96a", path: "/receipt" },
+    { icon: <BarChart3 size={20} />, label: "Reports", color: "#34d399", path: "/reports" },
+    { icon: <Shield size={20} />, label: "Staff", color: "#a78bfa", path: "/staff" },
+    { icon: <Settings size={20} />, label: "Settings", color: "#f87171", path: "/settings" },
+  ], []);
+
+  if (loading) {
+    return (
+      <div className="dash-loader">
+        <div className="loader-ring">
+          <div className="loader-inner">
+            <span className="loader-icon">◈</span>
+          </div>
+        </div>
+        <p className="loader-text">Loading Chapman Operations</p>
+        <p className="loader-sub">Syncing live data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="dash">
+        <div className="dash-grid-bg" aria-hidden />
+        <div className="dash-error">
+          <AlertCircle size={48} className="dash-error-icon" />
+          <div className="dash-error-title">Unable to load dashboard</div>
+          <div className="dash-error-text">{error}</div>
+          <button className="dash-error-retry" onClick={() => fetchData(true)}>
+            Try Again
+          </button>
         </div>
       </div>
-      <p className="loader-text">Loading Chapman Operations</p>
-      <p className="loader-sub">Syncing live data...</p>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="dash">
-      <style>{`
-        /* ✅ MOBILE TWEAKS (added only) */
-        @media (max-width: 1100px) {
-          /* Stack KPI cards in 2 columns instead of 4 */
-          .kpi-row { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-        
-        @media (max-width: 900px) {
-          /* Stack main grid vertically */
-          .mid-grid { grid-template-columns: 1fr !important; }
-          
-          /* Stack bottom grid vertically */
-          .bot-grid { grid-template-columns: 1fr !important; }
-          
-          /* Adjust header for mobile */
-          .dash-header {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 16px !important;
-            padding: 16px !important;
-          }
-          .dh-right { width: 100%; justify-content: space-between !important; }
-          
-          /* Make chart scrollable */
-          .area-chart-wrap { overflow-x: auto; }
-          
-          /* Ensure inputs are touch-friendly */
-          input, select, textarea { font-size: 16px !important; } /* Prevents iOS zoom */
-          button, [role="button"] { min-height: 44px !important; }
-        }
-        
-        @media (max-width: 480px) {
-          /* Further compact spacing */
-          .dash { padding: 12px !important; }
-          .panel { padding: 16px !important; }
-          
-          /* Hide less critical labels on very small screens */
-          .panel-sub { font-size: 11px !important; }
-          
-          /* Stack quick actions in 2 columns */
-          .qa-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-      `}</style>
-
-      {/* Background grid */}
       <div className="dash-grid-bg" aria-hidden />
 
-      {/* Header */}
       <header className="dash-header">
         <div className="dh-left">
           <div className="dh-eyebrow">
@@ -506,127 +617,141 @@ if (items.length > 0) {  // ✅ Check array length, not truthiness
           </p>
         </div>
         <div className="dh-right">
-          <button className={`refresh-btn ${refreshing ? "spinning" : ""}`} onClick={() => fetchData(true)} title="Refresh">
-            ↻
+          <button
+            className={`refresh-btn ${refreshing ? "spinning" : ""}`}
+            onClick={() => fetchData(true)}
+            title="Refresh"
+            aria-label="Refresh dashboard data"
+          >
+            <RefreshCw size={18} />
           </button>
           <div className="time-toggle">
             {(["week", "month", "year"] as const).map(r => (
-              <button key={r} className={`tt-btn ${timeRange === r ? "active" : ""}`} onClick={() => setTimeRange(r)}>
+              <button
+                key={r}
+                className={`tt-btn ${timeRange === r ? "active" : ""}`}
+                onClick={() => setTimeRange(r)}
+                aria-pressed={timeRange === r}
+              >
                 {r === "week" ? "7D" : r === "month" ? "30D" : "1Y"}
               </button>
             ))}
           </div>
-          <button className="btn-action" onClick={() => navigate("/new-order")}>
-            <span>＋</span> New Order
-          </button>
+          
+          {/* ✅ Only show "New Order" button if user has edit access */}
+          {canEdit && (
+            <button className="btn-action" onClick={() => navigate("/new-order")}>
+              <Plus size={16} />
+              New Order
+            </button>
+          )}
         </div>
       </header>
 
-      {/* KPI Cards */}
-      <section className="kpi-row">
-        <StatCard label="Total Orders" value={metrics.totalOrders} icon="📋" accent="#6c72f3"
-          delta={delta(metrics.todayOrders, metrics.yesterdayOrders)}
-          deltaLabel={`${metrics.todayOrders} today`}
-          sparkData={sparklines.orders} delay={0} />
-        <StatCard label="In Progress" value={metrics.inProgress} icon="⚡" accent="#22d3ee"
-          delta={0} deltaLabel={`${metrics.pendingReview} pending review`}
-          sparkData={sparklines.orders?.map(v => Math.floor(v * 0.4))} delay={80} />
-        <StatCard label="Completed Today" value={metrics.completed} icon="✅" accent="#34d399"
-          delta={delta(metrics.completed, metrics.completedYesterday)}
-          deltaLabel="vs yesterday"
-          sparkData={sparklines.completed} delay={160} />
-        <StatCard label="Revenue Today" value={metrics.revenueToday} prefix="₵" icon="💰" accent="#dba96a"
-          delta={delta(metrics.revenueToday, metrics.revenueYesterday)}
-          deltaLabel={`${fmt(metrics.revenueToday - metrics.revenueYesterday)} vs yesterday`}
-          sparkData={sparklines.revenue} delay={240} />
-      </section>
+      {/* ✅ Wrap main content in PermissionGuard to show "View-only" banner if needed */}
+      <PermissionGuard>
+        <section className="kpi-row">
+          {statCards.map((card) => (
+            <StatCard key={card.label} {...card} />
+          ))}
+        </section>
 
-      {/* Main Grid */}
-      <section className="mid-grid">
-        {/* Chart */}
-        <div className="panel chart-panel">
-          <div className="panel-head">
-            <div>
-              <div className="panel-title">Order Volume</div>
-              <div className="panel-sub">
-                {chartData.reduce((s, d) => s + d.value, 0)} orders in the last {timeRange === "week" ? "7 days" : timeRange === "month" ? "30 days" : "year"}
+        <section className="mid-grid">
+          <div className="panel chart-panel">
+            <div className="panel-head">
+              <div>
+                <div className="panel-title">Order Volume</div>
+                <div className="panel-sub">
+                  {chartData.reduce((s, d) => s + d.value, 0)} orders in the last {timeRange === "week" ? "7 days" : timeRange === "month" ? "30 days" : "year"}
+                </div>
               </div>
             </div>
+            <AreaChart data={chartData} timeRange={timeRange} />
           </div>
-          <AreaChart data={chartData} timeRange={timeRange} />
-        </div>
 
-        {/* Service Donut */}
-        <div className="panel donut-panel">
-          <div className="panel-head">
-            <div className="panel-title">Service Mix</div>
-            <div className="panel-sub">By order volume</div>
+          <div className="panel donut-panel">
+            <div className="panel-head">
+              <div className="panel-title">Service Mix</div>
+              <div className="panel-sub">By order volume</div>
+            </div>
+            <div className="donut-wrap">
+              <DonutChart segments={services} />
+            </div>
+            <div className="donut-legend">
+              {services.map((s, i) => (
+                <div key={s.label} className="dl-row">
+                  <span className="dl-dot" style={{ background: s.color }} />
+                  <span className="dl-name">{s.label}</span>
+                  <span className="dl-val">{s.value}%</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="donut-wrap">
-            <DonutChart segments={services} />
-          </div>
-          <div className="donut-legend">
-            {services.map((s, i) => (
-              <div key={i} className="dl-row">
-                <span className="dl-dot" style={{ background: s.color }} />
-                <span className="dl-name">{s.label}</span>
-                <span className="dl-val">{s.value}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Bottom Grid */}
-      <section className="bot-grid">
-        {/* Workflow */}
-        <div className="panel">
-          <div className="panel-head">
-            <div className="panel-title">Live Workflow</div>
-            <div className="panel-sub">Real-time stage distribution</div>
+        <section className="bot-grid">
+          <div className="panel">
+            <div className="panel-head">
+              <div className="panel-title">Live Workflow</div>
+              <div className="panel-sub">Real-time stage distribution</div>
+            </div>
+            <div className="workflow-list">
+              {workflow.map((s, i) => (
+                <LiveBar key={s.key} label={s.label} value={s.value} count={s.count} color={s.color} delay={i * 80} />
+              ))}
+            </div>
           </div>
-          <div className="workflow-list">
-            {workflow.map((s, i) => (
-              <LiveBar key={i} label={s.label} value={s.value} count={s.count} color={s.color} delay={i * 80} />
-            ))}
-          </div>
-        </div>
 
-        {/* Activity */}
-        <div className="panel">
-          <div className="panel-head">
-            <div className="panel-title">Activity Feed</div>
-            <button className="panel-link" onClick={() => navigate("/orders")}>View all →</button>
-          </div>
-          <div className="act-list">
-            {activities.length === 0 && <div className="act-empty">No recent activity</div>}
-            {activities.map((a, i) => <ActivityItem key={i} {...a} index={i} />)}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="panel qa-panel">
-          <div className="panel-head">
-            <div className="panel-title">Quick Actions</div>
-          </div>
-          <div className="qa-grid">
-            {[
-              { icon: "📋", label: "New Order",  color: "#6c72f3", path: "/new-order" },
-              { icon: "👥", label: "Add Client",  color: "#22d3ee", path: "/clients" },
-              { icon: "🧾", label: "Receipts",    color: "#dba96a", path: "/receipt" },
-              { icon: "📊", label: "Reports",     color: "#34d399", path: "/reports" },
-              { icon: "👷", label: "Staff",        color: "#a78bfa", path: "/staff" },
-              { icon: "⚙️", label: "Settings",    color: "#f87171", path: "/settings" },
-            ].map((a, i) => (
-              <button key={i} className="qa-btn" style={{ "--qa-color": a.color } as any} onClick={() => navigate(a.path)}>
-                <div className="qa-icon">{a.icon}</div>
-                <span className="qa-label">{a.label}</span>
-                <div className="qa-arrow">→</div>
+          <div className="panel">
+            <div className="panel-head">
+              <div className="panel-title">Activity Feed</div>
+              <button className="panel-link" onClick={() => navigate("/orders")}>
+                View all <ArrowRight size={14} />
               </button>
-            ))}
+            </div>
+            <div className="act-list">
+              {activities.length === 0 && (
+                <div className="act-empty-state">
+                  <Inbox size={32} />
+                  <span>No recent activity</span>
+                </div>
+              )}
+              {activities.map((a, i) => (
+                <ActivityItem key={i} {...a} index={i} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+
+          <div className="panel qa-panel">
+            <div className="panel-head">
+              <div className="panel-title">Quick Actions</div>
+            </div>
+            <div className="qa-grid">
+              {quickActions.map((a) => {
+                // ✅ Hide creation/editing actions if user only has view access
+                if ((a.label === "New Order" || a.label === "Add Client") && !canEdit) return null;
+                
+                return (
+                  <button
+                    key={a.label}
+                    className="qa-btn"
+                    style={{ "--qa-color": a.color } as React.CSSProperties}
+                    onClick={() => navigate(a.path)}
+                  >
+                    <div className="qa-icon-lucide" style={{ color: a.color }}>{a.icon}</div>
+                    <span className="qa-label">{a.label}</span>
+                    <div className="qa-arrow">
+                      <ArrowRight size={14} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      </PermissionGuard>
     </div>
   );
 };
+
+export default Dashboard;

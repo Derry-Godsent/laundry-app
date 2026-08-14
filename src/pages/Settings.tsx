@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
-import { useLocation } from "react-router-dom"; // ✅ Added for permission hook
+import { useLocation } from "react-router-dom";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
 import {
-  Building2, Shield, Bell, Database, Save, Upload, Download, AlertCircle, Check, Globe, Lock, Eye, EyeOff, WifiOff, RefreshCw
+  Building2, Shield, Database, Save, Upload, Download, 
+  AlertCircle, Check, Globe, Lock, Eye, EyeOff, WifiOff, RefreshCw, X
 } from "lucide-react";
-import { usePermission } from "../hooks/usePermission"; // ✅ Added
-import { PermissionGuard } from "../components/PermissionGuard"; // ✅ Added
+import { usePermission } from "../hooks/usePermission";
+import { PermissionGuard } from "../components/PermissionGuard";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const T = {
@@ -22,19 +23,28 @@ const T = {
 const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
 const MONO = "'DM Mono', 'Fira Mono', ui-monospace, monospace";
 
-const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "10px 12px", background: T.bgSurface,
-  border: `1px solid ${T.borderSoft}`, borderRadius: 8,
-  color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT
-};
-
-const labelStyle: React.CSSProperties = {
-  fontSize: 11, color: T.textTert, marginBottom: 6,
-  textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT
-};
-
+/* ─── SUB-COMPONENTS ────────────────────────────────────────── */
+function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error"; onClose: () => void }) {
+  useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
+  return (
+    <div style={{ 
+      position: "fixed", bottom: 24, right: 24, zIndex: 10000, 
+      background: type === "success" ? T.emeraldDim : T.dangerDim, 
+      border: `1px solid ${type === "success" ? T.emeraldBord : T.dangerBord}`, 
+      borderRadius: 12, padding: "12px 18px", display: "flex", alignItems: "center", gap: 12, 
+      boxShadow: "0 8px 32px rgba(0,0,0,.4)", animation: "csFadeUp 0.3s cubic-bezier(.4,0,.2,1)", whiteSpace: "nowrap" 
+    }}>
+      {type === "success" ? <Check size={15} color={T.emerald} /> : <AlertCircle size={15} color={T.danger} />}
+      <span style={{ fontSize: 13.5, fontWeight: 500, color: type === "success" ? T.emerald : T.danger, fontFamily: FONT }}>{msg}</span>
+      <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6, display: "flex", alignItems: "center", transition: "opacity 0.15s" }}>
+        <X size={13} />
+      </button>
+    </div>
+  );
+}
+/* ─── MAIN COMPONENT ────────────────────────────────────────── */
 export const Settings = () => {
-  const location = useLocation(); // ✅ Added for permission hook
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("profile");
   const [saved, setSaved] = useState(false);
   const [showPass, setShowPass] = useState(false);
@@ -42,6 +52,7 @@ export const Settings = () => {
   const [isOffline, setIsOffline] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [retrying, setRetrying] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const [config, setConfig] = useState({
     name: "Chapman Prestige Limited",
@@ -54,18 +65,23 @@ export const Settings = () => {
     autoBackup: true
   });
 
-  // ✅ Permission hook for guard
   const { permission, loading: permLoading, canEdit } = usePermission(location.pathname);
 
-  const fetchSettings = useCallback(async () => {
+    const fetchSettings = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('settings')
-        .select('*')
-        .maybeSingle();
-
-      if (error) throw error;
+      const { data, error } = await supabase.from('settings').select('*').maybeSingle();
+      
+      if (error) {
+        // Only mark as offline if it's a genuine network failure
+        if (error.message.includes('Failed to fetch') || !navigator.onLine) {
+          setIsOffline(true);
+        } else {
+          console.warn('Settings fetch error (likely missing table or permissions):', error);
+          setIsOffline(false); 
+        }
+        return;
+      }
 
       if (data) {
         setConfig(prev => ({
@@ -81,9 +97,14 @@ export const Settings = () => {
         }));
       }
       setIsOffline(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Settings fetch error:', err);
-      setIsOffline(true);
+      // Fallback network check for unexpected errors
+      if (err.message?.includes('Failed to fetch') || !navigator.onLine) {
+        setIsOffline(true);
+      } else {
+        setIsOffline(false);
+      }
     } finally {
       setLoading(false);
       setRetrying(false);
@@ -111,10 +132,12 @@ export const Settings = () => {
 
       if (error) throw error;
       setIsOffline(false);
+      setToast({ msg: "Settings saved successfully", type: "success" });
     } catch (err) {
       console.error('Settings save error:', err);
       setIsOffline(true);
       setSaveError(true);
+      setToast({ msg: "Failed to save settings", type: "error" });
     } finally {
       setTimeout(() => setSaved(false), 2500);
     }
@@ -139,9 +162,23 @@ export const Settings = () => {
       a.download = `chapman-export-${type}-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      setToast({ msg: "Data exported successfully", type: "success" });
     } catch (err) {
       console.error('Export error:', err);
       setIsOffline(true);
+      setToast({ msg: "Failed to export data", type: "error" });
+    }
+  };
+
+  const handleImport = async (file: File) => {
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      console.log('Imported data:', data);
+      setToast({ msg: "Data imported successfully", type: "success" });
+    } catch (err) {
+      console.error('Import error:', err);
+      setToast({ msg: "Invalid file format", type: "error" });
     }
   };
 
@@ -152,9 +189,12 @@ export const Settings = () => {
 
   const toggleStyle = (active: boolean): React.CSSProperties => ({
     position: "relative", display: "inline-block", width: 40, height: 22,
-    cursor: "pointer", borderRadius: 20, background: active ? T.emerald : T.bgElevated,
-    border: `1px solid ${active ? T.emeraldBord : T.borderSoft}`, transition: "background 0.25s ease, border-color 0.25s ease",
+    cursor: canEdit ? "pointer" : "not-allowed", borderRadius: 20, 
+    background: active ? T.emerald : T.bgElevated,
+    border: `1px solid ${active ? T.emeraldBord : T.borderSoft}`, 
+    transition: "background 0.25s ease, border-color 0.25s ease",
     boxShadow: active ? `0 0 0 4px ${T.emeraldDim}` : "none",
+    opacity: canEdit ? 1 : 0.7
   });
 
   const thumbStyle = (active: boolean): React.CSSProperties => ({
@@ -164,6 +204,20 @@ export const Settings = () => {
     boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
   });
 
+  const inputStyle: React.CSSProperties = {
+    width: "100%", padding: "10px 12px", background: T.bgSurface,
+    border: `1px solid ${T.borderSoft}`, borderRadius: 8,
+    color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT,
+    transition: "border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
+    opacity: canEdit ? 1 : 0.6,
+    cursor: canEdit ? "text" : "not-allowed"
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: 11, color: T.textTert, marginBottom: 6,
+    textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT
+  };
+
   const tabs = [
     { id: "profile", label: "Business Profile", icon: Building2 },
     { id: "rules", label: "Pricing & Rules", icon: Shield },
@@ -171,7 +225,6 @@ export const Settings = () => {
     { id: "data", label: "Data & Backup", icon: Database },
   ];
 
-  // ✅ Wait for both data AND permissions to load
   if (loading || permLoading) return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center", justifyContent: "center", height: "100vh", color: T.textTert, fontFamily: FONT, background: T.bgBase }}>
       <div className="cs-spinner" />
@@ -184,7 +237,7 @@ export const Settings = () => {
   );
 
   return (
-    <div className="cs-root" style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary }}>
+    <div className="cs-root" style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary, position: "relative" }}>
       <style>{`
         @keyframes csFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes csSpin { to { transform: rotate(360deg); } }
@@ -236,8 +289,6 @@ export const Settings = () => {
           .cs-header-inner { flex-direction: column; align-items: flex-start !important; gap: 12px; }
           .cs-tabs { overflow-x: auto; }
         }
-
-        /* ✅ MOBILE TWEAKS (added only) */
         @media (max-width: 480px) {
           .cs-grid-2 { grid-template-columns: 1fr !important; }
           .cs-tabs { padding: 0 16px !important; }
@@ -248,7 +299,8 @@ export const Settings = () => {
         }
       `}</style>
 
-      {/* HEADER */}
+      {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
+
       <div className="cs-header" style={{ borderBottom: `1px solid ${T.borderFaint}`, position: "relative", overflow: "hidden" }}>
         <div className="cs-aurora" />
         <div className="cs-header-inner" style={{ position: "relative", zIndex: 1, padding: "20px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -277,7 +329,6 @@ export const Settings = () => {
         </div>
       </div>
 
-      {/* OFFLINE BANNER */}
       {isOffline && (
         <div className="cs-offline-banner" style={{
           background: T.dangerDim, borderBottom: `1px solid ${T.dangerBord}`,
@@ -300,7 +351,6 @@ export const Settings = () => {
         </div>
       )}
 
-      {/* TABS */}
       <div className="cs-tabs" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "0 32px", display: "flex", gap: 4 }}>
         {tabs.map(tab => (
           <button
@@ -318,30 +368,28 @@ export const Settings = () => {
         ))}
       </div>
 
-      {/* CONTENT - Wrapped with PermissionGuard */}
       <PermissionGuard>
-        <div style={{ padding: "32px", maxWidth: 900 }}>
+        <div style={{ padding: "32px", maxWidth: 900, margin: "0 auto", overflowY: "auto" }}>
 
-          {/* BUSINESS PROFILE */}
           {activeTab === "profile" && (
             <div key="profile" className="cs-panel" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div className="cs-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div>
                   <div style={labelStyle}>Business Name</div>
-                  <input className="cs-input" value={config.name} onChange={e => setConfig(p => ({...p, name: e.target.value}))} style={inputStyle} />
+                  <input className="cs-input" value={config.name} onChange={e => setConfig(p => ({...p, name: e.target.value}))} style={inputStyle} disabled={!canEdit} />
                 </div>
                 <div>
                   <div style={labelStyle}>Primary Phone</div>
-                  <input className="cs-input" value={config.phone} onChange={e => setConfig(p => ({...p, phone: e.target.value}))} style={inputStyle} />
+                  <input className="cs-input" value={config.phone} onChange={e => setConfig(p => ({...p, phone: e.target.value}))} style={inputStyle} disabled={!canEdit} />
                 </div>
               </div>
               <div>
                 <div style={labelStyle}>Business Address</div>
-                <input className="cs-input" value={config.address} onChange={e => setConfig(p => ({...p, address: e.target.value}))} style={inputStyle} />
+                <input className="cs-input" value={config.address} onChange={e => setConfig(p => ({...p, address: e.target.value}))} style={inputStyle} disabled={!canEdit} />
               </div>
               <div>
                 <div style={labelStyle}>Contact Email</div>
-                <input className="cs-input" value={config.email} onChange={e => setConfig(p => ({...p, email: e.target.value}))} style={inputStyle} />
+                <input className="cs-input" value={config.email} onChange={e => setConfig(p => ({...p, email: e.target.value}))} style={inputStyle} disabled={!canEdit} />
               </div>
               <div className="cs-card" style={{ padding: 16, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -378,13 +426,12 @@ export const Settings = () => {
             </div>
           )}
 
-          {/* PRICING & RULES */}
           {activeTab === "rules" && (
             <div key="rules" className="cs-panel" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div className="cs-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div>
                   <div style={labelStyle}>Express Surcharge (GH₵)</div>
-                  <input className="cs-input" type="number" value={config.expressSurcharge} onChange={e => setConfig(p => ({...p, expressSurcharge: Number(e.target.value)}))} style={inputStyle} />
+                  <input className="cs-input" type="number" value={config.expressSurcharge} onChange={e => setConfig(p => ({...p, expressSurcharge: Number(e.target.value)}))} style={inputStyle} disabled={!canEdit} />
                 </div>
                 <div>
                   <div style={labelStyle}>Standard Turnaround</div>
@@ -411,7 +458,6 @@ export const Settings = () => {
             </div>
           )}
 
-          {/* LOYALTY TIERS */}
           {activeTab === "loyalty" && (
             <div key="loyalty" className="cs-panel" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div className="cs-card" style={{ padding: 16, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 10 }}>
@@ -420,10 +466,10 @@ export const Settings = () => {
                 </div>
                 {[
                   { tier: "Standard", visits: "< 5 visits", discount: "0%", color: T.textTert, icon: "○" },
-                  { tier: "Bronze 🥉", visits: "5 – 14 visits", discount: "5% Off", color: "#cd8a44", icon: "🥉" },
-                  { tier: "Silver 🥈", visits: "15 – 29 visits", discount: "10% Off", color: "#94a3b8", icon: "🥈" },
-                  { tier: "Gold 🥇", visits: "30+ visits", discount: "15% Off + Free Delivery", color: T.gold, icon: "🥇" },
-                  { tier: "VIP 👑", visits: "Management Designated", discount: "20% Off + Door-to-Door", color: "#a78bfa", icon: "👑" },
+                  { tier: "Bronze", visits: "5 – 14 visits", discount: "5% Off", color: "#cd8a44", icon: "🥉" },
+                  { tier: "Silver", visits: "15 – 29 visits", discount: "10% Off", color: "#94a3b8", icon: "🥈" },
+                  { tier: "Gold", visits: "30+ visits", discount: "15% Off + Free Delivery", color: T.gold, icon: "🥇" },
+                  { tier: "VIP", visits: "Management Designated", discount: "20% Off + Door-to-Door", color: "#a78bfa", icon: "👑" },
                 ].map((l, i) => (
                   <div key={l.tier} className="cs-loyalty-row" style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -448,7 +494,6 @@ export const Settings = () => {
             </div>
           )}
 
-          {/* DATA & BACKUP */}
           {activeTab === "data" && (
             <div key="data" className="cs-panel" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div className="cs-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
@@ -457,7 +502,7 @@ export const Settings = () => {
                     <Download size={18} color={T.accent} />
                     <div style={{ fontSize: 15, fontWeight: 600, fontFamily: FONT }}>Export Data</div>
                   </div>
-                  <div style={{ fontSize: 13, color: T.textTert, marginBottom: 16, fontFamily: FONT }}>Client, order, and pricing data in CSV or JSON format.</div>
+                  <div style={{ fontSize: 13, color: T.textTert, marginBottom: 16, fontFamily: FONT }}>Client, order, and pricing data in JSON format.</div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button 
                       onClick={() => canEdit && handleExport('clients')}
@@ -511,15 +556,7 @@ export const Settings = () => {
                       input.accept = '.json';
                       input.onchange = async (e: any) => {
                         const file = e.target.files?.[0];
-                        if (!file) return;
-                        const text = await file.text();
-                        try {
-                          const data = JSON.parse(text);
-                          console.log('Imported data:', data);
-                          alert('Import complete.');
-                        } catch (err) {
-                          alert('Invalid file format');
-                        }
+                        if (file) await handleImport(file);
                       };
                       input.click();
                     }}
@@ -548,11 +585,7 @@ export const Settings = () => {
                   <div style={{ fontSize: 12, color: T.textTert, marginTop: 2, fontFamily: FONT }}>Daily at 11:59 PM</div>
                 </div>
                 <div
-                  style={{
-                    ...toggleStyle(config.autoBackup),
-                    opacity: canEdit ? 1 : 0.7,
-                    cursor: canEdit ? "pointer" : "not-allowed"
-                  }}
+                  style={toggleStyle(config.autoBackup)}
                   onClick={() => canEdit && setConfig(p => ({...p, autoBackup: !p.autoBackup}))}
                 >
                   <div style={thumbStyle(config.autoBackup)} />

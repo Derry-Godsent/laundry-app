@@ -9,7 +9,7 @@
   border: 1px solid transparent;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   transform: translateZ(0);
 }
 
@@ -20,6 +20,11 @@
 }
 
 .profile-trigger:active { transform: translateY(0); }
+
+.profile-trigger:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
 
 .profile-avatar {
   width: 32px;
@@ -65,6 +70,17 @@
   font-weight: 500;
 }
 
+/* Mobile: collapse to avatar only */
+@media (max-width: 480px) {
+  .profile-trigger {
+    padding: 4px;
+    gap: 0;
+  }
+  .profile-info {
+    display: none;
+  }
+}
+
 .profile-dropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -75,7 +91,7 @@
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   padding: 6px;
-  z-index: 50;
+  z-index: 9999;
   animation: slideDown 0.2s ease;
   overflow: hidden;
 }
@@ -97,17 +113,19 @@
   color: #8b8f99;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
   transform: translateZ(0);
 }
 
 .profile-menu-item:hover {
   background: #1a1d26;
   color: #ffffff;
-  transform: translateX(2px);
 }
 
-.profile-menu-item:active { transform: translateX(0); }
+.profile-menu-item:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
 
 .profile-menu-item.logout { color: #ef4444; }
 .profile-menu-item.logout:hover {
@@ -115,8 +133,31 @@
   color: #f87171;
 }
 
+.profile-menu-item.logout:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
 .profile-divider {
   height: 1px;
   margin: 6px 0;
   background: linear-gradient(to right, transparent, #1e212b, transparent);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .profile-trigger,
+  .profile-avatar,
+  .profile-menu-item {
+    transition: none;
+  }
+  .profile-dropdown {
+    animation: none;
+  }
+  .profile-trigger:hover {
+    transform: none;
+  }
+  .profile-trigger:active {
+    transform: none;
+  }
 }

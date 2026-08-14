@@ -1,16 +1,15 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { useLocation } from "react-router-dom"; // ✅ Added for permission hook
+import { useLocation } from "react-router-dom";
 import {
   Search, Plus, X, Check, AlertCircle, Building2, Edit2, Package,
   Shirt, Star, Layers, Home, Sparkles, Wind, Grid, SprayCan, Car,
-  Droplets, Trash2, WifiOff, RefreshCw, Loader2, Clock
+  Droplets, Trash2, WifiOff, RefreshCw, Loader2, Clock, Download
 } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
-import { usePermission } from "../hooks/usePermission"; // ✅ Added
-import { PermissionGuard } from "../components/PermissionGuard"; // ✅ Added
+import { usePermission } from "../hooks/usePermission";
+import { PermissionGuard } from "../components/PermissionGuard";
 
-/* ─── TOKENS (bolder / higher-contrast pass) ─────────────────── */
 const T = {
   bgBase:      "#050609",
   bgSurface:   "#0a0c14",
@@ -59,7 +58,6 @@ const T = {
 const FONT = "'DM Sans','Inter',system-ui,sans-serif";
 const MONO = "'DM Mono','Fira Mono',ui-monospace,monospace";
 
-/* ─── GLOBAL CSS (animations + hover classes) ───────────────── */
 const GLOBAL_CSS = `
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -162,22 +160,20 @@ const GLOBAL_CSS = `
   .svc-badge-pill { display: none !important; }
 }
 
+@media (max-width: 720px) {
+  .svc-header-row { padding: 16px !important; }
+  .svc-stats-grid { grid-template-columns: 1fr !important; }
+  .svc-catalog-grid { min-width: 260px !important; }
+  .svc-corp-grid { min-width: 280px !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .svc-aurora, .svc-card, .corp-card, .modal-back, .modal-box, .svc-toast,
   .svc-offline-bar, .svc-skeleton, .svc-spinner { animation: none !important; }
   .svc-card:hover, .corp-card:hover { transform: none !important; }
 }
-
-/* MOBILE TWEAKS (added only) */
-@media (max-width: 720px) {
-  .svc-header-row { padding: 16px !important; }
-  .svc-stats-grid { grid-template-columns: 1fr !important; }
-  .svc-catalog-grid { min-width: 280px !important; }
-  .svc-corp-grid { min-width: 280px !important; }
-}
 `;
 
-/* ─── CONSTANTS ─────────────────────────────────────────────── */
 const EXPRESS = 10;
 
 const LOYALTY = [
@@ -188,7 +184,6 @@ const LOYALTY = [
   { name:"VIP",      visits:"By management", discount:20, color:"#c084ff" },
 ];
 
-/* Super-category config — each has a color accent for its tab indicator */
 const SUPER_CATS = [
   { key:"all",        label:"All Services",  icon:Grid,     color:T.accent,   dim:T.accentDim,   bord:T.accentBord   },
   { key:"laundry",    label:"Laundry",       icon:Shirt,    color:T.sky,      dim:T.skyDim,      bord:T.skyBord      },
@@ -213,17 +208,11 @@ const CATS_BY_SUPER: Record<string,string[]> = {
   car:        ["Exterior","Interior","Full Detail"],
 };
 
-/* ─── TYPES ─────────────────────────────────────────────────── */
 interface Prices { wash:number; iron:number; fold:number; hang:number }
 interface Service { id:string; name:string; category:string; superCat:string; prices:Prices }
 interface Client  { id:string; name:string; type:string; billing:string; discount:string; active:boolean; contractRef:string; notes:string }
 interface Toast { msg:string; type:'success'|'error' }
 
-/* ─── LOCAL FALLBACK DATA (used only until the server responds) ─ */
-// ❌ REMOVED: const INIT_SERVICES: Service[] = [...] — no more generic data
-// ❌ REMOVED: const INIT_CLIENTS: Client[] = [...] — no more generic data
-
-/* ─── SMALL HOOK: animated count-up for stat numbers ─────────── */
 function useCountUp(target: number, duration = 600) {
   const [value, setValue] = useState(0);
   const startRef = useRef<number | null>(null);
@@ -243,7 +232,6 @@ function useCountUp(target: number, duration = 600) {
   return value;
 }
 
-/* PRICE CHIP */
 const Chip = ({ label, value, accent }: { label:string; value:number; accent?:string }) => (
   <div style={{ flex:1, minWidth:0, background:T.bgElevated,
     border:`1px solid ${T.borderFaint}`, borderRadius:8,
@@ -259,7 +247,6 @@ const Chip = ({ label, value, accent }: { label:string; value:number; accent?:st
   </div>
 );
 
-/* ─── OFFLINE BANNER ─────────────────────────────────────────── */
 const OfflineBanner = ({ onRetry, retrying, lastSynced }: { onRetry:()=>void; retrying:boolean; lastSynced: Date | null }) => (
   <div className="svc-offline-bar" style={{
     background: "linear-gradient(90deg, rgba(255,96,96,0.14), rgba(255,96,96,0.06))",
@@ -285,7 +272,6 @@ const OfflineBanner = ({ onRetry, retrying, lastSynced }: { onRetry:()=>void; re
   </div>
 );
 
-/* ─── SERVICE CARD ──────────────────────────────────────────── */
 const ServiceCard = ({ item, onEdit, superConf, index }: {
   item: Service;
   onEdit: (s:Service)=>void;
@@ -302,11 +288,9 @@ const ServiceCard = ({ item, onEdit, superConf, index }: {
         flexDirection:"column", gap:11, cursor:"default", position:"relative",
         animationDelay:`${Math.min(index,16)*22}ms` }}>
 
-      {/* left accent bar */}
       <div style={{ position:"absolute", left:0, top:0, bottom:0, width:3,
         background: superConf.color, opacity:0.7 }} />
 
-      {/* top row */}
       <div style={{ display:"flex", alignItems:"flex-start", gap:11 }}>
         <div style={{ width:36, height:36, borderRadius:9, flexShrink:0,
           background: `linear-gradient(135deg, ${superConf.dim}, transparent)`,
@@ -334,7 +318,6 @@ const ServiceCard = ({ item, onEdit, superConf, index }: {
         </button>
       </div>
 
-      {/* price chips */}
       {isLaundry ? (
         <div style={{ display:"flex", gap:5 }}>
           <Chip label="Wash" value={item.prices.wash} />
@@ -348,7 +331,6 @@ const ServiceCard = ({ item, onEdit, superConf, index }: {
         </div>
       )}
 
-      {/* footer */}
       <div style={{ display:"flex", justifyContent:"space-between",
         alignItems:"center", paddingTop:8, borderTop:`1px solid ${T.borderFaint}` }}>
         {isLaundry ? (
@@ -373,7 +355,6 @@ const ServiceCard = ({ item, onEdit, superConf, index }: {
   );
 };
 
-/* ─── EDIT MODAL ────────────────────────────────────────────── */
 const EditModal = ({ item, onSave, onClose, saving }: {
   item: Service; onSave:(p:Prices)=>void; onClose:()=>void; saving:boolean;
 }) => {
@@ -523,7 +504,6 @@ const EditModal = ({ item, onSave, onClose, saving }: {
   );
 };
 
-/* ─── ADD ITEM MODAL ────────────────────────────────────────── */
 const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
   onClose:()=>void; onAdd:(s:Service)=>void; defaultSuper?:string; adding:boolean;
 }) => {
@@ -580,7 +560,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
               className="price-input"
               style={{ width:"100%", padding:"10px 13px",
                 background:T.bgSurface, border:`1px solid ${T.borderMid}`,
-                borderRadius:8, color:T.textPrimary, fontSize:14,
+                borderRadius:8, color:T.textPrimary, fontSize:16,
                 outline:"none", fontFamily:FONT }}
             />
           </div>
@@ -592,7 +572,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
               <select value={superCat} onChange={e=>handleSuperChange(e.target.value)}
                 style={{ width:"100%", padding:"9px 12px",
                   background:T.bgSurface, border:`1px solid ${T.borderMid}`,
-                  borderRadius:8, color:T.textPrimary, fontSize:13,
+                  borderRadius:8, color:T.textPrimary, fontSize:16,
                   outline:"none", fontFamily:FONT }}>
                 {SUPER_CATS.filter((c: typeof SUPER_CATS[0])=>c.key!=="all").map(c=>(
                   <option key={c.key} value={c.key}>{c.label}</option>
@@ -606,7 +586,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
               <select value={cat} onChange={e=>setCat(e.target.value)}
                 style={{ width:"100%", padding:"9px 12px",
                   background:T.bgSurface, border:`1px solid ${T.borderMid}`,
-                  borderRadius:8, color:T.textPrimary, fontSize:13,
+                  borderRadius:8, color:T.textPrimary, fontSize:16,
                   outline:"none", fontFamily:FONT }}>
                 {(CATS_BY_SUPER[superCat]||[]).map(c=>(
                   <option key={c} value={c}>{c}</option>
@@ -673,16 +653,55 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
   );
 };
 
-/* ─── MAIN ──────────────────────────────────────────────────── */
+const AddCorporateClientModal = ({ onClose, onAdd, adding }: {
+  onClose:()=>void; onAdd:(c:Partial<Client>)=>void; adding:boolean;
+}) => {
+  const [name, setName] = useState("");
+  const [notes, setNotes] = useState("");
+
+  return (
+    <div className="modal-back" onClick={e=>{if(e.target===e.currentTarget)onClose();}} style={{ position:"fixed", inset:0, zIndex:9999, background:"rgba(3,5,10,0.82)", display:"flex", alignItems:"center", justifyContent:"center", padding:"20px" }}>
+      <div className="modal-box" style={{ background:T.bgRaised, border:`1px solid ${T.borderMid}`, borderRadius:16, width:460, maxWidth:"94vw", display:"flex", flexDirection:"column", boxShadow:"0 28px 70px rgba(0,0,0,0.55)" }}>
+        <div style={{ padding:"20px 24px 16px", borderBottom:`1px solid ${T.borderFaint}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+          <div>
+            <div style={{ fontSize:16, fontWeight:700, color:T.textPrimary, fontFamily:FONT }}>Add Corporate Client</div>
+            <div style={{ fontSize:11, color:T.textTert, marginTop:3, fontFamily:FONT }}>New contract-based account</div>
+          </div>
+          <button onClick={onClose} style={{ width:32, height:32, borderRadius:8, border:`1px solid ${T.borderSoft}`, background:"transparent", color:T.textSec, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}><X size={15}/></button>
+        </div>
+        <div style={{ padding:"20px 24px", display:"flex", flexDirection:"column", gap:14 }}>
+          <div>
+            <div style={{ fontSize:11, color:T.textTert, marginBottom:6, fontFamily:FONT }}>Company Name</div>
+            <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. St. Martins Hospital" className="price-input" style={{ width:"100%", padding:"10px 13px", background:T.bgSurface, border:`1px solid ${T.borderMid}`, borderRadius:8, color:T.textPrimary, fontSize:16, outline:"none", fontFamily:FONT }} />
+          </div>
+          <div>
+            <div style={{ fontSize:11, color:T.textTert, marginBottom:6, fontFamily:FONT }}>Notes (Optional)</div>
+            <input value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Contract details..." className="price-input" style={{ width:"100%", padding:"10px 13px", background:T.bgSurface, border:`1px solid ${T.borderMid}`, borderRadius:8, color:T.textPrimary, fontSize:16, outline:"none", fontFamily:FONT }} />
+          </div>
+        </div>
+        <div style={{ padding:"14px 24px", borderTop:`1px solid ${T.borderFaint}`, display:"flex", justifyContent:"flex-end", gap:10 }}>
+          <button className="btn-ghost" onClick={onClose} style={{ padding:"9px 20px", background:"transparent", border:`1px solid ${T.borderSoft}`, borderRadius:8, color:T.textSec, fontSize:13.5, fontWeight:500, cursor:"pointer", fontFamily:FONT }}>Cancel</button>
+          <button className="btn-accent" disabled={adding} onClick={()=>{ if(!name.trim()) return; onAdd({name:name.trim(), notes}); }} style={{ padding:"9px 22px", background:T.accent, border:"none", borderRadius:8, color:"#fff", fontSize:13.5, fontWeight:700, cursor: adding ? "default" : "pointer", display:"flex", alignItems:"center", gap:7, fontFamily:FONT, opacity: adding ? 0.7 : 1, boxShadow:`0 8px 22px ${T.accentGlow}` }}>
+            {adding ? <Loader2 size={14} className="svc-spinner" /> : <Check size={14}/>}
+            {adding ? "Adding…" : "Add Client"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const Services = () => {
-  const location = useLocation(); // ✅ Added for permission hook
-  const [services, setServices] = useState<Service[]>([]); // ✅ Start empty, no mock
-  const [clients,  setClients]  = useState<Client[]>([]); // ✅ Start empty, no mock
+  const location = useLocation();
+  const [services, setServices] = useState<Service[]>([]);
+  const [clients,  setClients]  = useState<Client[]>([]);
   const [search,   setSearch]   = useState("");
   const [superCat, setSuperCat] = useState("all");
   const [subCat,   setSubCat]   = useState("All");
   const [editing,  setEditing]  = useState<Service|null>(null);
   const [showAdd,  setShowAdd]  = useState(false);
+  const [showAddClient, setShowAddClient] = useState(false);
+  const [addingClient, setAddingClient] = useState(false);
 
   const [isOffline, setIsOffline] = useState(false);
   const [retrying,  setRetrying]  = useState(false);
@@ -691,7 +710,6 @@ export const Services = () => {
   const [addingItem, setAddingItem] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
 
-  // ✅ Permission hook for guard
   const { permission, loading: permLoading, canEdit } = usePermission(location.pathname);
 
   const showToast = (msg: string, type: 'success' | 'error') => {
@@ -699,7 +717,6 @@ export const Services = () => {
     setTimeout(() => setToast(null), 3500);
   };
 
-  /* inject global CSS once */
   useEffect(() => {
     if (typeof document === "undefined") return;
     const id = "svc-premium-styles";
@@ -710,12 +727,6 @@ export const Services = () => {
     }
   }, []);
 
-  /* ─── SUPABASE: fetch, with honest offline reporting ─────────
-     If the request fails, we keep whatever data is already on
-     screen (initially the local reference catalog) but flip
-     isOffline=true so the UI clearly says so — we never pretend
-     a failed fetch means "no data" or silently swap in mock data
-     without telling the person. */
   const fetchFromSupabase = useCallback(async () => {
     try {
       const { data: svcData, error: svcError } = await supabase
@@ -740,7 +751,6 @@ export const Services = () => {
         }));
         setServices(mapped);
       } else {
-        // ✅ Supabase returned empty — show true empty state
         setServices([]);
       }
 
@@ -758,14 +768,13 @@ export const Services = () => {
           name: c.name,
           type: c.type,
           billing: 'Monthly',
-          discount: c.tier === 'Corporate' ? '10%' : '-',
+          discount: c.discount || '-',
           active: true,
           contractRef: c.contract_ref || `CPL-${c.name.split(' ')[0].slice(0,3).toUpperCase()}-${Math.floor(Math.random()*900)+100}`,
           notes: c.notes || ''
         }));
         setClients(mapped);
       } else {
-        // ✅ Supabase returned empty — show true empty state
         setClients([]);
       }
 
@@ -811,8 +820,6 @@ export const Services = () => {
     return g;
   }, [filtered]);
 
-  /* ─── SUPABASE: Save Edit — only reflects locally once the
-       server confirms it, and reports failure honestly ─────── */
   const saveEdit = async (id:string, prices:Prices) => {
     setSavingEdit(true);
     try {
@@ -826,16 +833,14 @@ export const Services = () => {
       setServices(p => p.map(s => s.id===id ? {...s,prices} : s));
       showToast('Pricing updated', 'success');
       setEditing(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Save edit error:', err);
-      setIsOffline(true);
-      showToast("Couldn't reach the server — pricing wasn't saved", 'error');
+      showToast(`Failed to save: ${err.message}`, 'error');
     } finally {
       setSavingEdit(false);
     }
   };
 
-  /* ─── SUPABASE: Add Item ─────────────────────────────────── */
   const addItem = async (item:Service) => {
     setAddingItem(true);
     try {
@@ -851,28 +856,81 @@ export const Services = () => {
       setServices(p=>[...p, {...item, id: data?.[0]?.id || item.id}]);
       showToast('Service item added', 'success');
       setShowAdd(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Add item error:', err);
-      setIsOffline(true);
-      showToast("Couldn't reach the server — item wasn't added", 'error');
+      showToast(`Failed to add: ${err.message}`, 'error');
     } finally {
       setAddingItem(false);
     }
   };
 
-  /* ─── SUPABASE: Update Corporate Client ─────────────────── */
+  const addCorporateClient = async (clientData: Partial<Client>) => {
+    setAddingClient(true);
+    try {
+      const payload = {
+        name: clientData.name,
+        type: 'Corporate',
+        tier: 'Corporate',
+        notes: clientData.notes || '',
+        active: true
+      };
+      const { data, error } = await supabase.from('clients').insert([payload]).select();
+      if (error) throw error;
+      
+      const newClient: Client = {
+        id: data[0].id,
+        name: data[0].name,
+        type: 'Corporate',
+        billing: 'Monthly',
+        discount: '-',
+        active: true,
+        contractRef: `CPL-${data[0].name.split(' ')[0].slice(0,3).toUpperCase()}-${Math.floor(Math.random()*900)+100}`,
+        notes: data[0].notes || ''
+      };
+      setClients(p => [...p, newClient]);
+      showToast('Corporate client added', 'success');
+      setShowAddClient(false);
+    } catch (err: any) {
+      console.error('Add client error:', err);
+      showToast(`Failed to add client: ${err.message}`, 'error');
+    } finally {
+      setAddingClient(false);
+    }
+  };
+
   const updateClient = async (id:string, updates:Partial<Client>) => {
     const previous = clients;
     setClients(p => p.map(c => c.id===id ? {...c, ...updates} : c));
     try {
       const { error } = await supabase.from('clients').update(updates).eq('id', id);
       if (error) throw error;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Update client error:', err);
-      setIsOffline(true);
       setClients(previous);
-      showToast("Couldn't reach the server — change wasn't saved", 'error');
+      showToast(`Failed to update: ${err.message}`, 'error');
     }
+  };
+
+  const handleExport = () => {
+    const escapeCsv = (val: any) => `"${String(val).replace(/"/g, '""')}"`;
+    const headers = ["Name", "Category", "Service Type", "Wash", "Iron", "Fold", "Hang"];
+    const rows = filtered.map(s => [
+      s.name,
+      s.category,
+      s.superCat,
+      s.prices.wash,
+      s.prices.iron,
+      s.prices.fold,
+      s.prices.hang
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(escapeCsv).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chapman-services-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const stats = {
@@ -895,7 +953,6 @@ export const Services = () => {
   const lbl = (sz=10.5, color=T.textTert): React.CSSProperties =>
     ({fontSize:sz,color,textTransform:"uppercase",letterSpacing:"0.08em",fontWeight:700,fontFamily:FONT});
 
-  // ✅ Wait for permissions to load
   if (permLoading) return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: T.textTert, fontFamily: FONT }}>
       Loading...
@@ -905,6 +962,7 @@ export const Services = () => {
   return (
     <>
       {showAdd  && <AddModal onClose={()=>setShowAdd(false)} onAdd={addItem} defaultSuper={superCat==="all"?"laundry":superCat} adding={addingItem}/>}
+      {showAddClient && <AddCorporateClientModal onClose={()=>setShowAddClient(false)} onAdd={addCorporateClient} adding={addingClient}/>}
       {editing  && <EditModal item={editing} onSave={(p)=>saveEdit(editing.id,p)} onClose={()=>setEditing(null)} saving={savingEdit}/>}
 
       {toast && (
@@ -924,7 +982,6 @@ export const Services = () => {
 
         {isOffline && <OfflineBanner onRetry={handleRetry} retrying={retrying} lastSynced={lastSynced} />}
 
-        {/* ══ HEADER ══════════════════════════════════════════ */}
         <div className="svc-header-row" style={{ background:T.bgSurface,
           borderBottom:`1px solid ${T.borderFaint}`,
           padding:"22px 32px", position:"relative", overflow:"hidden",
@@ -953,6 +1010,25 @@ export const Services = () => {
               <AlertCircle size={13}/> Express +GH₵{EXPRESS} / laundry item
             </div>
             <button 
+              className="btn-ghost"
+              onClick={handleExport}
+              style={{ 
+                padding:"10px 14px", 
+                background:"transparent", 
+                border:`1px solid ${T.borderSoft}`,
+                borderRadius:9, 
+                color:T.textSec, 
+                fontSize:14, 
+                fontWeight:600,
+                cursor: "pointer", 
+                display:"flex", 
+                alignItems:"center",
+                gap:7, 
+                fontFamily:FONT
+              }}>
+              <Download size={15}/> Export
+            </button>
+            <button 
               className="btn-accent"
               onClick={() => canEdit && setShowAdd(true)}
               disabled={!canEdit}
@@ -977,7 +1053,6 @@ export const Services = () => {
           </div>
         </div>
 
-        {/* ══ STATS BAR ═══════════════════════════════════════ */}
         <div className="svc-stats-grid" style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)",
           background:T.bgSurface, borderBottom:`1px solid ${T.borderFaint}` }}>
           {[
@@ -1000,7 +1075,6 @@ export const Services = () => {
           ))}
         </div>
 
-        {/* ══ SUPER-CATEGORY TABS ═════════════════════════════ */}
         <div style={{ background:T.bgSurface,
           borderBottom:`1px solid ${T.borderFaint}`,
           padding:"0 32px",
@@ -1036,7 +1110,6 @@ export const Services = () => {
           })}
         </div>
 
-        {/* ══ SUB-CATEGORY STRIP + SEARCH ═════════════════════ */}
         <div style={{ background:T.bgSurface,
           borderBottom:`1px solid ${T.borderFaint}`,
           padding:"10px 32px",
@@ -1069,16 +1142,15 @@ export const Services = () => {
               onChange={e=>setSearch(e.target.value)}
               style={{ width:"100%", padding:"8px 12px 8px 32px",
                 background:T.bgRaised, border:`1px solid ${T.borderSoft}`,
-                borderRadius:8, color:T.textPrimary, fontSize:13,
+                borderRadius:8, color:T.textPrimary, fontSize:16,
                 outline:"none", fontFamily:FONT,
                 transition:"border-color 0.15s" }}
             />
           </div>
         </div>
 
-        {/* CONTENT - Wrapped with PermissionGuard */}
         <PermissionGuard>
-          <div style={{ padding:"26px 32px" }}>
+          <div style={{ padding:"26px 32px", width: "100%" }}>
             {filtered.length === 0 ? (
               <div style={{ display:"flex", flexDirection:"column",
                 alignItems:"center", justifyContent:"center",
@@ -1111,7 +1183,7 @@ export const Services = () => {
                 const CatIcon = CAT_ICONS[cat] || Package;
                 const conf = SUPER_CATS.find(s=>s.key===items[0]?.superCat) || SUPER_CATS[0];
                 return (
-                  <div key={cat} style={{ marginBottom:32 }}>
+                  <div key={cat} style={{ marginBottom:32, width: "100%" }}>
                     <div style={{ display:"flex", alignItems:"center",
                       gap:10, marginBottom:13 }}>
                       <div style={{ width:24, height:24, borderRadius:6,
@@ -1128,8 +1200,8 @@ export const Services = () => {
                     </div>
 
                     <div className="svc-catalog-grid" style={{ display:"grid",
-                      gridTemplateColumns:"repeat(auto-fill,minmax(242px,1fr))",
-                      gap:11 }}>
+                      gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",
+                      gap:11, width: "100%" }}>
                       {items.map((item, i) => (
                         <ServiceCard key={item.id} item={item}
                           onEdit={canEdit ? (s: Service) => setEditing(s) : () => {}} 
@@ -1143,10 +1215,9 @@ export const Services = () => {
             )}
           </div>
 
-          {/* ══ CORPORATE ACCOUNTS ══════════════════════════════ */}
           <div style={{ background:T.bgSurface,
             borderTop:`1px solid ${T.borderFaint}`,
-            padding:"24px 32px" }}>
+            padding:"24px 32px", width: "100%" }}>
 
             <div style={{ display:"flex", justifyContent:"space-between",
               alignItems:"center", marginBottom:18 }}>
@@ -1160,7 +1231,7 @@ export const Services = () => {
                 </div>
               </div>
               {canEdit && (
-                <button className="btn-accent"
+                <button className="btn-accent" onClick={() => setShowAddClient(true)}
                   style={{ padding:"9px 18px", background:T.accent, border:"none",
                     borderRadius:9, color:"#fff", fontSize:13.5, fontWeight:600,
                     cursor:"pointer", display:"flex", alignItems:"center",
@@ -1171,7 +1242,7 @@ export const Services = () => {
             </div>
 
             <div className="svc-corp-grid" style={{ display:"grid",
-              gridTemplateColumns:"repeat(auto-fill,minmax(288px,1fr))", gap:12 }}>
+              gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))", gap:12, width: "100%" }}>
               {clients.map((client, i) => (
                 <div key={client.id} className="corp-card"
                   style={{ background:T.bgRaised, border:`1px solid ${T.borderSoft}`,
@@ -1228,7 +1299,7 @@ export const Services = () => {
                       <select value={client.discount}
                         onChange={e=>updateClient(client.id, {discount: e.target.value})}
                         style={{ background:T.bgSurface, border:`1px solid ${T.borderSoft}`,
-                          borderRadius:7, color:T.gold, fontSize:13.5, fontWeight:600,
+                          borderRadius:7, color:T.gold, fontSize:16, fontWeight:600,
                           fontFamily:MONO, padding:"5px 9px",
                           outline:"none", cursor:"pointer" }}>
                         <option value="-">—</option>

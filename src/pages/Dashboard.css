@@ -541,3 +541,170 @@ button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+
+/* ── Icon Replacements (Lucide) ────────────────────────────────── */
+.sc-icon-lucide {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qa-icon-lucide {
+  color: var(--qa-color, var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Error State ───────────────────────────────────────────────── */
+.dash-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+  padding: 40px;
+  text-align: center;
+}
+
+.dash-error-icon {
+  color: var(--ember);
+  opacity: 0.8;
+}
+
+.dash-error-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--txt-1);
+}
+
+.dash-error-text {
+  font-size: 14px;
+  color: var(--txt-3);
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+.dash-error-retry {
+  margin-top: 8px;
+  padding: 10px 20px;
+  background: var(--bg-raised);
+  border: 1px solid var(--bd-soft);
+  border-radius: var(--r-sm);
+  color: var(--txt-1);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s var(--transition);
+}
+
+.dash-error-retry:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Empty States ──────────────────────────────────────────────── */
+.chart-empty-state {
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--txt-4);
+  font-size: 13px;
+}
+
+.chart-empty-state svg {
+  color: var(--txt-4);
+  opacity: 0.5;
+}
+
+.act-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: var(--txt-4);
+  font-size: 13px;
+  text-align: center;
+}
+
+.act-empty-state svg {
+  color: var(--txt-4);
+  opacity: 0.4;
+}
+
+/* ── Reduced Motion ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .stat-card-new,
+  .panel,
+  .act-item,
+  .donut-arc,
+  .chart-area-path,
+  .chart-line-path,
+  .sc-bar-fill,
+  .lb-fill,
+  .lb-shine,
+  .live-dot,
+  .act-pip-ring {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .refresh-btn.spinning {
+    animation: none;
+  }
+
+  .loader-ring {
+    animation: none;
+  }
+
+  .loader-icon {
+    animation: none;
+  }
+}
+
+/* ── Mobile Touch Targets ──────────────────────────────────────── */
+@media (max-width: 600px) {
+  .tt-btn {
+    min-height: 36px;
+    padding: 8px 14px;
+  }
+
+  .btn-action {
+    min-height: 44px;
+  }
+
+  .qa-btn {
+    min-height: 80px;
+    padding: 12px;
+  }
+
+  .refresh-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .panel-link {
+    min-height: 32px;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .qa-btn {
+    min-height: 72px;
+    padding: 10px;
+  }
+
+  .qa-label {
+    font-size: 11px;
+  }
+}

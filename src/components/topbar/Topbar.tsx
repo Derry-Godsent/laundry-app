@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Search, Plus, Menu, User, LogOut } from "lucide-react";
+import { Search, Plus, Menu } from "lucide-react";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { CommandPalette } from "./CommandPalette";
 import { NotificationDropdown } from "./NotificationDropdown";
 import { ProfileDropdown } from "./ProfileDropdown";
-// @ts-ignore
 import { supabase } from "../../lib/supabaseClient";
+import type { User } from "@supabase/supabase-js";
 import "./Topbar.css";
 
 interface TopbarProps {
@@ -14,73 +14,158 @@ interface TopbarProps {
   isMobile?: boolean;
 }
 
+interface NotificationItem {
+  id: number;
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+  type: "success" | "info" | "warning" | "error";
+}
+
+interface StaffProfile {
+  role: string;
+  first_name: string | null;
+  last_name: string | null;
+}
+
 export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCommandOpen, setIsCommandOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string>("");
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [userName, setUserName] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Fetch current user session + staff profile
-useEffect(() => {
-  const fetchUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      setUser(session.user);
-      
-      // Fetch staff profile (role + full_name) from your staff table
-      const { data: staffData } = await supabase
-        .from("staff")
-        .select("role, first_name, last_name")
-        .eq("id", session.user.id)  // staff.id matches auth.users.id
-        .maybeSingle();
-      
-      if (staffData?.role) setUserRole(staffData.role);
-    }
-  };
-  fetchUser();
+  // Fetch current user session and staff profile
+  useEffect(() => {
+    let isMounted = true;
 
-  // Listen for auth changes
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    (_event: string, session: any) => {
-      if (session?.user) {
-        setUser(session.user);
-      } else {
-        setUser(null);
-        setUserRole("");
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!isMounted) return;
+
+        if (session?.user) {
+          setUser(session.user);
+
+          const { data: staffData, error: staffError } = await supabase
+            .from("staff")
+            .select("role, first_name, last_name")
+            .eq("id", session.user.id)
+            .maybeSingle();
+
+          if (!isMounted) return;
+
+          if (staffError) {
+            console.error("Failed to fetch staff profile:", staffError.message);
+          }
+
+          if (staffData?.role) {
+            setUserRole(staffData.role);
+          }
+
+          if (staffData?.first_name || staffData?.last_name) {
+            const fullName = [staffData.first_name, staffData.last_name]
+              .filter(Boolean)
+              .join(" ");
+            setUserName(fullName);
+          } else if (session.user.email) {
+            const prefix = session.user.email.split("@")[0];
+            setUserName(
+              prefix
+                .split(/[._-]/)
+                .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" ")
+            );
+          } else {
+            setUserName("User");
+          }
+        } else {
+          setUser(null);
+          setUserRole("");
+          setUserName("Guest");
+        }
+      } catch (err) {
+        if (!isMounted) return;
+        console.error("Unexpected error fetching user:", err);
+        setUserName("Guest");
+      } finally {
+        if (isMounted) setLoading(false);
       }
-    }
-  );
+    };
 
-  return () => subscription.unsubscribe();
-}, []);
+    fetchUser();
 
-  // Listen for real-time notifications (prepare for your NotificationDropdown)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event: string, session: { user: User | null } | null) => {
+        if (!isMounted) return;
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          setUser(null);
+          setUserRole("");
+          setUserName("");
+        }
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Listen for real-time notifications
   useEffect(() => {
     if (!user) return;
 
-    // Subscribe to changes in tables that should trigger notifications
     const channel = supabase
-      .channel('topbar-notifications')
+      .channel("topbar-notifications")
       .on(
-  'postgres_changes',
-  { event: '*', schema: 'public', table: 'orders', filter: `client_id=eq.${user.id}` },
-  (payload: any) => {
-    // Add new notification to state
-    const newNotification = {
-      id: payload.new?.id || Date.now(),
-      title: "Order Updated",
-      message: `Order ${payload.new?.order_id || '#???'} was ${payload.eventType}`,
-      time: new Date().toLocaleTimeString(),
-      read: false,
-      type: payload.eventType === 'INSERT' ? 'success' : 'info'
-    };
-    setNotifications(prev => [newNotification, ...prev.slice(0, 19)]);
-    setUnreadCount(prev => prev + 1);
-  }
-)
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders", filter: `client_id=eq.${user.id}` },
+        (payload: { eventType: string; new: Record<string, unknown> | null; old: Record<string, unknown> | null }) => {
+          const eventType = payload.eventType;
+          const newRecord = payload.new as Record<string, unknown> | null;
+          const oldRecord = payload.old as Record<string, unknown> | null;
+
+          let title = "Order Updated";
+          let message = "Your order has been updated";
+          let type: NotificationItem["type"] = "info";
+
+          if (eventType === "INSERT") {
+            title = "New Order";
+            message = `Order ${newRecord?.order_id || "#???"} was created`;
+            type = "success";
+          } else if (eventType === "UPDATE") {
+            title = "Order Updated";
+            message = `Order ${newRecord?.order_id || "#???"} was updated`;
+            type = "info";
+          } else if (eventType === "DELETE") {
+            title = "Order Deleted";
+            message = `Order ${oldRecord?.order_id || "#???"} was removed`;
+            type = "warning";
+          }
+
+          const newNotification: NotificationItem = {
+            id: Date.now(),
+            title,
+            message,
+            time: new Date().toLocaleTimeString(),
+            read: false,
+            type,
+          };
+
+          setNotifications((prev) => [newNotification, ...prev.slice(0, 19)]);
+          setUnreadCount((prev) => prev + 1);
+        }
+      )
       .subscribe();
 
     return () => {
@@ -93,9 +178,8 @@ useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        setIsCommandOpen(prev => !prev);
+        setIsCommandOpen((prev) => !prev);
       }
-      // Escape closes command palette
       if (e.key === "Escape") {
         setIsCommandOpen(false);
       }
@@ -110,23 +194,15 @@ useEffect(() => {
     navigate("/login");
   };
 
-  // Format user display name (fetches from staff table via state)
-const getUserDisplay = () => {
-  if (!user) return "Guest";
-  
-  // We'll fetch full_name from staff table in the effect above
-  // For now, fallback to email prefix if staff data not yet loaded
-  if (user.email) {
-    // Try to get first name from email prefix as temporary fallback
-    const prefix = user.email.split("@")[0];
-    // Capitalize first letter: "admin" → "Admin"
-    return prefix.charAt(0).toUpperCase() + prefix.slice(1);
-  }
-  return "User";
-};
+  // Get user display name
+  const getUserDisplay = (): string => {
+    if (loading) return "Loading...";
+    if (!user) return "Guest";
+    return userName || "User";
+  };
 
   // Get user avatar initial
-  const getUserInitial = () => {
+  const getUserInitial = (): string => {
     const name = getUserDisplay();
     return name.charAt(0).toUpperCase();
   };
@@ -135,10 +211,9 @@ const getUserDisplay = () => {
     <>
       <div className="topbar">
         <div className="topbar-left">
-          {/* Mobile Hamburger Button */}
           {isMobile && onMenuClick && (
-            <button 
-              className="sidebar-toggle-mobile" 
+            <button
+              className="sidebar-toggle-mobile"
               onClick={onMenuClick}
               aria-label="Open navigation menu"
               title="Open menu"
@@ -146,14 +221,13 @@ const getUserDisplay = () => {
               <Menu size={20} />
             </button>
           )}
-          
+
           <Breadcrumbs />
         </div>
 
         <div className="topbar-right">
-          {/* Command Search */}
-          <button 
-            className="command-trigger" 
+          <button
+            className="command-trigger"
             onClick={() => setIsCommandOpen(true)}
             title="Click to search or press Ctrl+K"
             aria-label="Open command palette"
@@ -163,15 +237,16 @@ const getUserDisplay = () => {
             <kbd className="command-key">Ctrl K</kbd>
           </button>
 
-          {/* Notifications with live count */}
-          <NotificationDropdown 
-            notifications={notifications}
-            unreadCount={unreadCount}
-            onMarkRead={() => setUnreadCount(0)}
-          />
+          <NotificationDropdown
+  notifications={notifications}
+  unreadCount={unreadCount}
+  onMarkRead={(id) => { /* mark single read */ }}
+  onMarkAllRead={() => setUnreadCount(0)}
+  onViewAll={() => navigate("/notifications")}
+  pulseBadge={unreadCount > 0}
+/>
 
-          {/* Profile Dropdown with user info */}
-          <ProfileDropdown 
+          <ProfileDropdown
             user={user}
             userName={getUserDisplay()}
             userRole={userRole}
@@ -179,8 +254,7 @@ const getUserDisplay = () => {
             onLogout={handleLogout}
           />
 
-          {/* New Order Button */}
-          <button 
+          <button
             className="btn-primary"
             onClick={() => navigate("/new-order")}
             aria-label="Create new order"
@@ -191,9 +265,8 @@ const getUserDisplay = () => {
         </div>
       </div>
 
-      {/* Command Palette Modal */}
-      <CommandPalette 
-        isOpen={isCommandOpen} 
+      <CommandPalette
+        isOpen={isCommandOpen}
         onClose={() => setIsCommandOpen(false)}
         userRole={userRole}
       />
