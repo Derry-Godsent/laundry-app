@@ -172,7 +172,7 @@ export const Reports = () => {
         setLoading(false);
       }
     };
-    
+
     fetchReportData();
   }, [timeRange]);
 
