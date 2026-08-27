@@ -16,7 +16,7 @@ In Supabase **Edge Functions → Secrets**, add these values directly. Do not se
 | --- | --- |
 | `ARKESEL_API_KEY` | The Arkesel API key approved for transactional SMS. |
 | `ARKESEL_SENDER_ID` | Your approved sender name, up to 11 characters, for example `Chapman`. |
-| `SEND_SMS_HOOK_SECRET` | The signing secret Supabase creates when you set up the Send SMS Hook. |
+| `SEND_SMS_HOOK_SECRETS` | The signing secret Supabase creates when you set up the Send SMS Hook. |
 
 ## The live setup order
 
@@ -24,7 +24,7 @@ In Supabase **Edge Functions → Secrets**, add these values directly. Do not se
 2. Add the first two Arkesel secrets in Supabase.
 3. Go to **Authentication → Auth Hooks → Send SMS**.
 4. Select the Edge Function endpoint and let Supabase generate the hook signing secret.
-5. Copy that generated secret into the `SEND_SMS_HOOK_SECRET` Edge Function secret.
+5. Copy that generated secret into the `SEND_SMS_HOOK_SECRETS` Edge Function secret.
 6. Go to **Authentication → Sign In / Providers → Phone** and enable Phone. Leave the native Twilio fields empty because the hook sends through Arkesel.
 7. Use a single Ghana test number in the mobile app. A valid sign-in request should send the SMS and the same six-digit code should verify through Supabase.
 

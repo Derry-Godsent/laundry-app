@@ -6,7 +6,7 @@ const requiredFragments = [
   "https://sms.arkesel.com/api/v2/sms/send",
   '"api-key": requiredSecret("ARKESEL_API_KEY")',
   'requiredSecret("ARKESEL_SENDER_ID")',
-  'requiredSecret("SEND_SMS_HOOK_SECRET")',
+  'requiredSecret("SEND_SMS_HOOK_SECRETS")',
   "new Webhook",
   "webhook.verify",
   "recipients: [arkeselPhone(phone)]",

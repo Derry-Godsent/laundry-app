@@ -37,7 +37,7 @@ Deno.serve(async (request) => {
   try {
     const rawPayload = await request.text();
     const signedHeaders = Object.fromEntries(request.headers);
-    const webhook = new Webhook(hookSecretValue(requiredSecret("SEND_SMS_HOOK_SECRET")));
+    const webhook = new Webhook(hookSecretValue(requiredSecret("SEND_SMS_HOOK_SECRETS")));
     const event = webhook.verify(rawPayload, signedHeaders) as SmsHookPayload;
 
     const phone = event.user.phone;
