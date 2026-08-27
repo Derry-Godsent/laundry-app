@@ -7,3 +7,4 @@
 - [x] Merge the reviewed Mobile Requests feature into the live staff-system master branch and confirm the production deployment.
 - [x] Point the normal staff-system address to the successful Mobile Requests production deployment without a Vercel login wall.
 - [ ] Add a customer-only response action for an accepted or rejected proposed Laundry date.
+- [ ] Hide a staff-updated request from the active queue until that same customer responds or a new staff action is required.
