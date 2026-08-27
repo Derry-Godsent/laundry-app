@@ -6,6 +6,8 @@
 - [x] Verify one customer-created Laundry request appears in the live staff Mobile Requests queue.
 - [x] Merge the reviewed Mobile Requests feature into the live staff-system master branch and confirm the production deployment.
 - [x] Point the normal staff-system address to the successful Mobile Requests production deployment without a Vercel login wall.
-- [ ] Add a customer-only response action for an accepted or rejected proposed Laundry date.
-- [ ] Hide a staff-updated request from the active queue until that same customer responds or a new staff action is required.
-- [ ] Let staff confirm a request using the client’s originally selected date, without showing a date field.
+- [x] Add a customer-only response action for an accepted or rejected proposed Laundry date.
+- [x] Superseded the disappearing-queue behaviour with managed request views so no staff record is lost from view.
+- [x] Let staff confirm a request using the client’s originally selected date, without showing a date field.
+- [x] Keep active, waiting, approved, and declined mobile requests in clear staff management views with matching client decision labels.
+- [x] Add optional client-approved one-time pickup coordinates to Laundry requests for authorised staff dispatch.
