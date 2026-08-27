@@ -47,12 +47,13 @@ function MobileRequestsContent() {
   const [requests, setRequests] = useState<MobileRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | RequestStatus>("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "under_review">("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [decision, setDecision] = useState<RequestStatus>("under_review");
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -61,6 +62,7 @@ function MobileRequestsContent() {
       .from("mobile_requests")
       .select("id, request_status, requested_for, confirmed_for, pickup_area, pickup_address, pickup_window, laundry_items, express, estimated_total, customer_note, staff_note, customer_response, created_at, customer_accounts ( full_name, phone )")
       .eq("service_code", "laundry")
+      .in("request_status", ["pending", "under_review"])
       .order("created_at", { ascending: false });
 
     if (requestError) {
@@ -86,13 +88,12 @@ function MobileRequestsContent() {
   const counts = useMemo(() => ({
     all: requests.length,
     pending: requests.filter((request) => request.request_status === "pending").length,
-    waiting: requests.filter((request) => request.request_status === "needs_customer_confirmation").length,
-    confirmed: requests.filter((request) => request.request_status === "confirmed").length,
+    reviewing: requests.filter((request) => request.request_status === "under_review").length,
   }), [requests]);
 
   useEffect(() => {
     if (!selected) return;
-    setDecision(STAFF_DECISIONS.includes(selected.request_status) ? selected.request_status : "under_review");
+    setDecision("needs_customer_confirmation");
     setDate(selected.confirmed_for ?? "");
     setNote(selected.staff_note ?? "");
   }, [selectedId]);
@@ -105,6 +106,7 @@ function MobileRequestsContent() {
     }
     setSaving(true);
     setError(null);
+    setSavedMessage(null);
     const { error: reviewError } = await supabase.rpc("review_mobile_request", {
       p_request_id: selected.id,
       p_status: decision,
@@ -116,6 +118,8 @@ function MobileRequestsContent() {
       setError("The request could not be updated. Please try again.");
       return;
     }
+    setSelectedId(null);
+    setSavedMessage(decision === "declined" ? "Request declined and removed from the active queue." : "Date proposal sent to the client. This task will return only if the client asks for another date.");
     await loadRequests();
   };
 
@@ -124,23 +128,24 @@ function MobileRequestsContent() {
       <div>
         <div className="mr-eyebrow"><Inbox size={14} /> MOBILE INTAKE</div>
         <h1>Mobile Requests</h1>
-        <p>Laundry requests from the Chapman mobile app appear here before they become operational orders.</p>
+        <p>Active Laundry requests that need a Chapman decision. Completed staff updates stay out of this queue until a client asks for another date.</p>
       </div>
       <button className="mr-refresh" onClick={() => void loadRequests()} disabled={loading} aria-label="Refresh mobile requests"><RefreshCw size={16} className={loading ? "mr-spin" : ""} /> Refresh</button>
     </header>
 
     <section className="mr-summary" aria-label="Mobile request summary">
-      <button className={filter === "all" ? "mr-summary-card active" : "mr-summary-card"} onClick={() => setFilter("all")}><span>All Laundry requests</span><strong>{counts.all}</strong></button>
+      <button className={filter === "all" ? "mr-summary-card active" : "mr-summary-card"} onClick={() => setFilter("all")}><span>Active requests</span><strong>{counts.all}</strong></button>
       <button className={filter === "pending" ? "mr-summary-card active amber" : "mr-summary-card amber"} onClick={() => setFilter("pending")}><span>New to review</span><strong>{counts.pending}</strong></button>
-      <button className={filter === "needs_customer_confirmation" ? "mr-summary-card active mint" : "mr-summary-card mint"} onClick={() => setFilter("needs_customer_confirmation")}><span>Waiting for client</span><strong>{counts.waiting}</strong></button>
-      <button className={filter === "confirmed" ? "mr-summary-card active green" : "mr-summary-card green"} onClick={() => setFilter("confirmed")}><span>Confirmed</span><strong>{counts.confirmed}</strong></button>
+      <button className={filter === "under_review" ? "mr-summary-card active mint" : "mr-summary-card mint"} onClick={() => setFilter("under_review")}><span>Needs a new date</span><strong>{counts.reviewing}</strong></button>
+      <div className="mr-summary-card green"><span>Client replies</span><strong>Live</strong></div>
     </section>
 
     <section className="mr-workspace">
       <div className="mr-list-panel">
-        <div className="mr-list-heading"><div><h2>Laundry queue</h2><p>{filter === "all" ? "Every mobile Laundry request" : `${STATUS_META[filter].label} requests`}</p></div><span>{filtered.length}</span></div>
+        <div className="mr-list-heading"><div><h2>Active Laundry queue</h2><p>{filter === "all" ? "Requests waiting for your action" : `${STATUS_META[filter].label} requests`}</p></div><span>{filtered.length}</span></div>
         {error ? <div className="mr-error">{error}</div> : null}
-        {loading || permissionLoading ? <div className="mr-empty"><RefreshCw size={18} className="mr-spin" /><p>Loading protected requests…</p></div> : filtered.length === 0 ? <div className="mr-empty"><ClipboardList size={24} /><h3>No Laundry requests yet</h3><p>When a verified customer sends a Laundry request from the app, it will appear here.</p></div> : <div className="mr-list">
+        {savedMessage ? <div className="mr-empty">{savedMessage}</div> : null}
+        {loading || permissionLoading ? <div className="mr-empty"><RefreshCw size={18} className="mr-spin" /><p>Loading protected requests…</p></div> : filtered.length === 0 ? <div className="mr-empty"><ClipboardList size={24} /><h3>No active Laundry requests</h3><p>New client requests and client date rejections will appear here when Chapman needs to act.</p></div> : <div className="mr-list">
           {filtered.map((request) => {
             const status = STATUS_META[request.request_status];
             const customerName = request.customer_accounts?.full_name || "Verified customer";
@@ -161,7 +166,7 @@ function MobileRequestsContent() {
           <div className="mr-detail-grid"><DetailItem icon={<CalendarDays size={16} />} label="Customer’s preferred date" value={formatDay(selected.requested_for)} /><DetailItem icon={<MapPin size={16} />} label="Collection area" value={selected.pickup_area || selected.pickup_address || "To be confirmed"} /><DetailItem icon={<ClipboardList size={16} />} label="Estimated total" value={money(selected.estimated_total)} /><DetailItem icon={<MessageSquareText size={16} />} label="Pickup window" value={selected.pickup_window || "To be arranged"} /></div>
           <div className="mr-section"><h3>Laundry items</h3>{Array.isArray(selected.laundry_items) && selected.laundry_items.length ? <div className="mr-items">{selected.laundry_items.map((item, index) => <span key={`${item.name}-${index}`}>{item.quantity ?? 1}× {item.name || "Laundry item"}</span>)}</div> : <p className="mr-muted">The item list will show here when the customer submits the booking.</p>}</div>
           <div className="mr-section"><h3>Customer note</h3><p className={selected.customer_note ? "mr-note" : "mr-muted"}>{selected.customer_note || "No special instructions added."}</p></div>
-          <div className="mr-decision"><div><h3>Staff decision</h3><p>Propose a date for the customer to accept, or decline the request. A customer’s acceptance confirms it.</p></div><label>Status<select value={decision} onChange={(event) => setDecision(event.target.value as RequestStatus)} disabled={!canEdit || saving}><option value="under_review">Start review</option><option value="needs_customer_confirmation">Propose a date</option><option value="declined">Decline request</option></select></label>{decision === "needs_customer_confirmation" ? <label>Proposed service date<input type="date" value={date} onChange={(event) => setDate(event.target.value)} disabled={!canEdit || saving} /></label> : null}<label>Note for customer<textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add a helpful update or next step" disabled={!canEdit || saving} rows={3} /></label><button className="mr-save" onClick={() => void saveDecision()} disabled={!canEdit || saving}>{saving ? "Saving…" : <><Check size={16} /> Save update</>}</button>{!canEdit ? <p className="mr-view-only">You can review this request, but only an authorised manager can change it.</p> : null}</div>
+          <div className="mr-decision"><div><h3>Staff decision</h3><p>Propose a date for the customer to accept, or decline the request. Once saved, this request leaves the active queue until the same client asks for another date.</p></div><label>Status<select value={decision} onChange={(event) => setDecision(event.target.value as RequestStatus)} disabled={!canEdit || saving}><option value="needs_customer_confirmation">Propose a date</option><option value="declined">Decline request</option></select></label>{decision === "needs_customer_confirmation" ? <label>Proposed service date<input type="date" value={date} onChange={(event) => setDate(event.target.value)} disabled={!canEdit || saving} /></label> : null}<label>Note for customer<textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add a helpful update or next step" disabled={!canEdit || saving} rows={3} /></label><button className="mr-save" onClick={() => void saveDecision()} disabled={!canEdit || saving}>{saving ? "Saving…" : <><Check size={16} /> Send update</>}</button>{!canEdit ? <p className="mr-view-only">You can review this request, but only an authorised manager can change it.</p> : null}</div>
         </>}
       </aside>
     </section>
