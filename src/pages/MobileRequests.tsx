@@ -36,7 +36,7 @@ const STATUS_META: Record<RequestStatus, { label: string; color: string; backgro
   converted: { label: "Order created", color: "#85b3ff", background: "rgba(55,138,221,0.14)" },
 };
 
-const STAFF_DECISIONS: RequestStatus[] = ["under_review", "needs_customer_confirmation", "declined"];
+const STAFF_DECISIONS: RequestStatus[] = ["under_review", "needs_customer_confirmation", "confirmed", "declined"];
 
 const formatDay = (value: string | null) => value ? new Date(`${value}T12:00:00`).toLocaleDateString("en-GH", { weekday: "short", month: "short", day: "numeric" }) : "No date chosen";
 const formatCreated = (value: string) => new Date(value).toLocaleString("en-GH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -94,7 +94,7 @@ function MobileRequestsContent() {
   useEffect(() => {
     if (!selected) return;
     setDecision("needs_customer_confirmation");
-    setDate(selected.confirmed_for ?? "");
+    setDate(selected.requested_for ?? selected.confirmed_for ?? "");
     setNote(selected.staff_note ?? "");
   }, [selectedId]);
 
@@ -110,7 +110,7 @@ function MobileRequestsContent() {
     const { error: reviewError } = await supabase.rpc("review_mobile_request", {
       p_request_id: selected.id,
       p_status: decision,
-      p_confirmed_for: date || null,
+      p_confirmed_for: decision === "needs_customer_confirmation" ? date || null : null,
       p_staff_note: note || null,
     });
     setSaving(false);
@@ -119,7 +119,7 @@ function MobileRequestsContent() {
       return;
     }
     setSelectedId(null);
-    setSavedMessage(decision === "declined" ? "Request declined and removed from the active queue." : "Date proposal sent to the client. This task will return only if the client asks for another date.");
+    setSavedMessage(decision === "declined" ? "Request declined and removed from the active queue." : decision === "confirmed" ? "Client’s selected date confirmed. This task has left the active queue." : "Date proposal sent to the client. This task will return only if the client asks for another date.");
     await loadRequests();
   };
 
@@ -166,7 +166,7 @@ function MobileRequestsContent() {
           <div className="mr-detail-grid"><DetailItem icon={<CalendarDays size={16} />} label="Customer’s preferred date" value={formatDay(selected.requested_for)} /><DetailItem icon={<MapPin size={16} />} label="Collection area" value={selected.pickup_area || selected.pickup_address || "To be confirmed"} /><DetailItem icon={<ClipboardList size={16} />} label="Estimated total" value={money(selected.estimated_total)} /><DetailItem icon={<MessageSquareText size={16} />} label="Pickup window" value={selected.pickup_window || "To be arranged"} /></div>
           <div className="mr-section"><h3>Laundry items</h3>{Array.isArray(selected.laundry_items) && selected.laundry_items.length ? <div className="mr-items">{selected.laundry_items.map((item, index) => <span key={`${item.name}-${index}`}>{item.quantity ?? 1}× {item.name || "Laundry item"}</span>)}</div> : <p className="mr-muted">The item list will show here when the customer submits the booking.</p>}</div>
           <div className="mr-section"><h3>Customer note</h3><p className={selected.customer_note ? "mr-note" : "mr-muted"}>{selected.customer_note || "No special instructions added."}</p></div>
-          <div className="mr-decision"><div><h3>Staff decision</h3><p>Propose a date for the customer to accept, or decline the request. Once saved, this request leaves the active queue until the same client asks for another date.</p></div><label>Status<select value={decision} onChange={(event) => setDecision(event.target.value as RequestStatus)} disabled={!canEdit || saving}><option value="needs_customer_confirmation">Propose a date</option><option value="declined">Decline request</option></select></label>{decision === "needs_customer_confirmation" ? <label>Proposed service date<input type="date" value={date} onChange={(event) => setDate(event.target.value)} disabled={!canEdit || saving} /></label> : null}<label>Note for customer<textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add a helpful update or next step" disabled={!canEdit || saving} rows={3} /></label><button className="mr-save" onClick={() => void saveDecision()} disabled={!canEdit || saving}>{saving ? "Saving…" : <><Check size={16} /> Send update</>}</button>{!canEdit ? <p className="mr-view-only">You can review this request, but only an authorised manager can change it.</p> : null}</div>
+          <div className="mr-decision"><div><h3>Staff decision</h3><p>Confirm uses the client’s selected date automatically. Propose a date only when Chapman needs to offer a different option. Once saved, this request leaves the active queue.</p></div><label>Status<select value={decision} onChange={(event) => setDecision(event.target.value as RequestStatus)} disabled={!canEdit || saving}><option value="needs_customer_confirmation">Propose a date</option><option value="confirmed">Confirm client date</option><option value="declined">Decline request</option></select></label>{decision === "needs_customer_confirmation" ? <label>Proposed service date<input type="date" value={date} onChange={(event) => setDate(event.target.value)} disabled={!canEdit || saving} /></label> : null}<label>Note for customer<textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add a helpful update or next step" disabled={!canEdit || saving} rows={3} /></label><button className="mr-save" onClick={() => void saveDecision()} disabled={!canEdit || saving}>{saving ? "Saving…" : <><Check size={16} /> Send update</>}</button>{!canEdit ? <p className="mr-view-only">You can review this request, but only an authorised manager can change it.</p> : null}</div>
         </>}
       </aside>
     </section>
