@@ -11,6 +11,7 @@ const requiredFragments = [
   "webhook.verify",
   "recipients: [arkeselPhone(phone)]",
   "Your Chapman Prestige code is ${otp}",
+  "EdgeRuntime.waitUntil(deliverArkeselSms(phone, otp))",
 ];
 
 for (const fragment of requiredFragments) {
