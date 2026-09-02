@@ -11,3 +11,4 @@
 - [x] Let staff confirm a request using the client’s originally selected date, without showing a date field.
 - [x] Keep active, waiting, approved, and declined mobile requests in clear staff management views with matching client decision labels.
 - [x] Add optional client-approved one-time pickup coordinates to Laundry requests for authorised staff dispatch.
+- [x] Repair existing customer account links so verified customers can submit Laundry requests after the protected database migration
