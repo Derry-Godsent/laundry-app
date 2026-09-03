@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import {
   LayoutDashboard, Package, Users, User, Settings, FileText,
   ChevronLeft, ChevronRight, Shield, CreditCard, ShoppingCart,
-  Printer, LogOut, X, BarChart3 
+  Printer, LogOut, X, BarChart3, Inbox
 } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../../lib/supabaseClient";
@@ -81,6 +81,7 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", pageKey: "dashboard" },
     { icon: ShoppingCart, label: "New Order", path: "/new-order", pageKey: "new-order" },
     { icon: Package, label: "Orders", path: "/orders", pageKey: "orders", badge: orderCount > 0 ? orderCount : undefined },
+    { icon: Inbox, label: "Mobile Requests", path: "/mobile-requests", pageKey: "mobile-requests" },
     { icon: Users, label: "Staff", path: "/staff", pageKey: "staff" },
     { icon: User, label: "Clients", path: "/clients", pageKey: "clients" },
     { icon: FileText, label: "Services", path: "/services", pageKey: "services" },
