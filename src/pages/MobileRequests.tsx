@@ -63,34 +63,59 @@ function MobileRequestsContent() {
     setLoading(true);
     setError(null);
     
-    // TEMPORARY FIX: Use "*" to get ALL columns and bypass column name mismatches
+    // 1. Fetch everything from the orders table
     const { data, error: requestError } = await supabase
       .from("orders")
       .select("*") 
       .order("created_at", { ascending: false });
 
     console.log("RAW DATA FROM SUPABASE:", data);
-    console.log("RAW ERROR FROM SUPABASE:", requestError);
       
     if (requestError) {
-      console.error("SUPABASE ERROR DETAILS:", requestError);
-      setError(`Mobile requests could not be loaded: ${requestError.message}`);
+      console.error("SUPABASE ERROR:", requestError);
+      setError(`Could not load requests: ${requestError.message}`);
       setRequests([]);
     } else {
-      // Map the raw data to the shape the UI expects
+      // 2. Safely map the data to match what the UI expects
       const mappedData = (data ?? []).map((order: any) => ({
-        ...order,
-        request_status: order.status || 'pending',
-        estimated_total: order.total_due,
-        customer_note: order.notes,
-        express: order.is_express,
+        id: order.id,
+        // Force lowercase and default to 'pending' to guarantee it matches our filters
+        request_status: (order.status || 'pending').toLowerCase() as RequestStatus,
+        requested_for: order.requested_for || null,
+        confirmed_for: order.confirmed_for || null,
+        pickup_area: order.pickup_area || null,
+        pickup_address: order.pickup_address || null,
+        pickup_window: order.pickup_window || null,
+        pickup_latitude: order.pickup_latitude || null,
+        pickup_longitude: order.pickup_longitude || null,
+        pickup_accuracy_meters: order.pickup_accuracy_meters || null,
+        laundry_items: order.laundry_items || [],
+        express: order.is_express || false,
+        estimated_total: order.total_due || 0,
+        customer_note: order.notes || null,
+        staff_note: order.staff_note || null,
+        customer_response: order.customer_response || null,
+        created_at: order.created_at,
       }));
       
-      setRequests(mappedData as MobileRequest[]);
-      setSelectedId((current) => current && mappedData.some((request: MobileRequest) => request.id === current) ? current : null);
+      setRequests(mappedData);
+      
+      // Keep the currently selected ID valid
+      setSelectedId((current) => current && mappedData.some((req) => req.id === current) ? current : null);
     }
     setLoading(false);
   }, []);
+
+  // 3. Simplified filtering to ensure 'pending' always shows in "active"
+  const filtered = useMemo(() => {
+    return requests.filter((request) => {
+      const status = request.request_status;
+      if (filter === "active") return status === "pending" || status === "under_review";
+      if (filter === "waiting") return status === "needs_customer_confirmation";
+      if (filter === "confirmed") return status === "confirmed" || status === "converted";
+      return status === "declined" || status === "cancelled";
+    });
+  }, [filter, requests]);
   useEffect(() => {
     void loadRequests();
     // CHANGED: Realtime now listens to the 'orders' table
