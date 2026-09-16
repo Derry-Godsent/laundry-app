@@ -59,11 +59,10 @@ function MobileRequestsContent() {
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
-  const loadRequests = useCallback(async () => {
+    const loadRequests = useCallback(async () => {
     setLoading(true);
     setError(null);
     
-    // CHANGED: Querying 'orders' table instead of 'mobile_requests'
     const { data, error: requestError } = await supabase
       .from("orders")
       .select(`
@@ -84,6 +83,9 @@ function MobileRequestsContent() {
         created_at
       `)
       .order("created_at", { ascending: false });
+
+    // ADD THIS LINE:
+    console.log("RAW DATA FROM SUPABASE:", data); 
       
     if (requestError) {
       setError("Mobile requests could not be loaded. Please refresh the page.");
@@ -94,7 +96,7 @@ function MobileRequestsContent() {
     }
     setLoading(false);
   }, []);
-
+  
   useEffect(() => {
     void loadRequests();
     // CHANGED: Realtime now listens to the 'orders' table
