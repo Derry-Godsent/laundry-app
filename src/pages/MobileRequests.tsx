@@ -62,11 +62,29 @@ function MobileRequestsContent() {
   const loadRequests = useCallback(async () => {
     setLoading(true);
     setError(null);
+    
+    // CHANGED: Querying 'orders' table instead of 'mobile_requests'
     const { data, error: requestError } = await supabase
-      .from("mobile_requests")
-      .select("id, request_status, requested_for, confirmed_for, pickup_area, pickup_address, pickup_window, pickup_latitude, pickup_longitude, pickup_accuracy_meters, laundry_items, express, estimated_total, customer_note, staff_note, customer_response, created_at, customer_accounts ( full_name, phone )")
-      .eq("service_code", "laundry")
+      .from("orders")
+      .select(`
+        id, 
+        status as request_status, 
+        requested_for, 
+        pickup_area, 
+        pickup_address, 
+        pickup_window, 
+        pickup_latitude, 
+        pickup_longitude, 
+        laundry_items, 
+        is_express as express, 
+        total_due as estimated_total, 
+        notes as customer_note, 
+        staff_note, 
+        customer_response, 
+        created_at
+      `)
       .order("created_at", { ascending: false });
+      
     if (requestError) {
       setError("Mobile requests could not be loaded. Please refresh the page.");
       setRequests([]);
@@ -79,8 +97,9 @@ function MobileRequestsContent() {
 
   useEffect(() => {
     void loadRequests();
+    // CHANGED: Realtime now listens to the 'orders' table
     const channel = supabase.channel("mobile-laundry-requests")
-      .on("postgres_changes", { event: "*", schema: "public", table: "mobile_requests" }, () => { void loadRequests(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => { void loadRequests(); })
       .subscribe();
     return () => { void supabase.removeChannel(channel); };
   }, [loadRequests]);
@@ -92,6 +111,7 @@ function MobileRequestsContent() {
     if (filter === "confirmed") return request.request_status === "confirmed" || request.request_status === "converted";
     return request.request_status === "declined" || request.request_status === "cancelled";
   }), [filter, requests]);
+  
   const counts = useMemo(() => ({
     active: requests.filter((request) => isActiveWork(request.request_status)).length,
     waiting: requests.filter((request) => request.request_status === "needs_customer_confirmation").length,
@@ -102,7 +122,7 @@ function MobileRequestsContent() {
   useEffect(() => {
     if (!selected || !isActiveWork(selected.request_status)) return;
     setDecision("needs_customer_confirmation");
-    setDate(selected.requested_for ?? selected.confirmed_for ?? "");
+    setDate(selected.requested_for ?? "");
     setNote(selected.staff_note ?? "");
   }, [selectedId, selected]);
 
@@ -115,17 +135,30 @@ function MobileRequestsContent() {
     setSaving(true);
     setError(null);
     setSavedMessage(null);
-    const { error: reviewError } = await supabase.rpc("review_mobile_request", {
-      p_request_id: selected.id,
-      p_status: decision,
-      p_confirmed_for: decision === "needs_customer_confirmation" ? date || null : null,
-      p_staff_note: note || null,
-    });
+    
+    // CHANGED: Direct update to 'orders' table instead of RPC for guaranteed reliability
+    const updatePayload: any = {
+      status: decision,
+      staff_note: note || null,
+    };
+    
+    if (decision === "needs_customer_confirmation") {
+      updatePayload.requested_for = date; // Updates the proposed date
+    } else if (decision === "confirmed") {
+      updatePayload.requested_for = selected.requested_for; // Confirms the client's date
+    }
+
+    const { error: updateError } = await supabase
+      .from("orders")
+      .update(updatePayload)
+      .eq("id", selected.id);
+
     setSaving(false);
-    if (reviewError) {
+    if (updateError) {
       setError("The request could not be updated. Please try again.");
       return;
     }
+    
     setSelectedId(null);
     setSavedMessage(decision === "declined" ? "Request declined. It remains in Declined history as a final record." : decision === "confirmed" ? "Client date approved. It remains in Approved work for the next Chapman step." : "New date sent. It remains in Waiting for client until the client responds.");
     setFilter(decision === "declined" ? "declined" : decision === "confirmed" ? "confirmed" : "waiting");
@@ -133,6 +166,7 @@ function MobileRequestsContent() {
   };
 
   const heading = filter === "active" ? ["Active Laundry queue", "Requests waiting for Chapman action"] : filter === "waiting" ? ["Waiting for client", "Date proposals awaiting a client answer"] : filter === "confirmed" ? ["Approved work", "Requests ready for operational follow-through"] : ["Declined history", "Final client or staff declines; no action required"];
+  
   return <div className="mr-page">
     <header className="mr-header"><div><div className="mr-eyebrow"><Inbox size={14} /> MOBILE INTAKE</div><h1>Mobile Requests</h1><p>Every request remains visible in its correct work view: action needed, client reply, approved work, or final decline history.</p></div><button className="mr-refresh" onClick={() => void loadRequests()} disabled={loading} aria-label="Refresh mobile requests"><RefreshCw size={16} className={loading ? "mr-spin" : ""} /> Refresh</button></header>
     <section className="mr-summary" aria-label="Mobile request management views">
@@ -142,8 +176,8 @@ function MobileRequestsContent() {
       <button className={filter === "declined" ? "mr-summary-card active amber" : "mr-summary-card amber"} onClick={() => setFilter("declined")}><span>Declined history</span><strong>{counts.declined}</strong></button>
     </section>
     <section className="mr-workspace">
-      <div className="mr-list-panel"><div className="mr-list-heading"><div><h2>{heading[0]}</h2><p>{heading[1]}</p></div><span>{filtered.length}</span></div>{error ? <div className="mr-error">{error}</div> : null}{savedMessage ? <div className="mr-empty">{savedMessage}</div> : null}{loading || permissionLoading ? <div className="mr-empty"><RefreshCw size={18} className="mr-spin" /><p>Loading protected requests…</p></div> : filtered.length === 0 ? <div className="mr-empty"><ClipboardList size={24} /><h3>No requests in this view</h3><p>{filter === "active" ? "New client requests will appear here when Chapman needs to act." : filter === "waiting" ? "Requests stay here until the client replies." : filter === "confirmed" ? "Approved requests remain here for follow-through." : "Final declined requests remain here as a clear record."}</p></div> : <div className="mr-list">{filtered.map((request) => { const status = requestMeta(request); const customerName = request.customer_accounts?.full_name || "Verified customer"; const itemCount = Array.isArray(request.laundry_items) ? request.laundry_items.reduce((total, item) => total + Number(item.quantity ?? 1), 0) : 0; return <button key={request.id} className={selectedId === request.id ? "mr-request selected" : "mr-request"} onClick={() => setSelectedId(request.id)}><div className="mr-request-top"><span className="mr-request-id">#{request.id.slice(0, 8)}</span><span className="mr-status" style={{ color: status.color, background: status.background }}>{status.label}</span></div><div className="mr-customer"><div className="mr-avatar">{customerName.slice(0, 1).toUpperCase()}</div><div><strong>{customerName}</strong><span>{request.customer_accounts?.phone || "Phone verified"}</span></div><ChevronRight size={17} /></div><div className="mr-request-meta"><span><CalendarDays size={13} /> {formatDay(request.confirmed_for ?? request.requested_for)}</span><span>{itemCount ? `${itemCount} items` : "Items to review"}</span><strong>{money(request.estimated_total)}</strong></div></button>; })}</div>}</div>
-      <aside className="mr-detail-panel" aria-live="polite">{!selected ? <div className="mr-detail-empty"><ShieldCheck size={26} /><h2>Select a request</h2><p>Review client details and manage the next appropriate step. Mobile requests remain separate from existing Orders until Chapman creates one deliberately.</p></div> : <><div className="mr-detail-header"><div><span className="mr-detail-label">LAUNDRY REQUEST</span><h2>{selected.customer_accounts?.full_name || "Verified customer"}</h2><p>Received {formatCreated(selected.created_at)}</p></div><button onClick={() => setSelectedId(null)} aria-label="Close request details"><X size={18} /></button></div><div className="mr-detail-status"><span className="mr-status" style={{ color: requestMeta(selected).color, background: requestMeta(selected).background }}>{requestMeta(selected).label}</span>{selected.express ? <span className="mr-express">Express care</span> : null}</div><div className="mr-detail-grid"><DetailItem icon={<CalendarDays size={16} />} label="Client’s preferred date" value={formatDay(selected.requested_for)} /><DetailItem icon={<MapPin size={16} />} label="Collection area" value={selected.pickup_area || selected.pickup_address || "To be confirmed"} /><DetailItem icon={<ClipboardList size={16} />} label="Estimated total" value={money(selected.estimated_total)} /><DetailItem icon={<MessageSquareText size={16} />} label="Pickup window" value={selected.pickup_window || "To be arranged"} /></div><div className="mr-section"><h3>Pickup location</h3>{selected.pickup_latitude !== null && selected.pickup_latitude !== undefined && selected.pickup_longitude !== null && selected.pickup_longitude !== undefined ? <p className="mr-note"><a href={`https://www.google.com/maps/search/?api=1&query=${selected.pickup_latitude},${selected.pickup_longitude}`} target="_blank" rel="noreferrer" style={{ color: "#61d7bc", fontWeight: 700 }}>Open client-shared pickup point <ExternalLink size={12} style={{ verticalAlign: "middle" }} /></a>{selected.pickup_accuracy_meters ? ` · approximately ${Math.round(selected.pickup_accuracy_meters)} m accuracy` : ""}</p> : <p className="mr-muted">No map point shared. Use the client’s area and landmark to arrange pickup.</p>}</div><div className="mr-section"><h3>Laundry items</h3>{Array.isArray(selected.laundry_items) && selected.laundry_items.length ? <div className="mr-items">{selected.laundry_items.map((item, index) => <span key={`${item.name}-${index}`}>{item.quantity ?? 1}× {item.name || "Laundry item"}</span>)}</div> : <p className="mr-muted">The item list will show here when the customer submits the booking.</p>}</div><div className="mr-section"><h3>Customer note</h3><p className={selected.customer_note ? "mr-note" : "mr-muted"}>{selected.customer_note || "No special instructions added."}</p></div>{isActiveWork(selected.request_status) ? <div className="mr-decision"><div><h3>Staff decision</h3><p>Confirm uses the client’s selected date automatically. Propose a date only when Chapman needs to offer a different option.</p></div><label>Status<select value={decision} onChange={(event) => setDecision(event.target.value as RequestStatus)} disabled={!canEdit || saving}><option value="needs_customer_confirmation">Propose a date</option><option value="confirmed">Confirm client date</option><option value="declined">Decline request</option></select></label>{decision === "needs_customer_confirmation" ? <label>Proposed service date<input type="date" value={date} onChange={(event) => setDate(event.target.value)} disabled={!canEdit || saving} /></label> : null}<label>Note for customer<textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add a helpful update or next step" disabled={!canEdit || saving} rows={3} /></label><button className="mr-save" onClick={() => void saveDecision()} disabled={!canEdit || saving}>{saving ? "Saving…" : <><Check size={16} /> Send update</>}</button>{!canEdit ? <p className="mr-view-only">You can review this request, but only an authorised manager can change it.</p> : null}</div> : <div className="mr-section"><h3>{selected.request_status === "needs_customer_confirmation" ? "Waiting for the client" : selected.request_status === "confirmed" || selected.request_status === "converted" ? "Approved work" : "Final declined record"}</h3><p className="mr-note">{selected.request_status === "needs_customer_confirmation" ? "The client must respond in the Chapman app. No staff action is needed until then." : selected.request_status === "confirmed" || selected.request_status === "converted" ? "Keep this request visible here while Chapman continues with order creation and specialist assignment." : selected.customer_response === "rejected" ? "The client rejected the proposed date. This request is closed and needs no further action." : "Chapman declined this request. It remains as a final history record."}</p></div>}</>}</aside>
+      <div className="mr-list-panel"><div className="mr-list-heading"><div><h2>{heading[0]}</h2><p>{heading[1]}</p></div><span>{filtered.length}</span></div>{error ? <div className="mr-error">{error}</div> : null}{savedMessage ? <div className="mr-empty">{savedMessage}</div> : null}{loading || permissionLoading ? <div className="mr-empty"><RefreshCw size={18} className="mr-spin" /><p>Loading protected requests…</p></div> : filtered.length === 0 ? <div className="mr-empty"><ClipboardList size={24} /><h3>No requests in this view</h3><p>{filter === "active" ? "New client requests will appear here when Chapman needs to act." : filter === "waiting" ? "Requests stay here until the client replies." : filter === "confirmed" ? "Approved requests remain here for follow-through." : "Final declined requests remain here as a clear record."}</p></div> : <div className="mr-list">{filtered.map((request) => { const status = requestMeta(request); const customerName = "Verified customer"; const itemCount = Array.isArray(request.laundry_items) ? request.laundry_items.reduce((total, item) => total + Number(item.quantity ?? 1), 0) : 0; return <button key={request.id} className={selectedId === request.id ? "mr-request selected" : "mr-request"} onClick={() => setSelectedId(request.id)}><div className="mr-request-top"><span className="mr-request-id">#{request.id.slice(0, 8)}</span><span className="mr-status" style={{ color: status.color, background: status.background }}>{status.label}</span></div><div className="mr-customer"><div className="mr-avatar">C</div><div><strong>{customerName}</strong><span>Phone verified</span></div><ChevronRight size={17} /></div><div className="mr-request-meta"><span><CalendarDays size={13} /> {formatDay(request.requested_for)}</span><span>{itemCount ? `${itemCount} items` : "Items to review"}</span><strong>{money(request.estimated_total)}</strong></div></button>; })}</div>}</div>
+      <aside className="mr-detail-panel" aria-live="polite">{!selected ? <div className="mr-detail-empty"><ShieldCheck size={26} /><h2>Select a request</h2><p>Review client details and manage the next appropriate step. Mobile requests remain separate from existing Orders until Chapman creates one deliberately.</p></div> : <><div className="mr-detail-header"><div><span className="mr-detail-label">LAUNDRY REQUEST</span><h2>Verified customer</h2><p>Received {formatCreated(selected.created_at)}</p></div><button onClick={() => setSelectedId(null)} aria-label="Close request details"><X size={18} /></button></div><div className="mr-detail-status"><span className="mr-status" style={{ color: requestMeta(selected).color, background: requestMeta(selected).background }}>{requestMeta(selected).label}</span>{selected.express ? <span className="mr-express">Express care</span> : null}</div><div className="mr-detail-grid"><DetailItem icon={<CalendarDays size={16} />} label="Client’s preferred date" value={formatDay(selected.requested_for)} /><DetailItem icon={<MapPin size={16} />} label="Collection area" value={selected.pickup_area || selected.pickup_address || "To be confirmed"} /><DetailItem icon={<ClipboardList size={16} />} label="Estimated total" value={money(selected.estimated_total)} /><DetailItem icon={<MessageSquareText size={16} />} label="Pickup window" value={selected.pickup_window || "To be arranged"} /></div><div className="mr-section"><h3>Pickup location</h3>{selected.pickup_latitude !== null && selected.pickup_latitude !== undefined && selected.pickup_longitude !== null && selected.pickup_longitude !== undefined ? <p className="mr-note"><a href={`https://www.google.com/maps/search/?api=1&query=${selected.pickup_latitude},${selected.pickup_longitude}`} target="_blank" rel="noreferrer" style={{ color: "#61d7bc", fontWeight: 700 }}>Open client-shared pickup point <ExternalLink size={12} style={{ verticalAlign: "middle" }} /></a></p> : <p className="mr-muted">No map point shared. Use the client’s area and landmark to arrange pickup.</p>}</div><div className="mr-section"><h3>Laundry items</h3>{Array.isArray(selected.laundry_items) && selected.laundry_items.length ? <div className="mr-items">{selected.laundry_items.map((item, index) => <span key={`${item.name}-${index}`}>{item.quantity ?? 1}× {item.name || "Laundry item"}</span>)}</div> : <p className="mr-muted">The item list will show here when the customer submits the booking.</p>}</div><div className="mr-section"><h3>Customer note</h3><p className={selected.customer_note ? "mr-note" : "mr-muted"}>{selected.customer_note || "No special instructions added."}</p></div>{isActiveWork(selected.request_status) ? <div className="mr-decision"><div><h3>Staff decision</h3><p>Confirm uses the client’s selected date automatically. Propose a date only when Chapman needs to offer a different option.</p></div><label>Status<select value={decision} onChange={(event) => setDecision(event.target.value as RequestStatus)} disabled={!canEdit || saving}><option value="needs_customer_confirmation">Propose a date</option><option value="confirmed">Confirm client date</option><option value="declined">Decline request</option></select></label>{decision === "needs_customer_confirmation" ? <label>Proposed service date<input type="date" value={date} onChange={(event) => setDate(event.target.value)} disabled={!canEdit || saving} /></label> : null}<label>Note for customer<textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="Add a helpful update or next step" disabled={!canEdit || saving} rows={3} /></label><button className="mr-save" onClick={() => void saveDecision()} disabled={!canEdit || saving}>{saving ? "Saving…" : <><Check size={16} /> Send update</>}</button>{!canEdit ? <p className="mr-view-only">You can review this request, but only an authorised manager can change it.</p> : null}</div> : <div className="mr-section"><h3>{selected.request_status === "needs_customer_confirmation" ? "Waiting for the client" : selected.request_status === "confirmed" || selected.request_status === "converted" ? "Approved work" : "Final declined record"}</h3><p className="mr-note">{selected.request_status === "needs_customer_confirmation" ? "The client must respond in the Chapman app. No staff action is needed until then." : selected.request_status === "confirmed" || selected.request_status === "converted" ? "Keep this request visible here while Chapman continues with order creation and specialist assignment." : selected.customer_response === "rejected" ? "The client rejected the proposed date. This request is closed and needs no further action." : "Chapman declined this request. It remains as a final history record."}</p></div>}</>}</aside>
     </section>
   </div>;
 }
