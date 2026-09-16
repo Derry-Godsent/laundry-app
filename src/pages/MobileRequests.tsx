@@ -101,13 +101,13 @@ function MobileRequestsContent() {
       setRequests(mappedData);
       
       // Keep the currently selected ID valid
-      setSelectedId((current) => current && mappedData.some((req) => req.id === current) ? current : null);
+      setSelectedId((current) => current && mappedData.some((req: MobileRequest) => req.id === current) ? current : null);
     }
     setLoading(false);
   }, []);
 
   // 3. Simplified filtering to ensure 'pending' always shows in "active"
-  const filtered = useMemo(() => {
+    const filtered = useMemo(() => {
     return requests.filter((request) => {
       const status = request.request_status;
       if (filter === "active") return status === "pending" || status === "under_review";
@@ -116,22 +116,42 @@ function MobileRequestsContent() {
       return status === "declined" || status === "cancelled";
     });
   }, [filter, requests]);
+
   useEffect(() => {
     void loadRequests();
-    // CHANGED: Realtime now listens to the 'orders' table
-    const channel = supabase.channel("mobile-laundry-requests")
-      .on("postgres_changes", { event: "*", schema: "public", table: "orders" }, () => { void loadRequests(); })
+    
+    const channel = supabase
+      .channel("mobile-laundry-requests")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        (payload: any) => {
+          if (payload.eventType === "UPDATE" || payload.eventType === "INSERT") {
+            const updatedOrder = payload.new as any;
+            setRequests((current) => {
+              const exists = current.some((req: MobileRequest) => req.id === updatedOrder.id);
+              const mappedOrder = {
+                ...updatedOrder,
+                request_status: (updatedOrder.status || 'pending').toLowerCase() as RequestStatus,
+                estimated_total: updatedOrder.total_due,
+                customer_note: updatedOrder.notes,
+                express: updatedOrder.is_express,
+              };
+              return exists 
+                ? current.map((req: MobileRequest) => req.id === updatedOrder.id ? mappedOrder : req)
+                : [mappedOrder, ...current];
+            });
+          } else if (payload.eventType === "DELETE") {
+            setRequests((current) => current.filter((req: MobileRequest) => req.id !== payload.old.id));
+          }
+        }
+      )
       .subscribe();
+
     return () => { void supabase.removeChannel(channel); };
   }, [loadRequests]);
 
   const selected = requests.find((request) => request.id === selectedId) ?? null;
-  const filtered = useMemo(() => requests.filter((request) => {
-    if (filter === "active") return isActiveWork(request.request_status);
-    if (filter === "waiting") return request.request_status === "needs_customer_confirmation";
-    if (filter === "confirmed") return request.request_status === "confirmed" || request.request_status === "converted";
-    return request.request_status === "declined" || request.request_status === "cancelled";
-  }), [filter, requests]);
   
   const counts = useMemo(() => ({
     active: requests.filter((request) => isActiveWork(request.request_status)).length,
