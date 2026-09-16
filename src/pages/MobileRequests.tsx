@@ -63,40 +63,34 @@ function MobileRequestsContent() {
     setLoading(true);
     setError(null);
     
+    // TEMPORARY FIX: Use "*" to get ALL columns and bypass column name mismatches
     const { data, error: requestError } = await supabase
       .from("orders")
-      .select(`
-        id, 
-        status as request_status, 
-        requested_for, 
-        pickup_area, 
-        pickup_address, 
-        pickup_window, 
-        pickup_latitude, 
-        pickup_longitude, 
-        laundry_items, 
-        is_express as express, 
-        total_due as estimated_total, 
-        notes as customer_note, 
-        staff_note, 
-        customer_response, 
-        created_at
-      `)
+      .select("*") 
       .order("created_at", { ascending: false });
 
-    // ADD THIS LINE:
-    console.log("RAW DATA FROM SUPABASE:", data); 
+    console.log("RAW DATA FROM SUPABASE:", data);
+    console.log("RAW ERROR FROM SUPABASE:", requestError);
       
     if (requestError) {
-      setError("Mobile requests could not be loaded. Please refresh the page.");
+      console.error("SUPABASE ERROR DETAILS:", requestError);
+      setError(`Mobile requests could not be loaded: ${requestError.message}`);
       setRequests([]);
     } else {
-      setRequests((data ?? []) as MobileRequest[]);
-      setSelectedId((current) => current && (data ?? []).some((request: MobileRequest) => request.id === current) ? current : null);
+      // Map the raw data to the shape the UI expects
+      const mappedData = (data ?? []).map((order: any) => ({
+        ...order,
+        request_status: order.status || 'pending',
+        estimated_total: order.total_due,
+        customer_note: order.notes,
+        express: order.is_express,
+      }));
+      
+      setRequests(mappedData as MobileRequest[]);
+      setSelectedId((current) => current && mappedData.some((request: MobileRequest) => request.id === current) ? current : null);
     }
     setLoading(false);
   }, []);
-  
   useEffect(() => {
     void loadRequests();
     // CHANGED: Realtime now listens to the 'orders' table
