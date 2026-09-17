@@ -124,12 +124,12 @@ function MobileRequestsContent() {
       .channel("mobile-laundry-requests")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "mobile_requests" }, // FIX: Changed from "orders" to "mobile_requests"
+        { event: "*", schema: "public", table: "mobile_requests" },
         () => {
-          void loadRequests(); // Simply reload the fresh data from the database
+          void loadRequests(); 
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         if (status === "SUBSCRIBED") {
           console.log("Staff realtime connected to mobile_requests");
         }
