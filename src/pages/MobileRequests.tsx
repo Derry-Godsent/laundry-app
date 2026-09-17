@@ -117,40 +117,28 @@ function MobileRequestsContent() {
     });
   }, [filter, requests]);
 
-  useEffect(() => {
+    useEffect(() => {
     void loadRequests();
     
     const channel = supabase
       .channel("mobile-laundry-requests")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        (payload: any) => {
-          if (payload.eventType === "UPDATE" || payload.eventType === "INSERT") {
-            const updatedOrder = payload.new as any;
-            setRequests((current) => {
-              const exists = current.some((req: MobileRequest) => req.id === updatedOrder.id);
-              const mappedOrder = {
-                ...updatedOrder,
-                request_status: (updatedOrder.status || 'pending').toLowerCase() as RequestStatus,
-                estimated_total: updatedOrder.total_due,
-                customer_note: updatedOrder.notes,
-                express: updatedOrder.is_express,
-              };
-              return exists 
-                ? current.map((req: MobileRequest) => req.id === updatedOrder.id ? mappedOrder : req)
-                : [mappedOrder, ...current];
-            });
-          } else if (payload.eventType === "DELETE") {
-            setRequests((current) => current.filter((req: MobileRequest) => req.id !== payload.old.id));
-          }
+        { event: "*", schema: "public", table: "mobile_requests" }, // FIX: Changed from "orders" to "mobile_requests"
+        () => {
+          void loadRequests(); // Simply reload the fresh data from the database
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log("Staff realtime connected to mobile_requests");
+        }
+      });
 
-    return () => { void supabase.removeChannel(channel); };
+    return () => { 
+      void supabase.removeChannel(channel); 
+    };
   }, [loadRequests]);
-
   const selected = requests.find((request) => request.id === selectedId) ?? null;
   
   const counts = useMemo(() => ({
