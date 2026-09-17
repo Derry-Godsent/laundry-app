@@ -59,13 +59,13 @@ function MobileRequestsContent() {
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
-    const loadRequests = useCallback(async () => {
+      const loadRequests = useCallback(async () => {
     setLoading(true);
     setError(null);
     
-    // 1. Fetch everything from the orders table
+    // FIX: Fetch from mobile_requests table
     const { data, error: requestError } = await supabase
-      .from("orders")
+      .from("mobile_requests")
       .select("*") 
       .order("created_at", { ascending: false });
 
@@ -76,31 +76,28 @@ function MobileRequestsContent() {
       setError(`Could not load requests: ${requestError.message}`);
       setRequests([]);
     } else {
-      // 2. Safely map the data to match what the UI expects
-      const mappedData = (data ?? []).map((order: any) => ({
-        id: order.id,
-        // Force lowercase and default to 'pending' to guarantee it matches our filters
-        request_status: (order.status || 'pending').toLowerCase() as RequestStatus,
-        requested_for: order.requested_for || null,
-        confirmed_for: order.confirmed_for || null,
-        pickup_area: order.pickup_area || null,
-        pickup_address: order.pickup_address || null,
-        pickup_window: order.pickup_window || null,
-        pickup_latitude: order.pickup_latitude || null,
-        pickup_longitude: order.pickup_longitude || null,
-        pickup_accuracy_meters: order.pickup_accuracy_meters || null,
-        laundry_items: order.laundry_items || [],
-        express: order.is_express || false,
-        estimated_total: order.total_due || 0,
-        customer_note: order.notes || null,
-        staff_note: order.staff_note || null,
-        customer_response: order.customer_response || null,
-        created_at: order.created_at,
+      // Map the data to match what the UI expects
+      const mappedData = (data ?? []).map((req: any) => ({
+        id: req.id,
+        request_status: (req.request_status || 'pending').toLowerCase() as RequestStatus,
+        requested_for: req.requested_for || null,
+        confirmed_for: req.confirmed_for || null,
+        pickup_area: req.pickup_area || null,
+        pickup_address: req.pickup_address || null,
+        pickup_window: req.pickup_window || null,
+        pickup_latitude: req.pickup_latitude || null,
+        pickup_longitude: req.pickup_longitude || null,
+        pickup_accuracy_meters: req.pickup_accuracy_meters || null,
+        laundry_items: req.laundry_items || [],
+        express: req.express || false,
+        estimated_total: req.estimated_total || 0,
+        customer_note: req.customer_note || null,
+        staff_note: req.staff_note || null,
+        customer_response: req.customer_response || null,
+        created_at: req.created_at,
       }));
       
       setRequests(mappedData);
-      
-      // Keep the currently selected ID valid
       setSelectedId((current) => current && mappedData.some((req: MobileRequest) => req.id === current) ? current : null);
     }
     setLoading(false);
@@ -155,7 +152,7 @@ function MobileRequestsContent() {
     setNote(selected.staff_note ?? "");
   }, [selectedId, selected]);
 
-  const saveDecision = async () => {
+    const saveDecision = async () => {
     if (!selected || !isActiveWork(selected.request_status)) return;
     if (decision === "needs_customer_confirmation" && !date) {
       setError("Choose the proposed service date before saving.");
@@ -165,20 +162,21 @@ function MobileRequestsContent() {
     setError(null);
     setSavedMessage(null);
     
-    // CHANGED: Direct update to 'orders' table instead of RPC for guaranteed reliability
+    // FIX: Update the mobile_requests table using the correct column names
     const updatePayload: any = {
-      status: decision,
+      request_status: decision,
       staff_note: note || null,
+      reviewed_at: new Date().toISOString(),
     };
     
     if (decision === "needs_customer_confirmation") {
-      updatePayload.requested_for = date; // Updates the proposed date
+      updatePayload.confirmed_for = date; // Use confirmed_for for proposed date
     } else if (decision === "confirmed") {
-      updatePayload.requested_for = selected.requested_for; // Confirms the client's date
+      updatePayload.confirmed_for = selected.requested_for; // Confirm the client's date
     }
 
     const { error: updateError } = await supabase
-      .from("orders")
+      .from("mobile_requests")
       .update(updatePayload)
       .eq("id", selected.id);
 
