@@ -110,3 +110,54 @@ Screens not yet migrated to the design system (Orders, Clients, Staff, Services,
 Payments, Receipt, Reports, Settings, Security, System Admin, App Accounts, App
 Ideas) keep their own inline styling; they inherit the new shell, typography and
 shell tokens. Migrating them to `@/components/ui` is the natural next pass.
+
+---
+
+## 6. Phases
+
+This redesign is deliberately phased so each step ships on its own and nothing
+is half-converted. **Status is tracked here and in [`todo.md`](../todo.md)** —
+that is the source of truth, not any chat thread.
+
+| Phase | Scope | Status |
+| --- | --- | --- |
+| 1 | Design system — tokens + `@/components/ui` + shared stylesheets | ✅ done |
+| 2 | App shell — sidebar, topbar, layout, palette, menus, FAB | ✅ done |
+| 3 | Dashboard — overview rebuilt on the system | ✅ done |
+| 4 | Mobile Requests queue — the intake pattern | ✅ done |
+| 5 | **Orders** — busiest screen; establishes the table + row-detail pattern | ⬜ next |
+| 6 | Clients + Staff — register and roster pages (KPI rows, tables, modals) | ⬜ |
+| 7 | Settings · Security · System Admin — the Administration group | ⬜ |
+| 8 | Services · Payments · Receipts · Reports | ⬜ |
+| 9 | Service Requests · App Ideas · App Accounts | ⬜ |
+| 10 | Sign-off: delete `/preview` (route + page + CSS) and the sample-data note here | ⬜ |
+
+Rules that keep the phases safe:
+
+- One page (or one small group) per commit, on the same branch as the open PR.
+- Data logic is frozen: queries, tables, columns, realtime channels, update
+  payloads, permission checks and routes must not change. Presentation only.
+- Each phase must end with `npx tsc -b` and `npm run build` passing, and the
+  page exercised in `/preview` (add a sample block) or against a real sign-in.
+
+## 7. Resuming this work in a new chat
+
+Everything needed to continue lives in the repository, so a fresh session can
+pick the work up without any chat history:
+
+1. **Read, in this order:** `todo.md` (open phases) → this file (system + rules)
+   → `git log --oneline -8` (what has landed) → the open PR.
+2. **The branch is the thread.** All redesign commits live on
+   `arena/03b7f65b-laundry-app` with PR **#7** open against `master`. If a new
+   chat starts on a *different* branch, that branch was cut from `master` and
+   will not contain the redesign — merge PR #7 first, or fetch the redesign
+   branch, before continuing.
+3. **A ready-made prompt** for the next session:
+
+   > Continue the staff console redesign. Read `docs/staff-console-redesign.md`
+   > and `todo.md` first. Phases 1–4 are committed on
+   > `arena/03b7f65b-laundry-app` (PR #7 open against master). Work on the next
+   > unchecked phase — presentation only, no data-logic changes — verify with
+   > `npx tsc -b` and `npm run build`, then commit and push to the same branch.
+
+4. **Review without credentials** at any point: `/preview` (sample data only).

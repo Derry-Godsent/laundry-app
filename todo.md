@@ -17,4 +17,17 @@
 - [x] Rebuild the Dashboard on the shared components, keeping the live figures and charts unchanged.
 - [x] Rebuild the Mobile Requests queue so a record's state, client date and decision are readable at a glance.
 - [x] Add a credential-free `/preview` page that renders the redesign from sample records for review before sign-in.
-- [ ] Migrate the remaining pages (Orders, Clients, Staff, Services, Payments, Receipts, Reports, Settings, Security, System Admin) onto the shared components.
+## Staff console redesign — phases
+
+Full notes, rules and the resume instructions live in `docs/staff-console-redesign.md`.
+
+- [x] Phase 1 — design system: tokens, shared stylesheets, `@/components/ui` primitives.
+- [x] Phase 2 — app shell: grouped sidebar with live counts, topbar, layout, palette, menus, FAB.
+- [x] Phase 3 — Dashboard rebuilt on the shared components.
+- [x] Phase 4 — Mobile Requests queue rebuilt around one decision panel.
+- [ ] Phase 5 — Orders: busiest screen, sets the table + row-detail pattern.
+- [ ] Phase 6 — Clients and Staff registers (KPI rows, tables, modals).
+- [ ] Phase 7 — Settings, Security, System Admin.
+- [ ] Phase 8 — Services, Payments, Receipts, Reports.
+- [ ] Phase 9 — Service Requests, App Ideas, App Accounts.
+- [ ] Phase 10 — after sign-off: delete the `/preview` page, its route and its CSS.
