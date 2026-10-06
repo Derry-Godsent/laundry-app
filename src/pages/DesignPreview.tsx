@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronLeft, ClipboardList,
-  Clock, DollarSign, Inbox, LayoutDashboard, Package, Plus, RefreshCw, Search, Shield,
+  Clock, DollarSign, Inbox, LayoutDashboard, MapPin, Package, Phone, Plus, RefreshCw, Search, Shield,
   Settings, Smartphone, Sparkles, Users, X,
 } from "lucide-react";
 import {
+  Avatar,
   Banner,
   Button,
   Card,
@@ -20,6 +21,7 @@ import {
 } from "../components/ui";
 import type { PillTone } from "../components/ui";
 import "./DesignPreview.css";
+import "./Orders.css";
 
 /* ───────────────────────────────────────────────────────────────────────────
    DESIGN PREVIEW
@@ -55,6 +57,36 @@ const SAMPLE_QUEUE = [
 ];
 
 const PILL_TONES: PillTone[] = ["neutral", "brand", "gold", "ok", "warn", "bad", "info", "violet"];
+
+/* Stage colours mirror the shared workflow ramp in tokens.css. */
+const ORDER_STAGES = [
+  { short: "Rcvd", color: "var(--stage-received)" },
+  { short: "Queue", color: "var(--stage-queued)" },
+  { short: "Wash", color: "var(--stage-washing)" },
+  { short: "Dry", color: "var(--stage-drying)" },
+  { short: "Iron", color: "var(--stage-ironing)" },
+  { short: "Pack", color: "var(--stage-packaging)" },
+  { short: "Ready", color: "var(--stage-ready)" },
+  { short: "OFD", color: "var(--stage-delivery)" },
+  { short: "Done", color: "var(--stage-completed)" },
+];
+
+const SAMPLE_ORDERS = [
+  { id: "CH-10482", customer: "Akosua Mensah", phone: "+233 53 413 4809", service: "Laundry", serviceTone: "brand" as PillTone, items: 12, amount: 420, stage: "Washing", stageColor: "var(--stage-washing)", payment: "Pending", payTone: "gold" as PillTone, worker: "Staff", date: "06/10/2026" },
+  { id: "CH-10481", customer: "Yaw Adjei", phone: "+233 24 118 0022", service: "Car Detailing", serviceTone: "ok" as PillTone, items: 4, amount: 96, stage: "Completed", stageColor: "var(--stage-completed)", payment: "Paid", payTone: "ok" as PillTone, worker: "Staff", date: "06/10/2026" },
+  { id: "CH-10480", customer: "Efua Sarpong", phone: "+233 20 774 5511", service: "Cleaning", serviceTone: "info" as PillTone, items: 21, amount: 780, stage: "In Queue", stageColor: "var(--stage-queued)", payment: "Partial", payTone: "bad" as PillTone, worker: "Staff", date: "05/10/2026" },
+  { id: "CH-10479", customer: "Kwame Boateng", phone: "+233 55 902 3388", service: "Fumigation", serviceTone: "gold" as PillTone, items: 6, amount: 185, stage: "Ready", stageColor: "var(--stage-ready)", payment: "Paid", payTone: "ok" as PillTone, worker: "Staff", date: "05/10/2026" },
+];
+
+const SAMPLE_PIPELINE = [
+  { label: "Washing", color: "var(--stage-washing)", cards: [{ id: "CH-10482", customer: "Akosua Mensah", items: 12, amount: 420, payment: "Pending", payTone: "gold" as PillTone, date: "06/10" }] },
+  { label: "Ironing", color: "var(--stage-ironing)", cards: [{ id: "CH-10477", customer: "Nana Kwesi", items: 9, amount: 310, payment: "Paid", payTone: "ok" as PillTone, date: "06/10" }] },
+  { label: "Ready", color: "var(--stage-ready)", cards: [
+    { id: "CH-10479", customer: "Kwame Boateng", items: 6, amount: 185, payment: "Paid", payTone: "ok" as PillTone, date: "05/10" },
+    { id: "CH-10476", customer: "Adjoa B.", items: 3, amount: 72, payment: "Partial", payTone: "bad" as PillTone, date: "05/10" },
+  ] },
+  { label: "Out for Delivery", color: "var(--stage-delivery)", cards: [] },
+];
 
 const NAV_SAMPLE = [
   { icon: LayoutDashboard, label: "Dashboard", active: true, badge: undefined as number | undefined },
@@ -366,9 +398,188 @@ export const DesignPreview = () => {
         </div>
       </section>
 
+      {/* ── The order book ────────────────────────────────────────────── */}
+      <section className="preview-section">
+        <h2 className="preview-heading">3 · The order book</h2>
+        <p className="preview-lede">
+          The busiest screen in the console. Stages, payment state and service type each have one
+          colour that means the same thing here, in the pipeline board and on the dashboard. Money
+          and counts use tabular figures so columns line up. Below 700px the table becomes a stack of
+          labelled cards instead of scrolling sideways.
+        </p>
+
+        <Card className="card--flush">
+          <div className="table-wrap">
+            <table className="data-table ord-table">
+              <thead>
+                <tr>
+                  <th style={{ width: 44 }}><input type="checkbox" className="ord-check" defaultChecked /></th>
+                  <th>Order</th><th>Customer</th><th>Service</th><th>Items</th>
+                  <th>Amount</th><th>Stage</th><th>Payment</th><th>Worker</th><th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {SAMPLE_ORDERS.map((order) => (
+                  <tr key={order.id} className="ord-row">
+                    <td className="ord-cell-check"><input type="checkbox" className="ord-check" /></td>
+                    <td data-label="Order" className="ord-id">{order.id}</td>
+                    <td data-label="Customer">
+                      <div className="ord-cust">
+                        <Avatar name={order.customer} hue={(order.customer.charCodeAt(0) * 37) % 360} />
+                        <div>
+                          <div className="ord-cust__name">{order.customer}</div>
+                          <div className="ord-cust__phone">{order.phone}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td data-label="Service"><StatusPill tone={order.serviceTone}>{order.service}</StatusPill></td>
+                    <td data-label="Items" className="ord-num">{order.items}</td>
+                    <td data-label="Amount" className="ord-amount">₵{order.amount.toLocaleString()}</td>
+                    <td data-label="Stage">
+                      <span className="ord-stage">
+                        <span className="ord-stage__dot" style={{ background: order.stageColor }} />
+                        {order.stage}
+                      </span>
+                    </td>
+                    <td data-label="Payment"><StatusPill tone={order.payTone}>{order.payment}</StatusPill></td>
+                    <td data-label="Worker" className="ord-dim">{order.worker}</td>
+                    <td data-label="Date" className="ord-dim">{order.date}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="ord-pag">
+            <span className="ord-pag__info">1–4 of 1,248 orders</span>
+            <div className="ord-pag__right">
+              <select className="select" defaultValue="10"><option>10 / page</option><option>25 / page</option></select>
+              <span className="ord-page-num is-active">1</span>
+              <span className="ord-page-num">2</span>
+              <span className="ord-page-num">3</span>
+            </div>
+          </div>
+        </Card>
+
+        <div className="preview-orders-split">
+          <div>
+            <div className="preview-subheading">Pipeline board</div>
+            <div className="ord-pipeline">
+              {SAMPLE_PIPELINE.map((column) => (
+                <div className="ord-col" key={column.label}>
+                  <div className="ord-col__head">
+                    <span className="ord-col__title">
+                      <span className="ord-col__dot" style={{ background: column.color }} />
+                      {column.label}
+                    </span>
+                    <span className="tag-count">{column.cards.length}</span>
+                  </div>
+                  <div className="ord-col__body">
+                    {column.cards.length === 0 ? (
+                      <div className="ord-col__empty">Nothing at this stage</div>
+                    ) : column.cards.map((card) => (
+                      <div className="ord-card" key={card.id}>
+                        <div className="ord-card__top">
+                          <span className="ord-card__id">{card.id}</span>
+                          <StatusPill tone={card.payTone}>{card.payment}</StatusPill>
+                        </div>
+                        <div className="ord-card__cust">
+                          <Avatar name={card.customer} size="sm" hue={(card.customer.charCodeAt(0) * 37) % 360} />
+                          <div>
+                            <div className="ord-card__name">{card.customer}</div>
+                            <div className="ord-card__sub">{card.items} items · ₵{card.amount.toLocaleString()}</div>
+                          </div>
+                        </div>
+                        <div className="ord-card__foot"><span>{card.date}</span><span>Staff</span></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="preview-subheading">Order detail drawer</div>
+            <div className="ord-drawer ord-drawer--static">
+              <div className="ord-drawer__head">
+                <div>
+                  <div className="ord-drawer__id">CH-10482</div>
+                  <div className="ord-drawer__date">Recorded 06/10/2026</div>
+                </div>
+                <div className="ord-drawer__head-actions">
+                  <span className="ord-stage">
+                    <span className="ord-stage__dot" style={{ background: "var(--stage-washing)" }} />
+                    Washing
+                  </span>
+                  <Button variant="ghost" size="sm" iconOnly aria-label="Close"><X size={16} /></Button>
+                </div>
+              </div>
+              <div className="ord-drawer__body">
+                <section>
+                  <div className="ord-block-label">Customer</div>
+                  <div className="ord-customer">
+                    <Avatar name="Akosua Mensah" size="lg" hue={65} />
+                    <div>
+                      <div className="ord-customer__name">Akosua Mensah</div>
+                      <div className="ord-customer__row"><Phone size={12} /> +233 53 413 4809</div>
+                      <div className="ord-customer__row"><MapPin size={12} /> East Legon, Accra</div>
+                    </div>
+                  </div>
+                </section>
+                <section>
+                  <div className="ord-block-label">Order details</div>
+                  <div className="meta-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                    <div className="meta-item"><div><small>Service</small><StatusPill tone="brand">Laundry</StatusPill></div></div>
+                    <div className="meta-item"><div><small>Items</small><strong>12</strong></div></div>
+                    <div className="meta-item"><div><small>Amount</small><strong>₵420</strong></div></div>
+                    <div className="meta-item"><div><small>Payment</small><StatusPill tone="gold">Pending</StatusPill></div></div>
+                  </div>
+                </section>
+                <section>
+                  <div className="ord-block-label">Workflow stage</div>
+                  <div className="ord-tl">
+                    {ORDER_STAGES.map((stage, index) => {
+                      const done = index < 2;
+                      const active = index === 2;
+                      return (
+                        <div className="ord-tl__node" key={stage.short}>
+                          {index > 0 && (
+                            <span className="ord-tl__line" style={{ background: index <= 2 ? stage.color : "var(--line-faint)" }} />
+                          )}
+                          <span
+                            className="ord-tl__dot"
+                            style={{
+                              borderColor: active ? stage.color : done ? "var(--ok-500)" : "var(--line)",
+                              background: active ? `color-mix(in srgb, ${stage.color} 18%, transparent)` : done ? "var(--ok-soft)" : "transparent",
+                            }}
+                          >
+                            {done ? <Check size={10} strokeWidth={3} /> : null}
+                            {active ? <span className="ord-tl__pulse" style={{ background: stage.color }} /> : null}
+                          </span>
+                          <span
+                            className="ord-tl__label"
+                            style={{ color: active ? stage.color : done ? "var(--ok-500)" : "var(--text-4)" }}
+                          >
+                            {stage.short}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              </div>
+              <div className="ord-drawer__foot">
+                <Button variant="secondary" block>Close</Button>
+                <Button variant="primary" block trailingIcon={<ArrowRight size={15} />}>Advance stage</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Components ────────────────────────────────────────────────── */}
       <section className="preview-section">
-        <h2 className="preview-heading">3 · The component vocabulary</h2>
+        <h2 className="preview-heading">4 · The component vocabulary</h2>
         <p className="preview-lede">
           Every page is built from these pieces, so a status, a button or an empty state can never
           drift between screens.

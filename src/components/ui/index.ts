@@ -9,6 +9,7 @@ export { StatusPill } from "./StatusPill";
 export type { PillTone } from "./StatusPill";
 
 export { PageHeader } from "./PageHeader";
+export { Avatar } from "./Avatar";
 export { StatTile } from "./StatTile";
 export { SegmentedControl } from "./SegmentedControl";
 export type { SegmentOption } from "./SegmentedControl";

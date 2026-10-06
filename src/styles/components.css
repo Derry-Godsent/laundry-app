@@ -445,6 +445,28 @@
 .segmented__item[aria-pressed="true"] .segmented__count { color: var(--text-2); }
 
 /* ───────────────────────────────────────────────────────────────────────────
+   AVATAR — initials chip; callers may tint it inline for a per-person hue
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  background: var(--ink-raised);
+  border: 1px solid var(--line-faint);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.avatar--sm { width: 28px; height: 28px; font-size: 11px; }
+.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+
+/* ───────────────────────────────────────────────────────────────────────────
    FORM FIELDS
    ─────────────────────────────────────────────────────────────────────────── */
 

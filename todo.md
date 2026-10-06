@@ -25,7 +25,7 @@ Full notes, rules and the resume instructions live in `docs/staff-console-redesi
 - [x] Phase 2 — app shell: grouped sidebar with live counts, topbar, layout, palette, menus, FAB.
 - [x] Phase 3 — Dashboard rebuilt on the shared components.
 - [x] Phase 4 — Mobile Requests queue rebuilt around one decision panel.
-- [ ] Phase 5 — Orders: busiest screen, sets the table + row-detail pattern.
+- [x] Phase 5 — Orders: rebuilt with the shared table, stage ramp, pipeline board and detail drawer.
 - [ ] Phase 6 — Clients and Staff registers (KPI rows, tables, modals).
 - [ ] Phase 7 — Settings, Security, System Admin.
 - [ ] Phase 8 — Services, Payments, Receipts, Reports.

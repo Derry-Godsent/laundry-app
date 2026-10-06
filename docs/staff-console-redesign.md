@@ -125,12 +125,16 @@ that is the source of truth, not any chat thread.
 | 2 | App shell — sidebar, topbar, layout, palette, menus, FAB | ✅ done |
 | 3 | Dashboard — overview rebuilt on the system | ✅ done |
 | 4 | Mobile Requests queue — the intake pattern | ✅ done |
-| 5 | **Orders** — busiest screen; establishes the table + row-detail pattern | ⬜ next |
-| 6 | Clients + Staff — register and roster pages (KPI rows, tables, modals) | ⬜ |
+| 5 | **Orders** — busiest screen; establishes the table + row-detail pattern | ✅ done |
+| 6 | Clients + Staff — register and roster pages (KPI rows, tables, modals) | ⬜ next |
 | 7 | Settings · Security · System Admin — the Administration group | ⬜ |
 | 8 | Services · Payments · Receipts · Reports | ⬜ |
 | 9 | Service Requests · App Ideas · App Accounts | ⬜ |
 | 10 | Sign-off: delete `/preview` (route + page + CSS) and the sample-data note here | ⬜ |
+
+The workflow stage ramp (`--stage-received` … `--stage-completed`) and the `Avatar`
+primitive were added to the system in phase 5; the pipeline board, order table,
+detail drawer and print sheet live in `src/pages/Orders.css`.
 
 Rules that keep the phases safe:
 
