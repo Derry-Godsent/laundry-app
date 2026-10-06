@@ -18,7 +18,7 @@ export interface SegmentedControlProps<T extends string> {
  * View switcher for queues and ranges.
  *
  * Counts are part of the control on purpose: staff can see how much work sits
- * behind each view without opening it — the numbers come from the same live
+ * behind each view without opening it. The numbers come from the same live
  * query the list uses, so they can never drift.
  */
 export const SegmentedControl = <T extends string>({

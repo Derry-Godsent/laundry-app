@@ -9,7 +9,7 @@ export interface SparklineProps {
   area?: boolean;
 }
 
-/** Tiny trend line for stat tiles. Pure SVG — no chart library, no re-render cost. */
+/** Tiny trend line for stat tiles. Pure SVG: no chart library, no re-render cost. */
 export const Sparkline = ({
   data,
   color = "var(--brand-500)",

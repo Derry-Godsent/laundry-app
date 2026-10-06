@@ -4,12 +4,12 @@
    A handful of screens (Receipt, Payments, Security, Settings, OrderBuilder,
    App Accounts …) still lay themselves out with inline styles instead of the
    shared components. These rules keep those screens usable on phones until
-   they are migrated to the design system — nothing here adds new visuals, it
+   they are migrated to the design system. Nothing here adds new visuals, it
    only keeps inline grids and fixed widths from overflowing small screens.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
-  /* iOS zooms any focused field under 16px — this is a platform requirement. */
+  /* iOS zooms any focused field under 16px. This is a platform requirement. */
   input,
   select,
   textarea {

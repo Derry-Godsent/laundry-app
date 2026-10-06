@@ -338,7 +338,7 @@ export const Settings = () => {
             <span className="cs-offline-dot" style={{ width: 8, height: 8, borderRadius: "50%", background: T.danger, display: "inline-block" }} />
             <WifiOff size={15} color={T.danger} />
             <span style={{ fontSize: 13, color: "#fca5a5", fontFamily: FONT }}>
-              System is offline — this page is showing local, unsynced values. Changes will not be saved until the connection is restored.
+              System is offline. This page is showing local, unsynced values. Changes will not be saved until the connection is restored.
             </span>
           </div>
           <button onClick={handleRetry} className="cs-retrybtn" style={{

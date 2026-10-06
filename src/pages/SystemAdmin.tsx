@@ -355,7 +355,7 @@ export const SystemAdmin = () => {
           {isOffline && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", background: T.emberDim, border: `1px solid ${T.emberBord}`, borderRadius: "10px", padding: "10px 16px", marginBottom: "18px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#fca5a5" }}>
-                <WifiOff size={15} color={T.ember} /><span>System is offline — showing cached data. Changes may not save.</span>
+                <WifiOff size={15} color={T.ember} /><span>System is offline. Showing cached data. Changes may not save.</span>
               </div>
               <button onClick={() => fetchAllData()} className="action-btn" style={{ background: "rgba(248,113,113,0.1)", border: `1px solid ${T.emberBord}`, color: T.ember }}>
                 <RefreshCw size={13} /> Retry

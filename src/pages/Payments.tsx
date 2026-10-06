@@ -268,7 +268,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
               <option value="">Choose an order with a balance...</option>
               {outstandingOrders.map(o => (
                 <option key={o.orderId} value={o.orderId}>
-                  {o.orderId} — {o.client} (Balance: ₵{o.balance})
+                  {o.orderId} · {o.client} (Balance: ₵{o.balance})
                 </option>
               ))}
             </select>
@@ -391,7 +391,7 @@ const ConnectivityBanner = ({ isOnline, syncError, onRetry }: { isOnline: boolea
         {offline ? <WifiOff size={16} color={T.ember} /> : <CloudOff size={16} color={T.gold} />}
         <div>
           <div style={{ fontSize: 13, fontWeight: 600, color: offline ? T.ember : T.gold }}>{offline ? "You're offline" : "Couldn't reach the server"}</div>
-          <div style={{ fontSize: 12, color: T.textSec, marginTop: 1 }}>{offline ? "Showing cached data from this session." : "Showing cached data — list may not reflect latest payments."}</div>
+          <div style={{ fontSize: 12, color: T.textSec, marginTop: 1 }}>{offline ? "Showing cached data from this session." : "Showing cached data. The list may not reflect latest payments."}</div>
         </div>
       </div>
       <button onClick={onRetry} className="pay-ghost-btn" style={{ padding: "7px 14px", background: "transparent", border: `1px solid ${offline ? T.emberBord : T.goldBord}`, borderRadius: 8, color: offline ? T.ember : T.gold, fontSize: 12.5, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0, fontFamily: FONT }}>
@@ -618,7 +618,7 @@ export const Payments = () => {
                   <div style={{ width: 64, height: 64, borderRadius: "50%", background: T.bgElevated, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <CreditCard size={28} color={T.textHint} />
                   </div>
-                  <span style={{ fontSize: 14, fontFamily: FONT }}>{syncError ? "Connection issue — retry to load payments" : transactions.length === 0 ? "No payments recorded yet" : "No transactions match your filters"}</span>
+                  <span style={{ fontSize: 14, fontFamily: FONT }}>{syncError ? "Connection issue. Retry to load payments" : transactions.length === 0 ? "No payments recorded yet" : "No transactions match your filters"}</span>
                 </div>
               ) : (
                 <>

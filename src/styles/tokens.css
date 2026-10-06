@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   CHAPMAN PRESTIGE — STAFF CONSOLE DESIGN TOKENS
+   CHAPMAN PRESTIGE · STAFF CONSOLE DESIGN TOKENS
    ───────────────────────────────────────────────────────────────────────────
    One file, one vocabulary. Every surface, line, colour and radius used by the
    staff console is declared here and nothing else may hard-code a hex value.
@@ -18,7 +18,7 @@
   color-scheme: dark;
 
   /* ── Layered surfaces ─────────────────────────────────────────────────── */
-  --ink-base: #04060b;   /* furthest back — the app backdrop            */
+  --ink-base: #04060b;   /* furthest back: the app backdrop            */
   --ink-shell: #080b12;  /* chrome: sidebar, topbar                     */
   --ink-card: #0d1119;   /* default card surface                        */
   --ink-raised: #121724; /* inputs, nested panels, table headers        */
@@ -64,6 +64,19 @@
   --violet-500: #b18cff;
   --violet-soft: rgba(177, 140, 255, 0.13);
 
+  /* ── Workflow ramp ─────────────────────────────────────────────────────
+     One colour per production stage, shared by the order pipeline, the stage
+     timeline and any stage badge, so a stage reads the same everywhere.   */
+  --stage-received: #378add;
+  --stage-queued: #6f77f7;
+  --stage-washing: #dba96a;
+  --stage-drying: #f97316;
+  --stage-ironing: #ec4899;
+  --stage-packaging: #b18cff;
+  --stage-ready: #3ddc97;
+  --stage-delivery: #62cdff;
+  --stage-completed: #2bbd84;
+
   /* ── Spacing rhythm (4px base) ────────────────────────────────────────── */
   --sp-1: 4px;
   --sp-2: 8px;
@@ -104,7 +117,7 @@
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
 
-  /* ── Shell metrics — the sidebar and topbar agree on these ────────────── */
+  /* ── Shell metrics: the sidebar and topbar agree on these ────────────── */
   --sidebar-w: 268px;
   --sidebar-w-rail: 76px;
   --topbar-h: 68px;

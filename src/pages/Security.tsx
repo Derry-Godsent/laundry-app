@@ -254,7 +254,7 @@ export const Security = () => {
           user: l?.user_name || 'System',
           action: l?.action || 'Configuration update',
           time: l?.created_at ? new Date(l.created_at).toLocaleString() : '',
-          ip: l?.ip_address || '—'
+          ip: l?.ip_address || '-'
         })));
       }
       
@@ -390,7 +390,7 @@ export const Security = () => {
             <div style={{ fontSize: 20, fontWeight: 700, color: T.textPrimary, letterSpacing: "-0.03em", fontFamily: FONT }}>Security</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
               <span className="sec-status-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, display: "inline-block" }} />
-              <span style={{ fontSize: 11.5, color: T.textTert, fontFamily: FONT, letterSpacing: "0.03em" }}>{isOnline ? (syncFailed ? "Connected — last sync failed" : "System online") : "System offline"}</span>
+              <span style={{ fontSize: 11.5, color: T.textTert, fontFamily: FONT, letterSpacing: "0.03em" }}>{isOnline ? (syncFailed ? "Connected, last sync failed" : "System online") : "System offline"}</span>
             </div>
           </div>
         </div>
@@ -402,7 +402,7 @@ export const Security = () => {
 
       {saveBlocked && (
         <div className="sec-banner" style={{ background: T.emberDim, borderBottom: `1px solid ${T.emberBord}`, padding: "8px 32px", fontSize: 12.5, color: T.ember, display: "flex", alignItems: "center", gap: 8, fontFamily: FONT }}>
-          <AlertTriangle size={14} /> Changes can't be saved while offline. They'll stay in the form — reconnect and try again.
+          <AlertTriangle size={14} /> Changes can't be saved while offline. They'll stay in the form. Reconnect and try again.
         </div>
       )}
 
@@ -430,7 +430,7 @@ export const Security = () => {
                 </thead>
                 <tbody>
                   {roles.length === 0 ? (
-                    <tr><td colSpan={5} style={{ padding: 28, textAlign: "center", color: T.textTert, fontFamily: FONT }}>{syncFailed ? "Couldn't load roles — reconnect to retry." : "No roles configured yet."}</td></tr>
+                    <tr><td colSpan={5} style={{ padding: 28, textAlign: "center", color: T.textTert, fontFamily: FONT }}>{syncFailed ? "Couldn't load roles. Reconnect to retry." : "No roles configured yet."}</td></tr>
                   ) : (
                     roles.map((role, i) => (
                       <tr key={role.id} className="sec-row" style={{ borderBottom: `1px solid ${T.borderFaint}`, animationDelay: `${i * 45}ms` }}>
@@ -500,7 +500,7 @@ export const Security = () => {
                   </thead>
                   <tbody>
                     {auditLog.length === 0 ? (
-                      <tr><td colSpan={4} style={{ padding: 28, textAlign: "center", color: T.textTert, fontFamily: FONT }}>{!isOnline || syncFailed ? "Audit history can't be reached right now — reconnect to load it." : "No records yet."}</td></tr>
+                      <tr><td colSpan={4} style={{ padding: 28, textAlign: "center", color: T.textTert, fontFamily: FONT }}>{!isOnline || syncFailed ? "Audit history can't be reached right now. Reconnect to load it." : "No records yet."}</td></tr>
                     ) : (
                       auditLog.map((log, i) => (
                         <tr key={log.id} className="sec-row" style={{ borderBottom: `1px solid ${T.borderFaint}`, animationDelay: `${Math.min(i, 12) * 35}ms` }}>

@@ -16,7 +16,7 @@ export interface StatusPillProps {
  * Status chip used by every queue, table and detail panel.
  *
  * A single tone vocabulary means "Waiting for client" looks the same in the
- * sidebar badge, the request list and the request detail — staff only have to
+ * sidebar badge, the request list and the request detail, so staff only have to
  * learn the colours once.
  */
 export const StatusPill = ({ tone = "neutral", dot = false, children, className, title }: StatusPillProps) => (

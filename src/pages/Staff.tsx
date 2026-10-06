@@ -957,7 +957,7 @@ export const Staff = () => {
                     </div>
                     <div className="sp-gi">
                       <span className="sp-gk"><MapPin size={11} /> Location</span>
-                      <span className="sp-gv">{openStaff.address || "—"}</span>
+                      <span className="sp-gv">{openStaff.address || "-"}</span>
                     </div>
                     <div className="sp-gi">
                       <span className="sp-gk"><Clock size={11} /> Joined</span>

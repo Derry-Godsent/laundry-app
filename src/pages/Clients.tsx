@@ -672,7 +672,7 @@ export const Clients = () => {
       {!canEdit && (
         <div className="cl-view-banner">
           <Shield size={14} color="#6c72f3" />
-          <span>View-only access — modifications disabled</span>
+          <span>View-only access · modifications disabled</span>
         </div>
       )}
 

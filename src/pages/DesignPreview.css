@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   DESIGN PREVIEW — presentation-only page for reviewing the redesign
+   DESIGN PREVIEW: presentation-only page for reviewing the redesign
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .preview-page {
@@ -116,3 +116,21 @@
 
 /* Preview pages should not inherit the app's non-selectable body behaviour. */
 .preview-page { -webkit-user-select: text; user-select: text; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   ORDER BOOK SAMPLE
+   The real page fills the app viewport, so it needs no height of its own. Here
+   the frame sits inside a scrolling document, so it is given one: that keeps
+   the pinned toolbar and the scrolling list visible in the walkthrough.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.preview-table {
+  height: min(74vh, 580px);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  background: var(--ink-card);
+}
+
+@media (max-width: 640px) {
+  .preview-table { height: min(80vh, 620px); }
+}

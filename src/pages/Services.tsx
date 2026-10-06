@@ -242,7 +242,7 @@ const Chip = ({ label, value, accent }: { label:string; value:number; accent?:st
     <span style={{ fontSize:16, fontWeight:500,
       color: value ? (accent || T.textPrimary) : T.textHint,
       fontFamily:MONO, letterSpacing:"-0.02em", lineHeight:1 }}>
-      {value ? `₵${value}` : <span style={{fontSize:13,color:T.textHint}}>—</span>}
+      {value ? `₵${value}` : <span style={{fontSize:13,color:T.textHint}}>-</span>}
     </span>
   </div>
 );
@@ -256,7 +256,7 @@ const OfflineBanner = ({ onRetry, retrying, lastSynced }: { onRetry:()=>void; re
     <WifiOff size={15} color={T.ember} style={{ flexShrink: 0 }} />
     <div style={{ flex: 1, minWidth: 0 }}>
       <span style={{ fontSize: 13, fontWeight: 600, color: T.ember, fontFamily: FONT }}>
-        Can't reach the server — you're offline.
+        Can't reach the server. You're offline.
       </span>
       <span style={{ fontSize: 12.5, color: "#ffb3b3", fontFamily: FONT, marginLeft: 8 }}>
         Showing local reference data{lastSynced ? `, last synced ${lastSynced.toLocaleTimeString()}` : ""}. Changes here won't be saved until you're back online.
@@ -1162,7 +1162,7 @@ export const Services = () => {
                 </div>
                 <div style={{ fontSize:14, color:T.textTert, fontFamily:FONT }}>
                   {isOffline 
-                    ? "Connection issue — retry to load services" 
+                    ? "Connection issue. Retry to load services" 
                     : services.length === 0 
                       ? "No services added yet" 
                       : "No items match your filters"}
@@ -1227,7 +1227,7 @@ export const Services = () => {
                   Corporate Accounts
                 </div>
                 <div style={{ fontSize:12.5, color:T.textTert, marginTop:3, fontFamily:FONT }}>
-                  Contract-based pricing — managed by GM
+                  Contract-based pricing · managed by GM
                 </div>
               </div>
               {canEdit && (
@@ -1302,7 +1302,7 @@ export const Services = () => {
                           borderRadius:7, color:T.gold, fontSize:16, fontWeight:600,
                           fontFamily:MONO, padding:"5px 9px",
                           outline:"none", cursor:"pointer" }}>
-                        <option value="-">—</option>
+                        <option value="-">-</option>
                         <option value="5%">5%</option>
                         <option value="10%">10%</option>
                         <option value="15%">15%</option>

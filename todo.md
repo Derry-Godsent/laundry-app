@@ -17,19 +17,23 @@
 - [x] Rebuild the Dashboard on the shared components, keeping the live figures and charts unchanged.
 - [x] Rebuild the Mobile Requests queue so a record's state, client date and decision are readable at a glance.
 - [x] Add a credential-free `/preview` page that renders the redesign from sample records for review before sign-in.
-## Staff console redesign — phases
+## Staff console redesign: phases
 
 Full notes, rules and the resume instructions live in `docs/staff-console-redesign.md`.
 
-- [x] Phase 1 — design system: tokens, shared stylesheets, `@/components/ui` primitives.
-- [x] Phase 2 — app shell: grouped sidebar with live counts, topbar, layout, palette, menus, FAB.
-- [x] Phase 3 — Dashboard rebuilt on the shared components.
-- [x] Phase 4 — Mobile Requests queue rebuilt around one decision panel.
-- [x] Phase 5 — Orders: redesigned, then reverted after review. The ORIGINAL page is kept on purpose:
-      its pinned header/filter bar plus card-style rows on phones are preferred over the rebuild.
-      The redesigned version is preserved in history at commit 22f31ed (`git cherry-pick 22f31ed`).
-- [ ] Phase 6 — Clients and Staff registers (KPI rows, tables, modals).
-- [ ] Phase 7 — Settings, Security, System Admin.
-- [ ] Phase 8 — Services, Payments, Receipts, Reports.
-- [ ] Phase 9 — Service Requests, App Ideas, App Accounts.
-- [ ] Phase 10 — after sign-off: delete the `/preview` page, its route and its CSS.
+- [x] Phase 1, design system: tokens, shared stylesheets, `@/components/ui` primitives.
+- [x] Phase 2, app shell: grouped sidebar with live counts, topbar, layout, palette, menus, FAB.
+- [x] Phase 3, Dashboard rebuilt on the shared components.
+- [x] Phase 4, Mobile Requests queue rebuilt around one decision panel.
+- [x] Phase 5, Orders: rebuilt, reverted, then restyled with the LAYOUT KEPT. The original page was
+      restored at 274fa56 (byte-for-byte against 5512924), then reworked onto the shared system:
+      the `.table-page` frame, `@/components/ui` controls, the `--stage-*` ramp and `Orders.css` for
+      the order-specific pieces. Pinned title/filters/pagination, one scrolling list and card-style
+      rows on phones all survive. Data logic untouched. The rejected rebuild stays at 22f31ed.
+      Also: `npm run check:copy` now fails on any em dash in the repo, and `/preview` section 3 shows
+      the order book frame with sample orders.
+- [ ] Phase 6, Clients and Staff registers (KPI rows, tables, modals).
+- [ ] Phase 7, Settings, Security, System Admin.
+- [ ] Phase 8, Services, Payments, Receipts, Reports.
+- [ ] Phase 9, Service Requests, App Ideas, App Accounts.
+- [ ] Phase 10, after sign-off: delete the `/preview` page, its route and its CSS.

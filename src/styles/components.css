@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   COMPONENT LAYER — the shared vocabulary every staff page composes from.
+   COMPONENT LAYER: the shared vocabulary every staff page composes from.
    Cards, page headers, stats, pills, buttons, fields, tables, states.
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -445,6 +445,27 @@
 .segmented__item[aria-pressed="true"] .segmented__count { color: var(--text-2); }
 
 /* ───────────────────────────────────────────────────────────────────────────
+   AVATAR
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  background: var(--ink-raised);
+  border: 1px solid var(--line-faint);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.avatar--sm { width: 28px; height: 28px; font-size: 11px; }
+.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+
+/* ───────────────────────────────────────────────────────────────────────────
    FORM FIELDS
    ─────────────────────────────────────────────────────────────────────────── */
 
@@ -531,6 +552,139 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .search-input input { padding-left: 36px; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   TABLE PAGE FRAME
+   For screens that own the viewport: the title, the filter bar and the
+   pagination stay put and only the rows scroll. That is what makes a long
+   order or client list usable on a phone, and it must not be traded away for
+   a plainer look.
+
+   .table-page             fixed height column, fills .main-body
+     .table-page__head     title + actions       (does not scroll)
+     .table-page__tools    search + filters      (does not scroll)
+     .table-page__body     flex:1, min-height:0
+       .table-page__scroll   the ONLY scrolling area
+     .table-page__foot     pagination            (does not scroll)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.table-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  animation: fadeIn var(--dur-base) var(--ease-out) both;
+}
+
+.table-page__head {
+  flex-shrink: 0;
+  padding: var(--sp-6) var(--sp-6) var(--sp-4);
+}
+
+.table-page__head .page-header { margin-bottom: 0; }
+
+.table-page__tools {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  padding: 0 var(--sp-6) var(--sp-4);
+  border-bottom: 1px solid var(--line-faint);
+}
+
+.table-page__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.table-page__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-page__foot {
+  flex-shrink: 0;
+  border-top: 1px solid var(--line-faint);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.table-page__scroll .data-table thead th { top: 0; }
+.table-page .data-table td.is-check,
+.table-page .data-table th.is-check { width: 44px; }
+
+/* ── Checkbox ───────────────────────────────────────────────────────────── */
+.checkbox {
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: var(--brand-500);
+  flex-shrink: 0;
+}
+
+/* ── Phones: rows become labelled cards ─────────────────────────────────── */
+@media (max-width: 640px) {
+  .table-page__head { padding: var(--sp-5) var(--sp-4) var(--sp-3); }
+  .table-page__tools { padding: 0 var(--sp-4) var(--sp-3); }
+
+  .table-page .data-table { min-width: 0; }
+  .table-page .data-table thead { display: none; }
+
+  .table-page .data-table tbody tr {
+    display: block;
+    margin: 0 var(--sp-3) var(--sp-3);
+    background: var(--ink-raised);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+
+  .table-page .data-table tbody tr:hover { background: var(--ink-raised); }
+
+  .table-page .data-table tbody td {
+    display: block;
+    position: relative;
+    padding: 9px var(--sp-4) 9px 42%;
+    text-align: right;
+    white-space: normal;
+    border-bottom: 1px solid var(--line-faint);
+  }
+
+  .table-page .data-table tbody td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: var(--sp-4);
+    top: 9px;
+    max-width: 46%;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-4);
+  }
+
+  .table-page .data-table tbody td:last-child { border-bottom: none; }
+
+  .table-page .data-table tbody td.is-check,
+  .table-page .data-table tbody td.is-full {
+    padding-left: var(--sp-4);
+    text-align: left;
+  }
+
+  .table-page .data-table tbody td.is-check::before,
+  .table-page .data-table tbody td.is-full::before { display: none; }
+
+  .table-page .data-table tbody td .cell-inline { justify-content: flex-end; }
+  .table-page .data-table tbody td .empty-state { padding: var(--sp-6) var(--sp-4); }
+}
 
 /* ───────────────────────────────────────────────────────────────────────────
    TABLES

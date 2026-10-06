@@ -14,7 +14,7 @@ export default function MainLayout() {
   const location = useLocation();
 
   const [isMobile, setIsMobile] = useState(getIsMobile);
-  // FIX: default depends on device — mobile should start closed,
+  // FIX: default depends on device. Mobile should start closed,
   // desktop should start open. Previously this was always `true`,
   // so a phone loading the page saw the sidebar already open.
   const [sidebarOpen, setSidebarOpen] = useState(() => !getIsMobile());
@@ -48,7 +48,7 @@ export default function MainLayout() {
   }, [location.pathname, isMobile]);
 
   // Close on Escape, and lock background scroll while the mobile
-  // sidebar is open — both expected behavior for a slide-over panel.
+  // sidebar is open, both expected behavior for a slide-over panel.
   useEffect(() => {
     if (!isMobile || !sidebarOpen) return;
 

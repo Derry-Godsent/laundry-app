@@ -132,7 +132,7 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
           if (newWorker) {
             newWorker.addEventListener("statechange", () => {
               if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                // New content available — optionally show update prompt
+                // New content available: optionally show update prompt
                 console.log("New version available. Refresh to update.");
               }
             });

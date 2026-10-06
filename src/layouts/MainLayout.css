@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   APP SHELL — sidebar + topbar + scrolling content column
+   APP SHELL: sidebar + topbar + scrolling content column
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .layout-container {
@@ -13,7 +13,7 @@
   overflow: hidden;
 }
 
-/* Ambient light behind the workspace — two soft, slow-drifting blooms that
+/* Ambient light behind the workspace: two soft, slow-drifting blooms that
    give the flat dark background some depth without competing for attention. */
 .layout-container::before,
 .layout-container::after {
@@ -70,7 +70,7 @@
   overscroll-behavior-y: contain;
 }
 
-/* Route transition — replays on pathname change, no JS required. */
+/* Route transition that replays on pathname change, no JS required. */
 .route-transition {
   animation: routeFade var(--dur-slow) var(--ease-out) both;
 }

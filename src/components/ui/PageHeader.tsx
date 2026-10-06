@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 export interface PageHeaderProps {
-  /** Small gold label above the title — the page's "home" in the console. */
+  /** Small gold label above the title: the page's "home" in the console. */
   eyebrow?: ReactNode;
   title: ReactNode;
   subtitle?: ReactNode;

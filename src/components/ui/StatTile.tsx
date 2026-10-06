@@ -8,7 +8,7 @@ export interface StatTileProps {
   /** Accent colour for the rail, icon chip and sparkline. */
   accent?: string;
   delta?: { value: number; label?: string };
-  /** Small text under the number — "12 today", "vs yesterday", … */
+  /** Small text under the number, such as "12 today" or "vs yesterday". */
   meta?: ReactNode;
   sparkline?: ReactNode;
   onClick?: () => void;

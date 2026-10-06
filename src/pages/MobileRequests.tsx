@@ -74,7 +74,7 @@ const VIEW_COPY: Record<RequestView, { title: string; sub: string; empty: string
   },
   confirmed: {
     title: "Approved work",
-    sub: "The client's date is agreed — ready for operational follow-through",
+    sub: "The client's date is agreed, ready for operational follow-through",
     empty: "Approved requests remain visible here for follow-through.",
   },
   declined: {
@@ -266,7 +266,6 @@ function MobileRequestsContent() {
       <PageHeader
         eyebrow={<><Smartphone size={13} /> Mobile intake</>}
         title="Mobile Requests"
-        subtitle="Every customer request stays in its correct work view — action needed, client reply, approved work, or final decline history — so no record is ever lost from view."
         actions={
           <Button
             variant="secondary"
@@ -536,7 +535,7 @@ function MobileRequestsContent() {
       </section>
 
       <p className="mr-footnote">
-        <Inbox size={13} /> Live queue — new requests and client replies appear without refreshing.
+        <Inbox size={13} /> Live queue: new requests and client replies appear without refreshing.
       </p>
     </div>
   );

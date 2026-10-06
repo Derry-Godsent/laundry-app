@@ -17,14 +17,14 @@ interface NavItemProps {
  * One row in the sidebar.
  *
  * The badge is a count of records still needing attention in that queue, so it
- * is always rendered as a number — a collapsed rail shows it as a dot with the
+ * is always rendered as a number. A collapsed rail shows it as a dot with the
  * same meaning, and hovering the row explains what is being counted.
  */
 export const NavItem = ({ icon: Icon, label, path, badge, badgeTitle, isCollapsed, onClick }: NavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === path;
   const hasBadge = badge !== undefined && badge > 0;
-  const tooltip = hasBadge && badgeTitle ? `${label} — ${badge} ${badgeTitle}` : label;
+  const tooltip = hasBadge && badgeTitle ? `${label} · ${badge} ${badgeTitle}` : label;
 
   return (
     <Link

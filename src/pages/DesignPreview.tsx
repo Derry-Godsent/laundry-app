@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronLeft, ClipboardList,
+  ArrowRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronLeft, ChevronRight, ClipboardList,
   Clock, DollarSign, Inbox, LayoutDashboard, Package, Plus, RefreshCw, Search, Shield,
   Settings, Smartphone, Sparkles, Users, X,
 } from "lucide-react";
 import {
+  Avatar,
   Banner,
   Button,
   Card,
@@ -20,12 +21,13 @@ import {
 } from "../components/ui";
 import type { PillTone } from "../components/ui";
 import "./DesignPreview.css";
+import "./Orders.css";
 
 /* ───────────────────────────────────────────────────────────────────────────
    DESIGN PREVIEW
    A credential-free walkthrough of the redesigned staff console: the shell, the
-   dashboard grid, the Mobile Requests queue and the component vocabulary — all
-   rendered from sample records so nothing here touches Supabase.
+   dashboard grid, the Mobile Requests queue, the order book and the component
+   vocabulary, all rendered from sample records so nothing here touches Supabase.
 
    It exists so the redesign can be reviewed (and screenshotted) before anyone
    signs in. Delete this page and its `/preview` route once the redesign has
@@ -54,6 +56,32 @@ const SAMPLE_QUEUE = [
   { id: "92be05f1", name: "Yaw Adjei", status: "Approved", tone: "ok" as PillTone, date: "Tue, Oct 13", items: 4, total: "₵96.00", express: false },
 ];
 
+/* The order book sample: enough rows to show the frame, the stage ramp and the
+   payment tones. Stage colours come from the shared workflow ramp in tokens.css. */
+const SAMPLE_ORDERS = [
+  { id: "CH-10482", customer: "Akosua Mensah", phone: "+233 24 551 0198", service: "Laundry", items: 12, amount: 420, stage: "washing", payment: "pending", date: "06/10/2026" },
+  { id: "CH-10481", customer: "Yaw Adjei", phone: "+233 20 774 2210", service: "Laundry", items: 4, amount: 96, stage: "completed", payment: "paid", date: "06/10/2026" },
+  { id: "CH-10480", customer: "Walk-in", phone: "+233 53 413 4809", service: "Cleaning", items: 9, amount: 185, stage: "queued", payment: "partial", date: "05/10/2026" },
+  { id: "CH-10479", customer: "Efua Sarpong", phone: "+233 26 330 8811", service: "Fumigation", items: 3, amount: 780, stage: "ready", payment: "paid", date: "05/10/2026" },
+  { id: "CH-10478", customer: "Kwame Boateng", phone: "+233 27 118 4402", service: "Car Detailing", items: 1, amount: 250, stage: "delivery", payment: "pending", date: "04/10/2026" },
+  { id: "CH-10477", customer: "Abena Osei", phone: "+233 55 902 3317", service: "Laundry", items: 7, amount: 210, stage: "ironing", payment: "paid", date: "04/10/2026" },
+];
+
+const PREVIEW_STAGE: Record<string, { label: string; color: string }> = {
+  queued: { label: "In Queue", color: "var(--stage-queued)" },
+  washing: { label: "Washing", color: "var(--stage-washing)" },
+  ironing: { label: "Ironing", color: "var(--stage-ironing)" },
+  ready: { label: "Ready", color: "var(--stage-ready)" },
+  delivery: { label: "Out for Delivery", color: "var(--stage-delivery)" },
+  completed: { label: "Completed", color: "var(--stage-completed)" },
+};
+
+const PREVIEW_PAY: Record<string, { label: string; tone: PillTone }> = {
+  paid: { label: "Paid", tone: "ok" },
+  pending: { label: "Pending", tone: "gold" },
+  partial: { label: "Partial", tone: "bad" },
+};
+
 const PILL_TONES: PillTone[] = ["neutral", "brand", "gold", "ok", "warn", "bad", "info", "violet"];
 
 const NAV_SAMPLE = [
@@ -70,6 +98,18 @@ export const DesignPreview = () => {
   const [range, setRange] = useState<"week" | "month" | "year">("month");
   const [view, setView] = useState<"active" | "waiting" | "confirmed">("active");
   const [selected, setSelected] = useState<string | null>(SAMPLE_QUEUE[0].id);
+  const [ordQuery, setOrdQuery] = useState("");
+  const [ordStage, setOrdStage] = useState("all");
+
+  const visibleOrders = SAMPLE_ORDERS.filter((row) => {
+    const needle = ordQuery.trim().toLowerCase();
+    const matchesText = !needle
+      || row.id.toLowerCase().includes(needle)
+      || row.customer.toLowerCase().includes(needle)
+      || row.phone.toLowerCase().includes(needle);
+    const matchesStage = ordStage === "all" || row.stage === ordStage;
+    return matchesText && matchesStage;
+  });
 
   const activeQueue = SAMPLE_QUEUE.filter((row) => {
     if (view === "active") return row.tone === "brand" || row.tone === "warn";
@@ -80,7 +120,7 @@ export const DesignPreview = () => {
   return (
     <div className="preview-page">
       <div className="preview-note">
-        <Banner tone="warn" title="Design preview — sample data only">
+        <Banner tone="warn" title="Design preview: sample data only">
           This page renders the redesigned staff console with made-up records so the design can be
           reviewed without signing in. Nothing here reads from Supabase, and no action changes real
           work. <button className="preview-link" onClick={() => navigate("/login")}>Go to sign in</button>
@@ -274,7 +314,7 @@ export const DesignPreview = () => {
             <CardHeader title="Needs action" subtitle="Requests waiting for Chapman to review, confirm or decline" actions={<span className="tag-count">{activeQueue.length}</span>} />
             <CardBody tight className="mr-list-body">
               {activeQueue.length === 0 ? (
-                <EmptyState icon={<ClipboardList size={20} />} title="No requests in this view" message="Sample view is empty — switch to another view above." />
+                <EmptyState icon={<ClipboardList size={20} />} title="No requests in this view" message="Sample view is empty. Switch to another view above." />
               ) : (
                 <div className="mr-list">
                   {activeQueue.map((row) => (
@@ -366,9 +406,133 @@ export const DesignPreview = () => {
         </div>
       </section>
 
+      {/* ── The order book ────────────────────────────────────────────── */}
+      <section className="preview-section">
+        <h2 className="preview-heading">3 · The order book</h2>
+        <p className="preview-lede">
+          The table screens share one frame: the page owns the viewport, the title, filters and
+          pagination stay pinned, and only the list scrolls. Under 640px the header row gives way and
+          each record becomes a labelled card, so no column is ever hidden behind a sideways scroll.
+        </p>
+
+        <div className="table-page preview-table">
+          <div className="table-page__head">
+            <PageHeader
+              eyebrow={<><Package size={13} /> Order book</>}
+              title="Orders"
+              subtitle="128 total · 37 active · 9 unpaid"
+              actions={
+                <>
+                  <Button variant="secondary" leadingIcon={<RefreshCw size={15} />}>Refresh</Button>
+                  <Button leadingIcon={<Plus size={15} />}>New Order</Button>
+                </>
+              }
+            />
+          </div>
+
+          <div className="table-page__tools">
+            <div className="search-input ord-search">
+              <Search size={14} />
+              <input
+                className="input"
+                placeholder="Search name or order ID…"
+                value={ordQuery}
+                onChange={(e) => setOrdQuery(e.target.value)}
+                aria-label="Search orders"
+              />
+            </div>
+            <select className="select" value={ordStage} onChange={(e) => setOrdStage(e.target.value)} aria-label="Filter by stage">
+              <option value="all">All stages</option>
+              {Object.entries(PREVIEW_STAGE).map(([key, stage]) => (
+                <option key={key} value={key}>{stage.label}</option>
+              ))}
+            </select>
+            <span className="ord-spacer" />
+            <div className="segmented" role="group" aria-label="Order view">
+              <button type="button" className="segmented__item is-active" aria-pressed="true">List</button>
+              <button type="button" className="segmented__item" aria-pressed="false">Pipeline</button>
+            </div>
+          </div>
+
+          <div className="table-page__body">
+            <div className="table-page__scroll">
+              <table className="data-table ord-table">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Items</th>
+                    <th>Amount</th>
+                    <th>Stage</th>
+                    <th>Payment</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="is-full">
+                        <EmptyState icon={<ClipboardList size={20} />} title="No orders match" message="Clear the search or pick another stage." />
+                      </td>
+                    </tr>
+                  ) : visibleOrders.map((row) => {
+                    const stage = PREVIEW_STAGE[row.stage];
+                    const pay = PREVIEW_PAY[row.payment];
+                    return (
+                      <tr key={row.id}>
+                        <td data-label="Order" className="ord-id">{row.id}</td>
+                        <td data-label="Customer">
+                          <div className="ord-cust">
+                            <Avatar name={row.customer} size="sm" />
+                            <div>
+                              <div className="ord-cust__name">{row.customer}</div>
+                              <div className="ord-cust__phone">{row.phone}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td data-label="Service"><StatusPill tone="brand">{row.service}</StatusPill></td>
+                        <td data-label="Items" className="ord-num">{row.items}</td>
+                        <td data-label="Amount" className="ord-amount">₵{row.amount.toLocaleString()}</td>
+                        <td data-label="Stage">
+                          <span className="ord-stage">
+                            <span className="ord-stage__dot" style={{ background: stage.color }} />
+                            {stage.label}
+                          </span>
+                        </td>
+                        <td data-label="Payment"><StatusPill tone={pay.tone}>{pay.label}</StatusPill></td>
+                        <td data-label="Date" className="ord-dim">{row.date}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="table-page__foot">
+            <div className="ord-pag">
+              <span className="ord-pag__info">
+                {visibleOrders.length === 0
+                  ? "No results"
+                  : `1 to ${visibleOrders.length} of ${visibleOrders.length}`}
+              </span>
+              <div className="ord-pag__right">
+                <Button variant="ghost" size="sm" iconOnly aria-label="Previous page" disabled>
+                  <ChevronLeft size={15} />
+                </Button>
+                <Button variant="ghost" size="sm" iconOnly aria-label="Next page" disabled>
+                  <ChevronRight size={15} />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Components ────────────────────────────────────────────────── */}
       <section className="preview-section">
-        <h2 className="preview-heading">3 · The component vocabulary</h2>
+        <h2 className="preview-heading">4 · The component vocabulary</h2>
         <p className="preview-lede">
           Every page is built from these pieces, so a status, a button or an empty state can never
           drift between screens.

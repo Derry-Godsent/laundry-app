@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   COMMAND PALETTE (Ctrl K) — keyboard-first navigation for the console
+   COMMAND PALETTE (Ctrl K): keyboard-first navigation for the console
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .cp-shell { position: fixed; inset: 0; z-index: 9000; }

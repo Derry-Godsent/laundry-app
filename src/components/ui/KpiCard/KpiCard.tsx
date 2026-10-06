@@ -12,7 +12,7 @@ interface KpiCardProps {
 }
 
 /**
- * Legacy KPI card, kept so older pages keep compiling — it now renders the
+ * Legacy KPI card, kept so older pages keep compiling: it now renders the
  * shared StatTile so it can never drift from the rest of the console.
  */
 export const KpiCard = ({ title, value, trend, icon, accent, onClick, className }: KpiCardProps) => (

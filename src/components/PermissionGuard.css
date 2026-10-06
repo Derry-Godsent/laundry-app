@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   PERMISSION GUARD — view-only notice and access-denied state
+   PERMISSION GUARD: view-only notice and access-denied state
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .pg-content { display: block; }
