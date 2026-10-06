@@ -64,20 +64,6 @@
   --violet-500: #b18cff;
   --violet-soft: rgba(177, 140, 255, 0.13);
 
-  /* ── Workflow ramp ─────────────────────────────────────────────────────
-     One colour per production stage. Used by the order pipeline, the stage
-     timeline, the dashboard workflow bars and any stage badge, so a stage
-     reads the same everywhere it appears.                              */
-  --stage-received: #378add;
-  --stage-queued: #6f77f7;
-  --stage-washing: #62cdff;
-  --stage-drying: #f0913f;
-  --stage-ironing: #e0709f;
-  --stage-packaging: #b18cff;
-  --stage-ready: #3ddc97;
-  --stage-delivery: #5eead4;
-  --stage-completed: #2bbd84;
-
   /* ── Spacing rhythm (4px base) ────────────────────────────────────────── */
   --sp-1: 4px;
   --sp-2: 8px;

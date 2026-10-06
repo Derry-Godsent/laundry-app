@@ -25,7 +25,9 @@ Full notes, rules and the resume instructions live in `docs/staff-console-redesi
 - [x] Phase 2 — app shell: grouped sidebar with live counts, topbar, layout, palette, menus, FAB.
 - [x] Phase 3 — Dashboard rebuilt on the shared components.
 - [x] Phase 4 — Mobile Requests queue rebuilt around one decision panel.
-- [x] Phase 5 — Orders: rebuilt with the shared table, stage ramp, pipeline board and detail drawer.
+- [x] Phase 5 — Orders: redesigned, then reverted after review. The ORIGINAL page is kept on purpose:
+      its pinned header/filter bar plus card-style rows on phones are preferred over the rebuild.
+      The redesigned version is preserved in history at commit 22f31ed (`git cherry-pick 22f31ed`).
 - [ ] Phase 6 — Clients and Staff registers (KPI rows, tables, modals).
 - [ ] Phase 7 — Settings, Security, System Admin.
 - [ ] Phase 8 — Services, Payments, Receipts, Reports.

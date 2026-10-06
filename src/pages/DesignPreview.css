@@ -106,39 +106,6 @@
   gap: var(--sp-3);
 }
 
-/* ── Orders block ───────────────────────────────────────────────────────── */
-.preview-subheading {
-  font-size: 13px;
-  font-weight: 650;
-  letter-spacing: 0.02em;
-  color: var(--text-2);
-  margin-bottom: var(--sp-3);
-}
-
-.preview-orders-split {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
-  gap: var(--sp-5);
-  align-items: start;
-  margin-top: var(--sp-5);
-}
-
-@media (max-width: 1200px) {
-  .preview-orders-split { grid-template-columns: minmax(0, 1fr); }
-}
-
-/* The drawer is a slide-over in the app; in the preview it just stands still. */
-.ord-drawer--static {
-  position: static;
-  transform: none;
-  width: 100%;
-  height: auto;
-  max-height: 720px;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-}
-
 .preview-footnote {
   display: flex;
   align-items: center;
