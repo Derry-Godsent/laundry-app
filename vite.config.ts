@@ -7,6 +7,11 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [svgr(), react()],
+  // Arena proxies the preview through a generated host name.
+  server: {
+    host: "0.0.0.0",
+    allowedHosts: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
