@@ -12,3 +12,9 @@
 - [x] Keep active, waiting, approved, and declined mobile requests in clear staff management views with matching client decision labels.
 - [x] Add optional client-approved one-time pickup coordinates to Laundry requests for authorised staff dispatch.
 - [x] Repair existing customer account links so verified customers can submit Laundry requests after the protected database migration
+- [x] Add one shared design vocabulary (tokens + component library) so every staff screen looks like the same product.
+- [x] Rebuild the console shell: grouped navigation with live counts, glass topbar with search and alerts, consistent page headers.
+- [x] Rebuild the Dashboard on the shared components, keeping the live figures and charts unchanged.
+- [x] Rebuild the Mobile Requests queue so a record's state, client date and decision are readable at a glance.
+- [x] Add a credential-free `/preview` page that renders the redesign from sample records for review before sign-in.
+- [ ] Migrate the remaining pages (Orders, Clients, Staff, Services, Payments, Receipts, Reports, Settings, Security, System Admin) onto the shared components.

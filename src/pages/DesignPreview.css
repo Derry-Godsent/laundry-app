@@ -1,0 +1,118 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN PREVIEW — presentation-only page for reviewing the redesign
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.preview-page {
+  min-height: 100vh;
+  padding: var(--sp-7) var(--sp-6) var(--sp-9);
+  max-width: 1520px;
+  margin: 0 auto;
+  background: var(--ink-base);
+}
+
+.preview-note { margin-bottom: var(--sp-7); }
+
+.preview-section { margin-bottom: var(--sp-9); }
+
+.preview-heading {
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.preview-lede {
+  max-width: 88ch;
+  margin-bottom: var(--sp-5);
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-3);
+}
+
+.preview-link {
+  color: var(--brand-400);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.preview-link:hover { color: var(--brand-500); }
+
+/* ── Static shell replica ───────────────────────────────────────────────── */
+.shell-demo {
+  display: flex;
+  height: 900px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  background: var(--ink-base);
+  box-shadow: var(--shadow-lg);
+}
+
+.shell-demo__sidebar { position: relative; }
+
+.shell-demo__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.shell-demo__topbar { position: relative; }
+
+.shell-demo__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-7) var(--sp-7) var(--sp-9);
+}
+
+/* Non-interactive replica: keep the look, drop the affordances. */
+.shell-demo .nav-item,
+.shell-demo .btn,
+.shell-demo .qa-btn,
+.shell-demo .command-trigger { cursor: default; }
+
+@media (max-width: 1080px) {
+  .shell-demo { flex-direction: column; height: auto; }
+  .shell-demo__sidebar { display: none; }
+  .shell-demo__body { padding: var(--sp-5) var(--sp-4) var(--sp-8); }
+}
+
+/* ── Component gallery ──────────────────────────────────────────────────── */
+.preview-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: var(--sp-4);
+  align-items: start;
+}
+
+.preview-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.preview-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--sp-4);
+}
+
+.preview-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.preview-footnote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--text-4);
+}
+
+/* Preview pages should not inherit the app's non-selectable body behaviour. */
+.preview-page { -webkit-user-select: text; user-select: text; }
