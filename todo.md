@@ -34,8 +34,31 @@ Full notes, rules and the resume instructions live in `docs/staff-console-redesi
       labelled Refresh Data, icon-only list/pipeline switch) because that is what staff recognise.
       Also: `npm run check:copy` now fails on any em dash in the repo, and `/preview` section 3 shows
       the order book frame with sample orders.
-- [ ] Phase 6, Clients and Staff registers (KPI rows, tables, modals).
-- [ ] Phase 7, Settings, Security, System Admin.
-- [ ] Phase 8, Services, Payments, Receipts, Reports.
-- [ ] Phase 9, Service Requests, App Ideas, App Accounts.
-- [ ] Phase 10, after sign-off: delete the `/preview` page, its route and its CSS.
+
+## Mobile-first pass (phases A to F)
+
+Approved order: foundation, shared patterns, daily operations, the rest of the
+app, appearance review, then mobile app integration. Full scope, target widths,
+the five-screen correctness pass and the definition of done live in
+`docs/staff-console-redesign.md` section 6.
+
+- [ ] Phase A, responsive foundation: one shell, `100dvh`, safe areas, one scroll
+      area per page, compact mobile top bar, stable drawer, notification panel that
+      stays on screen, shared breakpoints (320/360/390/430/768/1024) and padding tokens.
+- [ ] Phase B, shared mobile patterns: page header, summary cards, filter/search bar,
+      list row, status badge, detail view, bottom actions, full-screen modal, confirm
+      dialog, empty/error/loading states.
+- [ ] Phase C, daily operations: Mobile Requests, Service Requests, Orders QA,
+      New Order, Clients.
+- [ ] Phase D, the rest: Dashboard, App Ideas, App Accounts, Staff, Services,
+      Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile.
+- [ ] Phase E, overall appearance: palette, type, surfaces, border contrast, spacing,
+      button hierarchy, status colours, icons, states, motion, wording. Refine the dark
+      operational style rather than replacing it.
+- [ ] Phase F, mobile app integration: Mobile Requests, Service Requests, customer
+      replies, App Ideas, App Accounts, realtime alerts, staff actions from the app.
+- [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.
+
+Riding along with A and B, a minimal correctness pass for the five screens that are
+broken on phones rather than only unpolished: Clients, Staff, System Admin, Reports,
+New Order. Presentation only, no data logic.

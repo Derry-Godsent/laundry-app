@@ -132,8 +132,16 @@ keeping its layout. Migrating the rest to `@/components/ui` is the next pass.
 
 This redesign is deliberately phased so each step ships on its own and nothing
 is half-converted. **Status is tracked here and in [`todo.md`](../todo.md)**:
-
 that is the source of truth, not any chat thread.
+
+Phases 1 to 5 below were the desktop pass. It rebuilt the visual system and the
+shell, but it was planned for a desk: on phones the app is usable only by
+accident, and five screens scroll sideways or hide their own content. The mobile
+pass that follows re-plans the remaining work **mobile first**, daily operations
+first, and folds the still-unmigrated screens into it. The two lists are one
+roadmap: 1 to 5 are done and are not repeated; A to F are what remains.
+
+### Already landed: the desktop pass
 
 | Phase | Scope | Status |
 | --- | --- | --- |
@@ -142,11 +150,74 @@ that is the source of truth, not any chat thread.
 | 3 | Dashboard · overview rebuilt on the system | ✅ done |
 | 4 | Mobile Requests queue · the intake pattern | ✅ done |
 | 5 | **Orders** · layout kept, restyled on the shared system (`.table-page` frame + tokens) | ✅ done |
-| 6 | Clients + Staff · register and roster pages (KPI rows, tables, modals) | ⬜ next |
-| 7 | Settings · Security · System Admin · the Administration group | ⬜ |
-| 8 | Services · Payments · Receipts · Reports | ⬜ |
-| 9 | Service Requests · App Ideas · App Accounts | ⬜ |
-| 10 | Sign-off: delete `/preview` (route + page + CSS) and the sample-data note here | ⬜ |
+
+### Remaining: the mobile-first pass
+
+| Phase | Scope | Status |
+| --- | --- | --- |
+| A | **Responsive foundation** · shell, `100dvh`, safe areas, one scroll area per page, compact top bar, drawer, notification panel, shared breakpoints and padding tokens | ⬜ next |
+| B | **Shared mobile patterns** · page header, summary cards, filter/search bar, list row, status badge, detail view, bottom actions, full-screen modal, confirm dialog, empty/error/loading states | ⬜ |
+| C | **Daily operations** · Mobile Requests, Service Requests, Orders QA, New Order, Clients | ⬜ |
+| D | **Rest of the app** · Dashboard, App Ideas, App Accounts, Staff, Services, Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile | ⬜ |
+| E | **Overall appearance** · palette, type, surfaces, border contrast, spacing, button hierarchy, status colours, icons, states, motion, wording (refine the dark operational style, do not replace it) | ⬜ |
+| F | **Mobile app integration** · Mobile Requests, Service Requests, customer replies, App Ideas, App Accounts, realtime alerts, staff actions that start in the customer app | ⬜ |
+| G | Sign-off: delete `/preview` (route + page + CSS) and the sample-data note here, then close PR #7 | ⬜ |
+
+### Riding along with A and B: minimal correctness pass
+
+Five screens are not merely unpolished, they are broken on phones. A minimal
+correctness pass rides along with A and B so they stop being unusable while
+their full design waits for C and D. Presentation only, no data logic:
+
+| Screen | What is wrong |
+| --- | --- |
+| Clients | `.cl-tbl` keeps `min-width: 780px` on phones and four stacked KPI cards leave the list no height |
+| Staff | `.sf-tbl` keeps `min-width: 760px` inside a horizontally scrolling wrapper |
+| System Admin | the table is rendered with an inline `minWidth: 1100px`, which defeats the card mode the page already has |
+| Reports | no media queries at all: inline `2fr 1fr` grids, fixed 28px/32px padding, `min-height: 100vh` |
+| New Order | the cart table is forced to `overflow-x: auto` with `white-space: nowrap` and a panel that clips its own sections |
+
+### Target widths
+
+Every layout decision is checked at these widths, smallest first:
+
+| Width | Device |
+| --- | --- |
+| 320px | smallest supported phone |
+| 360px | small Android phone |
+| 390px | common modern phone |
+| 430px | larger phone |
+| 768px | tablet portrait |
+| 1024px+ | desktop layout |
+
+### Definition of done
+
+- No accidental horizontal page overflow at 320px.
+- No nested scrolling unless it is deliberate and named.
+- Important actions are reachable one-handed.
+- Buttons and fields are comfortable to tap (44px minimum where it matters).
+- Lists become useful cards or rows on phones.
+- Detail views have a clear back or close action.
+- Forms never require sideways scrolling.
+- Desktop layout stays stable; tablet portrait stays usable.
+- Keyboard navigation still works; text can be copied where useful.
+- Reduced motion is respected.
+- Checked on a Vercel preview at several viewport sizes.
+- Existing staff and customer app integration keeps working.
+
+### Page archetypes (the two shapes a page may have)
+
+A page picks exactly one, and the shell owns the scrollbar:
+
+1. **Document flow** (default): `.page` inside `.main-body`, which is the single
+   scroller. Use for settings-style pages and long forms.
+2. **Viewport frame**: `.table-page` for anything with a list that must scroll
+   under a pinned title, filters and pagination. `.table-page__scroll` is the
+   only scrolling element.
+
+A page must not declare its own `100vh`/`100dvh`, and must not open a second
+scroll container unless it is a named, deliberate case (for example the pipeline
+board scrolling sideways). The legacy bridge keeps shrinking as pages migrate.
 
 ### Decision log
 
@@ -235,6 +306,7 @@ pick the work up without any chat history:
    > and `todo.md` first. Phases 1 to 5 are committed on
    > `arena/03b7f65b-laundry-app` (PR #7 open against master). Work on the next
    > unchecked phase: presentation only, no data-logic changes. Verify with
-   > `npx tsc -b` and `npm run build`, then commit and push to the same branch.
+   > `npx tsc -b`, `npm run build` and `npm run check:copy`, then commit and
+   > push to the same branch. The current phase is A, the responsive foundation.
 
 4. **Review without credentials** at any point: `/preview` (sample data only).
