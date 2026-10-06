@@ -8,11 +8,13 @@ interface NavItemProps {
   label: string;
   path: string;
   badge?: number;
+  /** What the number means, shown when the office hovers it. */
+  badgeTitle?: string;
   isCollapsed?: boolean;
   onClick?: () => void;
 }
 
-export const NavItem = ({ icon: Icon, label, path, badge, isCollapsed, onClick }: NavItemProps) => {
+export const NavItem = ({ icon: Icon, label, path, badge, badgeTitle, isCollapsed, onClick }: NavItemProps) => {
   const location = useLocation();
   const isActive = location.pathname === path;
 
@@ -23,6 +25,7 @@ export const NavItem = ({ icon: Icon, label, path, badge, isCollapsed, onClick }
         className={`nav-item ${isActive ? "active" : ""}`}
         onClick={onClick}
         aria-current={isActive ? "page" : undefined}
+        title={badge && badgeTitle ? `${badge} ${badgeTitle}` : undefined}
       >
         <span className="nav-icon">
           <Icon size={20} />

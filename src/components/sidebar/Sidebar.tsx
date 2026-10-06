@@ -2,12 +2,13 @@ import { useState, useMemo, useEffect } from "react";
 import {
   LayoutDashboard, Package, Users, User, Settings, FileText,
   ChevronLeft, ChevronRight, Shield, CreditCard, ShoppingCart,
-  Printer, LogOut, X, BarChart3, Inbox
+  Printer, LogOut, X, BarChart3, Inbox, Sparkles, Lightbulb, Smartphone
 } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../../lib/supabaseClient";
 import { NavItem } from "./NavItem";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
+import { useIntakeCounts } from "../../hooks/useIntakeCounts";
 import "./Sidebar.css";
 
 interface SidebarProps {
@@ -18,28 +19,15 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [orderCount, setOrderCount] = useState(0);
   const [userRole, setUserRole] = useState<string>("staff");
   const [allowedPages, setAllowedPages] = useState<Set<string>>(new Set());
 
-  /* ─── REALTIME ORDER COUNT ─────────────────────────────────────────────── */
-  useEffect(() => {
-    let isMounted = true;
-    const fetchCount = async () => {
-      const { count } = await supabase.from('orders').select('*', { count: 'exact', head: true });
-      if (isMounted) setOrderCount(count || 0);
-    };
-    fetchCount();
-    
-    const channel = supabase.channel('sidebar-orders-badge')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchCount())
-      .subscribe();
-      
-    return () => { 
-      isMounted = false; 
-      supabase.removeChannel(channel); 
-    };
-  }, []);
+  /* ─── LIVE COUNTS FOR THE MENU ─────────────────────────────────────────────
+     One hook counts the records behind each page and keeps the numbers current
+     as customers send work and the office changes it. It only starts once the
+     role is known, because the menu hides pages this role may not open. */
+  const countsKnown = allowedPages.size > 0;
+  const { counts } = useIntakeCounts(countsKnown);
 
   /* ─── FETCH ROLE & PERMISSIONS ─────────────────────────────────────────── */
   useEffect(() => {
@@ -80,10 +68,13 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
   const navItems = useMemo(() => [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", pageKey: "dashboard" },
     { icon: ShoppingCart, label: "New Order", path: "/new-order", pageKey: "new-order" },
-    { icon: Package, label: "Orders", path: "/orders", pageKey: "orders", badge: orderCount > 0 ? orderCount : undefined },
-    { icon: Inbox, label: "Mobile Requests", path: "/mobile-requests", pageKey: "mobile-requests" },
-    { icon: Users, label: "Staff", path: "/staff", pageKey: "staff" },
-    { icon: User, label: "Clients", path: "/clients", pageKey: "clients" },
+    { icon: Package, label: "Orders", path: "/orders", pageKey: "orders", badge: countsKnown && counts.orders > 0 ? counts.orders : undefined },
+    { icon: Inbox, label: "Mobile Requests", path: "/mobile-requests", pageKey: "mobile-requests", badge: countsKnown && counts.mobileRequests > 0 ? counts.mobileRequests : undefined, badgeTitle: "waiting for Chapman to act" },
+    { icon: Sparkles, label: "Service Requests", path: "/service-requests", pageKey: "service-requests", badge: countsKnown && counts.serviceRequests > 0 ? counts.serviceRequests : undefined, badgeTitle: "need a date from Chapman" },
+    { icon: Lightbulb, label: "App Ideas", path: "/app-ideas", pageKey: "app-ideas", badge: countsKnown && counts.appIdeas > 0 ? counts.appIdeas : undefined, badgeTitle: "new ideas from customers" },
+    { icon: Smartphone, label: "App Accounts", path: "/app-accounts", pageKey: "app-accounts", badge: countsKnown && counts.appAccounts > 0 ? counts.appAccounts : undefined, badgeTitle: "customers using the app" },
+    { icon: Users, label: "Staff", path: "/staff", pageKey: "staff", badge: countsKnown && counts.staff > 0 ? counts.staff : undefined },
+    { icon: User, label: "Clients", path: "/clients", pageKey: "clients", badge: countsKnown && counts.clients > 0 ? counts.clients : undefined },
     { icon: FileText, label: "Services", path: "/services", pageKey: "services" },
     { icon: Printer, label: "Receipt", path: "/receipt", pageKey: "receipt" },
     { icon: CreditCard, label: "Payments", path: "/payments", pageKey: "payments" },
@@ -91,7 +82,7 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
     { icon: Shield, label: "Security", path: "/security", pageKey: "security" },
     { icon: Settings, label: "Settings", path: "/settings", pageKey: "settings" },
     { icon: Shield, label: "System Admin", path: "/system", pageKey: "system" },
-  ], [orderCount]);
+  ], [counts, countsKnown]);
 
   // Filter nav items based on database permissions
   const filteredNavItems = useMemo(() => {

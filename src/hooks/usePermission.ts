@@ -15,6 +15,9 @@ const PATH_TO_PERMISSION: Record<string, string> = {
   "/new-order": "new-order",
   "/security": "security",
   "/mobile-requests": "mobile-requests",
+  "/service-requests": "service-requests",
+  "/app-ideas": "app-ideas",
+  "/app-accounts": "app-accounts",
 };
 
 interface CacheEntry {

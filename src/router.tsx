@@ -19,6 +19,9 @@ import { SystemAdmin } from "./pages/SystemAdmin";
 import { Profile } from "./pages/Profile";
 import { Help } from "./pages/Help";
 import { MobileRequests } from "./pages/MobileRequests";
+import { ServiceRequests } from "./pages/ServiceRequests";
+import { AppIdeas } from "./pages/AppIdeas";
+import { AppAccounts } from "./pages/AppAccounts";
 
 /* ─── PROTECTED ROUTE WRAPPER ────────────────────────────────────────────── */
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -80,6 +83,9 @@ export const router = createBrowserRouter([
       { path: "reports", element: <Reports /> },
       { path: "help", element: <Help /> },
       { path: "mobile-requests", element: <MobileRequests /> },
+      { path: "service-requests", element: <ServiceRequests /> },
+      { path: "app-ideas", element: <AppIdeas /> },
+      { path: "app-accounts", element: <AppAccounts /> },
     ],
   },
   { path: "*", element: <Navigate to="/dashboard" replace /> }, 

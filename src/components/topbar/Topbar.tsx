@@ -6,6 +6,7 @@ import { CommandPalette } from "./CommandPalette";
 import { NotificationDropdown } from "./NotificationDropdown";
 import { ProfileDropdown } from "./ProfileDropdown";
 import { supabase } from "../../lib/supabaseClient";
+import { useIntakeNotifications } from "../../hooks/useIntakeNotifications";
 import type { User } from "@supabase/supabase-js";
 import "./Topbar.css";
 
@@ -15,12 +16,14 @@ interface TopbarProps {
 }
 
 interface NotificationItem {
-  id: number;
+  id: number | string;
   title: string;
   message: string;
   time: string;
   read: boolean;
   type: "success" | "info" | "warning" | "error";
+  /** Where clicking this alert takes the office. */
+  href?: string;
 }
 
 interface StaffProfile {
@@ -37,8 +40,6 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
   const [userRole, setUserRole] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   // Fetch current user session and staff profile
   useEffect(() => {
@@ -121,57 +122,19 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
     };
   }, []);
 
-  // Listen for real-time notifications
-  useEffect(() => {
-    if (!user) return;
+  /* ─── LIVE ALERTS ──────────────────────────────────────────────────────────
+     Every alert comes from a record: a customer sending a request, asking for a
+     service, or answering a date Chapman offered. The count is what is new since
+     this staff member last looked, so it is honest rather than decorative. */
+  const { notifications: intakeAlerts, unreadCount, markRead, markAllRead } = useIntakeNotifications(user?.id ?? null, Boolean(user));
 
-    const channel = supabase
-      .channel("topbar-notifications")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders", filter: `client_id=eq.${user.id}` },
-        (payload: { eventType: string; new: Record<string, unknown> | null; old: Record<string, unknown> | null }) => {
-          const eventType = payload.eventType;
-          const newRecord = payload.new as Record<string, unknown> | null;
-          const oldRecord = payload.old as Record<string, unknown> | null;
-
-          let title = "Order Updated";
-          let message = "Your order has been updated";
-          let type: NotificationItem["type"] = "info";
-
-          if (eventType === "INSERT") {
-            title = "New Order";
-            message = `Order ${newRecord?.order_id || "#???"} was created`;
-            type = "success";
-          } else if (eventType === "UPDATE") {
-            title = "Order Updated";
-            message = `Order ${newRecord?.order_id || "#???"} was updated`;
-            type = "info";
-          } else if (eventType === "DELETE") {
-            title = "Order Deleted";
-            message = `Order ${oldRecord?.order_id || "#???"} was removed`;
-            type = "warning";
-          }
-
-          const newNotification: NotificationItem = {
-            id: Date.now(),
-            title,
-            message,
-            time: new Date().toLocaleTimeString(),
-            read: false,
-            type,
-          };
-
-          setNotifications((prev) => [newNotification, ...prev.slice(0, 19)]);
-          setUnreadCount((prev) => prev + 1);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
+  // Clicking an alert marks it read and opens the queue it belongs to.
+  const handleAlertClick = (id?: number | string) => {
+    if (id === undefined || id === null) return;
+    const item = intakeAlerts.find((entry) => String(entry.id) === String(id));
+    markRead([String(id)]);
+    if (item?.href) navigate(item.href);
+  };
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -238,13 +201,13 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
           </button>
 
           <NotificationDropdown
-  notifications={notifications}
-  unreadCount={unreadCount}
-  onMarkRead={(id) => { /* mark single read */ }}
-  onMarkAllRead={() => setUnreadCount(0)}
-  onViewAll={() => navigate("/notifications")}
-  pulseBadge={unreadCount > 0}
-/>
+            notifications={intakeAlerts}
+            unreadCount={unreadCount}
+            onMarkRead={handleAlertClick}
+            onMarkAllRead={markAllRead}
+            onViewAll={() => navigate("/mobile-requests")}
+            pulseBadge={unreadCount > 0}
+          />
 
           <ProfileDropdown
             user={user}
