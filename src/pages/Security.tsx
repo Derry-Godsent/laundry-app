@@ -21,6 +21,10 @@ const PAGE_CONFIG = [
   { label: 'Payments', key: 'payments' },
   { label: 'Settings', key: 'settings' },
   { label: 'Security', key: 'security' },
+  { label: 'Mobile Requests', key: 'mobile-requests' },
+  { label: 'Service Requests', key: 'service-requests' },
+  { label: 'App Ideas', key: 'app-ideas' },
+  { label: 'App Accounts', key: 'app-accounts' },
 ];
 
 const T = {
