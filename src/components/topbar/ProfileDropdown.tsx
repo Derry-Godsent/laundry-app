@@ -1,12 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Settings, LogOut, HelpCircle, ChevronDown } from "lucide-react";
-// @ts-ignore
 import { supabase } from "../../lib/supabaseClient";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
 .pd-wrap { position: relative; font-family: 'Outfit', system-ui, sans-serif; }
 
@@ -149,6 +147,49 @@ const CSS = `
   .pd-trigger, .pd-av, .pd-chev, .pd-item, .pd-logout, .pd-item-ico, .pd-logout-ico { transition: none; }
   .pd-panel { animation: none; }
 }
+
+/* ── Console alignment ───────────────────────────────────────────────────
+   The account menu is part of the topbar, so it borrows the console's own
+   tokens instead of carrying its own extra font import. */
+.pd-wrap { font-family: var(--font-ui); }
+.pd-trigger {
+  background: var(--ink-card);
+  border-color: var(--line-soft);
+  border-radius: var(--r-sm);
+}
+.pd-trigger:hover { background: var(--ink-hover); border-color: var(--line); }
+.pd-trigger.open { background: var(--brand-soft); border-color: rgba(111, 119, 247, 0.3); }
+.pd-av { border-radius: var(--r-xs); }
+.pd-name { color: var(--text-1); }
+.pd-role { letter-spacing: 0.04em; text-transform: uppercase; }
+.pd-chev { color: var(--text-4); }
+.pd-panel {
+  background: var(--ink-hover);
+  border-color: var(--line-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop);
+}
+.pd-card { border-bottom-color: var(--line-faint); }
+.pd-card-av { border-radius: var(--r-sm); }
+.pd-card-name { color: var(--text-1); }
+.pd-card-email { color: var(--text-4); font-family: var(--font-mono); }
+.pd-menu { padding: var(--sp-2); }
+.pd-item,
+.pd-logout {
+  border-radius: var(--r-sm);
+  font-family: var(--font-ui);
+  color: var(--text-2);
+  font-weight: 550;
+}
+.pd-item:hover { background: var(--ink-active); color: var(--text-1); }
+.pd-logout:hover { background: var(--bad-soft); color: var(--bad-500); }
+.pd-item-ico,
+.pd-logout-ico {
+  background: var(--ink-raised);
+  border: 1px solid var(--line-faint);
+  border-radius: var(--r-xs);
+}
+.pd-div { background: var(--line-faint); }
 `;
 
 const ROLE_META: Record<string, { color: string }> = {

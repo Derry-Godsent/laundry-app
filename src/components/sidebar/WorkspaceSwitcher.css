@@ -1,238 +1,118 @@
-/* Wrapper - Fits sidebar inner width exactly */
-.ws-switcher-wrapper {
-  position: relative;
-  width: 100%;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   WORKSPACE SWITCHER — which branch this console is showing
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Hide when sidebar is collapsed */
-.sidebar.collapsed .ws-switcher-wrapper {
-  display: none;
-}
+.ws-switcher { position: relative; }
 
-/* Trigger Button */
 .ws-trigger {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  background: #12141c;
-  border: 1px solid #1e212b;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  gap: var(--sp-3);
   width: 100%;
+  padding: 9px var(--sp-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-faint);
+  background: var(--ink-card);
+  color: var(--text-2);
   text-align: left;
+  transition: border-color var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out);
 }
 
-.ws-trigger:hover {
-  background: #1a1d26;
-  border-color: #2d3140;
+.ws-trigger:hover:not(:disabled) {
+  border-color: var(--line);
+  background: var(--ink-hover);
 }
 
-.ws-trigger:focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
-}
+.ws-trigger:disabled { cursor: default; opacity: 0.85; }
+
+.sidebar.collapsed .ws-trigger { justify-content: center; padding: 9px 0; }
 
 .ws-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
+  border-radius: var(--r-xs);
+  background: var(--gold-soft);
+  color: var(--gold-500);
 }
 
-.ws-info {
-  flex: 1;
-  min-width: 0;
-}
+.ws-info { flex: 1; min-width: 0; }
 
 .ws-name {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ws-status {
-  font-size: 11px;
-  color: #8b8f99;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 2px;
+.ws-error { color: var(--bad-500); }
+
+.ws-skeleton {
+  height: 12px;
+  width: 80%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--ink-hover), var(--ink-active), var(--ink-hover));
+  background-size: 200% 100%;
+  animation: wsShimmer 1.6s infinite linear;
+}
+
+@keyframes wsShimmer {
+  to { background-position: -200% 0; }
 }
 
 .ws-chevron {
-  color: #8b8f99;
-  transition: transform 0.2s ease;
   flex-shrink: 0;
+  color: var(--text-4);
+  transition: transform var(--dur-base) var(--ease-out);
 }
 
-.ws-chevron.open {
-  transform: rotate(180deg);
-}
+.ws-chevron.open { transform: rotate(180deg); }
 
-/* Dropdown - Fixed positioning and width */
+.sidebar.collapsed .ws-info,
+.sidebar.collapsed .ws-chevron { display: none; }
+
+/* ── Dropdown ───────────────────────────────────────────────────────────── */
 .ws-dropdown {
   position: absolute;
-  bottom: 100%;
+  bottom: calc(100% + 8px);
   left: 0;
-  margin-bottom: 8px;
-  width: 100%;
-  max-width: 280px;
-  background: #12141c;
-  border: 1px solid #1e212b;
-  border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-  z-index: 50;
-  animation: wsSlideUp 0.2s ease;
-  overflow: hidden;
+  right: 0;
+  min-width: 220px;
+  padding: var(--sp-2);
+  background: var(--ink-hover);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-pop);
+  z-index: 9999;
+  animation: wsRise var(--dur-base) var(--ease-out) both;
 }
 
-@keyframes wsSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes wsRise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.ws-dropdown-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 14px;
-  border-bottom: 1px solid #1e212b;
-  background: rgba(18, 20, 28, 0.5);
-}
-
-.ws-dropdown-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: #525661;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.ws-dropdown-count {
-  font-size: 11px;
-  color: #22c55e;
-  font-weight: 600;
-}
-
-.ws-list {
-  padding: 6px;
-  max-height: 240px;
-  overflow-y: auto;
-}
-
-.ws-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 10px 12px;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-  gap: 8px;
-}
-
-.ws-item:hover:not(.disabled) {
-  background: #1a1d26;
-}
-
-.ws-item:focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
-}
-
-.ws-item.selected {
-  background: rgba(99, 102, 241, 0.1);
-}
-
-.ws-item.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.ws-item-info {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  gap: 2px;
-  min-width: 0;
-}
-
-.ws-item-name {
+.ws-option {
+  padding: 9px var(--sp-3);
+  border-radius: var(--r-sm);
   font-size: 13px;
-  font-weight: 500;
-  color: #fff;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 
-.ws-item-location {
-  font-size: 11px;
-  color: #525661;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.ws-option:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-1); }
 
-.ws-item-right {
-  display: flex;
-  align-items: center;
-}
-
-.ws-badge {
-  font-size: 10px;
+.ws-option.active {
+  color: var(--gold-400);
+  background: var(--gold-soft);
   font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
 }
 
-.ws-badge.active {
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
-}
-
-.ws-badge.planned {
-  background: rgba(139, 143, 153, 0.1);
-  color: #8b8f99;
-}
-
-.ws-footer {
-  padding: 10px 14px;
-  border-top: 1px solid #1e212b;
-  background: rgba(18, 20, 28, 0.5);
-}
-
-.ws-footer-text {
-  font-size: 11px;
-  color: #6b7080;
-  font-style: normal;
-  display: block;
-  text-align: center;
-}
-
-/* Reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  .ws-trigger,
-  .ws-chevron,
-  .ws-item {
-    transition: none;
-  }
-  .ws-dropdown {
-    animation: none;
-  }
-}
+/* Wrapper kept for markup that still nests the switcher in a positioned box. */
+.ws-switcher-wrapper { position: relative; }

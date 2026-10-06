@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { Bell, Check, X, CheckCircle, Info, AlertTriangle, AlertCircle } from "lucide-react";
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
 .nd-wrap { position: relative; font-family: 'Outfit', system-ui, sans-serif; }
 
@@ -194,6 +193,51 @@ const CSS = `
     animation: none;
   }
 }
+
+/* ── Console alignment ───────────────────────────────────────────────────
+   Alerts sit in the topbar next to the account menu, so they use the same
+   surface, line and text tokens as the rest of the console. */
+.nd-wrap { font-family: var(--font-ui); }
+.nd-bell {
+  width: 38px; height: 38px;
+  border-radius: var(--r-sm);
+  border-color: var(--line-soft);
+  background: var(--ink-card);
+  color: var(--text-3);
+}
+.nd-bell:hover { background: var(--ink-hover); border-color: var(--line); color: var(--text-1); }
+.nd-bell.open { background: var(--brand-soft); border-color: rgba(111, 119, 247, 0.3); color: var(--brand-400); }
+.nd-badge { background: var(--bad-500); color: #2b0505; border-color: var(--ink-shell); }
+.nd-panel {
+  background: var(--ink-hover);
+  border-color: var(--line-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop);
+}
+.nd-head { border-bottom-color: var(--line-faint); }
+.nd-head-title { color: var(--text-1); }
+.nd-unread-chip { background: var(--brand-soft); color: var(--brand-400); }
+.nd-mark-all { color: var(--text-4); font-family: var(--font-ui); }
+.nd-mark-all:hover { color: var(--text-2); }
+.nd-item { border-bottom-color: var(--line-faint); }
+.nd-item:hover { background: rgba(255, 255, 255, 0.035); }
+.nd-item.unread { background: var(--brand-soft); }
+.nd-item-title { color: var(--text-1); }
+.nd-item-desc { color: var(--text-3); }
+.nd-item-time { color: var(--text-4); }
+.nd-empty { color: var(--text-4); }
+.nd-act-btn { border-color: var(--line-soft); background: var(--ink-raised); color: var(--text-3); border-radius: var(--r-xs); }
+.nd-act-btn:hover { background: var(--ink-active); color: var(--text-1); }
+.nd-unread-dot { background: var(--brand-500); }
+.nd-footer { border-top-color: var(--line-faint); }
+.nd-view-all {
+  background: var(--ink-raised);
+  border-color: var(--line-soft);
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-family: var(--font-ui);
+}
+.nd-view-all:hover { background: var(--ink-active); color: var(--text-1); }
 `;
 
 interface Notification {

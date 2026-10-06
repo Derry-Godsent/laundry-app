@@ -1,61 +1,64 @@
-/* Topbar layout */
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOPBAR — context bar: where am I, what needs me, what do I do next
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 32px;
-  background: #0b0d12;
-  border-bottom: 1px solid #1a1d26;
-  gap: 16px;
-  height: 64px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02);
+  gap: var(--sp-4);
+  height: var(--topbar-h);
+  padding: 0 var(--sp-6);
+  background: rgba(8, 11, 18, 0.82);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--line-faint);
 }
 
 .topbar-left {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--sp-3);
   flex-shrink: 0;
 }
 
-/* Command search trigger */
+/* ── Search trigger ─────────────────────────────────────────────────────── */
 .command-trigger {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
-  background: #12141c;
-  border: 1px solid #1e212b;
-  border-radius: 10px;
-  color: #8b8f99;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  min-width: 280px;
+  gap: var(--sp-2);
+  width: 100%;
   max-width: 320px;
-  will-change: transform;
+  min-width: 220px;
+  height: 38px;
+  padding: 0 var(--sp-3);
+  background: var(--ink-card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  color: var(--text-4);
+  font-size: 13px;
+  transition: border-color var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
 }
 
 .command-trigger:hover {
-  border-color: #2d3140;
-  color: #ffffff;
-  background: #1a1d26;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.command-trigger:active {
-  transform: translateY(0);
-}
-
-.command-trigger:focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
+  color: var(--text-2);
+  background: var(--ink-hover);
+  border-color: var(--line);
+  box-shadow: var(--shadow-sm);
 }
 
 .command-placeholder {
@@ -67,178 +70,101 @@
 }
 
 .command-key {
-  margin-left: auto;
-  padding: 3px 6px;
-  background: #1a1d26;
-  border: 1px solid #2d3140;
-  border-radius: 4px;
+  flex-shrink: 0;
+  padding: 2px 6px;
+  background: var(--ink-raised);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-xs);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
   font-weight: 600;
-  font-size: 11px;
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
-  color: #8b8f99;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  color: var(--text-3);
 }
 
-.command-trigger:hover .command-key {
-  border-color: #3d4150;
-  color: #a1a5b0;
-}
-
-/* Icon buttons */
+/* ── Icon buttons (bell, etc.) ──────────────────────────────────────────── */
 .icon-btn {
   position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid #1e212b;
-  background: #12141c;
-  color: #8b8f99;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  will-change: transform;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-soft);
+  background: var(--ink-card);
+  color: var(--text-3);
+  transition: border-color var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
 }
 
 .icon-btn:hover {
-  background: #1e212b;
-  color: #ffffff;
-  border-color: #2d3140;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: var(--text-1);
+  background: var(--ink-hover);
+  border-color: var(--line);
 }
 
-.icon-btn:active {
-  transform: translateY(0);
-}
-
-.icon-btn:focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
-}
-
-/* Notification badge */
 .notification-badge {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: -5px;
+  right: -5px;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  background: #ef4444;
-  color: #ffffff;
+  display: grid;
+  place-items: center;
+  background: var(--bad-500);
+  color: #2b0505;
   font-size: 10px;
-  font-weight: 600;
-  border-radius: 9px;
-  border: 2px solid #12141c;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
+  font-weight: 800;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--ink-shell);
 }
 
-.notification-badge.pulse {
-  animation: pulse 2s infinite;
+.notification-badge.pulse { animation: badgePulse 2.4s var(--ease-in-out) infinite; }
+
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 125, 125, 0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(251, 125, 125, 0); }
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.8; }
-}
-
-/* Primary button */
-.btn-primary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  background: #6366f1;
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  will-change: transform;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-}
-
-.btn-primary:hover {
-  background: #4f46e5;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-}
-
-.btn-primary:focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
-}
-
-/* Mobile toggle */
+/* ── Mobile menu button ─────────────────────────────────────────────────── */
 .sidebar-toggle-mobile {
   display: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: transparent;
-  color: #edf0f8;
-  cursor: pointer;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-soft);
+  background: var(--ink-card);
+  color: var(--text-1);
+  transition: background-color var(--dur-base) var(--ease-out);
 }
 
-.sidebar-toggle-mobile:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+.sidebar-toggle-mobile:hover { background: var(--ink-hover); }
+
+/* The topbar's primary action keeps the shared button look but may shrink. */
+.topbar-action { flex-shrink: 0; }
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .command-trigger { min-width: 160px; max-width: 200px; }
+  .command-placeholder { display: none; }
 }
 
-.sidebar-toggle-mobile:focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
-}
-
-/* Mobile responsive */
 @media (max-width: 1024px) {
-  .sidebar-toggle-mobile { display: flex; }
-  .command-trigger { min-width: 40px; padding: 8px; max-width: 40px; }
-  .command-placeholder, .command-key { display: none; }
+  .topbar { padding: 0 var(--sp-4); }
+  .command-trigger { width: 38px; min-width: 38px; max-width: 38px; justify-content: center; padding: 0; }
+  .command-key { display: none; }
   .btn-text { display: none; }
-  .btn-primary { padding: 8px; min-width: 40px; justify-content: center; }
-  .topbar { padding: 12px 16px; }
+  .topbar-action { width: 38px; padding: 0; }
 }
 
 @media (max-width: 480px) {
-  .topbar-right { gap: 8px; }
-  .icon-btn { width: 36px; height: 36px; }
-  .notification-badge { top: 4px; right: 4px; min-width: 16px; height: 16px; font-size: 9px; }
-}
-
-/* Ensure hamburger is hidden on desktop */
-@media (min-width: 1025px) {
-  .sidebar-toggle-mobile {
-    display: none !important;
-  }
-}
-
-/* Reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  .command-trigger,
+  .topbar-right { gap: var(--sp-2); }
   .icon-btn,
-  .btn-primary,
-  .sidebar-toggle-mobile {
-    transition: none;
-  }
-  .notification-badge.pulse {
-    animation: none;
-  }
+  .sidebar-toggle-mobile,
+  .command-trigger,
+  .topbar-action { width: 36px; height: 36px; }
 }

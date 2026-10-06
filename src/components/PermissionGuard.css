@@ -1,46 +1,53 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   PERMISSION GUARD — view-only notice and access-denied state
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.pg-content { display: block; }
+
+.pg-banner,
+.pg-error,
+.pg-access-denied {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+  padding: 10px var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-soft);
+  background: var(--ink-raised);
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
 .pg-banner {
-  padding: 10px 14px;
-  background: rgba(219, 169, 106, 0.1);
-  border: 1px solid rgba(219, 169, 106, 0.22);
-  border-radius: 8px;
-  color: #dba96a;
-  font-size: 12px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'DM Sans', system-ui, sans-serif;
+  border-color: rgba(224, 180, 115, 0.24);
+  background: var(--gold-soft);
+  color: var(--gold-400);
 }
 
-.pg-content {
-  position: relative;
+.pg-banner svg,
+.pg-error svg,
+.pg-access-denied svg { flex-shrink: 0; }
+
+.pg-error {
+  border-color: rgba(251, 125, 125, 0.24);
+  background: var(--bad-soft);
+  color: var(--bad-500);
 }
 
-.pg-error, .pg-access-denied {
-  padding: 10px 14px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.22);
-  border-radius: 8px;
-  color: #ef4444;
-  font-size: 12px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: 'DM Sans', system-ui, sans-serif;
-}
-
-@media (max-width: 768px) {
-  .pg-banner, .pg-error, .pg-access-denied {
-    padding: 12px 14px;
-    font-size: 13px;
-  }
+.pg-access-denied {
+  border-color: rgba(240, 192, 94, 0.24);
+  background: var(--warn-soft);
+  color: var(--warn-500);
 }
 
 @media (max-width: 480px) {
-  .pg-banner, .pg-error, .pg-access-denied {
-    padding: 10px 12px;
+  .pg-banner,
+  .pg-error,
+  .pg-access-denied {
     font-size: 12px;
-    flex-wrap: wrap;
+    padding: 9px var(--sp-3);
+    align-items: flex-start;
   }
 }

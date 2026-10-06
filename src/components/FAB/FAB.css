@@ -1,247 +1,113 @@
-/* FAB Styles - Chapman Prestige Limited */
+/* ═══════════════════════════════════════════════════════════════════════════
+   FAB — quick create, bottom-right, keyboard reachable
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .fab-container {
   position: fixed;
-  bottom: 32px;
-  right: 32px;
-  z-index: 50;
+  right: var(--sp-6);
+  bottom: calc(var(--sp-6) + env(safe-area-inset-bottom, 0px));
+  z-index: 45;
 }
 
 .fab-button {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #6366f1;
-  color: #ffffff;
-  border: none;
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(160deg, var(--brand-500), var(--brand-700));
+  color: #fff;
+  box-shadow: 0 14px 34px -14px var(--brand-glow), var(--shadow-md);
+  transition: transform var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
 }
 
 .fab-button:hover {
-  transform: scale(1.1) rotate(90deg);
-  background: #4f46e5;
-  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -16px var(--brand-glow), var(--shadow-lg);
 }
 
-.fab-button:active {
-  transform: scale(0.95);
-  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.3);
-}
-
-.fab-button:focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 3px;
-}
+.fab-button:active { transform: translateY(0); }
 
 .fab-icon-wrapper {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: grid;
+  place-items: center;
+  transition: transform var(--dur-slow) var(--ease-out);
 }
 
-.fab-icon-wrapper.rotate {
-  transform: rotate(135deg);
-}
+.fab-icon-wrapper.rotate { transform: rotate(135deg); }
 
 .fab-menu {
   position: absolute;
-  bottom: 70px;
   right: 0;
+  bottom: calc(100% + var(--sp-3));
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--sp-2);
   opacity: 0;
-  pointer-events: none;
-  transform: translateY(20px);
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out),
+    visibility var(--dur-base);
 }
 
 .fab-container.open .fab-menu {
   opacity: 1;
-  pointer-events: auto;
+  visibility: visible;
   transform: translateY(0);
 }
 
 .fab-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  min-height: 48px;
-  background: #12141c;
-  border: 1px solid #1e212b;
-  border-radius: 12px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
+  gap: var(--sp-3);
+  padding: 10px var(--sp-4) 10px 10px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-soft);
+  background: var(--ink-hover);
+  color: var(--text-1);
+  font-size: 13px;
+  font-weight: 550;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  transition: background-color 0.2s ease,
-              border-color 0.2s ease,
-              transform 0.2s ease;
-  opacity: 0;
-  transform: translateY(12px) scale(0.95);
-  animation: none;
+  box-shadow: var(--shadow-pop);
+  transition: background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
-.fab-container.open .fab-item {
-  animation: fabItemIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  animation-delay: var(--delay, 0s);
-}
+.fab-container.open .fab-item { animation: fabItemIn var(--dur-base) var(--ease-out) both; }
 
-.fab-item:hover {
-  background: #1e212b;
-  border-color: #2d3140;
-  transform: translateX(-4px);
-}
-
-.fab-item:active {
-  transform: translateX(-2px) scale(0.98);
-}
-
-.fab-item:focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
-  border-radius: 12px;
-}
+.fab-item:hover { background: var(--ink-active); transform: translateX(-2px); }
 
 .fab-item-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(99, 102, 241, 0.15);
-  color: #6366f1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-xs);
+  background: var(--brand-soft);
+  color: var(--brand-400);
 }
 
 @keyframes fabItemIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .fab-button,
-  .fab-icon-wrapper,
-  .fab-menu,
-  .fab-item {
-    transition: none;
-    animation: none;
-  }
-
-  .fab-button:hover {
-    transform: none;
-  }
-
-  .fab-icon-wrapper.rotate {
-    transform: none;
-  }
-
-  .fab-container.open .fab-item {
-    opacity: 1;
-    transform: none;
-    animation: none;
-  }
-}
-
-/* Mobile */
 @media (max-width: 768px) {
-  .fab-container {
-    bottom: max(16px, env(safe-area-inset-bottom, 16px));
-    right: 16px;
-  }
-
-  .fab-button {
-    width: 52px;
-    height: 52px;
-  }
-
-  .fab-menu {
-    bottom: 64px;
-    gap: 10px;
-  }
-
-  .fab-item {
-    padding: 10px 14px;
-    min-height: 44px;
-    font-size: 13px;
-    gap: 10px;
-  }
-
-  .fab-item-icon {
-    width: 28px;
-    height: 28px;
-  }
+  .fab-container { right: var(--sp-4); bottom: calc(var(--sp-4) + env(safe-area-inset-bottom, 0px)); }
+  .fab-button { width: 48px; height: 48px; }
 }
 
 @media (max-width: 480px) {
-  .fab-container {
-    bottom: max(12px, env(safe-area-inset-bottom, 12px));
-    right: 12px;
-  }
-
-  .fab-button {
-    width: 48px;
-    height: 48px;
-  }
-
-  .fab-menu {
-    bottom: 60px;
-    right: 0;
-    gap: 8px;
-  }
-
-  .fab-item {
-    padding: 10px 12px;
-    min-height: 44px;
-    font-size: 13px;
-    gap: 8px;
-    border-radius: 10px;
-  }
-
-  .fab-item-icon {
-    width: 26px;
-    height: 26px;
-  }
-
-  .fab-item-label {
-    max-width: 160px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .fab-item { font-size: 12.5px; }
 }
 
-/* Landscape small height */
-@media (max-height: 500px) and (orientation: landscape) {
-  .fab-menu {
-    bottom: 60px;
-    max-height: calc(100vh - 100px);
-    overflow-y: auto;
-    padding-right: 4px;
-  }
-
-  .fab-menu::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  .fab-menu::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 99px;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .fab-menu,
+  .fab-item,
+  .fab-button,
+  .fab-icon-wrapper { transition: none; }
+  .fab-container.open .fab-item { animation: none; }
 }

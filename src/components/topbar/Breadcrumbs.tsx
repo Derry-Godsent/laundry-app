@@ -10,13 +10,18 @@ const routeLabels: Record<string, string> = {
   staff: "Staff",
   clients: "Clients",
   services: "Services",
-  receipt: "Receipt",
+  receipt: "Receipts",
   payments: "Payments",
+  reports: "Reports",
   security: "Security",
   settings: "Settings",
   system: "System Admin",
   profile: "Profile",
   help: "Help",
+  "mobile-requests": "Mobile Requests",
+  "service-requests": "Service Requests",
+  "app-ideas": "App Ideas",
+  "app-accounts": "App Accounts",
 };
 
 function formatLabel(raw: string): string {

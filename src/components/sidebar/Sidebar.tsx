@@ -2,9 +2,9 @@ import { useState, useMemo, useEffect } from "react";
 import {
   LayoutDashboard, Package, Users, User, Settings, FileText,
   ChevronLeft, ChevronRight, Shield, CreditCard, ShoppingCart,
-  Printer, LogOut, X, BarChart3, Inbox, Sparkles, Lightbulb, Smartphone
+  Printer, LogOut, X, BarChart3, Inbox, Sparkles, Lightbulb, Smartphone,
 } from "lucide-react";
-// @ts-ignore
+import type { LucideIcon } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { NavItem } from "./NavItem";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
@@ -16,6 +16,29 @@ interface SidebarProps {
   onToggle?: () => void;
   isMobile?: boolean;
 }
+
+interface NavEntry {
+  icon: LucideIcon;
+  label: string;
+  path: string;
+  pageKey: string;
+  badge?: number;
+  badgeTitle?: string;
+}
+
+interface NavSection {
+  id: string;
+  label: string;
+  items: NavEntry[];
+}
+
+const ROLE_LABEL: Record<string, string> = {
+  admin: "Administrator",
+  manager: "Manager",
+  strategist: "Strategist",
+  staff: "Staff",
+  courier: "Courier",
+};
 
 export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -40,7 +63,7 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
           .select("role")
           .eq("id", session.user.id)
           .maybeSingle();
-        
+
         const role = staffData?.role || "staff";
         setUserRole(role);
 
@@ -52,10 +75,8 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
 
         if (perms) {
           const allowed = new Set<string>();
-          perms.forEach((p: any) => {
-            if (p.can_view) {
-              allowed.add(p.page);
-            }
+          perms.forEach((p: { page: string; can_view: boolean }) => {
+            if (p.can_view) allowed.add(p.page);
           });
           setAllowedPages(allowed);
         }
@@ -64,30 +85,71 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
     fetchRoleAndPerms();
   }, []);
 
-  /* ─── NAVIGATION ITEMS ─────────────────────────────────────────────────── */
-  const navItems = useMemo(() => [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", pageKey: "dashboard" },
-    { icon: ShoppingCart, label: "New Order", path: "/new-order", pageKey: "new-order" },
-    { icon: Package, label: "Orders", path: "/orders", pageKey: "orders", badge: countsKnown && counts.orders > 0 ? counts.orders : undefined },
-    { icon: Inbox, label: "Mobile Requests", path: "/mobile-requests", pageKey: "mobile-requests", badge: countsKnown && counts.mobileRequests > 0 ? counts.mobileRequests : undefined, badgeTitle: "waiting for Chapman to act" },
-    { icon: Sparkles, label: "Service Requests", path: "/service-requests", pageKey: "service-requests", badge: countsKnown && counts.serviceRequests > 0 ? counts.serviceRequests : undefined, badgeTitle: "need a date from Chapman" },
-    { icon: Lightbulb, label: "App Ideas", path: "/app-ideas", pageKey: "app-ideas", badge: countsKnown && counts.appIdeas > 0 ? counts.appIdeas : undefined, badgeTitle: "new ideas from customers" },
-    { icon: Smartphone, label: "App Accounts", path: "/app-accounts", pageKey: "app-accounts", badge: countsKnown && counts.appAccounts > 0 ? counts.appAccounts : undefined, badgeTitle: "customers using the app" },
-    { icon: Users, label: "Staff", path: "/staff", pageKey: "staff", badge: countsKnown && counts.staff > 0 ? counts.staff : undefined },
-    { icon: User, label: "Clients", path: "/clients", pageKey: "clients", badge: countsKnown && counts.clients > 0 ? counts.clients : undefined },
-    { icon: FileText, label: "Services", path: "/services", pageKey: "services" },
-    { icon: Printer, label: "Receipt", path: "/receipt", pageKey: "receipt" },
-    { icon: CreditCard, label: "Payments", path: "/payments", pageKey: "payments" },
-    { icon: BarChart3, label: "Reports", path: "/reports", pageKey: "reports" },
-    { icon: Shield, label: "Security", path: "/security", pageKey: "security" },
-    { icon: Settings, label: "Settings", path: "/settings", pageKey: "settings" },
-    { icon: Shield, label: "System Admin", path: "/system", pageKey: "system" },
-  ], [counts, countsKnown]);
+  /* ─── NAVIGATION ─────────────────────────────────────────────────────────
+     Grouped by the way the office actually talks about the work: what comes in
+     and gets processed (Work), who it belongs to (Customers), how the business
+     is run (Business) and how the console itself is governed (Administration).
+     The badge on an item is the number of records still waiting there. */
+  const sections = useMemo<NavSection[]>(() => {
+    const badge = (value: number) => (countsKnown && value > 0 ? value : undefined);
 
-  // Filter nav items based on database permissions
-  const filteredNavItems = useMemo(() => {
-    return navItems.filter(item => allowedPages.has(item.pageKey));
-  }, [navItems, allowedPages]);
+    return [
+      {
+        id: "work",
+        label: "Work",
+        items: [
+          { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", pageKey: "dashboard" },
+          { icon: ShoppingCart, label: "New Order", path: "/new-order", pageKey: "new-order" },
+          { icon: Package, label: "Orders", path: "/orders", pageKey: "orders", badge: badge(counts.orders), badgeTitle: "orders on record" },
+          { icon: Inbox, label: "Mobile Requests", path: "/mobile-requests", pageKey: "mobile-requests", badge: badge(counts.mobileRequests), badgeTitle: "waiting for Chapman to act" },
+          { icon: Sparkles, label: "Service Requests", path: "/service-requests", pageKey: "service-requests", badge: badge(counts.serviceRequests), badgeTitle: "need a date from Chapman" },
+          { icon: Lightbulb, label: "App Ideas", path: "/app-ideas", pageKey: "app-ideas", badge: badge(counts.appIdeas), badgeTitle: "new ideas from customers" },
+        ],
+      },
+      {
+        id: "customers",
+        label: "Customers",
+        items: [
+          { icon: User, label: "Clients", path: "/clients", pageKey: "clients", badge: badge(counts.clients), badgeTitle: "client records" },
+          { icon: Smartphone, label: "App Accounts", path: "/app-accounts", pageKey: "app-accounts", badge: badge(counts.appAccounts), badgeTitle: "customers using the app" },
+        ],
+      },
+      {
+        id: "business",
+        label: "Business",
+        items: [
+          { icon: FileText, label: "Services", path: "/services", pageKey: "services" },
+          { icon: Printer, label: "Receipts", path: "/receipt", pageKey: "receipt" },
+          { icon: CreditCard, label: "Payments", path: "/payments", pageKey: "payments" },
+          { icon: BarChart3, label: "Reports", path: "/reports", pageKey: "reports" },
+        ],
+      },
+      {
+        id: "admin",
+        label: "Administration",
+        items: [
+          { icon: Users, label: "Staff", path: "/staff", pageKey: "staff", badge: badge(counts.staff), badgeTitle: "staff records" },
+          { icon: Shield, label: "Security", path: "/security", pageKey: "security" },
+          { icon: Settings, label: "Settings", path: "/settings", pageKey: "settings" },
+          { icon: Shield, label: "System Admin", path: "/system", pageKey: "system" },
+        ],
+      },
+    ];
+  }, [counts, countsKnown]);
+
+  /* A role with no explicit grant still needs the pages it obviously owns, so
+     the menu is never empty for a signed-in staff member. */
+  const visibleSections = useMemo(() => {
+    if (allowedPages.size === 0) return sections;
+    return sections
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) => allowedPages.has(item.pageKey)),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [sections, allowedPages]);
+
+  const visibleCount = visibleSections.reduce((total, section) => total + section.items.length, 0);
 
   /* ─── LOGOUT ───────────────────────────────────────────────────────────── */
   const handleLogout = async () => {
@@ -95,49 +157,80 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
     window.location.href = "/login";
   };
 
+  const collapsed = isCollapsed && !isMobile;
+
   return (
-    <aside className={`sidebar ${isCollapsed ? "collapsed" : "expanded"} ${isMobile ? "mobile" : ""} ${isOpen ? "open" : ""}`}>
-<div className="sidebar-header" style={{ justifyContent: (isCollapsed && !isMobile) ? 'center' : 'space-between' }}>
-  {(!isCollapsed || isMobile) && <div className="logo-text">Chapman Prestige</div>}
-  
-  {!isMobile && (
-    <button
-      className="collapse-btn sidebar-toggle-desktop"
-      onClick={() => setIsCollapsed(!isCollapsed)}
-      aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-      style={{ margin: (isCollapsed && !isMobile) ? '0' : undefined }} // Reset margin if centered
+    <aside
+      className={[
+        "sidebar",
+        collapsed ? "collapsed" : "expanded",
+        isMobile ? "mobile" : "",
+        isOpen ? "open" : "",
+      ].join(" ")}
     >
-      {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-    </button>
-  )}
-  {isMobile && (
-    <button
-      className="mobile-close-btn sidebar-toggle-mobile"
-      onClick={onToggle}
-      aria-label="Close sidebar"
-    >
-      <X size={18} />
-    </button>
-  )}
-</div>
-      <nav className="sidebar-nav">
-        {filteredNavItems.map((item) => (
-          <NavItem
-            key={item.path}
-            {...item}
-            isCollapsed={isCollapsed && !isMobile}
-            onClick={() => {
-              if (isMobile && onToggle) onToggle();
-            }}
-          />
+      <div className="sidebar-header">
+        <div className="brand">
+          <span className="brand__mark" aria-hidden="true">CP</span>
+          {!collapsed && (
+            <span className="brand__text">
+              <strong>Chapman Prestige</strong>
+              <small>Operations console</small>
+            </span>
+          )}
+        </div>
+
+        {!isMobile && (
+          <button
+            className="sidebar-icon-btn sidebar-toggle-desktop"
+            onClick={() => setIsCollapsed((prev) => !prev)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+        )}
+
+        {isMobile && (
+          <button
+            className="sidebar-icon-btn sidebar-toggle-mobile"
+            onClick={onToggle}
+            aria-label="Close navigation"
+          >
+            <X size={17} />
+          </button>
+        )}
+      </div>
+
+      <nav className="sidebar-nav" aria-label="Main navigation">
+        {visibleSections.map((section) => (
+          <div className="nav-section" key={section.id}>
+            <span className="nav-section__label">{collapsed ? "·" : section.label}</span>
+            {section.items.map((item) => (
+              <NavItem
+                key={item.path}
+                {...item}
+                isCollapsed={collapsed}
+                onClick={() => {
+                  if (isMobile && onToggle) onToggle();
+                }}
+              />
+            ))}
+          </div>
         ))}
+
+        {visibleCount === 0 && (
+          <p className="sidebar-note">
+            Your role has no pages assigned yet. Ask an administrator to grant access.
+          </p>
+        )}
       </nav>
 
       <div className="sidebar-footer">
         <WorkspaceSwitcher />
-        <button className="logout-btn" onClick={handleLogout}>
+        {!collapsed && <span className="sidebar-role">{ROLE_LABEL[userRole] ?? userRole}</span>}
+        <button className="logout-btn" onClick={handleLogout} title="Sign out">
           <LogOut size={16} />
-          {(!isCollapsed || isMobile) && <span>Sign Out</span>}
+          {!collapsed && <span>Sign out</span>}
         </button>
       </div>
     </aside>

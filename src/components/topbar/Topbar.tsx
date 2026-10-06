@@ -218,11 +218,11 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
           />
 
           <button
-            className="btn-primary"
+            className="btn btn--primary topbar-action"
             onClick={() => navigate("/new-order")}
             aria-label="Create new order"
           >
-            <Plus size={18} aria-hidden="true" />
+            <Plus size={17} aria-hidden="true" />
             <span className="btn-text">New Order</span>
           </button>
         </div>
