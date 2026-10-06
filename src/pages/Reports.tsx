@@ -178,7 +178,7 @@ export const Reports = () => {
 
   if (permLoading || loading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: T.textTert, fontFamily: FONT, background: T.bgBase }}>
+      <div className="rp-status" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: T.textTert, fontFamily: FONT, background: T.bgBase }}>
         <RefreshCw size={20} style={{ marginRight: 12, animation: "spin 1s linear infinite" }} /> Loading reports...
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -187,7 +187,7 @@ export const Reports = () => {
 
   if (!canView) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: T.textTert, fontFamily: FONT, background: T.bgBase }}>
+      <div className="rp-status" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: T.textTert, fontFamily: FONT, background: T.bgBase }}>
         <AlertCircle size={20} style={{ marginRight: 12 }} /> Access denied.
       </div>
     );
@@ -195,8 +195,22 @@ export const Reports = () => {
 
   return (
     <PermissionGuard>
-      <div style={{ padding: "28px 32px", maxWidth: 1600, margin: "0 auto", fontFamily: FONT, color: T.textPrimary, minHeight: "100vh", background: T.bgBase }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
+      <style>{`
+        .rp-page { padding: var(--page-pad-y) var(--page-pad-x) var(--page-pad-bottom); min-height: 100%; }
+        .rp-status { min-height: 60vh; }
+
+        @media (max-width: 900px) {
+          /* Two fixed columns cannot fit a phone: the charts stack. */
+          .rp-split, .rp-half { grid-template-columns: minmax(0, 1fr) !important; }
+        }
+
+        @media (max-width: 480px) {
+          .rp-page { padding: var(--page-pad-y) var(--page-pad-x) var(--page-pad-bottom); }
+          .rp-head { margin-bottom: 18px !important; }
+        }
+      `}</style>
+      <div className="rp-page" style={{ maxWidth: 1600, margin: "0 auto", fontFamily: FONT, color: T.textPrimary, background: T.bgBase }}>
+        <div className="rp-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
           <div>
             <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", margin: 0 }}>Business Intelligence</h2>
             <p style={{ fontSize: 13, color: T.textTert, marginTop: 4 }}>Comprehensive overview of revenue, expenses, growth, and clientele.</p>
@@ -222,7 +236,7 @@ export const Reports = () => {
         {data && (
           <>
             {/* KPI GRID */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, marginBottom: 28 }}>
+            <div className="rp-kpis" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: 16, marginBottom: 28 }}>
               <KPICard title="Total Revenue" value={`₵${data.totalRevenue.toLocaleString()}`} icon={<DollarSign size={18} />} color={T.emerald} growth={data.revenueGrowth} />
               <KPICard title="Net Profit" value={`₵${data.netProfit.toLocaleString()}`} icon={<Target size={18} />} color={T.accent} sub={`Expenses: ₵${data.totalExpenses.toLocaleString()}`} />
               <KPICard title="Total Orders" value={data.totalOrders.toLocaleString()} icon={<Package size={18} />} color={T.gold} sub={`AOV: ₵${data.totalOrders > 0 ? Math.round(data.totalRevenue / data.totalOrders) : 0}`} />
@@ -231,7 +245,7 @@ export const Reports = () => {
             </div>
 
             {/* CHARTS ROW 1 */}
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div className="rp-split" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 }}>
               <div className="report-card">
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Revenue vs Expenses (Daily)</h3>
                 <ResponsiveContainer width="100%" height={320}>
@@ -262,7 +276,7 @@ export const Reports = () => {
             </div>
 
             {/* CHARTS ROW 2 */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div className="rp-half" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
               <div className="report-card">
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Service Revenue Mix</h3>
                 <ResponsiveContainer width="100%" height={280}>

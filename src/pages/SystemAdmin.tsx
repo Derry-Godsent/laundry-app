@@ -324,6 +324,9 @@ export const SystemAdmin = () => {
           .modal-input:focus { border-color: ${T.accentBord}; }
           .perm-check { width: 18px; height: 18px; cursor: pointer; accent-color: ${T.emerald}; }
           @media (max-width: 768px) {
+            /* The card layout below needs the table floor gone; before this the
+               inline 1100px minimum forced a sideways scroll on every phone. */
+            :root { --sys-table-min: 0px; }
             .sys-table thead { display: none; }
             .sys-row { display: block; padding: 16px; border-bottom: 1px solid ${T.borderSoft}; }
             .sys-row td { display: block; padding: 6px 0 6px 40%; border: none; text-align: left; position: relative; font-size: 13px; }
@@ -410,7 +413,7 @@ export const SystemAdmin = () => {
                 <p style={{ margin: "4px 0 0", fontSize: 12, color: T.textTert }}>Toggle access for each role. Changes apply instantly across the entire system.</p>
               </div>
               <div style={{ overflowX: "auto" }}>
-                <table className="sys-table" style={{ minWidth: "1100px" }}>
+                <table className="sys-table" style={{ minWidth: "var(--sys-table-min, 1100px)" }}>
                   <thead>
                     <tr>
                       <th style={{ width: "150px" }}>Role</th>

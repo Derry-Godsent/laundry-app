@@ -547,7 +547,10 @@ export const Staff = () => {
         @keyframes sfShine { 0% { transform: translateX(-120%);} 100% { transform: translateX(220%);} }
         @keyframes sfAurora { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(3%,-2%) scale(1.05);} }
 
-        .sf { background: var(--sf-bg-base); min-height: 100vh; font-family: var(--sf-font); color: var(--sf-text-primary); padding: 28px 32px 60px; position: relative; }
+        /* Fills the shell frame: the shell owns the page scroll, .sf-tbl-wrap owns the
+   table scroll. min-height:100vh inside the shell is what forced the whole page
+   taller than the screen. */
+.sf { background: var(--sf-bg-base); min-height: 100%; font-family: var(--sf-font); color: var(--sf-text-primary); padding: 24px var(--page-pad-x) 48px; position: relative; }
 
         .sf-offline { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
           background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); border-radius: 10px;
@@ -758,6 +761,12 @@ export const Staff = () => {
           .sf-top { align-items: flex-start; }
           .sp-grid, .sm-row { grid-template-columns: 1fr; }
           .sf-panel { width: 100%; }
+        }
+
+        @media (max-width: 700px) {
+          /* The card mode below needs the table floor removed. */
+          .sf-tbl { min-width: 0; }
+          .sf { padding: 18px var(--page-pad-x) 40px; }
         }
 
         @media (max-width: 480px) {

@@ -534,7 +534,7 @@ export const OrderBuilder = () => {
               )}
             </div>
 
-            <div className="ob-panel" style={{ overflow: "hidden", flex: 1, padding: 0 }}>
+            <div className="ob-panel ob-panel--cart" style={{ flex: 1, padding: 0 }}>
               <div className="ob-cart-header">
                 <Receipt size={16} color="#34d399" /> Cart ({cart.length} items)
               </div>
@@ -544,7 +544,7 @@ export const OrderBuilder = () => {
                   <div>No items added yet</div>
                 </div>
               ) : (
-                <div style={{ overflowX: "auto" }}>
+                <div className="ob-cart-scroll">
                   <table className="ob-cart-table">
                     <thead>
                       <tr>
@@ -559,8 +559,8 @@ export const OrderBuilder = () => {
                     <tbody>
                       {cart.map((item, idx) => (
                         <tr key={`${item.serviceId}-${item.treatment}`}>
-                          <td style={{ fontWeight: 500 }}>{item.name}</td>
-                          <td>
+                          <td data-label="Item" style={{ fontWeight: 500 }}>{item.name}</td>
+                          <td data-label="Treatment">
                             <select
                               value={item.treatment}
                               onChange={(e) => updateTreatment(idx, e.target.value)}
@@ -574,7 +574,7 @@ export const OrderBuilder = () => {
                               <option>Hang</option>
                             </select>
                           </td>
-                          <td>
+                          <td data-label="Qty">
                             <div className="ob-cart-qty">
                               <button
                                 className="ob-qty-btn"
@@ -597,7 +597,7 @@ export const OrderBuilder = () => {
                               </button>
                             </div>
                           </td>
-                          <td className="ob-cart-price">
+                          <td data-label="Price" className="ob-cart-price">
                             {!useCurrentPricing || item.useCustomPrice ? (
                               <input
                                 type="number"
@@ -611,7 +611,7 @@ export const OrderBuilder = () => {
                               `₵${item.unitPrice}`
                             )}
                           </td>
-                          <td className="ob-cart-total">₵{item.total}</td>
+                          <td data-label="Total" className="ob-cart-total">₵{item.total}</td>
                           <td style={{ textAlign: "center" }}>
                             <button
                               className="ob-cart-remove"

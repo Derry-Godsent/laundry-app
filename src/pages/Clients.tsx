@@ -24,7 +24,9 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
 
 .cl-shell *{box-sizing:border-box;margin:0;padding:0}
-.cl-shell{display:flex;flex-direction:column;height:100vh;background:#07090e;color:#edf0f8;font-family:'Outfit',system-ui,sans-serif;overflow:hidden}
+/* Fills the shell frame: .main-body owns the page scroll, .cl-tbl-wrap owns the
+   list scroll. Never 100vh inside the shell; that is what cut the list off. */
+.cl-shell{display:flex;flex-direction:column;height:100%;min-height:0;background:#07090e;color:#edf0f8;font-family:'Outfit',system-ui,sans-serif;overflow:hidden}
 
 .cl-top{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 0;flex-shrink:0;animation:clDown .4s cubic-bezier(.4,0,.2,1) both}
 .cl-h2{font-size:22px;font-weight:700;color:#edf0f8;letter-spacing:-.4px;margin-bottom:4px}
@@ -199,14 +201,25 @@ const CSS = `
   .cl-ra { min-width: 44px; min-height: 44px; width: 44px; height: 44px; }
 }
 
+@media(max-width:700px){
+  /* The card layout is a block list now, so the 780px table floor must go. */
+  .cl-tbl { min-width: 0 !important; }
+  /* Two compact tiles instead of four tall ones: the list needs the height. */
+  .cl-kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; padding: 12px 16px 0; }
+  .cl-kpi { padding: 12px 13px; border-radius: 13px; }
+  .cl-kpi-ico { width: 28px; height: 28px; margin-bottom: 8px; }
+  .cl-kpi-val { font-size: 20px; }
+  .cl-kpi-bar { display: none; }
+}
+
 @media(max-width:480px){
   .cl-top{padding:12px 16px 0}
   .cl-filters{padding:10px 16px; flex-direction: column; align-items: stretch !important; gap: 10px !important;}
   .cl-srch{max-width:100% !important; width:100% !important;}
   .tier-pills{justify-content: center; flex-wrap: wrap;}
-  .cl-kpi-row{grid-template-columns:1fr !important;}
   .cl-m-inp, .cl-m-sel { font-size: 16px !important; }
-  button, [role="button"] { min-height: 44px !important; }
+  /* Scoped to this page: a page-local stylesheet must not restyle the console. */
+  .cl-shell button, .cl-shell [role="button"] { min-height: var(--tap-min); }
 }
 
 button:focus-visible{outline:2px solid #34d399;outline-offset:2px}
@@ -627,7 +640,7 @@ export const Clients = () => {
   const hasFilters = tierFilter !== "All" || typeFilter !== "All" || search;
 
   if (loading || permLoading) return (
-    <div className="cl-shell" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
+    <div className="cl-shell" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ color: "#3a4460", fontSize: 14, display: "flex", alignItems: "center" }}>
         <RefreshCw size={18} className="cl-spin" style={{ marginRight: 10 }} /> Loading clients...
       </div>

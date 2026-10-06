@@ -2,7 +2,8 @@
 
 .ob-root {
   background: #07090e;
-  min-height: 100vh;
+  /* Fills the shell frame; .main-body owns the page scroll. */
+  min-height: 100%;
   font-family: 'DM Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: #edf0f8;
 }
@@ -625,19 +626,56 @@ input[type="date"]::-moz-calendar-picker-indicator {
     padding: 16px;
   }
 
-  .ob-cart-table {
+  /* The cart was a sideways-scrolling table with nowrap cells: on a phone the
+     treatment, qty and price columns simply left the screen. It becomes one
+     labelled block per item instead, the same shape the list screens use. */
+  .ob-cart-scroll { overflow-x: visible; }
+
+  .ob-cart-table,
+  .ob-cart-table tbody,
+  .ob-cart-table tr,
+  .ob-cart-table td {
     display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    width: 100%;
   }
 
-  .ob-cart-table thead,
-  .ob-cart-table tbody,
-  .ob-cart-table th,
-  .ob-cart-table td,
+  .ob-cart-table thead { display: none; }
+
   .ob-cart-table tr {
-    white-space: nowrap;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
+
+  .ob-cart-table tr:last-child { border-bottom: none; }
+
+  .ob-cart-table td {
+    position: relative;
+    padding: 7px 0 7px 42%;
+    border: none;
+    white-space: normal;
+    text-align: right;
+  }
+
+  .ob-cart-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    top: 9px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #556070;
+  }
+
+  .ob-cart-table td[data-label="Treatment"] .ob-select,
+  .ob-cart-table td[data-label="Qty"] .ob-cart-qty { justify-content: flex-end; }
+
+  .ob-cart-table td[data-label="Treatment"] .ob-select { width: auto; max-width: 100%; }
+
+  /* Panels grow with their content on phones; clipping is what hid sections. */
+  .ob-panel { overflow: visible; }
+  .ob-service-list { max-height: 46vh; }
 
   .ob-input,
   .ob-select,
