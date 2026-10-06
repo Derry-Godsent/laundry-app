@@ -2,12 +2,66 @@
    ORDERS
    Layout is deliberately kept: the page owns the viewport, the title, filters
    and pagination stay put, only the rows scroll, and on phones each row becomes
-   a labelled card. The colours, controls and states now come from the shared
-   design system so it sits beside the dashboard and the request queue.
+   a labelled card. Colours and states come from the shared design system so it
+   sits beside the dashboard and the request queue; the toolbar controls keep the
+   compact shape this page was built with (auto-width filters with their own
+   caret, labelled refresh, icon-only view toggle), which is the look staff
+   already know.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Toolbar ────────────────────────────────────────────────────────────── */
-.ord-search { min-width: 200px; max-width: 300px; flex: 1 1 200px; }
+/* ── Toolbar ──────────────────────────────────────────────────────────────
+   Compact control row, the shape this page was built with: a search field with
+   its clear button and the "/" hint, small date inputs, auto-width filter
+   selects, then the refresh and view controls pushed to the right.         */
+.ord-srch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 200px;
+  min-width: 180px;
+  max-width: 300px;
+}
+
+.ord-srch__ico {
+  position: absolute;
+  left: var(--sp-3);
+  color: var(--text-4);
+  pointer-events: none;
+}
+
+.ord-srch__inp { padding-left: 34px; padding-right: 54px; }
+.ord-srch__inp::placeholder { color: var(--text-4); }
+
+.ord-srch__x {
+  position: absolute;
+  right: 30px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: none;
+  color: var(--text-4);
+  cursor: pointer;
+  border-radius: var(--r-xs);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.ord-srch__x:hover { color: var(--text-2); }
+
+.ord-srch__kbd {
+  position: absolute;
+  right: 10px;
+  padding: 1px 5px;
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-4);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.45;
+  pointer-events: none;
+}
 
 .ord-dates {
   display: flex;
@@ -17,12 +71,117 @@
 
 .ord-dates .input {
   width: auto;
-  min-height: 34px;
-  padding: 4px var(--sp-2);
+  min-height: 36px;
+  padding: 6px 11px;
   font-size: 12.5px;
 }
 
 .ord-dates__sep { font-size: 12px; color: var(--text-4); }
+
+/* Auto-width filter selects with their own caret, rather than the full-width
+   field style: three filters have to fit on one row. */
+.ord-fp-wrap { position: relative; display: inline-flex; }
+
+.ord-fp {
+  width: auto;
+  max-width: 190px;
+  min-height: 36px;
+  padding: 7px 30px 7px 12px;
+  font-size: 13px;
+  color: var(--text-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23737e96'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.ord-fp:hover { color: var(--text-1); border-color: var(--line); }
+.ord-fp option { background: var(--ink-raised); color: var(--text-1); }
+
+.ord-fp-clr {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid rgba(251, 125, 125, 0.24);
+  border-radius: var(--r-sm);
+  background: var(--bad-soft);
+  color: var(--bad-500);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+
+.ord-fp-clr:hover {
+  background: rgba(251, 125, 125, 0.2);
+  border-color: rgba(251, 125, 125, 0.36);
+}
+
+/* Quiet labelled button, used for Refresh Data and Print Range. */
+.ord-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+.ord-ghost:hover {
+  background: var(--ink-hover);
+  border-color: var(--line);
+  color: var(--text-1);
+}
+
+.ord-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Icon-only list / pipeline switch, pinned to the right end of the toolbar. */
+.ord-vt {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  padding: 3px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: var(--ink-raised);
+}
+
+.ord-vt__b {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-4);
+  cursor: pointer;
+  transition: color var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out);
+}
+
+.ord-vt__b:hover { color: var(--text-2); }
+
+.ord-vt__b.is-active {
+  background: var(--brand-soft);
+  color: var(--brand-400);
+}
 
 .ord-spacer { flex: 1 1 auto; min-width: var(--sp-2); }
 
@@ -42,6 +201,17 @@
 
 .ord-bulk strong { color: var(--text-1); font-weight: 650; }
 
+/* The bulk bar keeps the compact, small-radius button shape this page was built
+   with, one step tighter than the shared button so the bar stays slim. */
+.ord-bulk .btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.ord-bulk .btn--icon { width: 30px; padding: 0; }
+
 /* ── Table cells ────────────────────────────────────────────────────────── */
 .ord-table { min-width: 1060px; }
 .ord-table tbody tr { cursor: pointer; }
@@ -52,6 +222,7 @@
   font-size: 12.5px;
   font-weight: 500;
   color: var(--brand-400);
+  letter-spacing: -0.1px;
 }
 
 .ord-cust {
@@ -130,13 +301,14 @@
 .ord-pag__right .select {
   width: auto;
   min-height: 32px;
-  padding: 4px var(--sp-2);
-  font-size: 12.5px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--text-2);
 }
 
 .ord-page-num {
-  min-width: 32px;
-  height: 32px;
+  min-width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
   border-radius: var(--r-xs);
@@ -525,7 +697,8 @@
 @media (max-width: 640px) {
   .ord-pag { padding: var(--sp-3) var(--sp-4); }
   .ord-bulk { padding: 10px var(--sp-4); }
-  .ord-search { max-width: 100%; flex: 1 1 100%; }
+  .ord-srch { max-width: 100%; flex: 1 1 100%; }
+  .ord-srch__kbd { display: none; }
   .ord-dates { width: 100%; }
   .ord-dates .input { flex: 1; min-width: 0; }
   .ord-actions { opacity: 1; }

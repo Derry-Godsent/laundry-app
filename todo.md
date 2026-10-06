@@ -30,6 +30,8 @@ Full notes, rules and the resume instructions live in `docs/staff-console-redesi
       the `.table-page` frame, `@/components/ui` controls, the `--stage-*` ramp and `Orders.css` for
       the order-specific pieces. Pinned title/filters/pagination, one scrolling list and card-style
       rows on phones all survive. Data logic untouched. The rejected rebuild stays at 22f31ed.
+      The toolbar controls keep their original compact look (auto-width selects with their own caret,
+      labelled Refresh Data, icon-only list/pipeline switch) because that is what staff recognise.
       Also: `npm run check:copy` now fails on any em dash in the repo, and `/preview` section 3 shows
       the order book frame with sample orders.
 - [ ] Phase 6, Clients and Staff registers (KPI rows, tables, modals).

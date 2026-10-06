@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronLeft, ChevronRight, ClipboardList,
-  Clock, DollarSign, Inbox, LayoutDashboard, Package, Plus, RefreshCw, Search, Shield,
+  Clock, DollarSign, Inbox, LayoutDashboard, LayoutGrid, List, Package, Plus, RefreshCw, Search, Shield,
   Settings, Smartphone, Sparkles, Users, X,
 } from "lucide-react";
 import {
@@ -431,26 +431,41 @@ export const DesignPreview = () => {
           </div>
 
           <div className="table-page__tools">
-            <div className="search-input ord-search">
-              <Search size={14} />
+            <div className="ord-srch">
+              <Search size={13} className="ord-srch__ico" />
               <input
-                className="input"
+                className="input ord-srch__inp"
                 placeholder="Search name or order ID…"
                 value={ordQuery}
                 onChange={(e) => setOrdQuery(e.target.value)}
                 aria-label="Search orders"
               />
+              <kbd className="ord-srch__kbd">/</kbd>
             </div>
-            <select className="select" value={ordStage} onChange={(e) => setOrdStage(e.target.value)} aria-label="Filter by stage">
-              <option value="all">All stages</option>
-              {Object.entries(PREVIEW_STAGE).map(([key, stage]) => (
-                <option key={key} value={key}>{stage.label}</option>
-              ))}
-            </select>
-            <span className="ord-spacer" />
-            <div className="segmented" role="group" aria-label="Order view">
-              <button type="button" className="segmented__item is-active" aria-pressed="true">List</button>
-              <button type="button" className="segmented__item" aria-pressed="false">Pipeline</button>
+            <span className="ord-fp-wrap">
+              <select className="select ord-fp" value={ordStage} onChange={(e) => setOrdStage(e.target.value)} aria-label="Filter by stage">
+                <option value="all">All Statuses</option>
+                {Object.entries(PREVIEW_STAGE).map(([key, stage]) => (
+                  <option key={key} value={key}>{stage.label}</option>
+                ))}
+              </select>
+            </span>
+            <span className="ord-fp-wrap">
+              <select className="select ord-fp" aria-label="Filter by service">
+                <option value="all">All Services</option>
+              </select>
+            </span>
+            <span className="ord-fp-wrap">
+              <select className="select ord-fp" aria-label="Filter by payment">
+                <option value="all">All Payments</option>
+              </select>
+            </span>
+            <button type="button" className="ord-ghost">
+              <RefreshCw size={15} /> Refresh Data
+            </button>
+            <div className="ord-vt" role="group" aria-label="Order view">
+              <button type="button" className="ord-vt__b is-active" aria-pressed="true" title="List view"><List size={14} /></button>
+              <button type="button" className="ord-vt__b" aria-pressed="false" title="Pipeline view"><LayoutGrid size={14} /></button>
             </div>
           </div>
 

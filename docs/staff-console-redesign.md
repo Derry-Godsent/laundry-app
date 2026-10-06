@@ -85,10 +85,14 @@ TypeScript wrappers (import from `@/components/ui`):
   changed is the styling: the frame is now the shared `.table-page`, the controls are
   `PageHeader` / `Button` / `StatusPill` / `EmptyState` / `Avatar`, stage colours come from the
   `--stage-*` ramp, and everything page-specific lives in `Orders.css` under `.ord-*`.
+  The toolbar controls also keep the compact shape this page was built with: the filter selects are
+  auto-width with their own caret rather than full-width fields, the search field carries a clear
+  button and the "/" hint, Refresh Data and Print Range are labelled quiet buttons, and the list and
+  pipeline switch is icon-only. That control row is what staff recognise, so it stays.
 - `src/pages/MobileRequests.tsx` + `MobileRequests.css`: the intake queue rebuilt: view control with live counts, request cards that state the client's chosen date / item count / estimate, a detail column (preferred vs proposed date, pickup point, items, customer and staff notes) and a decision panel that is the only place a record changes state. Data logic, realtime channel and update payloads are unchanged.
 
 **New**
-- `src/pages/DesignPreview.tsx` + `DesignPreview.css` at `/preview`: a credential-free walkthrough of the redesign rendered from **sample records only**, plus a gallery of the components. Section 3 shows the order book frame with six sample orders. It touches no Supabase table. Delete it (and its route) once the redesign is signed off.
+- `src/pages/DesignPreview.tsx` + `DesignPreview.css` at `/preview`: a credential-free walkthrough of the redesign rendered from **sample records only**, plus a gallery of the components. Section 3 shows the order book frame with six sample orders and the same toolbar controls. It touches no Supabase table. Delete it (and its route) once the redesign is signed off.
 - `scripts/check-copy.mjs` (`npm run check:copy`): fails the build if an em dash (U+2014) appears anywhere in the repo. See the copy rules below.
 - `src/styles/legacy-bridge.css`: keeps the screens that still use inline-style layouts usable on phones.
 
@@ -164,9 +168,15 @@ was what made it work on a phone, so the layout is exactly what was preserved:
 - list and pipeline views, the drawer, the bulk-action bar, print mode and the
   CSV export all behave as before.
 
+A review note came back after the restyle and is worth recording: the *controls* were the part
+staff had learned, so the filter selects, the labelled Refresh Data button and the icon-only view
+switch keep their original compact shape while their colours come from the tokens. Everything else
+follows the shared vocabulary.
+
 What changed is presentation only: the frame is now the shared `.table-page`
 (the same one this document prescribes for every table screen), the controls are
-`PageHeader` / `Button` / `StatusPill` / `EmptyState` / `Avatar`, stage colours
+`PageHeader` / `StatusPill` / `EmptyState` / `Avatar`, with the compact
+`.ord-ghost`, `.ord-fp` and `.ord-vt` controls for the toolbar; stage colours
 come from the `--stage-*` ramp in `tokens.css`, and the `.ord-*` rules in
 `Orders.css` cover just the order-specific pieces. Queries, mutations, realtime,
 permission checks and routes are untouched.

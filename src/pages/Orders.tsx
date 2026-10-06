@@ -626,20 +626,31 @@ export const Orders = () => {
 
       {/* ── Filters: stay pinned while the rows scroll ───────────────────── */}
       <div className="table-page__tools">
-        <div className="search-input ord-search">
-          <Search size={14} />
+        <div className="ord-srch">
+          <Search size={13} className="ord-srch__ico" />
           <input
             ref={searchRef}
-            className="input"
+            className="input ord-srch__inp"
             placeholder="Search name or order ID…"
             value={q}
             onChange={(e) => { setQ(e.target.value); setPg(1); }}
             aria-label="Search orders"
           />
+          {q ? (
+            <button
+              type="button"
+              className="ord-srch__x"
+              onClick={() => { setQ(""); setPg(1); }}
+              aria-label="Clear search"
+            >
+              <X size={11} />
+            </button>
+          ) : null}
+          <kbd className="ord-srch__kbd">/</kbd>
         </div>
 
         <div className="ord-dates">
-          <Calendar size={14} style={{ color: "var(--text-4)" }} />
+          <Calendar size={13} style={{ color: "var(--text-4)" }} />
           <input
             className="input"
             type="date"
@@ -659,64 +670,79 @@ export const Orders = () => {
           />
         </div>
 
-        <select className="select" value={sf} onChange={(e) => { setSf(e.target.value); setPg(1); }} aria-label="Filter by stage">
-          <option value="all">All stages</option>
-          {STAGES.map((s) => (
-            <option key={s.key} value={s.key}>{s.label}</option>
-          ))}
-        </select>
+        <span className="ord-fp-wrap">
+          <select className="select ord-fp" value={sf} onChange={(e) => { setSf(e.target.value); setPg(1); }} aria-label="Filter by status">
+            <option value="all">All Statuses</option>
+            {STAGES.map((s) => (
+              <option key={s.key} value={s.key}>{s.label}</option>
+            ))}
+          </select>
+        </span>
 
-        <select className="select" value={svf} onChange={(e) => { setSvf(e.target.value); setPg(1); }} aria-label="Filter by service">
-          <option value="all">All services</option>
-          {SERVICES.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
+        <span className="ord-fp-wrap">
+          <select className="select ord-fp" value={svf} onChange={(e) => { setSvf(e.target.value); setPg(1); }} aria-label="Filter by service">
+            <option value="all">All Services</option>
+            {SERVICES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </span>
 
-        <select className="select" value={pf} onChange={(e) => { setPf(e.target.value); setPg(1); }} aria-label="Filter by payment">
-          <option value="all">All payments</option>
-          <option value="paid">Paid</option>
-          <option value="pending">Pending</option>
-          <option value="partial">Partial</option>
-        </select>
-
-        {startDate && endDate ? (
-          <Button
-            variant="secondary"
-            size="sm"
-            leadingIcon={<Printer size={14} />}
-            onClick={() => { setBulkOrders([]); setPrintMode(false); void fetchBulkOrders(); }}
-          >
-            Print range
-          </Button>
-        ) : null}
+        <span className="ord-fp-wrap">
+          <select className="select ord-fp" value={pf} onChange={(e) => { setPf(e.target.value); setPg(1); }} aria-label="Filter by payment">
+            <option value="all">All Payments</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+            <option value="partial">Partial</option>
+          </select>
+        </span>
 
         {hasFilters ? (
-          <Button variant="ghost" size="sm" leadingIcon={<X size={14} />} onClick={clearFilters}>
-            Clear
-          </Button>
+          <button type="button" className="ord-fp-clr" onClick={clearFilters}>
+            <X size={11} /> Clear
+          </button>
         ) : null}
 
-        <span className="ord-spacer" />
-
-        <div className="segmented" role="group" aria-label="Order view">
+        {startDate && endDate ? (
           <button
             type="button"
-            className={`segmented__item ${view === "list" ? "is-active" : ""}`}
+            className="ord-ghost"
+            onClick={() => { setBulkOrders([]); setPrintMode(false); void fetchBulkOrders(); }}
+          >
+            <Printer size={13} /> Print Range
+          </button>
+        ) : null}
+
+        <button
+          type="button"
+          className="ord-ghost"
+          onClick={async () => {
+            await fetchFromSupabase();
+            setBulkOrders([]);
+            setToast({ msg: "Data refreshed", type: "success" });
+          }}
+        >
+          <RefreshCw size={15} className={loading ? "spin" : ""} /> Refresh Data
+        </button>
+
+        <div className="ord-vt" role="group" aria-label="Order view">
+          <button
+            type="button"
+            className={`ord-vt__b ${view === "list" ? "is-active" : ""}`}
             aria-pressed={view === "list"}
             onClick={() => setView("list")}
             title="List view"
           >
-            <List size={14} /> List
+            <List size={14} />
           </button>
           <button
             type="button"
-            className={`segmented__item ${view === "pipeline" ? "is-active" : ""}`}
+            className={`ord-vt__b ${view === "pipeline" ? "is-active" : ""}`}
             aria-pressed={view === "pipeline"}
             onClick={() => setView("pipeline")}
             title="Pipeline view"
           >
-            <LayoutGrid size={14} /> Pipeline
+            <LayoutGrid size={14} />
           </button>
         </div>
       </div>
