@@ -10,8 +10,9 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-4);
-  height: var(--topbar-h);
-  padding: 0 var(--sp-6);
+  /* The bar itself plus the notch inset above it. */
+  height: calc(var(--topbar-h) + var(--safe-top));
+  padding: var(--safe-top) var(--page-pad-x) 0;
   background: rgba(8, 11, 18, 0.82);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
@@ -159,6 +160,13 @@
   .command-key { display: none; }
   .btn-text { display: none; }
   .topbar-action { width: 38px; padding: 0; }
+}
+
+@media (max-width: 768px) {
+  .topbar { gap: var(--sp-2); }
+  .topbar-left { gap: var(--sp-2); }
+  .topbar-right { gap: var(--sp-2); }
+  .breadcrumbs { font-size: 13px; }
 }
 
 @media (max-width: 480px) {

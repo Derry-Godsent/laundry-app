@@ -74,7 +74,11 @@ export default function MainLayout() {
         isMobile={isMobile}
       />
 
-      <div className="main-content">
+      <div
+        className="main-content"
+        aria-hidden={isMobile && sidebarOpen ? true : undefined}
+        {...(isMobile && sidebarOpen ? { inert: "" } : {})}
+      >
         <Topbar
           onMenuClick={() => setSidebarOpen(true)}
           isMobile={isMobile}
@@ -98,6 +102,8 @@ export default function MainLayout() {
         <div
           className={`sidebar-overlay ${sidebarOpen ? "active" : ""}`}
           onClick={() => setSidebarOpen(false)}
+          role="presentation"
+          aria-hidden="true"
         />
       )}
     </div>

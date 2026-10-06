@@ -8,6 +8,8 @@
   height: 100vh;
   height: 100dvh;
   flex-shrink: 0;
+  /* Notched phones in standalone mode: the brand block clears the inset. */
+  padding-top: var(--safe-top);
   background: linear-gradient(180deg, var(--ink-shell), #06080e 85%);
   border-right: 1px solid var(--line-faint);
   overflow: hidden;

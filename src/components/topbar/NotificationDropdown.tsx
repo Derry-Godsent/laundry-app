@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Bell, Check, X, CheckCircle, Info, AlertTriangle, AlertCircle } from "lucide-react";
 
 const CSS = `
@@ -44,8 +45,11 @@ const CSS = `
 
 /* Panel */
 .nd-panel {
-  position: absolute; top: calc(100% + 10px); right: 0;
-  width: 340px;
+  /* Positioned from the bell's measured rect, in the element's own custom
+     properties, so it can never be anchored off the side of a small screen.
+     --nd-x is the distance from the viewport's right edge. */
+  position: fixed; top: var(--nd-top, 84px); right: var(--nd-x, 24px);
+  width: 340px; max-width: calc(100vw - 24px);
   background: #0f1320;
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 16px;
@@ -194,6 +198,22 @@ const CSS = `
   }
 }
 
+/* ── Phones: the panel becomes a sheet under the top bar ───────────────── */
+@media (max-width: 640px) {
+  .nd-panel {
+    top: calc(var(--safe-top, 0px) + var(--topbar-h, 56px) + 8px);
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - var(--safe-top, 0px) - var(--topbar-h, 56px) - 24px);
+  }
+
+  .nd-list { max-height: none; }
+
+  .nd-item { padding: 12px 14px; }
+}
+
 /* ── Console alignment ───────────────────────────────────────────────────
    Alerts sit in the topbar next to the account menu, so they use the same
    surface, line and text tokens as the rest of the console. */
@@ -274,11 +294,42 @@ export const NotificationDropdown = ({
   pulseBadge = false,
 }: NotificationDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  /* The topbar has a backdrop-filter, which makes it a containing block for
+     anything position: fixed inside it. The panel is therefore rendered in a
+     portal on <body>, and it reads its position from the bell's own rect. */
+  const measure = useCallback(() => {
+    const trigger = ref.current?.querySelector(".nd-bell");
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    setAnchor({
+      top: rect.bottom + 10,
+      right: Math.max(12, window.innerWidth - rect.right),
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    measure();
+
+    const handle = () => measure();
+    window.addEventListener("resize", handle);
+    window.addEventListener("scroll", handle, true);
+    return () => {
+      window.removeEventListener("resize", handle);
+      window.removeEventListener("scroll", handle, true);
+    };
+  }, [isOpen, measure]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+      const target = e.target as Node;
+      if (ref.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      setIsOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -328,8 +379,17 @@ export const NotificationDropdown = ({
         )}
       </button>
 
-      {isOpen && (
-        <div className="nd-panel" role="dialog" aria-label="Notifications">
+      {isOpen && createPortal(
+        <div
+          ref={panelRef}
+          className="nd-panel"
+          role="dialog"
+          aria-label="Notifications"
+          style={{
+            ["--nd-top" as string]: `${anchor?.top ?? 84}px`,
+            ["--nd-x" as string]: `${anchor?.right ?? 24}px`,
+          }}
+        >
 
           {/* Header */}
           <div className="nd-head">
@@ -396,7 +456,8 @@ export const NotificationDropdown = ({
               </button>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

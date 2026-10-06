@@ -122,6 +122,47 @@
   --sidebar-w-rail: 76px;
   --topbar-h: 68px;
   --content-max: 1520px;
+
+  /* ── Responsive frame ─────────────────────────────────────────────────────
+     One place for the numbers every page and the shell share. Breakpoints are
+     documented, not tokenised (media queries cannot read custom properties):
+       320px  smallest supported phone
+       360px  small Android phone
+       390px  common modern phone
+       430px  larger phone
+       768px  tablet portrait
+       1024px desktop layout
+
+     Page padding shrinks once, here, so a page never invents its own.  */
+  --page-pad-x: var(--sp-7);
+  --page-pad-y: var(--sp-7);
+  --page-pad-bottom: var(--sp-9);
+
+  /* Minimum comfortable touch target. */
+  --tap-min: 44px;
+
+  /* Device insets. Zero on every device without a notch, so these are safe to
+     use unconditionally. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/* Phones: tighter page padding, smaller top bar. */
+@media (max-width: 768px) {
+  :root {
+    --page-pad-x: var(--sp-4);
+    --page-pad-y: var(--sp-5);
+    --page-pad-bottom: calc(var(--sp-7) + var(--safe-bottom));
+    --topbar-h: 56px;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    --page-pad-x: 14px;
+  }
 }
 
 /* Reduced motion: shorten, never remove the meaning of a transition. */

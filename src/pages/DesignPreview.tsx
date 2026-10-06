@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronLeft, ChevronRight, ClipboardList,
@@ -80,6 +81,72 @@ const PREVIEW_PAY: Record<string, { label: string; tone: PillTone }> = {
   paid: { label: "Paid", tone: "ok" },
   pending: { label: "Pending", tone: "gold" },
   partial: { label: "Partial", tone: "bad" },
+};
+
+/* ───────────────────────────────────────────────────────────────────────────
+   WIDTH PROBE
+   Phone layouts cannot be judged in a wide desktop window: the app's breakpoints
+   are media queries, so they only fire when the *viewport* is narrow. This
+   renders the sample below inside an iframe of a chosen width and copies the
+   console stylesheets into it, so the real 320/360/390/430 layouts are what you
+   are looking at, not a zoomed-out imitation.
+   ─────────────────────────────────────────────────────────────────────────── */
+const PROBE_WIDTHS = [320, 360, 390, 430, 768];
+
+const WidthProbe = ({ children }: { children: ReactNode }) => {
+  const [width, setWidth] = useState(390);
+  const [frame, setFrame] = useState<HTMLIFrameElement | null>(null);
+  const [body, setBody] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!frame) return;
+    const doc = frame.contentDocument;
+    if (!doc) return;
+
+    /* Copy every stylesheet the console is using: in dev Vite injects <style>
+       tags, in a build it emits <link> tags, so both are carried over. */
+    doc.head.innerHTML = "";
+    document
+      .querySelectorAll('style, link[rel="stylesheet"]')
+      .forEach((node) => doc.head.appendChild(node.cloneNode(true)));
+
+    doc.documentElement.style.setProperty("color-scheme", "dark");
+    doc.body.style.margin = "0";
+    doc.body.style.background = "var(--ink-base)";
+    setBody(doc.body);
+  }, [frame]);
+
+  return (
+    <div className="probe">
+      <div className="probe__bar">
+        <span className="probe__label">Check a width</span>
+        {PROBE_WIDTHS.map((value) => (
+          <button
+            key={value}
+            type="button"
+            className={`probe__btn ${width === value ? "is-active" : ""}`}
+            onClick={() => setWidth(value)}
+            aria-pressed={width === value}
+          >
+            {value}px
+          </button>
+        ))}
+        <span className="probe__hint">
+          The real page at that viewport width: phone breakpoints fire inside the frame.
+        </span>
+      </div>
+
+      <iframe
+        ref={setFrame}
+        title={`App preview at ${width}px wide`}
+        className="probe__frame"
+        style={{ width, maxWidth: "100%" }}
+        srcDoc="<!doctype html><html><head></head><body></body></html>"
+      />
+
+      {body ? createPortal(children, body) : null}
+    </div>
+  );
 };
 
 const PILL_TONES: PillTone[] = ["neutral", "brand", "gold", "ok", "warn", "bad", "info", "violet"];
@@ -415,8 +482,9 @@ export const DesignPreview = () => {
           each record becomes a labelled card, so no column is ever hidden behind a sideways scroll.
         </p>
 
-        <div className="table-page preview-table">
-          <div className="table-page__head">
+        <WidthProbe>
+          <div className="table-page preview-table">
+            <div className="table-page__head">
             <PageHeader
               eyebrow={<><Package size={13} /> Order book</>}
               title="Orders"
@@ -542,7 +610,8 @@ export const DesignPreview = () => {
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        </WidthProbe>
       </section>
 
       {/* ── Components ────────────────────────────────────────────────── */}

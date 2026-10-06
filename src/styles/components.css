@@ -7,17 +7,20 @@
    PAGE SCAFFOLD
    ─────────────────────────────────────────────────────────────────────────── */
 
+/* Archetype 1: document flow. The shell (.main-body) owns the scrollbar; the
+   page only supplies padding and a width cap. Never give a .page its own
+   100vh and never give it overflow. */
 .page {
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
-  padding: var(--sp-7) var(--sp-7) var(--sp-9);
+  padding: var(--page-pad-y) var(--page-pad-x) var(--page-pad-bottom);
   animation: fadeUp var(--dur-slow) var(--ease-out) both;
 }
 
-@media (max-width: 900px) {
-  .page { padding: var(--sp-5) var(--sp-4) var(--sp-9); }
-}
+/* A document-flow page that starts with a header uses this so the header can
+   sit above the padding when a page needs it flush. */
+.page--flush { padding-top: 0; }
 
 .page-header {
   display: flex;
@@ -579,7 +582,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .table-page__head {
   flex-shrink: 0;
-  padding: var(--sp-6) var(--sp-6) var(--sp-4);
+  padding: var(--page-pad-y) var(--page-pad-x) var(--sp-4);
 }
 
 .table-page__head .page-header { margin-bottom: 0; }
@@ -590,7 +593,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   align-items: center;
   gap: var(--sp-2);
   flex-wrap: wrap;
-  padding: 0 var(--sp-6) var(--sp-4);
+  padding: 0 var(--page-pad-x) var(--sp-4);
   border-bottom: 1px solid var(--line-faint);
 }
 
@@ -631,8 +634,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 /* ── Phones: rows become labelled cards ─────────────────────────────────── */
 @media (max-width: 640px) {
-  .table-page__head { padding: var(--sp-5) var(--sp-4) var(--sp-3); }
-  .table-page__tools { padding: 0 var(--sp-4) var(--sp-3); }
+  .table-page__head { padding: var(--page-pad-y) var(--page-pad-x) var(--sp-3); }
+  .table-page__tools { padding: 0 var(--page-pad-x) var(--sp-3); }
 
   .table-page .data-table { min-width: 0; }
   .table-page .data-table thead { display: none; }

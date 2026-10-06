@@ -4,6 +4,8 @@
 
 .layout-container {
   display: flex;
+  /* dvh tracks the mobile browser's retracting toolbar; vh stays as the
+     fallback for browsers that do not know dvh. */
   height: 100vh;
   height: 100dvh;
   background: var(--ink-base);
@@ -11,6 +13,9 @@
   font-family: var(--font-ui);
   position: relative;
   overflow: hidden;
+  /* Device insets: zero everywhere except notched phones in standalone mode. */
+  padding-right: var(--safe-right);
+  padding-left: var(--safe-left);
 }
 
 /* Ambient light behind the workspace: two soft, slow-drifting blooms that
@@ -60,6 +65,8 @@
   z-index: 1;
 }
 
+/* The one and only scroll area for document-flow pages. Pages that own the
+   viewport (the .table-page frame) opt out by filling this box instead. */
 .main-body {
   flex: 1;
   min-height: 0;
@@ -68,6 +75,16 @@
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+/* The route wrapper is exactly as tall as the frame so that a viewport-filling
+   page (.table-page) can resolve height: 100% and pin its own header. A
+   document-flow page simply grows past this box and .main-body scrolls it. */
+.main-body > .route-transition {
+  min-height: 0;
+  height: 100%;
 }
 
 /* Route transition that replays on pathname change, no JS required. */
@@ -96,6 +113,8 @@
     inset: 0 auto 0 0;
     width: 284px;
     max-width: 86vw;
+    height: 100vh;
+    height: 100dvh;
     transform: translateX(-100%);
     transition: transform var(--dur-slow) var(--ease-out);
     z-index: 60;
@@ -123,6 +142,13 @@
 .sidebar-overlay.active {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Phones: the two ambient blooms are a fixed 560px and 620px of blurred paint.
+   On a small screen they cost frames and add nothing, so they go. */
+@media (max-width: 768px) {
+  .layout-container::before,
+  .layout-container::after { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
