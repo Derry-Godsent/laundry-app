@@ -551,6 +551,33 @@ written `minmax(0, …)`, cards carry `min-width: 0`, and each chart sits in a
 `.rp-chart` box that clips, so nothing a chart draws can reach the card's edge
 between a resize and the next measurement.
 
+**The sign-in screen shows the business before it asks for a password.**
+
+The company runs seven services and the console runs all of them, so the screen
+names them: Laundry, Cleaning, Fumigation, Car detailing, Carpet washing, Sofa
+and upholstery, Polytank washing. Each is a tile in the console's own tile
+language, carrying the hue that service has on the Services page, so a service
+reads as the same thing wherever a member of staff meets it.
+
+Layout, from the design of the console rather than of a marketing site:
+
+- two columns from 1024px, with the sign-in card held in view while the services
+  scroll past it; one column below that, services first, card underneath
+- a jump link above the services on phones, so somebody arriving only to sign in
+  reaches the fields in one tap rather than scrolling past the list
+- the live connection state sits in the header, before sign-in, because whether
+  the system is up is the first thing staff need to know
+- the only motion is the spinner while credentials are checked
+
+Adding a service is one entry in `SERVICES` in `src/pages/Login.tsx`. The list is
+static on purpose: the services table is behind a policy that needs a session,
+and this screen runs before there is one.
+
+Photographs can replace the icons on those tiles. Put named files in
+`public/services/` (`laundry.jpg`, `carpet-washing.jpg`, and so on, matching each
+slug) and set `SERVICE_PHOTOS` to true in the same file. Until then the tiles
+carry their icon, and no request is made for a file that is not there.
+
 **The sign-in screen is a door, not a lobby.**
 
 It used to be a two-column landing page: a brand panel with a headline, three

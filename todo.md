@@ -217,6 +217,15 @@ the five-screen correctness pass and the definition of done live in
   - [ ] Waiting on the user: the real logo file. Drop it at
         `public/brand/logo.png` and run `npm i -D sharp && node
         scripts/make-brand-assets.mjs`.
+- [x] The sign-in page, rebuilt as a whole page: the seven services as tiles
+      (Laundry, Cleaning, Fumigation, Car detailing, Carpet washing, Sofa and
+      upholstery, Polytank washing), each carrying the hue it has on the Services
+      page, above the sign-in card. Two columns from 1024px with the card held in
+      view, one column on a phone with a jump link to the fields, and the live
+      connection state in the header. Photographs can replace the tile icons:
+      `public/services/<slug>.jpg` plus `SERVICE_PHOTOS = true` in Login.tsx.
+  - [ ] Waiting on the user: the real logo at `public/brand/logo.png`, and
+        (optional) service photographs at `public/services/<slug>.jpg`.
 - [ ] Next, in order:
   - [ ] Type, on the scale. The palette rule is met everywhere now; with the
         guard's pending list emptied it reports 624 font-size declarations and 34
