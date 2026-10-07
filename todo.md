@@ -56,9 +56,7 @@ the five-screen correctness pass and the definition of done live in
       carry `data-label`). New Order: `ActionBar` pins `Create Order` with the amount due on
       phones. Clients: the phone list is document flow, so the single scroller is `.main-body`.
       Verified with `tsc -b`, `vite build`, `check:copy` and a 25-point structural check.
-- [ ] Phase D, the rest: Dashboard, App Ideas, App Accounts, Staff, Services,
-      Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile.
-      Landed in slices, one commit each:
+- [x] Phase D, the rest (landed in slices, one commit each):
   - [x] D1, Staff + System Admin + Reports, plus a 320px overflow on the Dashboard
         loading skeleton. Staff: cards start where the table floor is released, panes sized
         to the visual viewport, shared `LoadingRows`, 16px fields, thumb-height controls.
@@ -79,7 +77,22 @@ the five-screen correctness pass and the definition of done live in
         and size their dialogs to the visible area as bottom sheets. Payments' ten-column
         table is now labelled cards (it was a sideways scroll to reach the receipt button).
         Receipt's phone layer is `@media screen` only, so the print stylesheet is untouched.
-  - [ ] D4, Security, Settings, Login, Help, Profile, then the `legacy-bridge` cleanup.
+  - [x] D4, Security, Settings, Login, Help, Profile, then the `legacy-bridge` cleanup.
+        Security: both 640px tables become labelled cards at 900px (roles and audit), fields
+        16px, tabs and buttons thumb height, toast clears the hidden strip. Settings: the
+        inline `overflowY: auto` body wrapper is gone and the CSS's already-written body hook
+        is actually used, the four `1fr 1fr` grids stack, loyalty rows wrap, fields 16px, toast
+        clears the hidden strip. Login: heights follow the visible viewport, 16px fields from
+        900px down (they used to start at 480px, so the first screen a phone opens zoomed on
+        focus) and it handles its own safe-area inset. Help and Profile: screen-only phone
+        layers with shared padding, thumb-height FAQ rows and a stacking pair. The bridge
+        `src/styles/legacy-bridge.css` is deleted: its two platform rules moved to `base.css`
+        PLATFORM GUARDS (16px field floor, legacy wide-table scrollers) and the CSS no longer
+        contains any attribute substring selector.
+- [x] Phase D, the rest: Dashboard, App Ideas, App Accounts, Staff, Services,
+      Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile.
+      All fourteen screens have had their mobile pass. Verified with `tsc -b`, `vite build`,
+      `check:copy` and a 30-point structural check across the ten D4 files.
 - [ ] Phase E, overall appearance: palette, type, surfaces, border contrast, spacing,
       button hierarchy, status colours, icons, states, motion, wording. Refine the dark
       operational style rather than replacing it.

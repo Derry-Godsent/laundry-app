@@ -94,7 +94,7 @@ TypeScript wrappers (import from `@/components/ui`):
 **New**
 - `src/pages/DesignPreview.tsx` + `DesignPreview.css` at `/preview`: a credential-free walkthrough of the redesign rendered from **sample records only**, plus a gallery of the components. Section 3 shows the order book frame with six sample orders and the same toolbar controls. It touches no Supabase table. Delete it (and its route) once the redesign is signed off.
 - `scripts/check-copy.mjs` (`npm run check:copy`): fails the build if an em dash (U+2014) appears anywhere in the repo. See the copy rules below.
-- `src/styles/legacy-bridge.css`: keeps the screens that still use inline-style layouts usable on phones.
+- `src/styles/base.css` PLATFORM GUARDS: the two rules that are requirements of the mobile browsers rather than styling, moved here from the deleted legacy bridge: the 16px field floor (`input, select, textarea`, so iOS cannot zoom on focus) and the named sideways scrollers for wide legacy tables (`.tbl-wrap`, `.sf-tbl-wrap`, `.table-wrapper`).
 
 ---
 
@@ -239,7 +239,9 @@ A page picks exactly one, and the shell owns the scrollbar:
 
 A page must not declare its own `100vh`/`100dvh`, and must not open a second
 scroll container unless it is a named, deliberate case (for example the pipeline
-board scrolling sideways). The legacy bridge keeps shrinking as pages migrate.
+board scrolling sideways, or the permissions matrix, which is a roles-by-pages
+grid). The legacy bridge that used to widen inline grids is deleted: every
+screen sets its own layout from the tokens at its own breakpoint.
 
 ### Decision log
 
@@ -341,7 +343,7 @@ the management screens first, then the tools, then the rarely opened ones.
 | D1 | Staff, System Admin, Reports, Dashboard overflow | The last of the five screens that were broken rather than unpolished, plus a 320px overflow on the Dashboard loading skeleton (fixed pixel widths, now percentages with caps). |
 | D2 | Dashboard, App Ideas, App Accounts | Phone polish on the pages that already compose from the shared system. |
 | D3 | Services, Payments, Receipt | Legacy token-object pages: frames, floors, side-by-side grids, dialogs. |
-| D4 | Security, Settings, Login, Help, Profile | The remaining legacy pages, then the `legacy-bridge` cleanup. |
+| D4 | Security, Settings, Login, Help, Profile | The remaining legacy pages, then the `legacy-bridge` cleanup (done). |
 
 What D1 changed, and the bugs found while doing it:
 
@@ -374,6 +376,30 @@ tables and dialogs were written for a desk.
 | Services | Loading and page were `100vh` inside the frame; gutters were hardcoded 32px; the modal was a centred box wider than a phone | Page fills the frame; the shared `LoadingRows`; gutters use the page tokens; four count cells stay two per row; the modal is a bottom sheet sized to the visible area with its form grids stacked; fields reach 16px; buttons reach thumb height; the toast clears the hidden strip |
 | Payments | A ten-column table with a 680px floor, which on a phone was a sideways scroll through nine columns to reach the receipt button; the record-payment dialog was centred at 85vh; four stat tiles squeezed into one column | Each row is a labelled card (`data-label` on all ten cells), the floor and the head are gone at 900px; the dialog is a bottom sheet sized to the visible area with its rows stacked; tiles two per row; fields 16px; every button thumb height |
 | Receipt | `100vh` in two states; the order selector kept `minWidth: 260`; small fields; a toast below the visible area when zoomed | Fills the frame; phone layer is `@media screen` only, so the print stylesheet is untouched; the selector goes full width at 16px; buttons thumb height; the toast clears the hidden strip |
+
+D4 closed phase D with the four rarely opened pages, and then deleted the
+bridge that had been carrying them.
+
+| Screen | What was wrong | What changed |
+| --- | --- | --- |
+| Security | `100vh` in the loading state and the page; two 640px tables with no release, so the roles and audit lists were sideways scrolls; the phone media block started at 860px but did nothing about the floor | Fills the frame; both tables become labelled cards at 900px (`data-label` on all nine cells, head hidden, the empty state stays a centred message); fields 16px; buttons and tabs thumb height; the toast clears the hidden strip. The permissions matrix keeps its named sideways scroller, as it is a roles-by-pages grid. |
+| Settings | `100vh` in both states; four `1fr 1fr` grids; an inline `overflowY: auto` body wrapper, which can only ever be a second scroller inside `.main-body`; several classes referenced by the CSS that no longer exist in the JSX | Fills the frame; grids stack; the body wrapper loses the inline overflow and gains the real `cs-body` hook that the CSS was already styling; fields 16px; the loyalty rows wrap instead of squeezing their inputs; the toast clears the hidden strip |
+| Login | Two `100vh` heights; 16px fields only arrived at 480px, so the first screen a phone opens zoomed on focus; no home-indicator inset | Heights follow the visible viewport with a `dvh` fallback; 16px fields from 900px down; buttons thumb height; the page handles its own safe-area inset because it sits outside the shell |
+| Help | Padding and gutters were inline, the FAQ rows were under the tap floor, and the contact grid could put an address on a squeezed line | Screen-only phone layer: shared page padding, thumb-height FAQ rows, the contact rows stack and wrap |
+| Profile | Two cards side by side by inline style, with inline padding | Screen-only phone layer: shared page padding, the pair stacks, fields 16px, buttons thumb height |
+
+**The `legacy-bridge` cleanup.** `src/styles/legacy-bridge.css` existed only to
+rescue screens that still laid themselves out with inline styles: attribute
+substring selectors (`[style*="padding: 32px"]`, `[style*="grid-template-columns:
+repeat(4"]`) that collapse inline grids, widen fixed widths and raise type on
+small screens. Every screen it rescued is now migrated and carries its own
+class-based phone layer, so the file is deleted. The two rules in it that were
+platform requirements rather than styling moved to `base.css` under PLATFORM
+GUARDS: the 16px field floor (`input, select, textarea`) and the legacy wide
+table scrollers (`.tbl-wrap`, `.sf-tbl-wrap`, `.table-wrapper`), plus hiding the
+webview scrollbar under 768px. Attribute substring selectors are now absent from
+the stylesheet, so a page cannot accidentally inherit styling from the exact
+byte sequence of its inline style any more.
 
 **Copy rules (repo-wide).** No em dashes. `npm run check:copy` fails on U+2014
 anywhere in the repo; use a full stop, a colon, a comma or a middot separator

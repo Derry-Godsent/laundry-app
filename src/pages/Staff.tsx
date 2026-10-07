@@ -758,6 +758,9 @@ export const Staff = () => {
         /* Phones and small tablets. Every pane is sized to the visible area, so
            a zoomed page or an open keyboard cannot push a button off screen. */
         @media (max-width: 900px) {
+          /* A "/" keyboard hint means nothing on a touch screen and it took a
+             third of the search field's width. */
+          .sf-kbd { display: none; }
           .sf-srch-inp, .sfp, .sm-inp, .sm-sel { font-size: 16px; }
 
           .sf-ov, .sf-modal-ov {

@@ -209,3 +209,40 @@ textarea,
     transition-duration: 1ms !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PLATFORM GUARDS
+   ───────────────────────────────────────────────────────────────────────────
+   These are requirements of the mobile browsers, not styling: they hold for
+   every screen, migrated or not, so they live in the base layer. The last of
+   the rescued screens (phase D) is migrated, so the transitional bridge that
+   used to sit alongside them is gone.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  /* Wide legacy tables scroll inside their own box rather than pushing the
+     page sideways. A deliberate, named scroller. */
+  .tbl-wrap,
+  .sf-tbl-wrap,
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 768px) {
+  /* iOS zooms the page in when a field under 16px receives focus and leaves it
+     zoomed, which moves the controls the staff member was reaching for. This
+     is the floor for every field; pages set it on their own classes too. */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* A phone shows its own scroll indicators. */
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}

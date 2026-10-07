@@ -18,11 +18,26 @@ const faqs = [
   { q: "Who do I contact for system errors?", a: "Please reach out to the System Administrator via the contact details below or use the internal support channel." },
 ];
 
+/* Phone: the shared page padding, thumb-height FAQ rows and contact rows that
+   wrap instead of squeezing an address onto one line. */
+const HELP_CSS = `
+  @media screen and (max-width: 900px) {
+    .hp-page { padding: 18px var(--page-pad-x) 40px !important; }
+    .hp-faq-btn { min-height: var(--tap-min); padding: 16px var(--page-pad-x) !important; }
+    .hp-faq-body { padding: 0 var(--page-pad-x) 16px !important; }
+    .hp-contact { grid-template-columns: minmax(0, 1fr) !important; gap: 12px !important; }
+    .hp-contact-row { align-items: flex-start !important; }
+    .hp-contact-row svg { flex: 0 0 auto; margin-top: 2px; }
+  }
+`;
+
 export const Help = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <div style={{ padding: "32px", maxWidth: 800, margin: "0 auto", fontFamily: FONT, color: T.textPrimary }}>
+    <>
+      <style>{HELP_CSS}</style>
+      <div className="hp-page" style={{ padding: "32px", maxWidth: 800, margin: "0 auto", fontFamily: FONT, color: T.textPrimary }}>
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24, letterSpacing: "-0.03em" }}>Help & Support</h2>
 
       {/* Contact Card */}
@@ -30,14 +45,14 @@ export const Help = () => {
         <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
           <MessageCircle size={16} color={T.accent} /> Contact Support
         </h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
+        <div className="hp-contact" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+          <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
             <Mail size={16} color={T.accent} /> chapmanprestigeltd1@gmail.com
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
+          <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
             <Phone size={16} color={T.emerald} /> +233 534 134 809
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
+          <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
             <MapPin size={16} color="#dba96a" /> Kwadaso-Ohwimase, Kumasi
           </div>
         </div>
@@ -49,6 +64,7 @@ export const Help = () => {
         {faqs.map((faq, index) => (
           <div key={index} style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 10, overflow: "hidden" }}>
             <button
+              className="hp-faq-btn"
               onClick={() => setOpenFaq(openFaq === index ? null : index)}
               style={{
                 width: "100%", padding: "16px 20px", background: "transparent", border: "none",
@@ -61,14 +77,15 @@ export const Help = () => {
               {openFaq === index ? <ChevronUp size={16} color={T.textTert} /> : <ChevronDown size={16} color={T.textTert} />}
             </button>
             {openFaq === index && (
-              <div style={{ padding: "0 20px 16px", color: T.textSec, fontSize: 13.5, lineHeight: 1.6, fontFamily: FONT }}>
+              <div className="hp-faq-body" style={{ padding: "0 20px 16px", color: T.textSec, fontSize: 13.5, lineHeight: 1.6, fontFamily: FONT }}>
                 {faq.a}
               </div>
             )}
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

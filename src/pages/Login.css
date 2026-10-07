@@ -3,6 +3,9 @@
 
 .login-root {
   min-height: 100vh;
+  /* The visual viewport height, so the screen stays the size of what the staff
+     member can actually see while the page is zoomed or the keyboard is up. */
+  min-height: var(--vv-h, 100dvh);
   display: flex;
   flex-direction: column;
   font-family: 'DM Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -426,6 +429,7 @@
 .login-session {
   background: #05070b;
   min-height: 100vh;
+  min-height: var(--vv-h, 100dvh);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -573,9 +577,20 @@
   }
 }
 
+/* 16px fields from 900px down, not 480px: iOS zooms the page in whenever a
+   field under 16px is focused, at any width, and this is the first screen
+   staff touch on a phone. */
+@media (max-width: 900px) {
+  /* The sign-in screen is outside the shell, so it handles the home indicator
+     itself. */
+  .login-root { padding-bottom: var(--safe-bottom); }
+  .login-input { font-size: 16px; }
+  .login-submit, .login-forgot, .login-alt button { min-height: var(--tap-min); }
+}
+
 @media (max-width: 480px) {
   .login-brand-panel {
-    padding: 32px 20px 24px;
+    padding: 32px 16px 24px;
   }
 
   .login-headline {
@@ -583,11 +598,7 @@
   }
 
   .login-card {
-    padding: 32px 20px;
-  }
-
-  .login-input {
-    font-size: 16px;
+    padding: 32px 16px;
   }
 
   .login-submit {

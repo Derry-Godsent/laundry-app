@@ -27,7 +27,7 @@ const MONO = "'DM Mono', 'Fira Mono', ui-monospace, monospace";
 function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error"; onClose: () => void }) {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
   return (
-    <div style={{ 
+    <div className="cs-toast" style={{ 
       position: "fixed", bottom: 24, right: 24, zIndex: 10000, 
       background: type === "success" ? T.emeraldDim : T.dangerDim, 
       border: `1px solid ${type === "success" ? T.emeraldBord : T.dangerBord}`, 
@@ -226,7 +226,7 @@ export const Settings = () => {
   ];
 
   if (loading || permLoading) return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center", justifyContent: "center", height: "100vh", color: T.textTert, fontFamily: FONT, background: T.bgBase }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center", justifyContent: "center", minHeight: "60%", padding: "var(--page-pad-y) var(--page-pad-x)", color: T.textTert, fontFamily: FONT, background: T.bgBase }}>
       <div className="cs-spinner" />
       <div style={{ fontSize: 13, letterSpacing: "0.04em" }}>Loading settings…</div>
       <style>{`
@@ -237,7 +237,7 @@ export const Settings = () => {
   );
 
   return (
-    <div className="cs-root" style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary, position: "relative" }}>
+    <div className="cs-root" style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT, color: T.textPrimary, position: "relative" }}>
       <style>{`
         @keyframes csFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes csSpin { to { transform: rotate(360deg); } }
@@ -284,17 +284,39 @@ export const Settings = () => {
         .cs-retrybtn:active { transform: scale(0.96); }
         .cs-retry-spin { animation: csSpin 0.8s linear infinite; }
 
-        @media (max-width: 720px) {
-          .cs-grid-2 { grid-template-columns: 1fr !important; }
-          .cs-header-inner { flex-direction: column; align-items: flex-start !important; gap: 12px; }
-          .cs-tabs { overflow-x: auto; }
+        @media (max-width: 900px) {
+          .cs-grid-2 { grid-template-columns: minmax(0, 1fr) !important; }
+          .cs-header-inner { padding: 18px var(--page-pad-x) !important; flex-wrap: wrap; gap: 12px; }
+          .cs-tabs { padding: 0 var(--page-pad-x) !important; overflow-x: auto; scrollbar-width: none; }
+          .cs-tabs::-webkit-scrollbar { display: none; }
+          .cs-tabbtn { padding: 12px 14px !important; min-height: var(--tap-min); }
+          .cs-body { padding: 18px var(--page-pad-x) 40px !important; }
+
+          /* 16px keeps iOS from zooming the page in on focus and leaving it
+             zoomed, which moves everything the staff member was reading.
+             The page renders most of its controls inline styled, so this
+             covers the classed fields and any field inside a settings card. */
+          .cs-input, .cs-panel input, .cs-panel select, .cs-panel textarea { font-size: 16px !important; }
+          .cs-input { min-height: var(--tap-min); }
+          .cs-retrybtn, .cs-iconbtn { min-height: var(--tap-min); }
+          .cs-card button { min-height: var(--tap-min); }
+
+          /* The loyalty rows were label and control side by side: on a phone a
+             long label squashed its input. They wrap, and the control keeps a
+             usable width. */
+          .cs-loyalty-row { flex-wrap: wrap; gap: 10px !important; }
+          .cs-loyalty-row input { flex: 1 1 120px; min-width: 0; }
+
+          .cs-toast {
+            bottom: calc(var(--vv-bottom, 0px) + 16px) !important;
+            left: var(--page-pad-x) !important;
+            right: var(--page-pad-x) !important;
+            max-width: none !important;
+          }
         }
+
         @media (max-width: 480px) {
-          .cs-grid-2 { grid-template-columns: 1fr !important; }
-          .cs-tabs { padding: 0 16px !important; }
-          .cs-tabbtn { padding: 12px 14px !important; font-size: 12.5px !important; }
-          .cs-header-inner { padding: 16px !important; }
-          .cs-offline-banner { padding: 8px 16px !important; flex-direction: column; align-items: flex-start !important; gap: 8px; }
+          .cs-offline-banner { padding: 8px var(--page-pad-x) !important; flex-direction: column; align-items: flex-start !important; gap: 8px; }
           .cs-retrybtn { width: 100%; justify-content: center; }
         }
       `}</style>
@@ -369,7 +391,7 @@ export const Settings = () => {
       </div>
 
       <PermissionGuard>
-        <div style={{ padding: "32px", maxWidth: 900, margin: "0 auto", overflowY: "auto" }}>
+        <div className="cs-body" style={{ padding: "32px", maxWidth: 900, margin: "0 auto" }}>
 
           {activeTab === "profile" && (
             <div key="profile" className="cs-panel" style={{ display: "flex", flexDirection: "column", gap: 20 }}>

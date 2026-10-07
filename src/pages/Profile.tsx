@@ -59,7 +59,9 @@ export const Profile = () => {
   const roleColor = staff?.role === "admin" ? T.accent : staff?.role === "manager" ? "#22d3ee" : T.emerald;
 
   return (
-    <div style={{ padding: "32px", maxWidth: 800, margin: "0 auto", fontFamily: FONT, color: T.textPrimary }}>
+    <>
+    <style>{PHONE_CSS}</style>
+    <div className="pf-page" style={{ padding: "32px", maxWidth: 800, margin: "0 auto", fontFamily: FONT, color: T.textPrimary }}>
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24, letterSpacing: "-0.03em" }}>My Profile</h2>
 
       {message && (
@@ -74,7 +76,7 @@ export const Profile = () => {
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+      <div className="pf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
         {/* User Info Card */}
         <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, padding: 24 }}>
           <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
@@ -146,7 +148,18 @@ export const Profile = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
+
+/* Phone: the two cards stack, and the page uses the shared page padding. */
+const PHONE_CSS = `
+  @media screen and (max-width: 900px) {
+    .pf-page { padding: 18px var(--page-pad-x) 40px !important; }
+    .pf-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; }
+    .pf-page input, .pf-page select { font-size: 16px !important; min-height: var(--tap-min); }
+    .pf-page button { min-height: var(--tap-min); }
+  }
+`;
 
 export default Profile;

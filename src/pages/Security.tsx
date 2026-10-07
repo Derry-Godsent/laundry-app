@@ -108,12 +108,63 @@ const StyleSheet = () => (
     @media (prefers-reduced-motion: reduce) {
       .sec-root *, .sec-root *::before, .sec-root *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
     }
-    @media (max-width: 860px) {
-      .sec-header { padding: 16px 18px !important; flex-wrap: wrap; gap: 12px; }
-      .sec-tabs { padding: 0 12px !important; overflow-x: auto; }
-      .sec-content { padding: 18px !important; }
-      .sec-grid-2 { grid-template-columns: 1fr !important; }
+    @media (max-width: 900px) {
+      .sec-header { padding: 18px var(--page-pad-x) !important; }
+      .sec-tabs { padding: 0 var(--page-pad-x) !important; overflow-x: auto; scrollbar-width: none; }
+      .sec-tabs::-webkit-scrollbar { display: none; }
+      .sec-tab { min-height: var(--tap-min); }
+      .sec-content { padding: 18px var(--page-pad-x) 40px !important; }
+      .sec-grid-2 { grid-template-columns: minmax(0, 1fr) !important; }
+
+      /* 16px keeps iOS from zooming the page in on focus and leaving it zoomed. */
+      .sec-input { font-size: 16px !important; min-height: var(--tap-min); }
+      .sec-btn, .sec-btn-ghost, .sec-edit-btn { min-height: var(--tap-min); }
+
+      /* A 640px table cannot be read on a phone: each row becomes a labelled
+         card. The wrap stays as a deliberate sideways scroller for the
+         permissions matrix, which is a grid of roles by pages. */
       .sec-table-wrap { overflow-x: auto; }
+      .sec-table { min-width: 0 !important; }
+      .sec-table thead { display: none; }
+      /* The empty-state row has no label: it stays a centred message. */
+      .sec-table tbody tr:not(.sec-row) td { display: block; padding: 28px 0 !important; text-align: center; }
+      .sec-row {
+        display: block;
+        padding: 12px var(--page-pad-x);
+        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+      }
+      .sec-row td {
+        display: block;
+        padding: 6px 0 6px 42% !important;
+        border: none;
+        text-align: left;
+        position: relative;
+        font-size: 13.5px;
+      }
+      .sec-row td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        top: 8px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: ${T.textTert};
+      }
+      /* The permissions cell holds a wrapping chip list: give it the full row. */
+      .sec-row td[data-label="Permissions"] { padding-left: 0 !important; }
+      .sec-row td[data-label="Permissions"]::before { position: static; display: block; margin-bottom: 6px; }
+      .sec-row td[data-label="Actions"] { padding-left: 0 !important; }
+      .sec-row td[data-label="Actions"]::before { display: none; }
+      .sec-edit-btn { width: 100%; justify-content: center; margin-top: 6px; }
+
+      .sec-toast {
+        bottom: calc(var(--vv-bottom, 0px) + 16px) !important;
+        left: var(--page-pad-x) !important;
+        right: var(--page-pad-x) !important;
+        max-width: none !important;
+      }
     }
   `}</style>
 );
@@ -122,7 +173,7 @@ const StyleSheet = () => (
 const Toast = ({ msg, type, onClose }: { msg: string; type: 'success' | 'error'; onClose: () => void }) => {
   useEffect(() => { const t = setTimeout(onClose, 4000); return () => clearTimeout(t); }, [onClose]);
   return (
-    <div style={{ position:"fixed", bottom:24, right:24, zIndex:10000, background: type==='error' ? T.emberDim : T.emeraldDim, border:`1px solid ${type==='error' ? T.emberBord : T.emeraldBord}`, borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12, boxShadow:"0 14px 36px rgba(0,0,0,0.45)", animation: "secFadeUp 0.3s ease both" }}>
+    <div className="sec-toast" style={{ position:"fixed", bottom:24, right:24, zIndex:10000, background: type==='error' ? T.emberDim : T.emeraldDim, border:`1px solid ${type==='error' ? T.emberBord : T.emeraldBord}`, borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12, boxShadow:"0 14px 36px rgba(0,0,0,0.45)", animation: "secFadeUp 0.3s ease both" }}>
       {type==='error' ? <AlertTriangle size={15} color={T.ember}/> : <Check size={15} color={T.emerald}/>}
       <span style={{ fontSize:14, color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
       <button onClick={onClose} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><span style={{fontSize: 14}}>✕</span></button>
@@ -352,9 +403,9 @@ export const Security = () => {
   const statusGlow = isOnline ? T.emeraldGlow : T.emberGlow;
 
   if (loading || permLoading) return (
-    <div className="sec-root" style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT }}>
+    <div className="sec-root" style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT }}>
       <StyleSheet />
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh", gap: 14 }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60%", gap: 14, padding: "var(--page-pad-y) var(--page-pad-x)" }}>
         <div style={{ position: "relative", width: 44, height: 44 }}>
           <Shield size={44} color={T.accent} className="sec-spin" style={{ opacity: 0.85 }} />
         </div>
@@ -366,7 +417,7 @@ export const Security = () => {
   );
 
   return (
-    <div className="sec-root" style={{ background: `radial-gradient(1200px 600px at 15% -10%, rgba(108,114,243,0.07), transparent 60%), radial-gradient(900px 500px at 100% 0%, rgba(219,169,106,0.05), transparent 55%), ${T.bgBase}`, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary }}>
+    <div className="sec-root" style={{ background: `radial-gradient(1200px 600px at 15% -10%, rgba(108,114,243,0.07), transparent 60%), radial-gradient(900px 500px at 100% 0%, rgba(219,169,106,0.05), transparent 55%), ${T.bgBase}`, minHeight: "100%", fontFamily: FONT, color: T.textPrimary }}>
       <StyleSheet />
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
@@ -420,7 +471,7 @@ export const Security = () => {
           
           {activeTab === "roles" && (
             <div key="roles" className="sec-card sec-table-wrap" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, overflow: "hidden", boxShadow: "0 20px 40px rgba(0,0,0,0.25)" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 640 }}>
+              <table className="sec-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
                 <thead>
                   <tr style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderSoft}` }}>
                     {["Role", "Users", "Permissions", "Last Active", "Actions"].map(h => (
@@ -434,9 +485,9 @@ export const Security = () => {
                   ) : (
                     roles.map((role, i) => (
                       <tr key={role.id} className="sec-row" style={{ borderBottom: `1px solid ${T.borderFaint}`, animationDelay: `${i * 45}ms` }}>
-                        <td style={{ padding: "16px 20px", fontWeight: 600 }}>{role.name}</td>
-                        <td style={{ padding: "16px 20px", fontFamily: MONO }}>{role.users}</td>
-                        <td style={{ padding: "16px 20px" }}>
+                        <td data-label="Role" style={{ padding: "16px 20px", fontWeight: 600 }}>{role.name}</td>
+                        <td data-label="Users" style={{ padding: "16px 20px", fontFamily: MONO }}>{role.users}</td>
+                        <td data-label="Permissions" style={{ padding: "16px 20px" }}>
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                             {role.permissions.map(p => {
                               const label = PAGE_CONFIG.find(c => c.key === p)?.label || p;
@@ -444,8 +495,8 @@ export const Security = () => {
                             })}
                           </div>
                         </td>
-                        <td style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{role.lastActive}</td>
-                        <td style={{ padding: "16px 20px" }}>
+                        <td data-label="Last Active" style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{role.lastActive}</td>
+                        <td data-label="Actions" style={{ padding: "16px 20px" }}>
                           <button className="sec-edit-btn" onClick={(e) => {
                             e.stopPropagation();
                             setEditingRole(role);
@@ -490,7 +541,7 @@ export const Security = () => {
           {activeTab === "audit" && (
             <div key="audit" className="sec-card" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div className="sec-table-wrap" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, overflow: "hidden", boxShadow: "0 20px 40px rgba(0,0,0,0.25)" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 640 }}>
+                <table className="sec-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                   <thead>
                     <tr style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderSoft}` }}>
                       {["User", "Action", "Timestamp", "IP Address"].map(h => (
@@ -504,10 +555,10 @@ export const Security = () => {
                     ) : (
                       auditLog.map((log, i) => (
                         <tr key={log.id} className="sec-row" style={{ borderBottom: `1px solid ${T.borderFaint}`, animationDelay: `${Math.min(i, 12) * 35}ms` }}>
-                          <td style={{ padding: "16px 20px", fontWeight: 500 }}>{log.user}</td>
-                          <td style={{ padding: "16px 20px", color: T.textSec }}>{log.action}</td>
-                          <td style={{ padding: "16px 20px", fontFamily: MONO, fontSize: 12 }}>{log.time}</td>
-                          <td style={{ padding: "16px 20px", fontFamily: MONO, fontSize: 12, color: T.textTert }}>{log.ip}</td>
+                          <td data-label="User" style={{ padding: "16px 20px", fontWeight: 500 }}>{log.user}</td>
+                          <td data-label="Action" style={{ padding: "16px 20px", color: T.textSec }}>{log.action}</td>
+                          <td data-label="Time" style={{ padding: "16px 20px", fontFamily: MONO, fontSize: 12 }}>{log.time}</td>
+                          <td data-label="IP Address" style={{ padding: "16px 20px", fontFamily: MONO, fontSize: 12, color: T.textTert }}>{log.ip}</td>
                         </tr>
                       ))
                     )}

@@ -1,11 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    CHAPMAN PRESTIGE · STAFF CONSOLE
    Entry stylesheet. Order matters: tokens define the vocabulary, base resets
-   the document, components provide the primitives, and the legacy bridge keeps
-   screens that have not been migrated yet behaving on small phones.
+   the document and holds the platform guards, components provide the
+   primitives. Every screen is on the shared system as of phase D.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @import "./styles/tokens.css";
 @import "./styles/base.css";
 @import "./styles/components.css";
-@import "./styles/legacy-bridge.css";
