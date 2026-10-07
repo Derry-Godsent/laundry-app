@@ -12,6 +12,7 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
 import { PermissionGuard } from "../components/PermissionGuard";
+import { LoadingRows } from "../components/ui";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const T = {
@@ -178,9 +179,8 @@ export const Reports = () => {
 
   if (permLoading || loading) {
     return (
-      <div className="rp-status" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: T.textTert, fontFamily: FONT, background: T.bgBase }}>
-        <RefreshCw size={20} style={{ marginRight: 12, animation: "spin 1s linear infinite" }} /> Loading reports...
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ padding: "var(--page-pad-y) var(--page-pad-x)", fontFamily: FONT, background: T.bgBase }}>
+        <LoadingRows rows={4} label="Loading reports" />
       </div>
     );
   }
@@ -204,9 +204,23 @@ export const Reports = () => {
           .rp-split, .rp-half { grid-template-columns: minmax(0, 1fr) !important; }
         }
 
-        @media (max-width: 480px) {
-          .rp-page { padding: var(--page-pad-y) var(--page-pad-x) var(--page-pad-bottom); }
-          .rp-head { margin-bottom: 18px !important; }
+        @media (max-width: 640px) {
+          .rp-head { margin-bottom: 18px !important; flex-direction: column; align-items: stretch !important; }
+          /* Four range buttons do not fit 320px: they scroll sideways instead
+             of pushing the whole page sideways. */
+          .rp-range {
+            width: 100%;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            scrollbar-width: none;
+          }
+          .rp-range::-webkit-scrollbar { display: none; }
+          .rp-range button { flex: 0 0 auto; min-height: var(--tap-min); }
+
+          .rp-kpis { gap: 10px !important; margin-bottom: 18px !important; }
+          .report-card { padding: 15px; border-radius: var(--r-md); }
+          /* A 320px-tall chart on a 320px-wide phone is mostly empty space. */
+          .report-card .recharts-responsive-container { height: 220px !important; }
         }
       `}</style>
       <div className="rp-page" style={{ maxWidth: 1600, margin: "0 auto", fontFamily: FONT, color: T.textPrimary, background: T.bgBase }}>
@@ -215,7 +229,7 @@ export const Reports = () => {
             <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", margin: 0 }}>Business Intelligence</h2>
             <p style={{ fontSize: 13, color: T.textTert, marginTop: 4 }}>Comprehensive overview of revenue, expenses, growth, and clientele.</p>
           </div>
-          <div style={{ display: "flex", gap: 4, background: T.bgRaised, padding: 4, borderRadius: 10, border: `1px solid ${T.borderSoft}` }}>
+          <div className="rp-range" style={{ display: "flex", gap: 4, background: T.bgRaised, padding: 4, borderRadius: 10, border: `1px solid ${T.borderSoft}` }}>
             {(["7d", "30d", "month", "year"] as const).map((range) => (
               <button
                 key={range}

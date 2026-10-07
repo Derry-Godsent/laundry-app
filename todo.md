@@ -58,6 +58,18 @@ the five-screen correctness pass and the definition of done live in
       Verified with `tsc -b`, `vite build`, `check:copy` and a 25-point structural check.
 - [ ] Phase D, the rest: Dashboard, App Ideas, App Accounts, Staff, Services,
       Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile.
+      Landed in slices, one commit each:
+  - [x] D1, Staff + System Admin + Reports, plus a 320px overflow on the Dashboard
+        loading skeleton. Staff: cards start where the table floor is released, panes sized
+        to the visual viewport, shared `LoadingRows`, 16px fields, thumb-height controls.
+        System Admin: the `min-width: 760px` floor that scrolled the staff table and clipped
+        the logs table is released, the permissions matrix keeps its header as a named
+        sideways scroller, the Add Staff dialog becomes a bottom sheet, the tabs slide.
+        Reports: the range buttons were ~400px wide and pushed the page sideways at 320px;
+        they are a slide strip now, the header stacks and charts drop to 220px on a phone.
+  - [ ] D2, Dashboard, App Ideas, App Accounts.
+  - [ ] D3, Services, Payments, Receipt.
+  - [ ] D4, Security, Settings, Login, Help, Profile, then the `legacy-bridge` cleanup.
 - [ ] Phase E, overall appearance: palette, type, surfaces, border contrast, spacing,
       button hierarchy, status colours, icons, states, motion, wording. Refine the dark
       operational style rather than replacing it.

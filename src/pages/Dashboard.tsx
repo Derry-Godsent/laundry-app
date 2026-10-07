@@ -528,9 +528,10 @@ export const Dashboard = () => {
     return (
       <div className="page">
         <div className="dash-skeleton-head">
-          <div className="skeleton" style={{ width: 200, height: 14 }} />
-          <div className="skeleton" style={{ width: 280, height: 30, marginTop: 12 }} />
-          <div className="skeleton" style={{ width: 340, height: 12, marginTop: 12 }} />
+          {/* Percentages with a cap: fixed pixel widths overflowed 320px. */}
+          <div className="skeleton" style={{ width: "52%", maxWidth: 200, height: 14 }} />
+          <div className="skeleton" style={{ width: "72%", maxWidth: 280, height: 30, marginTop: 12 }} />
+          <div className="skeleton" style={{ width: "88%", maxWidth: 340, height: 12, marginTop: 12 }} />
         </div>
         <div className="stat-grid" style={{ marginBottom: "var(--sp-5)" }}>
           {[0, 1, 2, 3].map((i) => <div key={i} className="skeleton" style={{ height: 148, borderRadius: "var(--r-lg)" }} />)}

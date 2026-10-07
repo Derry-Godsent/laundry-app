@@ -9,6 +9,7 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission"; 
 import { PermissionGuard } from "../components/PermissionGuard";
+import { LoadingRows } from "../components/ui";
 
 /* ─── HELPERS ────────────────────────────────────────────────────────────── */
 function formatPhoneInput(value: string): string {
@@ -519,10 +520,8 @@ export const Staff = () => {
   const effColor = (e: number) => e >= 95 ? "#34d399" : e >= 85 ? "#dba96a" : "#f87171";
 
   if (loading || permLoading) return (
-    <div className="sf" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
-      <div style={{ color: "var(--sf-text-tert)", fontSize: 13, fontFamily: "var(--sf-font)" }}>
-        Loading staff...
-      </div>
+    <div className="sf">
+      <LoadingRows rows={5} label="Loading staff" />
     </div>
   );
 
@@ -753,35 +752,116 @@ export const Staff = () => {
         .smf-p:disabled { opacity: .6; cursor: not-allowed; }
 
         @media (max-width: 1180px) {
-          .kpi-row { grid-template-columns: repeat(3, 1fr); }
+          .kpi-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
+
+        /* Phones and small tablets. Every pane is sized to the visible area, so
+           a zoomed page or an open keyboard cannot push a button off screen. */
+        @media (max-width: 900px) {
+          .sf-srch-inp, .sfp, .sm-inp, .sm-sel { font-size: 16px; }
+
+          .sf-ov, .sf-modal-ov {
+            top: var(--vv-top, 0px);
+            height: var(--vv-h, 100dvh);
+          }
+
+          .sf-panel {
+            top: var(--vv-top, 0px);
+            height: var(--vv-h, 100dvh);
+            width: 100%;
+            max-width: 100%;
+          }
+
+          /* The add-member dialog rises from the bottom edge instead of
+             floating in the middle of a small screen. */
+          .sf-modal-ov { padding: 0; align-items: flex-end; }
+          .sf-modal {
+            width: 100%;
+            max-width: 100%;
+            max-height: var(--vv-h, 100dvh);
+            border-radius: 16px 16px 0 0;
+            overflow-y: auto;
+          }
+        }
+
         @media (max-width: 760px) {
-          .sf { padding: 20px 16px 48px; }
-          .kpi-row { grid-template-columns: repeat(2, 1fr); }
-          .sf-top { align-items: flex-start; }
-          .sp-grid, .sm-row { grid-template-columns: 1fr; }
-          .sf-panel { width: 100%; }
-        }
-
-        @media (max-width: 700px) {
-          /* The card mode below needs the table floor removed. */
-          .sf-tbl { min-width: 0; }
           .sf { padding: 18px var(--page-pad-x) 40px; }
+
+          .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+          .kpi { padding: 13px 13px 11px; border-radius: var(--r-md); }
+          .kpi-ico { width: 26px; height: 26px; }
+          .kpi-val { font-size: 22px; margin-top: 4px; }
+          .kpi-bar { margin-top: 9px; }
+
+          .sf-top { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 18px; }
+          .sf-acts { width: 100%; }
+          .sf-btn { min-height: var(--tap-min); justify-content: center; }
+          .sf-acts .sf-btn.primary { flex: 1; }
+
+          /* Search keeps its own line; the filters become one strip that slides
+             instead of wrapping the list down the page. */
+          .sf-filters {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overscroll-behavior-x: contain;
+            scrollbar-width: none;
+            margin-bottom: 12px;
+          }
+          .sf-filters::-webkit-scrollbar { display: none; }
+          .sf-srch { flex: 1 1 auto; min-width: 0; }
+          .sfp, .sfp-clr { flex: 0 0 auto; min-height: var(--tap-min); }
+
+          .sp-grid, .sm-row { grid-template-columns: 1fr; }
+          .sp-hero, .sm-head { padding-left: var(--page-pad-x); padding-right: var(--page-pad-x); }
+          .sp-body, .sm-body { padding: 18px var(--page-pad-x); }
+          .sp-footer, .sm-foot {
+            flex-wrap: nowrap;
+            padding: 14px var(--page-pad-x) calc(14px + var(--safe-bottom));
+          }
+          .spf-s, .spf-p, .smf-s, .smf-p { min-height: var(--tap-min); }
         }
 
-        @media (max-width: 480px) {
+        /* Cards from the same breakpoint that releases the 760px table floor,
+           so no width has to squeeze eight columns into a phone. */
+        @media (max-width: 700px) {
+          .sf-tbl { min-width: 0; }
           .sf-tbl thead { display: none; }
-          .sf-row { display: block; padding: 12px 16px; border-bottom: 1px solid var(--sf-border-faint); }
-          .sf-row td { display: block; padding: 8px 12px 8px 40%; border: none; text-align: left; position: relative; }
-          .sf-row td::before { content: attr(data-label); position: absolute; left: 12px; top: 8px; font-size: 10px; color: var(--sf-text-tert); text-transform: uppercase; font-weight: 700; }
-          .sf-member { margin-bottom: 8px; }
-          .sf-num, .sf-dim, .sf-act-cell { text-align: left; }
-          .sf-pag { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+          .sf-row { display: block; padding: 12px 14px; border-bottom: 1px solid var(--sf-border-faint); }
+          .sf-row td {
+            display: block;
+            padding: 7px 0 7px 40%;
+            border: none;
+            text-align: left;
+            position: relative;
+          }
+          .sf-row td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 0;
+            top: 9px;
+            font-size: 10px;
+            color: var(--sf-text-tert);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            font-weight: 700;
+          }
+
+          .sf-row td[data-label="Staff Member"] { padding-left: 0; }
+          .sf-row td[data-label="Staff Member"]::before { display: none; }
+          .sf-member { margin-bottom: 6px; }
+          .sf-row td[data-label="Efficiency"] { min-width: 0 !important; }
+          .eff-wrap { min-width: 0; }
+
+          .sf-pag { flex-direction: column; align-items: flex-start; gap: 12px; padding: 12px 14px; }
           .sf-pag-r { width: 100%; justify-content: space-between; }
-          
-          .sf-srch-x { padding: 8px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
-          .sp-unassign { padding: 12px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
-          .sf-btn.ghost { padding: 10px 12px; }
+          .sf-pag-b, .sf-pag-n { width: var(--tap-min); height: var(--tap-min); }
+          .sf-pag-pp { min-height: var(--tap-min); }
+
+          .sf-ra { min-height: var(--tap-min); width: 100%; }
+          .sf-srch-x { padding: 10px; min-width: var(--tap-min); min-height: var(--tap-min); display: flex; align-items: center; justify-content: center; }
+          .sp-unassign { padding: 12px; min-width: var(--tap-min); min-height: var(--tap-min); display: flex; align-items: center; justify-content: center; }
+          .sf-body { border-radius: var(--r-md); }
         }
       `}</style>
 

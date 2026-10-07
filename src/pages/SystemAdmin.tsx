@@ -8,6 +8,7 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
 import { PermissionGuard } from "../components/PermissionGuard";
+import { LoadingRows } from "../components/ui";
 
 type StaffRole = "admin" | "worker" | "courier" | "manager" | "strategist";
 
@@ -294,15 +295,15 @@ export const SystemAdmin = () => {
 
   if (loading || permLoading) { 
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: T.textTert, fontFamily: FONT }}>
-        <Loader2 size={20} className="spin" style={{ marginRight: 12 }} /> Loading system admin...
+      <div style={{ padding: "var(--page-pad-y) var(--page-pad-x)", fontFamily: FONT }}>
+        <LoadingRows rows={5} label="Loading system administration" />
       </div>
     ); 
   }
 
   return (
     <PermissionGuard path="/system">
-      <div className="sys-admin-root" style={{ background: T.bgBase, minHeight: "100vh", color: T.textPrimary, fontFamily: FONT }}>
+      <div className="sys-admin-root" style={{ background: T.bgBase, minHeight: "100%", color: T.textPrimary, fontFamily: FONT }}>
         <style>{`
           @keyframes fadeInUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
           @keyframes spin { to { transform: rotate(360deg); } }
@@ -323,29 +324,106 @@ export const SystemAdmin = () => {
           .modal-input { width: 100%; padding: 10px 12px; background: ${T.bgElevated}; border: 1px solid ${T.borderSoft}; border-radius: 8px; color: ${T.textPrimary}; font-size: 13.5px; outline: none; font-family: ${FONT}; transition: border-color 0.15s; }
           .modal-input:focus { border-color: ${T.accentBord}; }
           .perm-check { width: 18px; height: 18px; cursor: pointer; accent-color: ${T.emerald}; }
+          @media (max-width: 900px) {
+            /* A focused field under 16px makes iOS zoom the page in and leave it
+               zoomed, which moves everything the staff member was looking at. */
+            .modal-input, .sys-search-inp, .sys-role-sel { font-size: 16px; }
+
+            /* The four tabs slide sideways instead of stacking four rows deep. */
+            .sys-tabs {
+              flex-wrap: nowrap;
+              overflow-x: auto;
+              overscroll-behavior-x: contain;
+              scrollbar-width: none;
+            }
+            .sys-tabs::-webkit-scrollbar { display: none; }
+            .sys-tab { flex: 0 0 auto; min-height: var(--tap-min); padding: 10px 14px; }
+
+            /* Grows the tap target without growing the switch itself. */
+            .toggle-switch::after { content: ""; position: absolute; inset: -11px -14px; }
+
+            .sys-search-x {
+              min-width: var(--tap-min);
+              min-height: var(--tap-min);
+              align-items: center;
+              justify-content: center;
+            }
+
+            /* The Add Staff dialog is sized to the visible area and rises from
+               the bottom edge, where the thumb is. */
+            .sys-modal-ov { padding: 0; align-items: flex-end; }
+            .sys-modal {
+              width: 100% !important;
+              max-width: 100% !important;
+              border-radius: 16px 16px 0 0 !important;
+              max-height: var(--vv-h, 100dvh);
+              overflow-y: auto;
+              padding-bottom: calc(24px + var(--safe-bottom)) !important;
+            }
+            .sys-modal-actions { flex-direction: column-reverse; }
+            .sys-modal-actions button { min-height: var(--tap-min); }
+            .sys-modal-row { grid-template-columns: minmax(0, 1fr) !important; }
+          }
+
           @media (max-width: 768px) {
-            /* The card layout below needs the table floor gone; before this the
-               inline 1100px minimum forced a sideways scroll on every phone. */
-            :root { --sys-table-min: 0px; }
+            /* The card layout below needs the table floor gone: the inline
+               1100px minimum on the matrix and the 760px in this rule were what
+               forced a sideways scroll on every phone. */
+            .sys-table { min-width: 0; }
             .sys-table thead { display: none; }
-            .sys-row { display: block; padding: 16px; border-bottom: 1px solid ${T.borderSoft}; }
-            .sys-row td { display: block; padding: 6px 0 6px 40%; border: none; text-align: left; position: relative; font-size: 13px; }
-            .sys-row td::before { content: attr(data-label); position: absolute; left: 0; top: 6px; font-size: 10px; color: ${T.textTert}; text-transform: uppercase; font-weight: 700; }
-            .action-btn { min-height: 44px; min-width: 44px; justify-content: center; margin-top: 8px; width: 100%; }
+
+            .sys-row { display: block; padding: 14px; border-bottom: 1px solid ${T.borderSoft}; }
+            .sys-row td {
+              display: block;
+              padding: 6px 0 6px 40%;
+              border: none;
+              text-align: left;
+              position: relative;
+              font-size: 13px;
+            }
+            .sys-row td::before {
+              content: attr(data-label);
+              position: absolute;
+              left: 0;
+              top: 6px;
+              font-size: 10px;
+              color: ${T.textTert};
+              text-transform: uppercase;
+              font-weight: 700;
+            }
+            .sys-row td[data-label="Staff"] { padding-left: 0; }
+            .sys-row td[data-label="Staff"]::before { display: none; }
+            .sys-row td[data-label="Actions"] { text-align: left; }
+
+            .action-btn { min-height: var(--tap-min); min-width: var(--tap-min); justify-content: center; margin-top: 8px; width: 100%; }
+
+            .sys-head { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 18px; }
+            .sys-head-actions { width: 100%; }
+            .sys-head-actions .action-btn { flex: 1; }
+
+            /* The permissions matrix is one wide grid of roles by pages. It keeps
+               its header and scrolls sideways inside its own named scroller, the
+               deliberate exception, rather than squashing into a phone. */
+            .sys-perm { --sys-table-min: 760px; -webkit-overflow-scrolling: touch; }
+            .sys-perm .sys-table thead { display: table-header-group; }
+            .sys-perm .sys-table th, .sys-perm .sys-table td { white-space: nowrap; }
+
+            /* Settings tiles stack so the switch sits under its label. */
+            .sys-settings-grid { grid-template-columns: minmax(0, 1fr) !important; }
           }
         `}</style>
 
         {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
-        <div style={{ padding: "28px 32px", maxWidth: 1400, margin: "0 auto" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
+        <div style={{ padding: "var(--page-pad-y) var(--page-pad-x) 40px", maxWidth: 1400, margin: "0 auto" }}>
+          <div className="sys-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
             <div>
               <h1 style={{ fontSize: "22px", fontWeight: 700, margin: 0, letterSpacing: "-0.03em", display: "flex", alignItems: "center", gap: 10 }}>
                 <Shield size={20} color={T.accent} /> System Administration
               </h1>
               <p style={{ fontSize: "12.5px", color: T.textTert, margin: "6px 0 0" }}>Full control over staff access, system settings, and audit logs.</p>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div className="sys-head-actions" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <button onClick={() => fetchAllData()} className="action-btn" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, color: T.textSec }}>
                 <RefreshCw size={14} className={loading ? "spin" : ""} /> Refresh
               </button>
@@ -378,8 +456,8 @@ export const SystemAdmin = () => {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
                 <div style={{ display: "flex", alignItems: "center", background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: "9px", padding: "0 12px", maxWidth: "420px", width: "100%" }}>
                   <Search size={13} color={T.textTert} style={{ marginRight: "8px" }} />
-                  <input placeholder="Search staff..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: T.textPrimary, fontSize: "13.5px", padding: "10px 0", fontFamily: FONT }} />
-                  {search && <button onClick={() => setSearch("")} style={{ background: T.bgElevated, border: "none", borderRadius: "5px", color: T.textTert, padding: "4px", cursor: "pointer", display: "flex" }}><X size={11} /></button>}
+                  <input className="sys-search-inp" placeholder="Search staff..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: T.textPrimary, padding: "10px 0", fontFamily: FONT }} />
+                  {search && <button className="sys-search-x" onClick={() => setSearch("")} style={{ background: T.bgElevated, border: "none", borderRadius: "5px", color: T.textTert, padding: "4px", cursor: "pointer", display: "flex" }}><X size={11} /></button>}
                 </div>
                 {canEdit && <button onClick={() => setShowAddModal(true)} className="action-btn" style={{ background: T.emerald, color: "#03261a", fontWeight: 700 }}><Plus size={14} /> Add Staff Member</button>}
               </div>
@@ -392,7 +470,7 @@ export const SystemAdmin = () => {
                         filteredStaff.map((s) => (
                           <tr key={s.id} className="sys-row">
                             <td data-label="Staff"><div style={{ display: "flex", alignItems: "center", gap: "11px" }}><div style={{ width: 36, height: 36, borderRadius: "50%", background: `linear-gradient(155deg, hsl(${(s.first_name.charCodeAt(0) * 37) % 360},40%,24%), hsl(${(s.first_name.charCodeAt(0) * 37) % 360},35%,14%))`, color: `hsl(${(s.first_name.charCodeAt(0) * 37) % 360},65%,74%)`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 12 }}>{s.first_name.charAt(0)}{s.last_name.charAt(0)}</div><div><div style={{ fontWeight: 600, color: T.textPrimary }}>{s.first_name} {s.last_name}</div><div style={{ fontSize: "11.5px", color: T.textTert, fontFamily: MONO }}>{s.phone}</div></div></div></td>
-                            <td data-label="Role">{canEdit ? (<select value={s.role} onChange={(e) => handleUpdateRole(s.id, e.target.value as StaffRole)} disabled={updating === s.id} style={{ background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: "7px", color: T.textPrimary, fontSize: "12.5px", padding: "6px 10px", fontFamily: FONT, cursor: updating === s.id ? "not-allowed" : "pointer", opacity: updating === s.id ? 0.6 : 1 }}>{ROLE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}</select>) : <span style={{ fontSize: "11px", fontWeight: 700, padding: "4px 10px", borderRadius: "20px", background: T.accentDim, color: T.accent, border: `1px solid ${T.accentBord}` }}>{s.role}</span>}</td>
+                            <td data-label="Role">{canEdit ? (<select className="sys-role-sel" value={s.role} onChange={(e) => handleUpdateRole(s.id, e.target.value as StaffRole)} disabled={updating === s.id} style={{ background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: "7px", color: T.textPrimary, padding: "6px 10px", fontFamily: FONT, cursor: updating === s.id ? "not-allowed" : "pointer", opacity: updating === s.id ? 0.6 : 1 }}>{ROLE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}</select>) : <span style={{ fontSize: "11px", fontWeight: 700, padding: "4px 10px", borderRadius: "20px", background: T.accentDim, color: T.accent, border: `1px solid ${T.accentBord}` }}>{s.role}</span>}</td>
                             <td data-label="Status"><span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11.5px", fontWeight: 700, padding: "5px 11px", borderRadius: "20px", border: `1px solid ${STATUS_COLORS[s.status]}40`, background: `${STATUS_COLORS[s.status]}12`, color: STATUS_COLORS[s.status] }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_COLORS[s.status] }} />{s.status}</span></td>
                             <td data-label="Joined" style={{ color: T.textTert, fontSize: "12.5px" }}>{s.joined_date}</td>
                             <td data-label="Actions" style={{ textAlign: "right" }}>{canEdit && (<div style={{ display: "flex", justifyContent: "flex-end", gap: "6px", flexWrap: "wrap" }}><button onClick={() => handleToggleBan(s.id, s.is_banned)} disabled={updating === s.id} className="action-btn" style={{ border: `1px solid ${s.is_banned ? T.emberBord : T.emeraldBord}`, background: s.is_banned ? T.emberDim : T.emeraldDim, color: s.is_banned ? T.ember : T.emerald }}>{s.is_banned ? <Unlock size={12} /> : <Lock size={12} />} {s.is_banned ? "Unban" : "Ban"}</button><button onClick={() => handleDelete(s.id)} disabled={updating === s.id} className="action-btn" style={{ border: `1px solid ${T.emberBord}`, background: T.emberDim, color: T.ember }}><Trash2 size={12} /></button></div>)}</td>
@@ -412,7 +490,7 @@ export const SystemAdmin = () => {
                 <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: T.textPrimary, display: "flex", alignItems: "center", gap: 8 }}><LayoutGrid size={16} color={T.accent} /> Role Permissions Matrix</h3>
                 <p style={{ margin: "4px 0 0", fontSize: 12, color: T.textTert }}>Toggle access for each role. Changes apply instantly across the entire system.</p>
               </div>
-              <div style={{ overflowX: "auto" }}>
+              <div className="sys-perm" style={{ overflowX: "auto" }}>
                 <table className="sys-table" style={{ minWidth: "var(--sys-table-min, 1100px)" }}>
                   <thead>
                     <tr>
@@ -458,7 +536,7 @@ export const SystemAdmin = () => {
           )}
 
           {activeTab === 'settings' && (
-            <div style={{ animation: "fadeInUp 0.3s ease both", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
+            <div className="sys-settings-grid" style={{ animation: "fadeInUp 0.3s ease both", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
               {[
                 { key: "maintenance_mode", label: "Maintenance Mode", desc: "Blocks new orders from being placed" },
                 { key: "require_2fa_admin", label: "Require 2FA for Admins", desc: "Forces 2FA for all admin accounts" },
@@ -497,21 +575,21 @@ export const SystemAdmin = () => {
         </div>
 
         {showAddModal && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(4,5,9,0.85)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: 20 }} onClick={() => setShowAddModal(false)}>
-            <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 16, width: 460, maxWidth: '100%', padding: 24, boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
+          <div className="sys-modal-ov" style={{ position: 'fixed', inset: 0, background: 'rgba(4,5,9,0.85)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: 20 }} onClick={() => setShowAddModal(false)}>
+            <div className="sys-modal" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 16, width: 460, maxWidth: '100%', padding: 24, boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
               <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}><User size={16} color={T.emerald} /> Add New Staff Member</h3>
               <p style={{ margin: '0 0 16px', fontSize: 12.5, color: T.textTert }}>Create a new account and assign initial permissions.</p>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div className="sys-modal-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
                 <div><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>First Name</label><input className="modal-input" value={newStaff.firstName} onChange={e => setNewStaff({...newStaff, firstName: e.target.value})} placeholder="e.g. Kwame" /></div>
                 <div><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Last Name</label><input className="modal-input" value={newStaff.lastName} onChange={e => setNewStaff({...newStaff, lastName: e.target.value})} placeholder="e.g. Asante" /></div>
               </div>
               <div style={{ marginBottom: 12 }}><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Email Address</label><input className="modal-input" type="email" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} placeholder="staff@chapmanprestige.com" /></div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
+              <div className="sys-modal-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
                 <div><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Phone Number</label><input className="modal-input" value={newStaff.phone} onChange={e => setNewStaff({...newStaff, phone: e.target.value})} placeholder="+233..." /></div>
                 <div><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Role / Permission</label><select className="modal-input" value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value as StaffRole})} style={{ cursor: "pointer" }}>{ROLE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}</select></div>
               </div>
               <div style={{ marginBottom: 20 }}><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Temporary Password</label><div style={{ position: 'relative' }}><input className="modal-input" type={showPass ? "text" : "password"} value={newStaff.password} onChange={e => setNewStaff({...newStaff, password: e.target.value})} placeholder="Min 6 characters" style={{ paddingRight: 40 }} /><button onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: T.textSec, cursor: 'pointer' }}>{showPass ? <EyeOff size={14} /> : <Eye size={14} />}</button></div></div>
-              <div style={{ display: 'flex', gap: 10 }}>
+              <div className="sys-modal-actions" style={{ display: 'flex', gap: 10 }}>
                 <button onClick={() => setShowAddModal(false)} style={{ flex: 1, padding: 10, background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textSec, fontWeight: 600, cursor: 'pointer', fontFamily: FONT }}>Cancel</button>
                 <button onClick={handleAddStaff} disabled={addingStaff} style={{ flex: 1.5, padding: 10, background: T.emerald, border: 'none', borderRadius: 8, color: '#03261a', fontWeight: 700, cursor: addingStaff ? 'not-allowed' : 'pointer', opacity: addingStaff ? 0.6 : 1, fontFamily: FONT, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>{addingStaff ? <Loader2 size={14} className="spin" /> : <Check size={14} />} {addingStaff ? "Creating..." : "Create Account"}</button>
               </div>

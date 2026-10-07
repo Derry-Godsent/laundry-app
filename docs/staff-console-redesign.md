@@ -332,6 +332,30 @@ and both are fixed without taking pinch zoom away from anyone who needs it.
    `user-scalable=no`, and blocking zoom would take magnification away from
    staff who need it, so the layout is made zoom-proof instead.
 
+**Phase D (the rest of the app) · slices.** D covers fourteen screens, so it
+lands in slices, one commit each, in the order the work is actually needed:
+the management screens first, then the tools, then the rarely opened ones.
+
+| Slice | Screens | What it does |
+| --- | --- | --- |
+| D1 | Staff, System Admin, Reports, Dashboard overflow | The last of the five screens that were broken rather than unpolished, plus a 320px overflow on the Dashboard loading skeleton (fixed pixel widths, now percentages with caps). |
+| D2 | Dashboard, App Ideas, App Accounts | Phone polish on the pages that already compose from the shared system. |
+| D3 | Services, Payments, Receipt | Legacy token-object pages: frames, floors, side-by-side grids, dialogs. |
+| D4 | Security, Settings, Login, Help, Profile | The remaining legacy pages, then the `legacy-bridge` cleanup. |
+
+What D1 changed, and the bugs found while doing it:
+
+| Screen | What was wrong | What changed |
+| --- | --- | --- |
+| Staff | The loading state was `height: 100vh` inside the frame; card mode did not start until 480px while the table floor was released at 700px, so 481 to 700px squeezed eight columns; panes used `100dvh` and ignored zoom | Loading state is the shared `LoadingRows`; cards start exactly where the floor is released (700px) with their `data-label` headers; the panel and the dialog are sized to the visual viewport; fields reach 16px; the filter row is a slide strip; pagination, row actions, the clear button and the footer buttons are thumb-height |
+| System Admin | `.sys-table` kept `min-width: 760px` at every width: the staff table scrolled sideways and the logs table, inside a clipped card, simply cut its columns off. The permissions matrix lost its header to the card rules | The floor is released with the card mode; the matrix is a named, deliberate exception that keeps its header and scrolls sideways inside its own wrapper; the Add Staff dialog becomes a bottom sheet sized to the visible area; the tabs slide; the settings grid stacks; the toggle keeps its 24px look but gains a 44px tap area |
+| Reports | The four range buttons were an unwrapping flex row about 400px wide, so they pushed the whole page sideways at 320px; no phone media query existed for the header | The range switcher is a slide strip and the header stacks; charts drop to 220px on a phone; the loading state is the shared `LoadingRows` |
+
+The lesson recorded for D2 to D4: on these legacy pages the defect is almost
+always one of four things, and all four are greppable before touching anything.
+A `min-width` in pixels with no release, a `100vh` inside the shell frame, a
+`position: fixed` pane that ignores the visual viewport, and a field under 16px.
+
 **Copy rules (repo-wide).** No em dashes. `npm run check:copy` fails on U+2014
 anywhere in the repo; use a full stop, a colon, a comma or a middot separator
 instead, and a plain hyphen for "no value" cells. En dashes survive only in
