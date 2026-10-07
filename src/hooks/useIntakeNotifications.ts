@@ -8,7 +8,7 @@ import { supabase } from "../lib/supabaseClient";
  * arrives by itself:
  * - a customer sends a laundry request
  * - a customer asks for cleaning, fumigation, detailing, polytank, or contract work
- * - a customer answers a date Chapman offered, by accepting or rejecting it
+ * - a customer answers a date CPL offered, by accepting or rejecting it
  * - a customer changes or cancels something
  * - a customer sends an idea for the app
  *
@@ -92,7 +92,7 @@ function serviceNotification(row: any): StaffNotification {
   return {
     id: `quote-${row.id}`,
     title: `New ${row.service_title || "service"} request`,
-    message: `${row.property_type || "A customer"}${row.preference ? `, ${row.preference}` : ""}${area ? `, about ${area} m2` : ""}. This one needs a date from Chapman.`,
+    message: `${row.property_type || "A customer"}${row.preference ? `, ${row.preference}` : ""}${area ? `, about ${area} m2` : ""}. This one needs a date from CPL.`,
     time: minutesAgo(row.created_at),
     read: false,
     type: "info",

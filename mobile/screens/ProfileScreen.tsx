@@ -207,7 +207,7 @@ export default function ProfileScreen({ navigation }: any) {
               onPress={() => Alert.alert('Delete Account', 'Are you sure you want to delete your account? This action cannot be undone.')} 
             />
           </View>
-          <Text style={styles.versionText}>Chapman Prestige v2.4.1 • Made in Kumasi</Text>
+          <Text style={styles.versionText}>Chapman Prestige Limited v2.4.1 • Made in Kumasi</Text>
         </View>
 
         {/* Logout Button */}

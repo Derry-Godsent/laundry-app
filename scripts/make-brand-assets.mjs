@@ -61,4 +61,39 @@ for (const { file, size } of TARGETS) {
   const kb = (png.length / 1024).toFixed(1);
   console.log(`  ${file.padEnd(24)} ${size}x${size}  ${kb} kB`);
 }
+
+/* ---------------------------------------------------------------- the phone
+ * The customer app carries its own copies of the mark, so it does not depend
+ * on a file that has to be fetched at launch. An app icon also has to be a
+ * full square with no transparency: iOS masks the corners itself and Android
+ * crops an adaptive icon hard, so the mark is drawn small enough to survive
+ * both, on the same field the console uses.
+ */
+const FIELD = usingLogo ? { r: 255, g: 255, b: 255 } : { r: 36, g: 80, b: 110 };
+const INNER = { icon: 0.62, adaptive: 0.52, splash: 0.52, logo: 0.82 };
+
+const MOBILE = [
+  { file: "mobile/assets/icon.png", size: 1024, inner: INNER.icon, field: true },
+  { file: "mobile/assets/adaptive-icon.png", size: 1024, inner: INNER.adaptive, field: true },
+  { file: "mobile/assets/splash-icon.png", size: 512, inner: INNER.splash, field: true },
+  { file: "mobile/assets/favicon.png", size: 48, inner: INNER.logo, field: true },
+  { file: "mobile/assets/logo.png", size: 512, inner: INNER.logo, field: false },
+];
+
+for (const { file, size, inner, field } of MOBILE) {
+  const mark = await sharp(bytes, { density: 512 })
+    .resize(Math.round(size * inner), Math.round(size * inner), { fit: "contain" })
+    .png()
+    .toBuffer();
+  const base = field
+    ? sharp({ create: { width: size, height: size, channels: 4, background: FIELD } })
+    : sharp({ create: { width: size, height: size, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } });
+  const png = await base
+    .composite([{ input: mark, gravity: "center" }])
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+  await writeFile(file, png);
+  console.log(`  ${file.replace("mobile/assets/", "mobile ").padEnd(24)} ${size}x${size}  ${(png.length / 1024).toFixed(1)} kB`);
+}
+
 console.log(`\nDone. Source: ${source}`);

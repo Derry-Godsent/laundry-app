@@ -613,7 +613,7 @@ export const Dashboard = () => {
             Live operations
           </>
         }
-        title="Chapman Prestige"
+        title="Chapman Prestige Limited"
         subtitle={`${now.toLocaleDateString("en-GH", { weekday: "long", year: "numeric", month: "long", day: "numeric" })} · every number below is read live from the records the office works on.`}
         actions={
           <>

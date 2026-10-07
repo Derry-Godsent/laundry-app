@@ -349,7 +349,7 @@ export const Settings = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `chapman-export-${type}-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `cpl-export-${type}-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
       setToast({ msg: "Data exported successfully", type: "success" });

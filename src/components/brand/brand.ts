@@ -13,8 +13,8 @@
 export const BRAND = {
   /** The registered name, for documents and footers. */
   name: "Chapman Prestige Limited",
-  /** The name as it is spoken, for the sidebar and the sign-in screen. */
-  short: "Chapman Prestige",
+  /** The abbreviation, for the places that cannot hold the full name. */
+  abbr: "CPL",
   /** What this app is, under the mark. */
   product: "Operations console",
   /** The logo, if it has been added to `public/brand/`. */

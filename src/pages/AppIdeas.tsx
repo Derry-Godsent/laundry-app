@@ -9,7 +9,7 @@ import "./AppIdeas.css";
 /**
  * App Ideas
  *
- * Each idea a customer sends from the Chapman app, together with their name and
+ * Each idea a customer sends from the CPL app, together with their name and
  * number, so the office can read it and reply to them. The table has existed
  * since the app could send ideas, and until now no staff screen read it, so
  * every idea a customer took the trouble to write landed nowhere.

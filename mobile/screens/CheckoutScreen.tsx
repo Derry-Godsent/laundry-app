@@ -328,7 +328,7 @@ export default function CheckoutScreen({ route, navigation }: any) {
               <View style={styles.securityIcon}>
                 <Ionicons name="shield-checkmark" size={18} color={COLORS.green} />
               </View>
-              <Text style={styles.securityText}>Secured by Chapman</Text>
+              <Text style={styles.securityText}>Secured by CPL</Text>
             </View>
           </View>
         </View>

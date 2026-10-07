@@ -286,7 +286,7 @@ export const DesignPreview = () => {
             <div className="shell-demo__body">
               <PageHeader
                 eyebrow={<><span className="live-dot" /> Live operations</>}
-                title="Chapman Prestige"
+                title="Chapman Prestige Limited"
                 subtitle="Tuesday, 6 October 2026 · every number below is read live from the records the office works on."
                 actions={
                   <>
@@ -408,7 +408,7 @@ export const DesignPreview = () => {
 
         <div className="mr-workspace">
           <Card className="mr-list-panel">
-            <CardHeader title="Needs action" subtitle="Requests waiting for Chapman to review, confirm or decline" actions={<span className="tag-count">{activeQueue.length}</span>} />
+            <CardHeader title="Needs action" subtitle="Requests waiting for review, confirmation or a decision" actions={<span className="tag-count">{activeQueue.length}</span>} />
             <CardBody tight className="mr-list-body">
               {activeQueue.length === 0 ? (
                 <EmptyState icon={<ClipboardList size={20} />} title="No requests in this view" message="Sample view is empty. Switch to another view above." />
@@ -481,7 +481,7 @@ export const DesignPreview = () => {
             <Card className="mr-decision">
               <CardHeader
                 title="Staff decision"
-                subtitle="Confirm uses the client's selected date automatically. Propose a date only when Chapman must offer a different option."
+                subtitle="Confirm uses the client's selected date automatically. Propose a date only when a different option is needed."
               />
               <CardBody className="mr-decision-body">
                 <label className="field">
@@ -756,7 +756,7 @@ export const DesignPreview = () => {
           <Card>
             <CardHeader title="Feedback & states" subtitle="Banners, empty and loading states" />
             <CardBody className="preview-stack">
-              <Banner tone="ok" title="Client date approved">It remains in Approved work for the next Chapman step.</Banner>
+              <Banner tone="ok" title="Client date approved">It remains in Approved work for the next step.</Banner>
               <Banner tone="info" title="Waiting for the client">No staff action is needed until the client answers.</Banner>
               <Banner tone="bad" title="Could not load requests">Check the connection and refresh the queue.</Banner>
               <div className="skeleton" style={{ height: 44 }} />

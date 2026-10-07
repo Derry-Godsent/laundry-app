@@ -6,7 +6,7 @@ import { supabase } from "../lib/supabaseClient";
  *
  * Each number answers a question the office actually asks:
  * - Orders: how many orders exist.
- * - Mobile Requests: how many laundry requests are still waiting for Chapman.
+ * - Mobile Requests: how many laundry requests are still waiting for CPL.
  * - Service Requests: how many cleaning or service enquiries need a date.
  * - App Ideas: how many ideas from customers nobody has read yet.
  * - App Accounts: how many customers use the app.

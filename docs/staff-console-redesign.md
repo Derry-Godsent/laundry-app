@@ -620,6 +620,41 @@ what the page holds, nothing more.
 **Consequence for phase 6+:** new pages must not regress the pinned chrome. Use
 the page frame below for table screens instead of the plain `.page` wrapper.
 
+### The company name, and the logo pipeline
+
+The company is **Chapman Prestige Limited**, abbreviated **CPL**. Nothing else.
+`Chapman` on its own and `Chapman Prestige` without `Limited` were removed
+everywhere a person can read them: page titles, the sidebar, receipt headers,
+badge tooltips, notification copy, download file names (`cpl-*.csv`,
+`cpl-export-*.json`), the browser tab, the web app manifest and the customer
+app on the phone.
+
+Three things keep the old spelling on purpose, because renaming them is not a
+text change:
+
+| Kept | Why |
+| --- | --- |
+| `is_chapman_staff()`, `is_chapman_admin()`, `chapman_app_*` tables | Live database functions and tables. Row level security policies call the functions by name, so a rename inside the app without a migration locks every user out. |
+| `chapman-query-cache`, `chapman-staff-alerts-read:` | Browser storage keys. Changing them only discards each user's cached data and read markers. |
+| `Chapman Prestige Limited - Kumasi` | A branch name, stored as data in the database. |
+
+The mark comes from one file. `src/components/brand/BrandMark.tsx` shows
+`public/brand/logo.png` when it exists and falls back to the drawn `CPL` letters
+otherwise, so nothing can show a broken image. `public/brand/monogram.svg` is
+that drawn mark, and `scripts/make-brand-assets.mjs` rasterises it, or the real
+logo, into every size the browser and the phone ask for:
+
+```
+node scripts/prepare-logo.mjs <supplied-image>   # background out, square, 1024px
+node scripts/make-brand-assets.mjs               # every icon, console + phone
+```
+
+`prepare-logo.mjs` takes a logo that arrived on a white background, makes the
+paper transparent without touching the mark's own colours, takes the white back
+out of the anti-aliased edges so it does not halo on a dark surface, trims the
+surrounding emptiness and re-centres it on a square canvas. It is the only step
+between the supplied artwork and every icon in the product.
+
 ### Page frame for table screens
 
 ```

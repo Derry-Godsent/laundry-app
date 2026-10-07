@@ -88,12 +88,12 @@ export default function LoginScreen({ navigation }: any) {
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Image
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDolCkLrbtEMfue_L5daYQPY3OJINLp8pXTYLMTSnifWvhjGcOegRWTXgz8txA2-h5lb6-8e8iPvRhud2y5hwQ6lTdsJ-pMpBsYDMB-pJi7-Y_G2fcvoh2vrlIO-bgypxbqTAGWPpZiJAou9FZ3JvyEbvgO-oIqe-Yf4-3c69h31hqpXmxmi7KL2kKhBVIWOWsx3vYCqjCH0hb9vG7KFuoKKkQdfX8cTI-LjwMwGLxIBS4emHvc9Xpg' }}
+              source={require('../assets/logo.png')}
               style={styles.logoImage}
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.title}>Welcome to Chapman Prestige Ltd.</Text>
+          <Text style={styles.title}>Welcome to Chapman Prestige Limited.</Text>
           <Text style={styles.subtitle}>Secure login. No passwords needed.</Text>
         </View>
 

@@ -30,9 +30,10 @@ export const BrandMark = ({ size = "md", withText = false, className }: BrandMar
        in a font, so the mark cannot change shape with a font that failed to
        load, and the small sizes stay crisp. */
     <svg className="brandmark__mono" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
-      <g transform="translate(3 0)" fill="none" stroke="currentColor" strokeWidth="34" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M259 186 A92 92 0 1 0 259 326" />
-        <path d="M310 352 V160 H356 A52 52 0 0 1 356 272 H310" />
+      <g transform="translate(256 256) scale(1.16) translate(-256 -256)" fill="none" stroke="currentColor" strokeWidth="34" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M150 168 A88 88 0 1 0 150 344" />
+        <path d="M260 344 V168 H296 A44 44 0 0 1 296 256 H260" />
+        <path d="M368 168 V344 H440" />
       </g>
     </svg>
   ) : (
@@ -58,8 +59,8 @@ export const BrandMark = ({ size = "md", withText = false, className }: BrandMar
       <span className="brandmark__chip">{mark}</span>
       {withText && (
         <span className="brandmark__text">
-          <span className="brandmark__name">{BRAND.short}</span>
-          <span className="brandmark__product">{BRAND.product}</span>
+          <span className="brandmark__name">{BRAND.abbr}</span>
+          <span className="brandmark__product">{BRAND.name}</span>
         </span>
       )}
     </span>

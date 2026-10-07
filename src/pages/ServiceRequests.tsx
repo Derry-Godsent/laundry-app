@@ -25,7 +25,7 @@ import "./ServiceRequests.css";
  * Service Requests
  *
  * Cleaning, fumigation, detailing, polytank and contract requests sent from the
- * Chapman customer app. The laundry queue has its own page, Mobile Requests.
+ * CPL customer app. The laundry queue has its own page, Mobile Requests.
  *
  * These arrived in the database and no staff screen read them, so customers were
  * asking for work that nobody could see. This page closes that gap.
@@ -278,7 +278,7 @@ function ServiceRequestsContent() {
   };
 
   /**
-   * Tells the customer Chapman cannot take this request, and why. This is stored
+   * Tells the customer CPL cannot take this request, and why. This is stored
    * on the request and the customer app shows the reason on their tracking page.
    * A request can be taken again later by offering a date, which clears nothing
    * the customer was told, so the history stays honest.
@@ -311,20 +311,20 @@ function ServiceRequestsContent() {
   };
 
   const heading: [string, string] = filter === "action"
-    ? ["Needs a date", "Requests waiting for Chapman to offer a service date"]
+    ? ["Needs a date", "Requests waiting for a service date to be offered"]
     : filter === "waiting"
       ? ["With the customer", "Dates offered, waiting for the customer to accept or reject"]
       : filter === "accepted"
-        ? ["Accepted", "The customer approved the date, ready for the next Chapman step"]
+        ? ["Accepted", "The customer approved the date, ready for the next step"]
         : filter === "another"
           ? ["Wants another date", "The customer asked for a different date and needs a new offer"]
-          : ["Not taken", "Chapman could not take these requests. The customer has been told why"];
+          : ["Not taken", "CPL could not take these requests. The customer has been told why"];
 
   return <div className="sr-page">
     <PageHeader
       eyebrow={<><Inbox size={13} /> App intake</>}
       title="Service Requests"
-      subtitle="Cleaning, fumigation, detailing, polytank and contract requests sent from the Chapman app."
+      subtitle="Cleaning, fumigation, detailing, polytank and contract requests sent from the customer app."
       actions={
         <Button
           variant="secondary"
@@ -491,7 +491,7 @@ function ServiceRequestsContent() {
 
             {selected.appointment_response === "declined" ? (
               <div className="sr-declined-box">
-                <h3>Chapman said no to this request</h3>
+                <h3>CPL declined this request</h3>
                 <p className="sr-note">The customer saw this line in the app: "{selected.declined_reason || "no reason was written"}"</p>
                 <p className="sr-muted-small">You can still take the work. Offering a date below puts the request back in the customer's hands with a new date to accept.</p>
               </div>
@@ -531,7 +531,7 @@ function ServiceRequestsContent() {
                 <p className="sr-note">
                   {selected.appointment_response === "accepted"
                     ? `The customer accepted ${formatDay(selected.details?.proposedDate?.slice(0, 10))}. Create the order when the team is ready.`
-                    : `Chapman offered ${formatDay(selected.details?.proposedDate?.slice(0, 10))}. The answer appears here as soon as the customer replies in the app.`}
+                    : `CPL offered ${formatDay(selected.details?.proposedDate?.slice(0, 10))}. The answer appears here as soon as the customer replies in the app.`}
                 </p>
               </div>
             )}

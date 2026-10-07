@@ -72,7 +72,7 @@ const STATUS_META: Record<RequestStatus, StatusMeta> = {
 const VIEW_COPY: Record<RequestView, { title: string; sub: string; empty: string }> = {
   active: {
     title: "Needs action",
-    sub: "Requests waiting for Chapman to review, confirm or decline",
+    sub: "Requests waiting for review, confirmation or a decision",
     empty: "New client requests appear here the moment they are submitted.",
   },
   waiting: {
@@ -339,7 +339,7 @@ function MobileRequestsContent() {
       decision === "declined"
         ? "Request declined. It remains in Declined history as a final record."
         : decision === "confirmed"
-          ? "Client date approved. It remains in Approved work for the next Chapman step."
+          ? "Client date approved. It remains in Approved work for the next step."
           : "New date sent. It remains in Waiting for client until the client responds."
     );
     setFilter(decision === "declined" ? "declined" : decision === "confirmed" ? "confirmed" : "waiting");
@@ -436,7 +436,7 @@ function MobileRequestsContent() {
               <EmptyState
                 icon={<ShieldCheck size={22} />}
                 title="Select a request"
-                message="Review the client's details, then confirm their date, propose a new one, or decline. Mobile requests stay separate from Orders until Chapman deliberately creates one."
+                message="Review the client's details, then confirm their date, propose a new one, or decline. Mobile requests stay separate from Orders until CPL deliberately creates one."
               />
             </Card>
           ) : (
@@ -551,7 +551,7 @@ function MobileRequestsContent() {
                 <Card className="mr-decision">
                   <CardHeader
                     title="Staff decision"
-                    subtitle="Confirm uses the client's selected date automatically. Propose a date only when Chapman must offer a different option."
+                    subtitle="Confirm uses the client's selected date automatically. Propose a date only when a different option is needed."
                   />
                   <CardBody className="mr-decision-body">
                     <label className="field">
@@ -612,12 +612,12 @@ function MobileRequestsContent() {
                   <CardBody>
                     <p className="mr-note">
                       {selected.request_status === "needs_customer_confirmation"
-                        ? "The client must respond in the Chapman app. No staff action is needed until then."
+                        ? "The client must respond in the customer app. No staff action is needed until then."
                         : selected.request_status === "confirmed" || selected.request_status === "converted"
-                          ? "Keep this request visible here while Chapman continues with order creation and specialist assignment."
+                          ? "Keep this request visible here while order creation and specialist assignment continue."
                           : selected.customer_response === "rejected"
                             ? "The client rejected the proposed date. This request is closed and needs no further action."
-                            : "Chapman declined this request. It remains as a final history record."}
+                            : "CPL declined this request. It remains as a final history record."}
                     </p>
                   </CardBody>
                 </Card>

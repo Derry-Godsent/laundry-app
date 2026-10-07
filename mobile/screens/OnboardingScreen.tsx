@@ -50,7 +50,7 @@ export default function OnboardingScreen({ navigation }: any) {
   const slides = [
     {
       icon: 'sparkles',
-      title: 'Chapman Prestige',
+      title: 'Chapman Prestige Limited',
       subtitle: 'Professional Care for Modern Living in Kumasi',
       description: 'Your trusted partner for premium home and facility services.',
       color: COLORS.primary,

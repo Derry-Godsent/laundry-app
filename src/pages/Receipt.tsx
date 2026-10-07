@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
 import { isNetworkError } from "../hooks/useConnection";
 import { PermissionGuard } from "../components/PermissionGuard";
+import { BRAND } from "../components/brand/brand";
 import { 
   Printer, ArrowLeft, Package, AlertCircle, 
   WifiOff, RefreshCw, Loader2, Check, X 
@@ -292,7 +293,7 @@ export const Receipt = () => {
               borderRadius: 16, overflow: "hidden", boxShadow: "var(--shadow-modal)" 
             }}>
               <div className="receipt-header" style={{ padding: "32px", textAlign: "center", borderBottom: `1px solid ${T.borderFaint}` }}>
-                <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 8, textTransform: "uppercase" }}>Chapman Prestige Ltd</div>
+                <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 8, textTransform: "uppercase" }}>{BRAND.name}</div>
                 <div style={{ fontSize: 13, color: T.textTert, lineHeight: 1.6 }}>
                   Kwadaso-Ohwimase, Kumasi • Tel: +233 534 134 809<br/>
                   chapmanprestigelimited@gmail.com
@@ -373,7 +374,7 @@ export const Receipt = () => {
               </div>
 
               <div className="receipt-footer" style={{ padding: "24px 32px", textAlign: "center", borderTop: `1px solid ${T.borderFaint}` }}>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Thank you for choosing Chapman Prestige!</div>
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Thank you for choosing Chapman Prestige Limited.</div>
                 <div style={{ fontSize: 11, color: T.textTert }}>Official receipt • Keep for records</div>
                 {balance > 0 && (
                   <div style={{ marginTop: 14, padding: 10, background: T.emberDim, borderRadius: 8, fontSize: 12, color: T.ember, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>

@@ -515,7 +515,7 @@ export const Staff = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `chapman-staff-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `cpl-staff-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     setToast({ msg: "CSV exported successfully", type: "success" });

@@ -236,6 +236,15 @@ the five-screen correctness pass and the definition of done live in
 - [ ] Phase F, mobile app integration: Mobile Requests, Service Requests, customer
       replies, App Ideas, App Accounts, realtime alerts, staff actions from the app.
 - [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.
+- [x] The company name, everywhere: `Chapman Prestige Limited`, `CPL` for short. Page
+      titles, sidebar, receipts, notifications, badge tooltips, download file names,
+      the browser tab, the manifest and the customer app. Database functions, storage
+      keys and the `Chapman Prestige Limited - Kumasi` branch label stay as they are.
+- [x] The phone app draws its own icons from the same source as the console, and its
+      sign-in screen no longer fetches a logo URL that had expired.
+- [ ] The company logo itself: waiting on the artwork. Run
+      `node scripts/prepare-logo.mjs <file>` then `node scripts/make-brand-assets.mjs`,
+      and every icon in the console and the phone app updates at once.
 
 - [x] Phase C follow-up, zoom on a phone: fields are 16px from 900px down so iOS cannot
       zoom on focus, and the visual viewport is published as `--vv-h` / `--vv-top` /

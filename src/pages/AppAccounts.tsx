@@ -10,7 +10,7 @@ import "./AppAccounts.css";
 /**
  * App Accounts
  *
- * Who has signed into the Chapman app, and every security moment recorded on
+ * Who has signed into the CPL app, and every security moment recorded on
  * their account: a sign-in, a PIN set, a PIN removed, a PIN used up.
  *
  * The app writes these notes itself. Until now no staff screen read them, so a
@@ -176,7 +176,7 @@ function AppAccountsContent() {
           <span className="aa-eyebrow"><Smartphone size={13} /> FROM THE CUSTOMER APP</span>
           <h1>App Accounts</h1>
           <p>
-            Who has signed into the Chapman app, and every security moment on their account:
+            Who has signed into the CPL app, and every security moment on their account:
             a sign-in, a PIN added, a PIN removed, a PIN used up. The four digits are never
             stored, here or anywhere, so nothing on this page could help anyone guess one.
           </p>
@@ -283,7 +283,7 @@ function AppAccountsContent() {
               <div className="aa-honest">
                 <KeyRound size={15} />
                 <span>
-                  The PIN lives on the customer's phone, not here. Chapman can see that a PIN was
+                  The PIN lives on the customer's phone, not here. CPL can see that a PIN was
                   set or given up, never the four digits.
                 </span>
               </div>

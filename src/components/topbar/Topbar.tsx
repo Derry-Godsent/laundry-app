@@ -126,7 +126,7 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
 
   /* ─── LIVE ALERTS ──────────────────────────────────────────────────────────
      Every alert comes from a record: a customer sending a request, asking for a
-     service, or answering a date Chapman offered. The count is what is new since
+     service, or answering a date CPL offered. The count is what is new since
      this staff member last looked, so it is honest rather than decorative. */
   const { notifications: intakeAlerts, unreadCount, markRead, markAllRead } = useIntakeNotifications(user?.id ?? null, Boolean(user));
 
