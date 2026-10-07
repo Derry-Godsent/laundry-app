@@ -587,6 +587,30 @@ roughly 30kB each, so the screen never waits on a network picture. If one is
 renamed or missing the frame falls back to that service's icon on its hue, so a
 bad file shows a plain tile rather than a broken image.
 
+**The page sits on the work, out of focus.**
+
+The sign-in page is not black. Behind everything is one photograph of the
+company's work, blurred and dimmed, fixed so it does not travel when the page
+scrolls. It stays a background: the dim is a flat translucent surface over the
+whole picture, so the fields, the card and the title keep their contrast
+wherever the crop lands, and nothing has to be re-checked when the photograph is
+replaced.
+
+Three decisions, all of which look like mistakes to anyone who has not tried the
+other way:
+
+- The blur is baked into the file, at sigma 30, not applied in CSS. A live blur
+  on a full-screen layer is repainted on every scroll frame, and on a phone that
+  is felt while somebody is typing a password. The file is 39kB.
+- The layer is `position: fixed` with `z-index: -1`, and the page establishes its
+  own stacking context (`isolation: isolate`), so the backdrop can never climb
+  over a card, a notice or the fields, whatever order the browser paints in.
+- The handoff screen, the moment between a successful sign-in and the console,
+  keeps it hidden: that screen is a moment, not a page.
+
+To replace it, overwrite `public/services/login-backdrop.jpg` and re-run the blur
+recipe (sigma 30, quality 70) or supply a blurred version. Nothing else changes.
+
 **One mark, one name.** `src/components/brand/` holds the company name and the
 logo path, and `BrandMark` renders it: `public/brand/logo.png` when that file
 exists, and a drawn monogram when it does not, so a missing file can never leave

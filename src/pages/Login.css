@@ -16,15 +16,46 @@
  */
 
 .login-page {
+  position: relative;
   min-height: 100vh;
   min-height: 100dvh;
   padding: calc(var(--sp-5) + var(--safe-top)) var(--page-pad-x) calc(var(--sp-7) + var(--safe-bottom));
   background: var(--ink-base);
   color: var(--text-1);
   font-family: var(--font-ui);
+  isolation: isolate;
+}
+
+/* The backdrop.
+ *
+ * Fixed rather than absolute, so it stays still while a long page scrolls and
+ * the content travels over it. It sits behind everything else on the page
+ * (`z-index: -1`) and the page establishes its own stacking context, so it can
+ * never climb over a card. The photograph arrives already blurred in the file,
+ * and the dim is one flat translucent surface: a live CSS blur on a full-screen
+ * layer is what makes a phone stutter while somebody types a password. */
+.login-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.login-backdrop__photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.login-backdrop__dim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink-base) 74%, transparent);
 }
 
 .login-shell {
+  position: relative;
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
@@ -481,6 +512,14 @@
 .login-page--handoff {
   display: grid;
   place-items: center;
+}
+
+/* Signing in hands off to the console: that screen is a moment, not a page, so
+   the backdrop is a flat surface rather than a photograph. */
+.login-page--handoff .login-backdrop__photo { display: none; }
+
+.login-handoff {
+  position: relative;
 }
 
 .login-handoff {

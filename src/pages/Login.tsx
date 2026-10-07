@@ -36,6 +36,13 @@ const SERVICES: { slug: string; name: string; line: string; icon: LucideIcon; hu
   { slug: "polytank", name: "Polytank washing", line: "Polytanks and water storage.", icon: Cylinder, hue: "var(--brand-400)" },
 ];
 
+/* The photograph behind the whole page.
+ *
+ * One file, blurred and already dimmed, so the browser has nothing to do but
+ * paint it: no CSS blur on a full-screen layer, which is what makes a phone
+ * stutter while typing a password. Replace this file and the page follows. */
+const BACKDROP = "/services/login-backdrop.jpg";
+
 /* One piece of work, as a picture.
  *
  * The photograph carries the meaning; the plate over it names the service in
@@ -204,6 +211,15 @@ export const Login = () => {
 
   return (
     <div className="login-page">
+      {/* The page backdrop: the company's work, out of focus, behind everything.
+          Fixed, so it does not move while the page scrolls, and dimmed to a flat
+          surface rather than faded, so it stays a background and every field
+          above it keeps its contrast. */}
+      <div className="login-backdrop" aria-hidden="true">
+        <img className="login-backdrop__photo" src={BACKDROP} alt="" decoding="async" />
+        <span className="login-backdrop__dim" />
+      </div>
+
       <div className="login-shell">
         <header className="login-top">
           <BrandMark size="lg" />

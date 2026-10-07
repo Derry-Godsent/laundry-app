@@ -250,6 +250,10 @@ the five-screen correctness pass and the definition of done live in
       every icon regenerated from it, console and phone. It sits on a light plate
       wherever it is navy on dark, and the drawn monogram stays in the small slots
       (tab icon, sidebar, top bar) where the 99px artwork would be a smudge.
+- [x] The sign-in page sits on a blurred, dimmed photograph of the work rather than
+      on black: one fixed layer, blur baked into the file, flat dim over it.
+- [ ] Swap `public/services/login-backdrop.jpg` for the company's own collage when the
+      file can be got into the repository. The layout does not change.
 - [ ] If a larger copy of the logo is ever available (1000px or more), every icon
       gets sharper, and the small slots could carry the artwork too. Nothing else
       needs to change: drop it in, run the two scripts again.
