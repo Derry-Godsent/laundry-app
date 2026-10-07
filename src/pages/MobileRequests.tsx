@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CalendarDays, Check, ChevronRight, ClipboardList, ExternalLink, Inbox,
-  MapPin, MessageSquareText, RefreshCw, ShieldCheck, Smartphone, X,
+  MapPin, MessageSquareText, Phone, RefreshCw, ShieldCheck, Smartphone, User, X,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { PermissionGuard } from "../components/PermissionGuard";
@@ -31,6 +31,8 @@ type RequestView = "active" | "waiting" | "confirmed" | "declined";
 
 interface MobileRequest {
   id: string;
+  client_id: string | null;
+  customer_account_id: string | null;
   request_status: RequestStatus;
   requested_for: string | null;
   confirmed_for: string | null;
@@ -111,9 +113,39 @@ const itemCountOf = (request: MobileRequest) =>
     ? request.laundry_items.reduce((total, item) => total + Number(item.quantity ?? 1), 0)
     : 0;
 
-const customerNameOf = (request: MobileRequest) => request.customer_accounts?.full_name || "Verified customer";
-const customerPhoneOf = (request: MobileRequest) =>
-  request.customer_accounts?.phone ? "Phone verified" : "Verified customer account";
+/* Who the request belongs to.
+ *
+ * The row holds the ids but not the names: the embedded read of
+ * customer_accounts is not a relationship the console can follow from this
+ * table, so the account behind an id is fetched separately, the same way the
+ * service-request queue does it. The linked client record is the second
+ * source, because the customer app writes one on the first booking. Both reads
+ * fail soft: a request is still worth handling when the name cannot be read,
+ * and the cell then says so instead of claiming a verification nobody made.
+ */
+type CustomerIdentity = { full_name: string | null; phone: string | null };
+type IdentityMap = Record<string, CustomerIdentity>;
+
+const identityOf = (
+  request: MobileRequest,
+  accounts: IdentityMap,
+  clients: IdentityMap
+): CustomerIdentity => {
+  const account = request.customer_account_id ? accounts[request.customer_account_id] : undefined;
+  if (account) return account;
+  const client = request.client_id ? clients[request.client_id] : undefined;
+  if (client) return client;
+  return {
+    full_name: request.customer_accounts?.full_name ?? null,
+    phone: request.customer_accounts?.phone ?? null,
+  };
+};
+
+const customerNameOf = (request: MobileRequest, accounts: IdentityMap, clients: IdentityMap) =>
+  identityOf(request, accounts, clients).full_name?.trim() || "Name not readable";
+
+const customerPhoneOf = (request: MobileRequest, accounts: IdentityMap, clients: IdentityMap) =>
+  identityOf(request, accounts, clients).phone?.trim() || "No number on file";
 
 function MobileRequestsContent() {
   const { canEdit, loading: permissionLoading } = usePermission("/mobile-requests");
@@ -127,11 +159,49 @@ function MobileRequestsContent() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<RequestView>("active");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<IdentityMap>({});
+  const [clientRecords, setClientRecords] = useState<IdentityMap>({});
   const [decision, setDecision] = useState<RequestStatus>("needs_customer_confirmation");
   const [date, setDate] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+
+  /* Names and numbers for the ids on the queue, in two reads. A failure here
+     never stops the queue from loading. */
+  const loadIdentities = useCallback(async (accountIds: string[], clientIds: string[]) => {
+    if (accountIds.length) {
+      const { data, error } = await supabase
+        .from("customer_accounts")
+        .select("auth_user_id, full_name, phone")
+        .in("auth_user_id", accountIds);
+      if (!error) {
+        const map: IdentityMap = {};
+        for (const row of (data ?? []) as Array<{ auth_user_id: string; full_name: string | null; phone: string | null }>) {
+          map[row.auth_user_id] = { full_name: row.full_name, phone: row.phone };
+        }
+        setAccounts(map);
+      } else {
+        console.warn("Customer accounts could not be read:", error.message);
+      }
+    }
+
+    if (clientIds.length) {
+      const { data, error } = await supabase
+        .from("clients")
+        .select("id, name, phone")
+        .in("id", clientIds);
+      if (!error) {
+        const map: IdentityMap = {};
+        for (const row of (data ?? []) as Array<{ id: string; name: string | null; phone: string | null }>) {
+          map[row.id] = { full_name: row.name, phone: row.phone };
+        }
+        setClientRecords(map);
+      } else {
+        console.warn("Client records could not be read:", error.message);
+      }
+    }
+  }, []);
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -151,6 +221,8 @@ function MobileRequestsContent() {
       // customer relationship it is kept, so the queue can show a real name.
       const mappedData = (data ?? []).map((req: any) => ({
         id: req.id,
+        client_id: req.client_id || null,
+        customer_account_id: req.customer_account_id || null,
         request_status: (req.request_status || "pending").toLowerCase() as RequestStatus,
         requested_for: req.requested_for || null,
         confirmed_for: req.confirmed_for || null,
@@ -172,9 +244,13 @@ function MobileRequestsContent() {
 
       setRequests(mappedData);
       setSelectedId((current) => current && mappedData.some((req: MobileRequest) => req.id === current) ? current : null);
+
+      const accountIds = Array.from(new Set(mappedData.map((row: MobileRequest) => row.customer_account_id).filter(Boolean))) as string[];
+      const clientIds = Array.from(new Set(mappedData.map((row: MobileRequest) => row.client_id).filter(Boolean))) as string[];
+      await loadIdentities(accountIds, clientIds);
     }
     setLoading(false);
-  }, []);
+  }, [loadIdentities]);
 
   const filtered = useMemo(() => {
     return requests.filter((request) => {
@@ -331,10 +407,10 @@ function MobileRequestsContent() {
                       className="mr-record"
                       selected={active}
                       onClick={() => setSelectedId(request.id)}
-                      aria-label={`Open request ${request.id.slice(0, 8)} for ${customerNameOf(request)}`}
-                      lead={<Avatar name={customerNameOf(request)} size="md" />}
-                      title={customerNameOf(request)}
-                      subtitle={`#${request.id.slice(0, 8)} · ${customerPhoneOf(request)}`}
+                      aria-label={`Open request ${request.id.slice(0, 8)} for ${customerNameOf(request, accounts, clientRecords)}`}
+                      lead={<Avatar name={customerNameOf(request, accounts, clientRecords)} size="md" />}
+                      title={customerNameOf(request, accounts, clientRecords)}
+                      subtitle={`#${request.id.slice(0, 8)} · ${customerPhoneOf(request, accounts, clientRecords)}`}
                       meta={[
                         <><CalendarDays size={12} /> {formatDay(request.requested_for)}</>,
                         <><ClipboardList size={12} /> {items ? `${items} items` : "Items to review"}</>,
@@ -369,7 +445,7 @@ function MobileRequestsContent() {
               className="mr-detail-card"
               variant={isNarrow ? "overlay" : "inline"}
               onClose={() => setSelectedId(null)}
-              title={customerNameOf(selected)}
+              title={customerNameOf(selected, accounts, clientRecords)}
               subtitle={`Laundry request · #${selected.id.slice(0, 8)} · received ${formatCreated(selected.created_at)}`}
               actions={
                 <>
@@ -407,6 +483,8 @@ function MobileRequestsContent() {
               <div className="mr-detail-body">
                 <CardBody>
                   <div className="meta-grid">
+                    <DetailItem icon={<User size={15} />} label="Customer" value={customerNameOf(selected, accounts, clientRecords)} />
+                    <DetailItem icon={<Phone size={15} />} label="Phone number" value={customerPhoneOf(selected, accounts, clientRecords)} />
                     <DetailItem icon={<CalendarDays size={15} />} label="Client's preferred date" value={formatDay(selected.requested_for)} />
                     <DetailItem icon={<CalendarDays size={15} />} label="Date proposed to client" value={selected.confirmed_for ? formatDay(selected.confirmed_for) : "None yet"} />
                     <DetailItem icon={<MapPin size={15} />} label="Collection area" value={selected.pickup_area || selected.pickup_address || "To be confirmed"} />

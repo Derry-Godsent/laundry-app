@@ -141,7 +141,7 @@ const CSS = `
   transition: background-color 0.15s ease;
 }
 
-@keyframes pdSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes pdSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
   .pd-trigger, .pd-av, .pd-chev, .pd-item, .pd-logout, .pd-item-ico, .pd-logout-ico { transition: none; }

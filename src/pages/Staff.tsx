@@ -536,13 +536,13 @@ export const Staff = () => {
           --sf-gold: #dba96a; --sf-emerald: #34d399; --sf-danger: #f87171;
           --sf-font: 'DM Sans','Inter',system-ui,sans-serif; --sf-mono: 'DM Mono','Fira Mono',ui-monospace,monospace;
         }
-        @keyframes sfFadeUp { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: translateY(0);} }
+        @keyframes sfFadeUp { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: none;} }
         @keyframes sfFadeIn { from { opacity:0;} to { opacity:1;} }
         @keyframes sfSpin { to { transform: rotate(360deg); } }
         @keyframes sfPulse { 0%,100% { opacity:1;} 50% { opacity:.5;} }
-        @keyframes sfSlideInR { from { transform: translateX(24px); opacity:0;} to { transform: translateX(0); opacity:1;} }
-        @keyframes sfPanelIn { from { transform: translateX(100%);} to { transform: translateX(0);} }
-        @keyframes sfScaleIn { from { opacity:0; transform: scale(.96) translateY(6px);} to { opacity:1; transform: scale(1) translateY(0);} }
+        @keyframes sfSlideInR { from { transform: translateX(24px); opacity:0;} to { transform: none; opacity:1;} }
+        @keyframes sfPanelIn { from { transform: translateX(100%);} to { transform: none;} }
+        @keyframes sfScaleIn { from { opacity:0; transform: scale(.96) translateY(6px);} to { opacity:1; transform: none;} }
         @keyframes sfShine { 0% { transform: translateX(-120%);} 100% { transform: translateX(220%);} }
         @keyframes sfAurora { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(3%,-2%) scale(1.05);} }
 

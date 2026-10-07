@@ -188,14 +188,29 @@ textarea,
 
 .spin { animation: spin 0.9s linear infinite; }
 
+/* NOTE on the final frame of every entrance animation in this file and in the
+   layout: it must land on transform: none, not translateY(0). With a fill mode
+   the last keyframe is retained after the animation ends, and a retained
+   transform, even an identity one, makes the element a containing block for
+   every position: fixed descendant. That is how a bottom sheet, a toast or a
+   full-screen takeover ends up positioned against the page instead of the
+   screen, and scrolling with the page. */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* While an overlay is open the page behind it does not move. `useOverlay` sets
+   the flag; body covers the document, .main-body is the console's own scroller
+   and would otherwise keep scrolling under a sheet. */
+body[data-scroll-locked="true"],
+body[data-scroll-locked="true"] .main-body {
+  overflow: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -167,10 +167,10 @@ const CSS = `
 .cl-toast-x{background:none;border:none;cursor:pointer;color:inherit;opacity:.6;display:flex;align-items:center;transition:opacity .15s}
 .cl-toast-x:hover{opacity:1}
 
-@keyframes clDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes clUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes clRowIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
-@keyframes clSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes clDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform: none}}
+@keyframes clUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform: none}}
+@keyframes clRowIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform: none}}
+@keyframes clSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform: none}}
 @keyframes clSpin{to{transform:rotate(360deg)}}
 @keyframes clBarGrow{from{width:0}to{width:75%}}
 

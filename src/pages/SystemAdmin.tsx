@@ -305,7 +305,7 @@ export const SystemAdmin = () => {
     <PermissionGuard path="/system">
       <div className="sys-admin-root" style={{ background: T.bgBase, minHeight: "100%", color: T.textPrimary, fontFamily: FONT }}>
         <style>{`
-          @keyframes fadeInUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+          @keyframes fadeInUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform: none; } }
           @keyframes spin { to { transform: rotate(360deg); } }
           .spin { animation: spin 0.8s linear infinite; }
           .sys-admin-root * { box-sizing: border-box; }

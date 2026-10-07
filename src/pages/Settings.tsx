@@ -239,7 +239,7 @@ export const Settings = () => {
   return (
     <div className="cs-root" style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT, color: T.textPrimary, position: "relative" }}>
       <style>{`
-        @keyframes csFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes csFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
         @keyframes csSpin { to { transform: rotate(360deg); } }
         @keyframes csPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
         @keyframes csAurora { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(2%,-3%) scale(1.06); } }

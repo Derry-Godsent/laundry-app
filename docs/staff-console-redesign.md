@@ -401,6 +401,22 @@ webview scrollbar under 768px. Attribute substring selectors are now absent from
 the stylesheet, so a page cannot accidentally inherit styling from the exact
 byte sequence of its inline style any more.
 
+**Phase D follow-up, reported from a phone.** Three of the four are one bug at
+heart, and none of them could be seen by a static check: there is no browser in
+the build environment.
+
+| Reported | What was actually happening | Fix |
+| --- | --- | --- |
+| On Mobile Requests the takeover had to be scrolled before the Send date button could be reached, and the Back / name / status bar moved with it. Service Requests "opened the modal weirdly". | Every page was inside two wrappers with an entrance animation that ended on `transform: translateY(0)` and kept it (fill mode `both`): `.route-transition` and `.page`. A retained transform, even an identity one, makes that element the containing block for `position: fixed` descendants. So the takeover was laid out against the page instead of the screen, and it scrolled with `.main-body`: its header walked off the top and its pinned action ended up below the fold. It also stacked under the top bar instead of over it. | Two parts. Every finite entrance animation in the repo now lands on `transform: none`, so no wrapper keeps a containing block (33 keyframes). And `DetailView` renders its takeover on `<body>` rather than in place, which makes it immune to any ancestor, then opens through `useOverlay`: Escape closes it, focus stays inside, and the page behind it is frozen. The bar and the action row are flex siblings of the scrolling body, so they cannot move. |
+| The notification panel nearly filled a phone and scrolling it scrolled the app behind it. | The panel's list was given `max-height: none` under 640px, so a long list grew past the panel and was clipped by its `overflow: hidden`: nothing inside could scroll, and the swipe went to the page. The row actions were `opacity: 0` until `:hover`, which a touch screen never fires. | The list is the scroller of the panel's flex column (`flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain`), the panel is capped by the visual viewport so it can never be taller than what is on screen, and on a phone it is a sheet under the top bar with a backdrop that swallows the gesture, a close button, row actions that are always visible and thumb sized, and the page behind it locked. |
+| The Mobile Requests queue showed "Verified customer" instead of who was actually asking. | The row carries `customer_account_id` but the embedded read of `customer_accounts` was never in the query, so the mapper's `customer_accounts` line was always undefined and both helpers fell through to their placeholder strings. The phone number was never rendered either: both branches of the helper printed a claim, not a number. | The ids on the queue are resolved in two reads, the same way the service-request queue does it: `customer_accounts` by `auth_user_id`, then `clients` by `client_id` as the fallback, both failing soft so a request is still workable when a name cannot be read. The real name and number now appear in the list row, in the takeover header and as two detail rows. The placeholders are honest when a read fails: "Name not readable", "No number on file". |
+
+**Rule for new pages.** An entrance keyframe must land on `transform: none`, never
+on `translateY(0)` or `scale(1)`, and any wrapper that can contain a full-screen
+or pinned surface must not be a transform, filter or containment ancestor of it.
+A retained identity transform silently moves every `position: fixed` element
+inside it, which is how a takeover ends up scrolling with the page.
+
 **Copy rules (repo-wide).** No em dashes. `npm run check:copy` fails on U+2014
 anywhere in the repo; use a full stop, a colon, a comma or a middot separator
 instead, and a plain hyphen for "no value" cells. En dashes survive only in

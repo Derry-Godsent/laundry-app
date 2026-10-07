@@ -493,12 +493,12 @@
 
 @keyframes loginFadeUp {
   from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes loginFadeRight {
   from { opacity: 0; transform: translateX(24px); }
-  to { opacity: 1; transform: translateX(0); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes loginPing {
@@ -525,7 +525,7 @@
 
 @keyframes loginBannerIn {
   from { transform: translateY(-100%); }
-  to { transform: translateY(0); }
+  to { transform: none; }
 }
 
 /* ── Reduced Motion ────────────────────────────── */

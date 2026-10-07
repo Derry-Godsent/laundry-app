@@ -53,14 +53,14 @@ const DISPLAY = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
 
 const GlobalStyle = () => (
   <style>{`
-    @keyframes fadeInUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform: none; } }
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-    @keyframes scaleIn { from { opacity:0; transform:scale(0.96) translateY(6px); } to { opacity:1; transform:scale(1) translateY(0); } }
+    @keyframes scaleIn { from { opacity:0; transform:scale(0.96) translateY(6px); } to { opacity:1; transform: none; } }
     @keyframes pulseDot { 0%,100% { opacity:1; box-shadow:0 0 0 0 currentColor; } 50% { opacity:0.55; } }
     @keyframes ringPulse { 0% { box-shadow:0 0 0 0 rgba(63,227,166,0.35); } 70% { box-shadow:0 0 0 8px rgba(63,227,166,0); } 100% { box-shadow:0 0 0 0 rgba(63,227,166,0); } }
     @keyframes shimmer { 0% { background-position:-400px 0; } 100% { background-position:400px 0; } }
     @keyframes drift { 0%,100% { transform:translate(0,0); } 50% { transform:translate(-3%,4%); } }
-    @keyframes slideBanner { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideBanner { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform: none; } }
     @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
 
     .pay-root * { box-sizing:border-box; }

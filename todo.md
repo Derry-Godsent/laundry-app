@@ -93,6 +93,20 @@ the five-screen correctness pass and the definition of done live in
       Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile.
       All fourteen screens have had their mobile pass. Verified with `tsc -b`, `vite build`,
       `check:copy` and a 30-point structural check across the ten D4 files.
+- [x] Phase D follow-up, three things reported from a phone.
+      The takeover on Mobile Requests and Service Requests scrolled with the page (its bar and
+      its Send date button moved) because `.route-transition` and `.page` kept a transform from
+      their entrance animations, which made them the containing block for `position: fixed`
+      descendants; all finite entrance keyframes now land on `transform: none` (33 of them) and
+      `DetailView` renders its takeover on `<body>`, through `useOverlay`, so Escape closes it,
+      focus stays inside and the page behind is frozen. The notification panel clipped a long
+      list, could not scroll it and let the swipe reach the page; the list is now the scroller of
+      the panel's flex column, the panel is capped by the visible viewport and on a phone it is a
+      sheet under the top bar with a backdrop that swallows the gesture, a close button, always
+      visible thumb-sized row actions and the page locked. Mobile Requests now resolves the real
+      customer through `customer_accounts` and, failing that, the linked `clients` row, showing
+      the name and number in the queue, the header and the detail; the placeholders that claimed
+      "Verified customer" are gone.
 - [ ] Phase E, overall appearance: palette, type, surfaces, border contrast, spacing,
       button hierarchy, status colours, icons, states, motion, wording. Refine the dark
       operational style rather than replacing it.

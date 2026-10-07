@@ -17,7 +17,9 @@ import { useCallback, useEffect, useRef } from "react";
  * and some did not.
  */
 export const useOverlay = (isOpen: boolean, onClose: () => void) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  /* Writable, so a caller that has its own ref for the same node can pass it
+     through as well. */
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
   const focusables = useCallback((): HTMLElement[] => {
@@ -65,18 +67,24 @@ export const useOverlay = (isOpen: boolean, onClose: () => void) => {
   }, [isOpen, onClose, focusables]);
 
   /* The page behind the panel must not scroll: on a phone that is how a sheet
-     ends up half off the screen. */
+     ends up half off the screen. The console scrolls inside .main-body rather
+     than the document, so the flag is what freezes that scroller (see base.css);
+     locking the body alone left the page moving under an open sheet. */
   useEffect(() => {
     if (!isOpen) return;
 
     const { overflow, paddingRight } = document.body.style;
     const scrollbar = window.innerWidth - document.documentElement.clientWidth;
+    const previous = document.body.dataset.scrollLocked;
 
     document.body.style.overflow = "hidden";
+    document.body.dataset.scrollLocked = "true";
     if (scrollbar > 0) document.body.style.paddingRight = `${scrollbar}px`;
 
     return () => {
       document.body.style.overflow = overflow;
+      if (previous === undefined) delete document.body.dataset.scrollLocked;
+      else document.body.dataset.scrollLocked = previous;
       document.body.style.paddingRight = paddingRight;
     };
   }, [isOpen]);

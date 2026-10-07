@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Bell, Check, X, CheckCircle, Info, AlertTriangle, AlertCircle } from "lucide-react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useOverlay } from "@/components/ui/useOverlay";
 
 const CSS = `
 
@@ -56,6 +58,7 @@ const CSS = `
   box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
   z-index: 9999;
   overflow: hidden;
+  overscroll-behavior: contain;
   animation: ndSlideIn 0.22s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -69,6 +72,7 @@ const CSS = `
   font-size: 13.5px; font-weight: 700; color: #edf0f8;
   display: flex; align-items: center; gap: 8px;
 }
+.nd-head-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .nd-unread-chip {
   font-size: 10px; font-weight: 700;
   padding: 2px 7px; border-radius: 20px;
@@ -83,8 +87,17 @@ const CSS = `
 .nd-mark-all:hover { color: #9aa3b5; }
 .nd-mark-all:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
-/* List */
-.nd-list { max-height: 320px; overflow-y: auto; }
+/* List. It is the scroller of the panel's flex column, so a long list scrolls
+   inside the panel instead of being clipped at the panel's edge, and reaching
+   the end of it does not hand the scroll to the page behind. */
+.nd-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
 .nd-list::-webkit-scrollbar { width: 3px; }
 .nd-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 99px; }
 
@@ -146,6 +159,12 @@ const CSS = `
   transition: opacity 0.15s ease;
 }
 .nd-item:hover .nd-item-acts { opacity: 1; }
+
+/* A touch screen has no hover, so anything that only appears on hover is
+   invisible and, in practice, unreachable. */
+@media (hover: none) {
+  .nd-item-acts { opacity: 1; }
+}
 .nd-act-btn {
   width: 24px; height: 24px; border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.08);
@@ -181,9 +200,9 @@ const CSS = `
 .nd-view-all:hover { background: rgba(255,255,255,0.06); color: #9aa3b5; }
 .nd-view-all:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
-@keyframes ndSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes ndSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: none; } }
 @keyframes ndPop     { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@keyframes ndRowIn   { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes ndRowIn   { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: none; } }
 
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
@@ -200,21 +219,64 @@ const CSS = `
 
 /* ── Phones: the panel becomes a sheet under the top bar ───────────────── */
 @media (max-width: 640px) {
+  .nd-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(2, 3, 7, 0.55);
+    /* The backdrop swallows the gesture: without this, a swipe on the empty
+       space beside the sheet scrolls the page behind it. */
+    touch-action: none;
+    animation: fadeIn 0.2s var(--ease-out, ease) both;
+  }
+
   .nd-panel {
-    /* The sheet hangs below the top bar inside the visible area, so it stays
-       put when the page is zoomed or the keyboard is open. */
+    /* Hangs below the top bar and is capped by what is on screen, so it can
+       never be taller than the visible area and never puts its own action row
+       out of reach: the header stays at the top, the footer at the bottom, and
+       the list between them is the only thing that scrolls. A short list gives
+       a short sheet; a long one scrolls inside this box. The cap comes from the
+       visual viewport, so it holds while the page is zoomed or the keyboard is
+       open. */
     top: calc(var(--vv-top, 0px) + var(--safe-top, 0px) + var(--topbar-h, 56px) + 8px);
-    left: 12px;
-    right: 12px;
+    bottom: auto;
+    left: 10px;
+    right: 10px;
     width: auto;
     max-width: none;
-    max-height: calc(var(--vv-h, 100dvh) - var(--safe-top, 0px) - var(--topbar-h, 56px) - 24px);
+    max-height: calc(
+      var(--vv-h, 100dvh) - var(--safe-top, 0px) - var(--safe-bottom, 0px) - var(--topbar-h, 56px) - 32px
+    );
   }
 
   .nd-list { max-height: none; }
 
-  .nd-item { padding: 12px 14px; }
+  .nd-head { padding: 12px 12px 10px 16px; gap: 8px; }
+  .nd-head-title { font-size: 14px; }
+  .nd-mark-all { min-height: 32px; padding: 0 8px; }
+  .nd-close { display: inline-flex; }
+  .nd-item { padding: 13px 14px; gap: 10px; }
+  .nd-item-title { font-size: 13px; }
+  .nd-item-desc { font-size: 12.5px; }
+  .nd-item-time { font-size: 11px; }
+  .nd-act-btn { width: 36px; height: 36px; }
+  .nd-view-all { padding: 12px; font-size: 13.5px; }
 }
+
+/* Close button: the sheet is dismissed by tapping the backdrop as well, but a
+   visible way out is what a phone user reaches for. */
+.nd-close {
+  display: none; align-items: center; justify-content: center;
+  width: 32px; height: 32px; flex-shrink: 0;
+  border: 1px solid var(--line-soft);
+  background: var(--ink-raised);
+  color: var(--text-3);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.nd-close:hover { color: var(--text-1); background: var(--ink-active); }
+.nd-close:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* ── Console alignment ───────────────────────────────────────────────────
    Alerts sit in the topbar next to the account menu, so they use the same
@@ -298,7 +360,14 @@ export const NotificationDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  /* Under 640px the panel is a sheet with a backdrop, so it behaves like a
+     dialog: the page behind it cannot scroll and Escape closes it. On a desk it
+     stays a dropdown anchored to the bell. */
+  const isSheet = useMediaQuery("(max-width: 640px)");
+  const close = useCallback(() => setIsOpen(false), []);
+  const sheetRef = useOverlay(isOpen && isSheet, close);
 
   /* The topbar has a backdrop-filter, which makes it a containing block for
      anything position: fixed inside it. The panel is therefore rendered in a
@@ -382,8 +451,15 @@ export const NotificationDropdown = ({
       </button>
 
       {isOpen && createPortal(
+        <>
+        {isSheet ? (
+          <div className="nd-scrim" onClick={close} aria-hidden="true" />
+        ) : null}
         <div
-          ref={panelRef}
+          ref={(node) => {
+            panelRef.current = node;
+            sheetRef.current = node;
+          }}
           className="nd-panel"
           role="dialog"
           aria-label="Notifications"
@@ -399,15 +475,20 @@ export const NotificationDropdown = ({
               Notifications
               {unreadCount > 0 && <span className="nd-unread-chip">{unreadCount} new</span>}
             </span>
-            {unreadCount > 0 && (
-              <button className="nd-mark-all" onClick={handleMarkAllRead} aria-label="Mark all as read">
-                Mark all read
+            <span className="nd-head-actions">
+              {unreadCount > 0 && (
+                <button className="nd-mark-all" onClick={handleMarkAllRead} aria-label="Mark all as read">
+                  Mark all read
+                </button>
+              )}
+              <button className="nd-close" onClick={close} aria-label="Close notifications" data-autofocus>
+                <X size={15} />
               </button>
-            )}
+            </span>
           </div>
 
           {/* List */}
-          <div className="nd-list">
+          <div className="nd-list" role="list">
             {notifications.length === 0 ? (
               <div className="nd-empty">
                 <span className="nd-empty-ico">🔔</span>
@@ -458,7 +539,8 @@ export const NotificationDropdown = ({
               </button>
             </div>
           )}
-        </div>,
+        </div>
+        </>,
         document.body
       )}
     </div>
