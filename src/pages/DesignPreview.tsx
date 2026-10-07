@@ -49,7 +49,7 @@ const SAMPLE_STATS = [
   { label: "Total Orders", value: "1,248", role: "hero" as const, accent: "var(--brand-500)", icon: <ClipboardList size={19} />, meta: "18 recorded today, 12% ahead of yesterday", spark: [4, 6, 5, 9, 7, 11, 10, 14] },
   { label: "In Progress", value: "37", accent: "var(--info-500)", icon: <Clock size={19} />, meta: "9 still awaiting review", spark: [3, 5, 4, 6, 5, 7, 6, 8] },
   { label: "Completed Today", value: "14", accent: "var(--ok-500)", icon: <CheckCircle2 size={19} />, meta: "4% behind yesterday", spark: [8, 7, 9, 6, 8, 7, 6, 5] },
-  { label: "Revenue Today", value: "\u20b56,420", accent: "var(--brand-500)", icon: <DollarSign size={19} />, meta: "GH\u20b51,180 ahead of yesterday", spark: [2, 4, 3, 6, 5, 8, 9, 12] },
+  { label: "Revenue Today", value: "GH\u20b56,420", accent: "var(--brand-500)", icon: <DollarSign size={19} />, meta: "GH\u20b51,180 ahead of yesterday", spark: [2, 4, 3, 6, 5, 8, 9, 12] },
 ];
 
 const SAMPLE_WORKFLOW = [
