@@ -9,14 +9,14 @@
   height: 7px;
   border-radius: 50%;
   background: var(--ok-500);
-  box-shadow: 0 0 0 0 rgba(61, 220, 151, 0.45);
   animation: livePulse 2.4s var(--ease-in-out) infinite;
 }
 
+/* The dot used to throw a widening green shadow ring every 2.4 seconds, which
+   read as a click target that was never there. A light breathing is enough. */
 @keyframes livePulse {
-  0% { box-shadow: 0 0 0 0 rgba(61, 220, 151, 0.4); }
-  70% { box-shadow: 0 0 0 7px rgba(61, 220, 151, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(61, 220, 151, 0); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }
 
 .dash-skeleton-head { margin-bottom: var(--sp-6); }
@@ -176,7 +176,7 @@
   border-radius: 50%;
   margin-top: 6px;
   flex-shrink: 0;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line-faint);
 }
 
 .act-body { flex: 1; min-width: 0; }
@@ -249,9 +249,9 @@
 
 .qa-btn--brand { --qa-accent: var(--brand-500); }
 .qa-btn--info { --qa-accent: var(--info-500); }
-.qa-btn--gold { --qa-accent: var(--gold-500); }
+.qa-btn--warn { --qa-accent: var(--warn-500); }
 .qa-btn--ok { --qa-accent: var(--ok-500); }
-.qa-btn--violet { --qa-accent: var(--violet-500); }
+.qa-btn--accent { --qa-accent: var(--brand-400); }
 .qa-btn--warn { --qa-accent: var(--warn-500); }
 .qa-btn--neutral { --qa-accent: var(--text-3); }
 

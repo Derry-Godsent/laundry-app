@@ -66,7 +66,7 @@ const STATUS_META: Record<RequestStatus, StatusMeta> = {
   confirmed: { label: "Approved", tone: "ok" },
   declined: { label: "Declined", tone: "bad" },
   cancelled: { label: "Cancelled", tone: "neutral" },
-  converted: { label: "Order created", tone: "violet" },
+  converted: { label: "Order created", tone: "accent" },
 };
 
 const VIEW_COPY: Record<RequestView, { title: string; sub: string; empty: string }> = {
@@ -418,7 +418,7 @@ function MobileRequestsContent() {
                       ]}
                       trail={
                         <>
-                          {request.express ? <StatusPill tone="gold">Express</StatusPill> : null}
+                          {request.express ? <StatusPill tone="warn">Express</StatusPill> : null}
                           <StatusPill tone={status.tone} dot>{status.label}</StatusPill>
                         </>
                       }

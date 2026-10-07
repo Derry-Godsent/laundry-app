@@ -55,18 +55,18 @@ const PAGES_MATRIX = [
 ];
 
 const STATUS_COLORS: Record<string, string> = { 
-  active: "#34d399", 
-  onduty: "#dba96a", 
+  active: "var(--ok-500)", 
+  onduty: "var(--warn-500)", 
   offline: "#3a4460" 
 };
 
 const T = {
-  bgBase: "#07090e", bgSurface: "#0c0f18", bgRaised: "#111520", bgElevated: "#161c2c",
-  borderFaint: "rgba(255,255,255,0.05)", borderSoft: "rgba(255,255,255,0.09)", borderMid: "rgba(255,255,255,0.15)",
-  textPrimary: "#edf0f8", textSec: "#9aa3b5", textTert: "#556070", textHint: "#2e3a4e",
-  accent: "#6c72f3", accentDim: "rgba(108,114,243,0.13)", accentBord: "rgba(108,114,243,0.28)",
-  emerald: "#34d399", emeraldDim: "rgba(52,211,153,0.1)", emeraldBord: "rgba(52,211,153,0.2)",
-  ember: "#f87171", emberDim: "rgba(248,113,113,0.1)", emberBord: "rgba(248,113,113,0.32)",
+  bgBase: "var(--ink-base)", bgSurface: "var(--ink-shell)", bgRaised: "var(--ink-card)", bgElevated: "var(--ink-raised)",
+  borderFaint: "var(--line-faint)", borderSoft: "var(--line-soft)", borderMid: "var(--line)",
+  textPrimary: "var(--text-1)", textSec: "var(--text-2)", textTert: "var(--text-3)", textHint: "var(--text-4)",
+  accent: "var(--brand-500)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)",
+  emerald: "var(--ok-500)", emeraldDim: "var(--ok-soft)", emeraldBord: "var(--ok-border)",
+  ember: "var(--bad-500)", emberDim: "var(--bad-soft)", emberBord: "var(--bad-border)",
 };
 
 const FONT = "var(--font-ui)";
@@ -438,7 +438,7 @@ export const SystemAdmin = () => {
               <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#fca5a5" }}>
                 <WifiOff size={15} color={T.ember} /><span>System is offline. Showing cached data. Changes may not save.</span>
               </div>
-              <button onClick={() => fetchAllData()} className="action-btn" style={{ background: "rgba(248,113,113,0.1)", border: `1px solid ${T.emberBord}`, color: T.ember }}>
+              <button onClick={() => fetchAllData()} className="action-btn" style={{ background: "var(--bad-soft)", border: `1px solid ${T.emberBord}`, color: T.ember }}>
                 <RefreshCw size={13} /> Retry
               </button>
             </div>
@@ -469,7 +469,7 @@ export const SystemAdmin = () => {
                       {filteredStaff.length === 0 ? (<tr><td colSpan={5} style={{ textAlign: "center", padding: "48px 20px", color: T.textTert }}>No staff match your search</td></tr>) : (
                         filteredStaff.map((s) => (
                           <tr key={s.id} className="sys-row">
-                            <td data-label="Staff"><div style={{ display: "flex", alignItems: "center", gap: "11px" }}><div style={{ width: 36, height: 36, borderRadius: "50%", background: `linear-gradient(155deg, hsl(${(s.first_name.charCodeAt(0) * 37) % 360},40%,24%), hsl(${(s.first_name.charCodeAt(0) * 37) % 360},35%,14%))`, color: `hsl(${(s.first_name.charCodeAt(0) * 37) % 360},65%,74%)`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 12 }}>{s.first_name.charAt(0)}{s.last_name.charAt(0)}</div><div><div style={{ fontWeight: 600, color: T.textPrimary }}>{s.first_name} {s.last_name}</div><div style={{ fontSize: "11.5px", color: T.textTert, fontFamily: MONO }}>{s.phone}</div></div></div></td>
+                            <td data-label="Staff"><div style={{ display: "flex", alignItems: "center", gap: "11px" }}><div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--ink-active)", color: "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 12 }}>{s.first_name.charAt(0)}{s.last_name.charAt(0)}</div><div><div style={{ fontWeight: 600, color: T.textPrimary }}>{s.first_name} {s.last_name}</div><div style={{ fontSize: "11.5px", color: T.textTert, fontFamily: MONO }}>{s.phone}</div></div></div></td>
                             <td data-label="Role">{canEdit ? (<select className="sys-role-sel" value={s.role} onChange={(e) => handleUpdateRole(s.id, e.target.value as StaffRole)} disabled={updating === s.id} style={{ background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: "7px", color: T.textPrimary, padding: "6px 10px", fontFamily: FONT, cursor: updating === s.id ? "not-allowed" : "pointer", opacity: updating === s.id ? 0.6 : 1 }}>{ROLE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}</select>) : <span style={{ fontSize: "11px", fontWeight: 700, padding: "4px 10px", borderRadius: "20px", background: T.accentDim, color: T.accent, border: `1px solid ${T.accentBord}` }}>{s.role}</span>}</td>
                             <td data-label="Status"><span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11.5px", fontWeight: 700, padding: "5px 11px", borderRadius: "20px", border: `1px solid ${STATUS_COLORS[s.status]}40`, background: `${STATUS_COLORS[s.status]}12`, color: STATUS_COLORS[s.status] }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_COLORS[s.status] }} />{s.status}</span></td>
                             <td data-label="Joined" style={{ color: T.textTert, fontSize: "12.5px" }}>{s.joined_date}</td>

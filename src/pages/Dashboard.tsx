@@ -235,11 +235,11 @@ function AreaChart({ data, timeRange }: { data: ChartPoint[]; timeRange: TimeRan
           return (
             <>
               <line x1={p.x} y1={pad.t} x2={p.x} y2={H - pad.b}
-                stroke="rgba(111,119,247,0.35)" strokeWidth="1" strokeDasharray="3 3" />
+                stroke="var(--brand-border)" strokeWidth="1" strokeDasharray="3 3" />
               <circle cx={p.x} cy={p.y} r="5" fill="var(--brand-500)" />
-              <circle cx={p.x} cy={p.y} r="9" fill="rgba(111,119,247,0.18)" />
+              <circle cx={p.x} cy={p.y} r="9" fill="var(--brand-soft)" />
               <rect x={tipX} y={tipY} width={TOOLTIP_W} height={TOOLTIP_H} rx={6}
-                fill="var(--ink-hover)" stroke="rgba(111,119,247,0.45)" strokeWidth="1" />
+                fill="var(--ink-hover)" stroke="var(--brand-border)" strokeWidth="1" />
               <text x={tipX + TOOLTIP_W / 2} y={tipY + 10} textAnchor="middle"
                 fill="var(--text-3)" fontSize="9" fontWeight="500">{p.label}</text>
               <text x={tipX + TOOLTIP_W / 2} y={tipY + 21} textAnchor="middle"
@@ -352,14 +352,14 @@ export const Dashboard = () => {
   const [chartData, setChartData] = useState<ChartPoint[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [workflow, setWorkflow] = useState<WorkflowStage[]>([
-    { label: "Received & Sorted", key: "Pending", value: 0, count: 0, color: "#6f77f7" },
+    { label: "Received & Sorted", key: "Pending", value: 0, count: 0, color: "var(--brand-500)" },
     { label: "Washing", key: "Washing", value: 0, count: 0, color: "#62cdff" },
     { label: "Ironing", key: "Ironing", value: 0, count: 0, color: "#e0b473" },
     { label: "Ready for Delivery", key: "Ready", value: 0, count: 0, color: "#3ddc97" },
     { label: "Delivered", key: "Delivered", value: 0, count: 0, color: "#b18cff" },
   ]);
   const [services, setServices] = useState<ServiceSegment[]>([
-    { label: "Laundry", value: 42, color: "#6f77f7" },
+    { label: "Laundry", value: 42, color: "var(--brand-500)" },
     { label: "Cleaning", value: 28, color: "#62cdff" },
     { label: "Fumigation", value: 18, color: "#e0b473" },
     { label: "Car Detail", value: 12, color: "#3ddc97" },
@@ -456,7 +456,7 @@ export const Dashboard = () => {
           const cat = item.services?.category || "Other";
           serviceCounts[cat] = (serviceCounts[cat] || 0) + (item.quantity || 1);
         });
-        const colors = ["#6f77f7", "#62cdff", "#e0b473", "#3ddc97", "#b18cff"];
+        const colors = ["var(--brand-500)", "#62cdff", "#e0b473", "#3ddc97", "#b18cff"];
         const totalSvc = Object.values(serviceCounts).reduce((a, b) => a + b, 0) || 1;
         setServices(Object.entries(serviceCounts).slice(0, 4).map(([label, value], i) => ({
           label,
@@ -540,19 +540,19 @@ export const Dashboard = () => {
       label: "Revenue Today",
       value: `₵${countedRevenue.toLocaleString()}`,
       icon: <DollarSign size={19} />,
-      accent: "var(--gold-500)",
+      accent: "var(--warn-500)",
       delta: { value: delta(metrics.revenueToday, metrics.revenueYesterday), label: `${fmt(metrics.revenueToday - metrics.revenueYesterday)} against yesterday` },
-      sparkline: <Sparkline data={sparklines.revenue ?? []} color="var(--gold-500)" />,
+      sparkline: <Sparkline data={sparklines.revenue ?? []} color="var(--warn-500)" />,
     },
   ], [countedTotal, countedInProgress, countedCompleted, countedRevenue, metrics, sparklines, delta, fmt]);
 
   const quickActions = useMemo(() => [
     { icon: <ClipboardList size={19} />, label: "New Order", tone: "brand", path: "/new-order", needsEdit: true },
     { icon: <Users size={19} />, label: "Add Client", tone: "info", path: "/clients", needsEdit: true },
-    { icon: <Receipt size={19} />, label: "Receipts", tone: "gold", path: "/receipt", needsEdit: false },
+    { icon: <Receipt size={19} />, label: "Receipts", tone: "warn", path: "/receipt", needsEdit: false },
     { icon: <Package size={19} />, label: "Mobile Requests", tone: "ok", path: "/mobile-requests", needsEdit: false },
     { icon: <BarChart3 size={19} />, label: "Reports", tone: "info", path: "/reports", needsEdit: false },
-    { icon: <Shield size={19} />, label: "Staff", tone: "violet", path: "/staff", needsEdit: false },
+    { icon: <Shield size={19} />, label: "Staff", tone: "accent", path: "/staff", needsEdit: false },
     { icon: <FileText size={19} />, label: "Services", tone: "warn", path: "/services", needsEdit: false },
     { icon: <Settings size={19} />, label: "Settings", tone: "neutral", path: "/settings", needsEdit: false },
   ], []);

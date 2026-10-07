@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   Shield, Users, Lock, Eye, EyeOff, Save, AlertTriangle, Check, Clock,
-  RefreshCw, FileText, WifiOff
+  RefreshCw, FileText, WifiOff, X
 } from "lucide-react";
 import { usePermission } from "../hooks/usePermission";
 import { useLocation } from "react-router-dom";
@@ -28,12 +28,12 @@ const PAGE_CONFIG = [
 ];
 
 const T = {
-  bgBase: "#05070b", bgSurface: "#0a0d15", bgRaised: "#10141f", bgElevated: "#161c2c",
-  borderFaint: "rgba(255,255,255,0.05)", borderSoft: "rgba(255,255,255,0.09)", borderMid: "rgba(255,255,255,0.16)",
-  textPrimary: "#edf0f8", textSec: "#9aa3b5", textTert: "#556070", textHint: "#2e3a4e",
-  accent: "#6c72f3", accentBright: "#8489ff", accentDim: "rgba(108,114,243,0.13)", accentBord: "rgba(108,114,243,0.28)", accentGlow: "rgba(108,114,243,0.45)",
-  emerald: "#34d399", emeraldDim: "rgba(52,211,153,0.1)", emeraldBord: "rgba(52,211,153,0.2)", emeraldGlow: "rgba(52,211,153,0.5)",
-  ember: "#f87171", emberDim: "rgba(248,113,113,0.1)", emberBord: "rgba(248,113,113,0.25)", emberGlow: "rgba(248,113,113,0.45)",
+  bgBase: "var(--ink-base)", bgSurface: "var(--ink-shell)", bgRaised: "var(--ink-card)", bgElevated: "var(--ink-raised)",
+  borderFaint: "var(--line-faint)", borderSoft: "var(--line-soft)", borderMid: "var(--line)",
+  textPrimary: "var(--text-1)", textSec: "var(--text-2)", textTert: "var(--text-3)", textHint: "var(--text-4)",
+  accent: "var(--brand-500)", accentBright: "var(--brand-400)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)", accentGlow: "var(--brand-glow)",
+  emerald: "var(--ok-500)", emeraldDim: "var(--ok-soft)", emeraldBord: "var(--ok-border)", emeraldGlow: "var(--ok-soft)",
+  ember: "var(--bad-500)", emberDim: "var(--bad-soft)", emberBord: "var(--bad-border)", emberGlow: "var(--bad-soft)",
 };
 
 const FONT = "var(--font-ui)";
@@ -69,11 +69,11 @@ const StyleSheet = () => (
 
     .sec-root * { box-sizing: border-box; }
     .sec-input { transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; width: 100%; padding: 10px 12px; background: ${T.bgSurface}; border: 1px solid ${T.borderSoft}; border-radius: 8px; color: ${T.textPrimary}; font-size: 14px; outline: none; font-family: ${FONT}; }
-    .sec-input:focus { border-color: ${T.accent} !important; box-shadow: 0 0 0 3px ${T.accentDim}, 0 0 16px ${T.accentDim}; background: ${T.bgElevated} !important; }
+    .sec-input:focus { border-color: ${T.accent} !important; box-shadow: var(--focus-ring); background: ${T.bgElevated} !important; }
     .sec-input:hover { border-color: ${T.borderMid} !important; }
 
     .sec-btn-primary { transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease; padding: 10px 20px; border-radius: 9px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 7px; font-family: ${FONT}; border: none; }
-    .sec-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px ${T.accentGlow}; }
+    .sec-btn-primary:hover { filter: brightness(1.06); }
     .sec-btn-primary:active { transform: translateY(0px) scale(0.98); }
 
     .sec-btn-ghost { transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.15s ease; padding: 8px 16px; border-radius: 8px; font-size: 13px; display: flex; align-items: center; gap: 6px; font-family: ${FONT}; border: 1px solid ${T.borderSoft}; background: ${T.bgElevated}; }
@@ -81,8 +81,8 @@ const StyleSheet = () => (
 
     .sec-tab { position: relative; transition: color 0.2s ease; display: flex; align-items: center; gap: 8px; padding: 14px 18px; font-size: 13.5px; font-weight: 500; cursor: pointer; font-family: ${FONT}; border: none; background: transparent; white-space: nowrap; }
     .sec-tab:hover { color: ${T.textPrimary} !important; }
-    .sec-tab-bar { position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; border-radius: 2px 2px 0 0; background: linear-gradient(90deg, ${T.accent}, ${T.accentBright}); transform: scaleX(0); transform-origin: center; transition: transform 0.28s cubic-bezier(.4,0,.2,1), box-shadow 0.28s ease; }
-    .sec-tab-bar.active { transform: scaleX(1); box-shadow: 0 0 10px ${T.accentGlow}; }
+    .sec-tab-bar { position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; border-radius: 2px 2px 0 0; background: var(--brand-500); transform: scaleX(0); transform-origin: center; transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
+    .sec-tab-bar.active { transform: scaleX(1); }
 
     .sec-row { transition: background 0.15s ease, transform 0.15s ease; animation: secFadeUp 0.35s ease both; }
     .sec-row:hover { background: ${T.bgElevated}; }
@@ -90,7 +90,7 @@ const StyleSheet = () => (
 
     .sec-toggle { transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; position: relative; display: inline-block; width: 40px; height: 22px; border-radius: 20px; border: 1px solid ${T.borderSoft}; }
     .sec-toggle:hover { box-shadow: 0 0 0 4px rgba(255,255,255,0.04); }
-    .sec-toggle-thumb { transition: left 0.22s cubic-bezier(.4,0,.2,1); position: absolute; content: ""; height: 18px; width: 18px; bottom: 1px; background-color: #fff; border-radius: 50%; }
+    .sec-toggle-thumb { transition: left 0.22s cubic-bezier(.4,0,.2,1); position: absolute; content: ""; height: 18px; width: 18px; bottom: 1px; background-color: var(--text-1); border-radius: 50%; }
 
     .sec-eye-btn { transition: color 0.18s ease, transform 0.18s ease; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; }
     .sec-eye-btn:hover { color: ${T.textPrimary} !important; transform: translateY(-50%) scale(1.08); }
@@ -98,7 +98,7 @@ const StyleSheet = () => (
     .sec-edit-btn { transition: all 0.18s ease; padding: 6px 12px; background: ${T.bgElevated}; border: 1px solid ${T.borderSoft}; border-radius: 6px; color: ${T.textSec}; font-size: 12px; cursor: pointer; font-family: ${FONT}; }
     .sec-edit-btn:hover { background: ${T.accentDim} !important; border-color: ${T.accentBord} !important; color: ${T.accentBright} !important; }
 
-    .sec-skeleton { background: linear-gradient(90deg, ${T.bgElevated} 0px, rgba(255,255,255,0.06) 40px, ${T.bgElevated} 80px); background-size: 800px 100%; animation: secShimmer 1.6s linear infinite; border-radius: 6px; }
+    .sec-skeleton { background: ${T.bgElevated}; animation: skeletonPulse 1.8s var(--ease-in-out) infinite; border-radius: 6px; }
     .sec-spin { animation: secSpin 0.9s linear infinite; }
     .sec-ping-ring { position: absolute; inset: 0; border-radius: 50%; animation: secPing 1.8s cubic-bezier(0,0,.2,1) infinite; }
     .sec-status-dot { animation: secPulseDot 2s ease-in-out infinite; }
@@ -176,7 +176,7 @@ const Toast = ({ msg, type, onClose }: { msg: string; type: 'success' | 'error';
     <div className="sec-toast" style={{ position:"fixed", bottom:24, right:24, zIndex:10000, background: type==='error' ? T.emberDim : T.emeraldDim, border:`1px solid ${type==='error' ? T.emberBord : T.emeraldBord}`, borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12, boxShadow:"0 14px 36px rgba(0,0,0,0.45)", animation: "secFadeUp 0.3s ease both" }}>
       {type==='error' ? <AlertTriangle size={15} color={T.ember}/> : <Check size={15} color={T.emerald}/>}
       <span style={{ fontSize:14, color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
-      <button onClick={onClose} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><span style={{fontSize: 14}}>✕</span></button>
+      <button onClick={onClose} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><span style={{fontSize: 14}}><X size={16} /></span></button>
     </div>
   );
 };
@@ -417,12 +417,12 @@ export const Security = () => {
   );
 
   return (
-    <div className="sec-root" style={{ background: `radial-gradient(1200px 600px at 15% -10%, rgba(108,114,243,0.07), transparent 60%), radial-gradient(900px 500px at 100% 0%, rgba(219,169,106,0.05), transparent 55%), ${T.bgBase}`, minHeight: "100%", fontFamily: FONT, color: T.textPrimary }}>
+    <div className="sec-root" style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT, color: T.textPrimary }}>
       <StyleSheet />
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
       {(!isOnline || syncFailed) && (
-        <div className="sec-banner" style={{ position: "sticky", top: 0, zIndex: 50, background: `linear-gradient(90deg, ${T.emberDim}, rgba(248,113,113,0.04))`, borderBottom: `1px solid ${T.emberBord}`, padding: "10px 32px", display: "flex", alignItems: "center", gap: 10, backdropFilter: "blur(6px)" }}>
+        <div className="sec-banner" style={{ position: "sticky", top: 0, zIndex: 50, background: T.emberDim, borderBottom: `1px solid ${T.emberBord}`, padding: "10px 32px", display: "flex", alignItems: "center", gap: 10 }}>
           <WifiOff size={15} color={T.ember} />
           <span style={{ fontSize: 13, color: T.textPrimary, fontFamily: FONT, fontWeight: 600 }}>{!isOnline ? "You're offline." : "Couldn't reach the security service."}</span>
           <span style={{ fontSize: 13, color: T.textSec, fontFamily: FONT }}>Showing the last data loaded this session. Changes won't save until the connection is back.</span>
@@ -470,7 +470,7 @@ export const Security = () => {
         <div className="sec-content" style={{ padding: "32px", maxWidth: 1000 }}>
           
           {activeTab === "roles" && (
-            <div key="roles" className="sec-card sec-table-wrap" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, overflow: "hidden", boxShadow: "0 20px 40px rgba(0,0,0,0.25)" }}>
+            <div key="roles" className="sec-card sec-table-wrap" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, overflow: "hidden", boxShadow: "var(--shadow-modal)" }}>
               <table className="sec-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
                 <thead>
                   <tr style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderSoft}` }}>
@@ -540,7 +540,7 @@ export const Security = () => {
 
           {activeTab === "audit" && (
             <div key="audit" className="sec-card" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div className="sec-table-wrap" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, overflow: "hidden", boxShadow: "0 20px 40px rgba(0,0,0,0.25)" }}>
+              <div className="sec-table-wrap" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, overflow: "hidden", boxShadow: "var(--shadow-modal)" }}>
                 <table className="sec-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                   <thead>
                     <tr style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderSoft}` }}>

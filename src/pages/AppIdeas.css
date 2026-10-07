@@ -15,7 +15,7 @@
 .ai-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
 .ai-eyebrow { display: flex; align-items: center; gap: 7px; color: #61d7bc; font-size: 11px; font-weight: 700; letter-spacing: 1.3px; }
 .ai-header h1 { margin: 6px 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -0.4px; }
-.ai-header p { margin: 0; max-width: 640px; color: #9aa3b5; font-size: 13px; line-height: 20px; }
+.ai-header p { margin: 0; max-width: 640px; color: var(--text-2); font-size: 13px; line-height: 20px; }
 .ai-refresh { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border: 1px solid rgba(255,255,255,0.13); border-radius: 11px; background: rgba(255,255,255,0.05); color: #cfd6e6; font-size: 12px; font-weight: 700; cursor: pointer; }
 .ai-refresh:disabled { opacity: 0.6; cursor: default; }
 .ai-spin { animation: ai-rotate 900ms linear infinite; }
@@ -27,10 +27,10 @@
 .ai-notready strong { color: #ffffff; }
 
 .ai-summary { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
-.ai-summary-card { display: flex; flex-direction: column; gap: 5px; padding: 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; background: rgba(255,255,255,0.04); color: #9aa3b5; text-align: left; cursor: pointer; }
+.ai-summary-card { display: flex; flex-direction: column; gap: 5px; padding: 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; background: rgba(255,255,255,0.04); color: var(--text-2); text-align: left; cursor: pointer; }
 .ai-summary-card span { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
 .ai-summary-card strong { font-size: 22px; font-weight: 800; color: #ffffff; }
-.ai-summary-card.active { border-color: rgba(108,114,243,0.55); background: rgba(108,114,243,0.1); }
+.ai-summary-card.active { border-color: var(--brand-glow); background: var(--brand-soft); }
 .ai-summary-card.reading.active { border-color: rgba(246,199,105,0.55); background: rgba(246,199,105,0.1); }
 .ai-summary-card.planned.active { border-color: rgba(97,215,188,0.55); background: rgba(97,215,188,0.1); }
 .ai-summary-card.done.active { border-color: rgba(98,221,147,0.55); background: rgba(98,221,147,0.1); }

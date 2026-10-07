@@ -59,7 +59,7 @@
 
 .dropdown-action:hover {
   color: #818cf8;
-  background: rgba(99, 102, 241, 0.1);
+  background: var(--brand-soft);
 }
 
 .dropdown-action:focus-visible {
@@ -92,13 +92,13 @@
 }
 
 .dropdown-item.unread {
-  background: rgba(99, 102, 241, 0.05);
+  background: var(--brand-soft);
   border-left: 2px solid #6366f1;
   padding-left: 14px;
 }
 
 .dropdown-item.unread:hover {
-  background: rgba(99, 102, 241, 0.1);
+  background: var(--brand-soft);
 }
 
 .dropdown-item-indicator {
@@ -112,7 +112,7 @@
 }
 
 .dropdown-item-indicator.success {
-  background: #22c55e;
+  background: var(--ok-500);
 }
 
 .dropdown-item-indicator.warning {
@@ -120,7 +120,7 @@
 }
 
 .dropdown-item-indicator.error {
-  background: #ef4444;
+  background: var(--bad-500);
 }
 
 .dropdown-item-indicator.info {
@@ -181,7 +181,7 @@
 
 .dropdown-item-action:hover {
   background: #2d3140;
-  color: #22c55e;
+  color: var(--ok-500);
 }
 
 .dropdown-item-action:active {
@@ -189,13 +189,13 @@
 }
 
 .dropdown-item-action:focus-visible {
-  outline: 2px solid #22c55e;
+  outline: 2px solid var(--ok-500);
   outline-offset: 2px;
 }
 
 .dropdown-item-dismiss:hover {
   background: #2d3140;
-  color: #ef4444;
+  color: var(--bad-500);
 }
 
 .dropdown-item-dismiss:active {
@@ -203,7 +203,7 @@
 }
 
 .dropdown-item-dismiss:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid var(--bad-500);
   outline-offset: 2px;
 }
 

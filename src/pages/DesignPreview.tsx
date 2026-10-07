@@ -48,15 +48,15 @@ const SAMPLE_STATS = [
   { label: "Total Orders", value: "1,248", role: "hero" as const, accent: "var(--brand-500)", icon: <ClipboardList size={19} />, meta: "18 recorded today, 12% ahead of yesterday", spark: [4, 6, 5, 9, 7, 11, 10, 14] },
   { label: "In Progress", value: "37", accent: "var(--info-500)", icon: <Clock size={19} />, meta: "9 still awaiting review", spark: [3, 5, 4, 6, 5, 7, 6, 8] },
   { label: "Completed Today", value: "14", accent: "var(--ok-500)", icon: <CheckCircle2 size={19} />, meta: "4% behind yesterday", spark: [8, 7, 9, 6, 8, 7, 6, 5] },
-  { label: "Revenue Today", value: "\u20b56,420", accent: "var(--gold-500)", icon: <DollarSign size={19} />, meta: "GH\u20b51,180 ahead of yesterday", spark: [2, 4, 3, 6, 5, 8, 9, 12] },
+  { label: "Revenue Today", value: "\u20b56,420", accent: "var(--brand-500)", icon: <DollarSign size={19} />, meta: "GH\u20b51,180 ahead of yesterday", spark: [2, 4, 3, 6, 5, 8, 9, 12] },
 ];
 
 const SAMPLE_WORKFLOW = [
-  { label: "Received & Sorted", value: 42, count: 41, color: "var(--brand-500)" },
-  { label: "Washing", value: 26, count: 25, color: "var(--info-500)" },
-  { label: "Ironing", value: 18, count: 17, color: "var(--gold-500)" },
-  { label: "Ready for Delivery", value: 9, count: 9, color: "var(--ok-500)" },
-  { label: "Delivered", value: 5, count: 5, color: "var(--violet-500)" },
+  { label: "Received & Sorted", value: 42, count: 41, color: "var(--stage-received)" },
+  { label: "Washing", value: 26, count: 25, color: "var(--stage-washing)" },
+  { label: "Ironing", value: 18, count: 17, color: "var(--stage-ironing)" },
+  { label: "Ready for Delivery", value: 9, count: 9, color: "var(--stage-ready)" },
+  { label: "Delivered", value: 5, count: 5, color: "var(--stage-completed)" },
 ];
 
 const SAMPLE_QUEUE = [
@@ -88,7 +88,7 @@ const PREVIEW_STAGE: Record<string, { label: string; color: string }> = {
 
 const PREVIEW_PAY: Record<string, { label: string; tone: PillTone }> = {
   paid: { label: "Paid", tone: "ok" },
-  pending: { label: "Pending", tone: "gold" },
+  pending: { label: "Pending", tone: "warn" },
   partial: { label: "Partial", tone: "bad" },
 };
 
@@ -178,7 +178,7 @@ const WidthProbe = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const PILL_TONES: PillTone[] = ["neutral", "brand", "gold", "ok", "warn", "bad", "info", "violet"];
+const PILL_TONES: PillTone[] = ["neutral", "brand", "accent", "ok", "warn", "bad", "info"];
 
 const NAV_SAMPLE = [
   { icon: LayoutDashboard, label: "Dashboard", active: true, badge: undefined as number | undefined },
@@ -371,8 +371,8 @@ export const DesignPreview = () => {
                       { label: "New Order", tone: "brand", icon: <ClipboardList size={19} /> },
                       { label: "Mobile Requests", tone: "ok", icon: <Package size={19} /> },
                       { label: "Reports", tone: "info", icon: <BarChart3 size={19} /> },
-                      { label: "Staff", tone: "violet", icon: <Shield size={19} /> },
-                      { label: "App Ideas", tone: "gold", icon: <MessageSquareText size={19} /> },
+                      { label: "Staff", tone: "accent", icon: <Shield size={19} /> },
+                      { label: "App Ideas", tone: "warn", icon: <MessageSquareText size={19} /> },
                       { label: "Settings", tone: "neutral", icon: <Settings size={19} /> },
                     ].map((action) => (
                       <span key={action.label} className={`qa-btn qa-btn--${action.tone}`}>
@@ -428,7 +428,7 @@ export const DesignPreview = () => {
                       <div className="mr-request__top">
                         <span className="mr-request__id">#{row.id}</span>
                         <StatusPill tone={row.tone} dot>{row.status}</StatusPill>
-                        {row.express ? <StatusPill tone="gold">Express</StatusPill> : null}
+                        {row.express ? <StatusPill tone="warn">Express</StatusPill> : null}
                       </div>
                       <div className="mr-request__customer">
                         <span className="mr-avatar">{row.name.charAt(0)}</span>
@@ -673,7 +673,7 @@ export const DesignPreview = () => {
               <Button variant="secondary" disabled>Secondary, disabled</Button>
               <Button variant="primary" size="lg">Large</Button>
               <Button variant="secondary" iconOnly aria-label="Icon only"><Search size={16} /></Button>
-              <Button variant="gold">Gold, brand only</Button>
+              <Button variant="warn">Warn, reserved</Button>
               <Button variant="ok">Confirm</Button>
             </CardBody>
           </Card>
@@ -685,9 +685,9 @@ export const DesignPreview = () => {
             />
             <CardBody className="preview-tiles">
               <section className="stat-grid">
-                <StatTile role="hero" label="Revenue today" value="GH\u20b56,420" accent="var(--gold-500)" icon={<DollarSign size={17} />}
+                <StatTile role="hero" label="Revenue today" value="GH\u20b56,420" accent="var(--warn-500)" icon={<DollarSign size={17} />}
                   meta="GH\u20b51,180 ahead of yesterday"
-                  sparkline={<Sparkline data={[2, 4, 3, 6, 5, 8, 9, 12]} color="var(--gold-500)" />} />
+                  sparkline={<Sparkline data={[2, 4, 3, 6, 5, 8, 9, 12]} color="var(--warn-500)" />} />
                 <StatTile role="split" label="Orders" value="148" accent="var(--brand-500)" icon={<ClipboardList size={17} />}
                   subValues={[{ label: "Collected", value: "96" }, { label: "Awaiting pickup", value: "52" }]} />
                 <StatTile role="progress" label="Wash floor" value="37" accent="var(--info-500)" icon={<Clock size={17} />}
@@ -697,15 +697,15 @@ export const DesignPreview = () => {
                 <StatTile role="compact" label="Delivered" value="31" accent="var(--ok-500)" />
                 <StatTile role="compact" label="Ready" value="9" accent="var(--brand-500)" />
                 <StatTile role="compact" label="Overdue" value="3" accent="var(--bad-500)" />
-                <StatTile role="compact" label="Express" value="6" accent="var(--gold-500)" />
-                <StatTile role="compact" label="Walk-in" value="4" accent="var(--violet-500)" />
+                <StatTile role="compact" label="Express" value="6" accent="var(--warn-500)" />
+                <StatTile role="compact" label="Walk-in" value="4" accent="var(--brand-400)" />
               </section>
               <section className="stat-grid preview-tiles">
                 <StatTile role="standard" label="Awaiting review" value="12" accent="var(--warn-500)" icon={<AlertCircle size={17} />}
                   meta="Oldest waiting 2 days" />
                 <StatTile role="standard" label="Customer replies" value="7" accent="var(--info-500)" icon={<MessageSquareText size={17} />}
                   sparkline={<Sparkline data={[1, 3, 2, 5, 4, 6, 7]} color="var(--info-500)" />} />
-                <StatTile role="standard" label="Staff on duty" value="6" accent="var(--violet-500)" icon={<Users size={17} />}
+                <StatTile role="standard" label="Staff on duty" value="6" accent="var(--brand-400)" icon={<Users size={17} />}
                   meta="2 on the wash floor" />
               </section>
             </CardBody>

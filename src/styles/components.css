@@ -41,11 +41,11 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--gold-500);
+  color: var(--text-3);
   margin-bottom: var(--sp-2);
 }
 
-.eyebrow svg { color: var(--gold-500); }
+.eyebrow svg { color: currentColor; }
 
 .page-title {
   font-size: 27px;
@@ -359,12 +359,11 @@
 
 .pill--neutral { color: var(--text-2); background: var(--ink-raised); border-color: var(--line-soft); }
 .pill--brand { color: var(--brand-400); background: var(--brand-soft); border-color: var(--brand-border); }
-.pill--gold { color: var(--gold-400); background: var(--gold-soft); border-color: var(--gold-border); }
-.pill--ok { color: var(--ok-500); background: var(--ok-soft); border-color: var(--ok-border); }
 .pill--warn { color: var(--warn-500); background: var(--warn-soft); border-color: var(--warn-border); }
+.pill--ok { color: var(--ok-500); background: var(--ok-soft); border-color: var(--ok-border); }
 .pill--bad { color: var(--bad-500); background: var(--bad-soft); border-color: var(--bad-border); }
 .pill--info { color: var(--info-500); background: var(--info-soft); border-color: var(--info-border); }
-.pill--violet { color: var(--violet-500); background: var(--violet-soft); border-color: var(--violet-border); }
+.pill--accent { color: var(--brand-400); background: var(--brand-soft); border-color: var(--brand-border); }
 
 /* A count, not a badge: a plain figure with a hairline, so it never competes
    with the status beside it. */
@@ -444,12 +443,13 @@
   border-color: var(--brand-400);
 }
 
-.btn--gold {
-  color: var(--on-gold);
-  background: var(--gold-500);
-  border-color: var(--gold-400);
+/* Was --gold; the fill is the warning colour now, so the name follows. */
+.btn--warn {
+  color: var(--on-warn);
+  background: var(--warn-500);
+  border-color: var(--warn-500);
 }
-.btn--gold:hover:not(:disabled) { background: var(--gold-400); }
+.btn--warn:hover:not(:disabled) { filter: brightness(1.06); }
 
 .btn--secondary {
   color: var(--text-1);
@@ -618,7 +618,7 @@
 .field textarea:focus {
   outline: none;
   border-color: var(--brand-500);
-  box-shadow: var(--ring-brand);
+  box-shadow: var(--focus-ring);
   background: var(--ink-hover);
 }
 
@@ -1111,7 +1111,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   .record-list { gap: var(--sp-2); padding: var(--sp-3); }
 
   .record.is-selected {
-    border-color: rgba(111, 119, 247, 0.4);
+    border-color: var(--brand-border);
     box-shadow: none;
   }
 
@@ -1286,7 +1286,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   background: var(--ink-card);
   border: 1px solid var(--line-soft);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-modal);
   overflow: hidden;
   animation: fadeUp var(--dur-base) var(--ease-out) both;
 }

@@ -12,13 +12,13 @@ import { PermissionGuard } from "../components/PermissionGuard";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
 const T = {
-  bgBase:      "#07090e", bgSurface: "#0c0f18", bgRaised: "#111520", bgElevated: "#161c2c",
-  borderFaint: "rgba(255,255,255,0.05)", borderSoft: "rgba(255,255,255,0.09)", borderMid: "rgba(255,255,255,0.15)",
-  textPrimary: "#edf0f8", textSec: "#9aa3b5", textTert: "#556070", textHint: "#2e3a4e",
-  accent: "#6c72f3", accentDim: "rgba(108,114,243,0.13)", accentBord: "rgba(108,114,243,0.28)", accentGlow: "rgba(108,114,243,0.35)",
-  gold: "#dba96a", goldDim: "rgba(219,169,106,0.1)", goldBord: "rgba(219,169,106,0.22)",
-  emerald: "#34d399", emeraldDim: "rgba(52,211,153,0.1)", emeraldBord: "rgba(52,211,153,0.2)",
-  danger: "#f87171", dangerDim: "rgba(248,113,113,0.1)", dangerBord: "rgba(248,113,113,0.25)",
+  bgBase:      "var(--ink-base)", bgSurface: "var(--ink-shell)", bgRaised: "var(--ink-card)", bgElevated: "var(--ink-raised)",
+  borderFaint: "var(--line-faint)", borderSoft: "var(--line-soft)", borderMid: "var(--line)",
+  textPrimary: "var(--text-1)", textSec: "var(--text-2)", textTert: "var(--text-3)", textHint: "var(--text-4)",
+  accent: "var(--brand-500)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)", accentGlow: "var(--brand-glow)",
+  gold: "var(--warn-500)", goldDim: "var(--warn-soft)", goldBord: "var(--warn-border)",
+  emerald: "var(--ok-500)", emeraldDim: "var(--ok-soft)", emeraldBord: "var(--ok-border)",
+  danger: "var(--bad-500)", dangerDim: "var(--bad-soft)", dangerBord: "var(--bad-border)",
 };
 
 const FONT = "var(--font-ui)";
@@ -33,7 +33,7 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
       background: type === "success" ? T.emeraldDim : T.dangerDim, 
       border: `1px solid ${type === "success" ? T.emeraldBord : T.dangerBord}`, 
       borderRadius: 12, padding: "12px 18px", display: "flex", alignItems: "center", gap: 12, 
-      boxShadow: "0 8px 32px rgba(0,0,0,.4)", animation: "csFadeUp 0.3s cubic-bezier(.4,0,.2,1)", whiteSpace: "nowrap" 
+      boxShadow: "var(--shadow-modal)", animation: "csFadeUp 0.3s cubic-bezier(.4,0,.2,1)", whiteSpace: "nowrap" 
     }}>
       {type === "success" ? <Check size={15} color={T.emerald} /> : <AlertCircle size={15} color={T.danger} />}
       <span style={{ fontSize: 13.5, fontWeight: 500, color: type === "success" ? T.emerald : T.danger, fontFamily: FONT }}>{msg}</span>
@@ -202,7 +202,7 @@ export const Settings = () => {
     position: "absolute", content: '""', height: 18, width: 18,
     left: active ? 19 : 2, bottom: 1, backgroundColor: "#fff",
     transition: "left 0.25s cubic-bezier(.4,0,.2,1)", borderRadius: "50%",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
+    boxShadow: "var(--shadow-sm)",
   });
 
   const inputStyle: React.CSSProperties = {
@@ -245,35 +245,30 @@ export const Settings = () => {
         @keyframes csPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
         @keyframes csAurora { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(2%,-3%) scale(1.06); } }
 
-        .cs-aurora {
-          position: absolute; inset: -40% -10% auto -10%; height: 260px; pointer-events: none;
-          background: radial-gradient(closest-side, ${T.accentDim}, transparent 70%),
-                      radial-gradient(closest-side, ${T.goldDim}, transparent 65%) 70% 20%;
-          filter: blur(30px); opacity: 0.8; animation: csAurora 14s ease-in-out infinite; z-index: 0;
-        }
+        /* The drifting aurora behind the header is gone: two blurred colour
+           blobs moving on a 14 second loop, on a settings page. */
         .cs-header { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(14px); background: rgba(12,15,24,0.82); }
-        .cs-savebtn { position: relative; transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.25s ease; }
-        .cs-savebtn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px -8px ${T.accentGlow}; }
-        .cs-savebtn:active { transform: translateY(0px) scale(0.98); }
-        .cs-savebtn.err:hover { box-shadow: 0 8px 24px -8px rgba(248,113,113,0.4); }
+        .cs-savebtn { position: relative; transition: background-color 0.2s ease; }
+        .cs-savebtn:hover { filter: brightness(1.06); }
+        .cs-savebtn:active { filter: brightness(1.12); }
 
         .cs-tabbtn { position: relative; transition: color 0.2s ease, background 0.2s ease; border-radius: 8px 8px 0 0; }
         .cs-tabbtn:hover { color: ${T.textPrimary} !important; background: rgba(255,255,255,0.025); }
-        .cs-tabbtn.active::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; background: linear-gradient(90deg, ${T.accent}, ${T.gold}); border-radius: 2px; animation: csFadeUp 0.25s ease; }
+        .cs-tabbtn.active::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; background: var(--brand-500); border-radius: 2px; animation: csFadeUp 0.25s ease; }
 
         .cs-panel { animation: csFadeUp 0.38s cubic-bezier(.16,1,.3,1); }
-        .cs-card { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-        .cs-card:hover { border-color: ${T.borderMid}; box-shadow: 0 10px 28px -16px rgba(0,0,0,0.6); }
+        .cs-card { transition: border-color 0.2s ease; }
+        .cs-card:hover { border-color: ${T.borderMid}; }
 
         .cs-input { transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; }
         .cs-input:hover { border-color: ${T.borderMid}; }
-        .cs-input:focus { border-color: ${T.accentBord}; box-shadow: 0 0 0 3px ${T.accentDim}; background: #0f131e; }
+        .cs-input:focus { border-color: ${T.accentBord}; box-shadow: var(--focus-ring); background: ${T.bgElevated}; }
 
         .cs-iconbtn { transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease; }
         .cs-iconbtn:hover { background: ${T.bgElevated}; color: ${T.textPrimary}; transform: translateY(-1px); }
 
-        .cs-exportbtn:hover { transform: translateY(-1px); border-color: ${T.accentBord} !important; box-shadow: 0 6px 18px -10px ${T.accentGlow}; }
-        .cs-importbtn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px -10px rgba(52,211,153,0.35); }
+        .cs-exportbtn:hover { border-color: ${T.accentBord} !important; }
+        .cs-importbtn:hover { filter: brightness(1.1); }
 
         .cs-loyalty-row { transition: background 0.18s ease, padding-left 0.18s ease; }
         .cs-loyalty-row:hover { background: rgba(255,255,255,0.025); padding-left: 20px; }
@@ -281,7 +276,7 @@ export const Settings = () => {
         .cs-offline-banner { animation: csFadeUp 0.3s ease; }
         .cs-offline-dot { animation: csPulse 1.6s ease-in-out infinite; }
         .cs-retrybtn { transition: transform 0.18s ease, background 0.18s ease; }
-        .cs-retrybtn:hover { background: rgba(248,113,113,0.18); }
+        .cs-retrybtn:hover { background: var(--bad-soft); }
         .cs-retrybtn:active { transform: scale(0.96); }
         .cs-retry-spin { animation: csSpin 0.8s linear infinite; }
 
@@ -366,7 +361,7 @@ export const Settings = () => {
           </div>
           <button onClick={handleRetry} className="cs-retrybtn" style={{
             display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 7,
-            background: "rgba(248,113,113,0.1)", border: `1px solid ${T.dangerBord}`, color: T.danger,
+            background: "var(--bad-soft)", border: `1px solid ${T.dangerBord}`, color: T.danger,
             fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: FONT, whiteSpace: "nowrap",
           }}>
             <RefreshCw size={13} className={retrying ? "cs-retry-spin" : ""} /> Retry
@@ -490,9 +485,9 @@ export const Settings = () => {
                 {[
                   { tier: "Standard", visits: "Under 5 visits", discount: "0%", color: T.textTert, icon: Circle },
                   { tier: "Bronze", visits: "5 to 14 visits", discount: "5% Off", color: "#cd8a44", icon: Medal },
-                  { tier: "Silver", visits: "15 to 29 visits", discount: "10% Off", color: "#94a3b8", icon: Medal },
+                  { tier: "Silver", visits: "15 to 29 visits", discount: "10% Off", color: "var(--text-2)", icon: Medal },
                   { tier: "Gold", visits: "30 or more visits", discount: "15% Off + Free Delivery", color: T.gold, icon: Trophy },
-                  { tier: "VIP", visits: "Management Designated", discount: "20% Off + Door-to-Door", color: "#a78bfa", icon: Crown },
+                  { tier: "VIP", visits: "Management Designated", discount: "20% Off + Door-to-Door", color: "var(--brand-400)", icon: Crown },
                 ].map((l, i) => (
                   <div key={l.tier} className="cs-loyalty-row" style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center",

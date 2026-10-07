@@ -19,7 +19,7 @@ const CSS = `
   transition: background-color 0.18s ease, border-color 0.18s ease;
 }
 .pd-trigger:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.11); }
-.pd-trigger.open  { background: rgba(108,114,243,0.08); border-color: rgba(108,114,243,0.25); }
+.pd-trigger.open  { background: var(--brand-soft); border-color: var(--brand-border); }
 .pd-trigger:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* Avatar */
@@ -31,7 +31,7 @@ const CSS = `
   transition: box-shadow 0.2s ease;
 }
 .pd-trigger:hover .pd-av, .pd-trigger.open .pd-av {
-  box-shadow: 0 0 0 2px rgba(108,114,243,0.4);
+  box-shadow: 0 0 0 2px var(--brand-border);
 }
 
 /* Name/role */
@@ -52,8 +52,8 @@ const CSS = `
   color: #3a4460; flex-shrink: 0;
   transition: transform 0.2s ease, color 0.18s ease;
 }
-.pd-trigger.open .pd-chev { transform: rotate(180deg); color: #6c72f3; }
-.pd-trigger:hover .pd-chev { color: #556070; }
+.pd-trigger.open .pd-chev { transform: rotate(180deg); color: var(--brand-500); }
+.pd-trigger:hover .pd-chev { color: var(--text-4); }
 
 /* Mobile: collapse to avatar only */
 @media (max-width: 480px) {
@@ -66,7 +66,7 @@ const CSS = `
 .pd-panel {
   position: absolute; top: calc(100% + 10px); right: 0;
   width: 230px; max-width: 90vw; /* Prevents overflow on small screens */
-  background: #0f1320;
+  background: var(--ink-card);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 14px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
@@ -86,7 +86,7 @@ const CSS = `
   font-size: 16px; font-weight: 700; flex-shrink: 0;
 }
 .pd-card-name {
-  font-size: 13px; font-weight: 700; color: #edf0f8;
+  font-size: 13px; font-weight: 700; color: var(--text-1);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pd-card-email {
@@ -107,7 +107,7 @@ const CSS = `
   text-align: left; text-transform: capitalize;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
-.pd-item:hover { background: rgba(255,255,255,0.05); color: #edf0f8; }
+.pd-item:hover { background: rgba(255,255,255,0.05); color: var(--text-1); }
 .pd-item:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 .pd-item-ico {
@@ -126,14 +126,14 @@ const CSS = `
   display: flex; align-items: center; gap: 10px;
   padding: 9px 10px; border-radius: 8px; width: 100%;
   background: transparent; border: none;
-  color: #556070; font-size: 13px; font-weight: 500;
+  color: var(--text-4); font-size: 13px; font-weight: 500;
   cursor: pointer; font-family: var(--font-ui);
   text-align: left;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
-.pd-logout:hover { background: rgba(248,113,113,0.08); color: #f87171; }
-.pd-logout:focus-visible { outline: 2px solid #ef4444; outline-offset: 2px; }
-.pd-logout:hover .pd-logout-ico { background: rgba(248,113,113,0.12); }
+.pd-logout:hover { background: var(--bad-soft); color: var(--bad-500); }
+.pd-logout:focus-visible { outline: 2px solid var(--bad-500); outline-offset: 2px; }
+.pd-logout:hover .pd-logout-ico { background: var(--bad-soft); }
 .pd-logout-ico {
   width: 28px; height: 28px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
@@ -158,7 +158,7 @@ const CSS = `
   border-radius: var(--r-sm);
 }
 .pd-trigger:hover { background: var(--ink-hover); border-color: var(--line); }
-.pd-trigger.open { background: var(--brand-soft); border-color: rgba(111, 119, 247, 0.3); }
+.pd-trigger.open { background: var(--brand-soft); border-color: var(--brand-border); }
 .pd-av { border-radius: var(--r-xs); }
 .pd-name { color: var(--text-1); }
 .pd-role { letter-spacing: 0.04em; text-transform: uppercase; }
@@ -167,7 +167,7 @@ const CSS = `
   background: var(--ink-hover);
   border-color: var(--line-soft);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-modal);
 }
 .pd-card { border-bottom-color: var(--line-faint); }
 .pd-card-av { border-radius: var(--r-sm); }
@@ -193,11 +193,11 @@ const CSS = `
 `;
 
 const ROLE_META: Record<string, { color: string }> = {
-  admin:      { color: "#6c72f3" },
+  admin:      { color: "var(--brand-500)" },
   manager:    { color: "#22d3ee" },
-  strategist: { color: "#a78bfa" },
-  staff:      { color: "#34d399" },
-  courier:    { color: "#dba96a" },
+  strategist: { color: "var(--brand-400)" },
+  staff:      { color: "var(--ok-500)" },
+  courier:    { color: "var(--warn-500)" },
 };
 
 interface ProfileDropdownProps {
@@ -219,7 +219,7 @@ export const ProfileDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const roleMeta = ROLE_META[userRole] ?? { color: "#9aa3b5" };
+  const roleMeta = ROLE_META[userRole] ?? { color: "var(--text-2)" };
   const email    = user?.email ?? "";
 
   useEffect(() => {

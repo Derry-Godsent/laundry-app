@@ -25,7 +25,7 @@
   background: var(--ink-card);
   border: 1px solid var(--line-soft);
   border-radius: var(--r-xl);
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-modal);
   overflow: hidden;
   animation: cpRise var(--dur-slow) var(--ease-out) both;
 }
@@ -120,7 +120,7 @@
 
 .cp-item.selected .cp-item-ico {
   background: var(--brand-soft);
-  border-color: rgba(111, 119, 247, 0.24);
+  border-color: var(--brand-border);
   color: var(--brand-400);
 }
 

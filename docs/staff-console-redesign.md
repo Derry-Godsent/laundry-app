@@ -417,11 +417,12 @@ or pinned surface must not be a transform, filter or containment ancestor of it.
 A retained identity transform silently moves every `position: fixed` element
 inside it, which is how a takeover ends up scrolling with the page.
 
-### Phase E: overall appearance
+### Phase E: the whole appearance, in one pass
 
 Phase E refines the dark operational style. It does not replace it: the
 surfaces, the workflow colours and the density stay, and what changes is the
-craft. The direction below was agreed before any of it was written.
+craft. This is not delivered in slices. The whole system changes at once, and
+every page is in scope.
 
 **The nine rules.**
 
@@ -432,66 +433,47 @@ craft. The direction below was agreed before any of it was written.
    browser's fallback font.
 2. **Nine type sizes.** `--fs-2xs` to `--fs-4xl`, replacing the twenty-eight
    sizes between 9px and 30px, half of them half-pixel steps.
-3. **One palette.** Tokens only; no colour literal outside `tokens.css`, which
-   removes the two-palette split (token pages versus the pages carrying their
-   own `T` object) and the 25 hexes that four state meanings had accumulated.
+3. **One palette, and it is natural.** Tokens only; no colour literal outside
+   `tokens.css`. The warm graphite surfaces, the muted steel blue accent and the
+   earthen state colours replaced a metallic gold and a violet/indigo range that
+   made the console look like a launch page rather than a work surface.
 4. **A readable floor.** Every step that carries text clears WCAG AA on the
-   lightest surface it sits on. The old ramp's bottom two steps were 2.9:1 and
-   2.4:1, which is unreadable on a phone outdoors. Disabled controls get their
-   own step, because a disabled control is not text.
+   lightest surface it sits on: the ramp is 14.5:1 at the top and 4.8:1 at the
+   quietest label. Disabled controls get their own step, because a disabled
+   control is not text.
 5. **No gradients.** Flat surfaces, hairline borders and type carry the design.
-   The rule covers button fills, page backdrops, the drifting glow blobs behind
-   the shell, the skeleton sheen (now a settled pulse) and the SVG area fills.
-6. **No emoji, no glyph stand-ins.** Icons come from the icon set at four
-   sizes, never from a character: the bell, the loyalty tiers, the trend
-   arrows and the ticks that were standing in for icons are all real icons now.
+   The rule covers button fills, page backdrops, drifting glow blobs, skeleton
+   sheens (now a settled pulse) and the SVG area fills.
+6. **No emoji, no glyph stand-ins, and no sparkles.** Icons come from the icon
+   set at four sizes, never from a character, and never from the set that reads
+   as decoration: the sparkle, the lightning bolt and the star are gone from
+   section markers, category maps and eyebrows.
 7. **Nothing floats by default.** Elevation is reserved for surfaces that are
-   genuinely above the page: modal, sheet, dropdown, command palette, toast.
-   Cards sit on hairlines, and hover changes colour rather than lifting an
-   element off the page.
+   genuinely above the page: modal, sheet, dropdown, command palette, toast, and
+   there is exactly one shadow for all of them. Cards sit on hairlines, hover
+   changes colour rather than lifting an element off the page, and no shadow is
+   coloured: a coloured shadow reads as light leaking out of the component.
 8. **Motion with a job.** Three durations: press, state change, entrance.
    Entrances fade and rise at most 6px and leave no transform behind, exits are
    faster than entrances, and nothing animates for decoration.
-9. **Tiles have variety, trends have sparklines.** One tile primitive with
-   roles (hero, standard, compact, split, progress) instead of every page
-   hand-rolling four identical boxes; a trend shows as a sparkline rather than
-   a badge. A badge is kept only where state itself is the information.
+9. **A bar means a figure.** Every bar, rail or sparkline on a tile is the
+   number beside it measured against a real denominator. Where there is no
+   denominator the bar does not exist: it is not decoration and it is not a
+   mood. Sparklines draw a real series.
 
-**Slices, one commit each.**
+**What the pass covers.**
 
-| Slice | What it lands |
-| --- | --- |
-| E1 | This foundation: the type scale, the readable ramp, one font pipeline, the gradient sweep through the chrome and the shared sheet, the AI illustration assets and the emoji removed, and `npm run check:visual` to hold all of it. |
-| E2 | The primitives: button hierarchy, fields, cards and section headers, pills, the tile family and the sparkline, icon sizes, states, motion. The `/preview` gallery shows every primitive in every state. Done: see "E2, the primitives" below. |
-| E3 | Operations pages: Requests, Service Requests, Orders, Order Builder, Clients, Dashboard. |
-| E4 | Management and settings pages: Staff, System Admin, Reports, Services, Payments, Receipt, Security, Settings, App Ideas, App Accounts, Help, Profile, Login. |
-| E5 | Copy and formats: one money helper (`GH₵420.00`), one date and time set, one locale, sentence case, and the customer/client wording rule. Then the guards go strict and the final report. |
-
-**E2, the primitives (done).**
-
-- **The tile family.** `StatTile` now declares a role instead of always drawing
-  the same box: `hero` (once per row, larger, two columns where there is room),
-  `standard`, `compact` (dense counts, five or six across), `split` (a figure
-  that breaks into two) and `progress` (a figure with a bar and its caption).
-  A trend is a **sparkline**, not a delta badge: `KpiCard` draws one from its
-  series and the words stay as meta text, because the shape of the line is the
-  information and a coloured arrow on top of it says the same thing twice. A
-  badge survives only where a line cannot draw the state.
-- **Flat by default.** Cards lost their shadow and their top sheen, and nothing
-  lifts on hover any more: hover changes the surface and the hairline. Elevation
-  is reserved for what is genuinely above the page. The blurred accent orb on
-  every tile is gone, replaced by a 2px accent rail.
-- **Buttons** keep one hierarchy with the focus ring token, a disabled style
-  that stops shouting rather than fading to 50% opacity, and a press that is a
-  brightness step instead of a nudge. Their text colours are tokens.
-- **Fields** gained an invalid state that rings the input itself, a disabled
-  step that is a colour rather than an opacity, and text on the type scale.
-- **Pills and counts**: pill borders come from the semantic border tokens, and a
-  count is a mono figure with a hairline rather than a badge competing with the
-  status beside it.
-- **The gallery** at `/preview` gained a tile-family section (all five roles,
-  several rows) and a button-hierarchy section with the disabled states, so the
-  look can be judged before it is rolled across the pages.
+- The palette itself: surfaces, lines, the text ramp, the accent, the four
+  state colours and the workflow ramp, in `tokens.css`.
+- Every page: the gradients, the glow blobs, the highlight sheens, the hover
+  lifts and the one-off shadows come out; the `T` object each page carried is
+  now tokens, so a page cannot reach the old palette even by accident.
+- Every bar on every summary tile is driven by real counts or removed.
+- `npm run check:visual` holds all of it, including a rule that fails on a
+  `var()` that nothing defines, which is how a renamed token silently draws
+  nothing.
+- The `/preview` gallery shows the primitives, the tile family and the button
+  hierarchy in every state.
 
 **Wording rule.** Anyone who books through the customer app is a **customer**,
 in copy and in the queue. **Client** is the console's own record: the Clients

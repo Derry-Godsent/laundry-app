@@ -35,8 +35,8 @@
   height: 26px;
   flex-shrink: 0;
   border-radius: var(--r-xs);
-  background: var(--gold-soft);
-  color: var(--gold-500);
+  background: var(--brand-soft);
+  color: var(--brand-400);
 }
 
 .ws-info { flex: 1; min-width: 0; }
@@ -82,7 +82,7 @@
   background: var(--ink-hover);
   border: 1px solid var(--line-soft);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-modal);
   z-index: 9999;
   animation: wsRise var(--dur-base) var(--ease-out) both;
 }
@@ -104,8 +104,8 @@
 .ws-option:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-1); }
 
 .ws-option.active {
-  color: var(--gold-400);
-  background: var(--gold-soft);
+  color: var(--brand-400);
+  background: var(--brand-soft);
   font-weight: 600;
 }
 

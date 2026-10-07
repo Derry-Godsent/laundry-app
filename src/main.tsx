@@ -33,7 +33,7 @@ class ErrorBoundary extends React.Component<
       return (
         <div style={{
           minHeight: "100vh", display: "flex", alignItems: "center",
-          justifyContent: "center", background: "var(--ink-base)", color: "#edf0f8",
+          justifyContent: "center", background: "var(--ink-base)", color: "var(--text-1)",
           fontFamily: "var(--font-ui)", textAlign: "center", padding: 24
         }}>
           <div>
@@ -65,12 +65,12 @@ class ErrorBoundary extends React.Component<
 const LoadingFallback = () => (
   <div style={{
     minHeight: "100vh", display: "flex", alignItems: "center",
-    justifyContent: "center", background: "var(--ink-base)", color: "#edf0f8",
+    justifyContent: "center", background: "var(--ink-base)", color: "var(--text-1)",
     fontFamily: "var(--font-ui)"
   }}>
     <div style={{ textAlign: "center" }}>
       <div style={{
-        width: 48, height: 48, border: "3px solid rgba(108,114,243,0.2)",
+        width: 48, height: 48, border: "3px solid var(--brand-soft)",
         borderTopColor: "var(--brand-500)", borderRadius: "50%", margin: "0 auto 16px",
         animation: "spin 1s linear infinite"
       }} />

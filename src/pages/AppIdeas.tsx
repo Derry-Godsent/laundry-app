@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Lightbulb, RefreshCw, Sparkles } from "lucide-react";
+import { Lightbulb, RefreshCw, Smartphone } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { usePermission } from "../hooks/usePermission";
@@ -35,17 +35,17 @@ interface AppIdea {
 }
 
 const KIND_META: Record<IdeaKind, { label: string; color: string; background: string }> = {
-  add: { label: "Add", color: "#aab4ff", background: "rgba(108,114,243,0.16)" },
-  remove: { label: "Remove", color: "#fb9494", background: "rgba(248,113,113,0.14)" },
+  add: { label: "Add", color: "#aab4ff", background: "var(--brand-soft)" },
+  remove: { label: "Remove", color: "#fb9494", background: "var(--bad-soft)" },
   change: { label: "Change", color: "#f6c769", background: "rgba(246,199,105,0.14)" },
 };
 
 const STATUS_META: Record<IdeaStatus, { label: string; hint: string; color: string; background: string }> = {
-  new: { label: "New", hint: "Nobody has read it yet", color: "#aab4ff", background: "rgba(108,114,243,0.16)" },
+  new: { label: "New", hint: "Nobody has read it yet", color: "#aab4ff", background: "var(--brand-soft)" },
   reading: { label: "Reading", hint: "Being looked at now", color: "#f6c769", background: "rgba(246,199,105,0.14)" },
   planned: { label: "Planned", hint: "Agreed, waiting its turn", color: "#61d7bc", background: "rgba(97,215,188,0.14)" },
-  done: { label: "Done", hint: "Built and in the app", color: "#62dd93", background: "rgba(52,211,153,0.14)" },
-  declined: { label: "Not doing", hint: "Explained to the customer", color: "#9aa3b5", background: "rgba(154,163,181,0.13)" },
+  done: { label: "Done", hint: "Built and in the app", color: "#62dd93", background: "var(--ok-soft)" },
+  declined: { label: "Not doing", hint: "Explained to the customer", color: "var(--text-2)", background: "rgba(154,163,181,0.13)" },
 };
 
 const STATUS_ORDER: IdeaStatus[] = ["new", "reading", "planned", "done", "declined"];
@@ -139,7 +139,7 @@ function AppIdeasContent() {
     <div className="ai-page">
       <header className="ai-header">
         <div>
-          <span className="ai-eyebrow"><Sparkles size={13} /> FROM THE CUSTOMER APP</span>
+          <span className="ai-eyebrow"><Smartphone size={13} /> FROM THE CUSTOMER APP</span>
           <h1>App Ideas</h1>
           <p>
             Every idea a customer sends from the app, with their name and number, so you can

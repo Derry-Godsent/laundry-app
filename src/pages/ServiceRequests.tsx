@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, ClipboardList, Inbox, Ruler, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
+import { CalendarDays, ClipboardList, Inbox, Ruler, RefreshCw, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { usePermission } from "../hooks/usePermission";
@@ -75,10 +75,10 @@ interface CustomerIdentity {
 }
 
 const STATE_META: Record<AppointmentResponse, { label: string; color: string; background: string }> = {
-  "awaiting-chapman": { label: "Needs a date", color: "#aab4ff", background: "rgba(108,114,243,0.16)" },
+  "awaiting-chapman": { label: "Needs a date", color: "#aab4ff", background: "var(--brand-soft)" },
   "awaiting-customer": { label: "With the customer", color: "#f6c769", background: "rgba(246,199,105,0.14)" },
-  accepted: { label: "Accepted", color: "#62dd93", background: "rgba(52,211,153,0.14)" },
-  rejected: { label: "Wants another date", color: "#fb9494", background: "rgba(248,113,113,0.14)" },
+  accepted: { label: "Accepted", color: "#62dd93", background: "var(--ok-soft)" },
+  rejected: { label: "Wants another date", color: "#fb9494", background: "var(--bad-soft)" },
   declined: { label: "Not taken", color: "#e08b8b", background: "rgba(224,139,139,0.14)" },
 };
 
@@ -459,7 +459,7 @@ function ServiceRequestsContent() {
             <div className="sr-detail-grid">
               <DetailItem icon={<CalendarDays size={16} />} label="Customer's preferred date" value={formatDay(selected.details?.requestedDate?.slice(0, 10))} />
               <DetailItem icon={<ClipboardList size={16} />} label="Property" value={selected.property_type || "Not stated"} />
-              <DetailItem icon={<Sparkles size={16} />} label="Preference" value={selected.preference || "Not stated"} />
+              <DetailItem icon={<SlidersHorizontal size={16} />} label="Preference" value={selected.preference || "Not stated"} />
               <DetailItem icon={<Ruler size={16} />} label="Measured area" value={selected.details?.estimatedAreaM2 ? `${selected.details.estimatedAreaM2} m2` : "Not measured"} />
               <DetailItem icon={<ClipboardList size={16} />} label="Customer" value={customerName(selected)} />
               <DetailItem icon={<ClipboardList size={16} />} label="Phone" value={customerPhone(selected) ?? "Protected in the app"} />

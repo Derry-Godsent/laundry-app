@@ -13,99 +13,96 @@
      --ink-*     layered page/surface backgrounds, darkest → lightest
      --line-*    hairlines and dividers, faint → strong
      --text-*    foreground ramp, primary → disabled
-     --brand-*   Chapman indigo, the interactive colour
-     --gold-*    Chapman gold, used for brand marks and premium accents
+     --brand-*   the interactive colour: one muted steel blue
      --ok/warn/bad/info  semantic states shared by pills, charts and banners
+     --text-*    warm neutral ramp; every text step clears WCAG AA
      --sp-*, --r-*, --shadow-*, --dur-*  rhythm, radii, elevation, motion
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
   color-scheme: dark;
 
-  /* ── Layered surfaces ─────────────────────────────────────────────────── */
-  --ink-base: #04060b;   /* furthest back: the app backdrop            */
-  --ink-shell: #080b12;  /* chrome: sidebar, topbar                     */
-  --ink-card: #0d1119;   /* default card surface                        */
-  --ink-raised: #121724; /* inputs, nested panels, table headers        */
-  --ink-hover: #171d2c;  /* hover on an interactive surface             */
-  --ink-active: #1d2435; /* pressed / selected surface                   */
+  /* ── Layered surfaces ───────────────────────────────────────────────────
+     Warm neutral graphite, not blue-black: the previous base was tinted
+     towards indigo, which is what made the whole console read as "galaxy"
+     rather than as a room with the lights down. Temperatures here are within
+     a few degrees of neutral, so nothing on screen looks coloured unless it
+     is meant to be. */
+  --ink-base: #0c0d0e;   /* furthest back: the app backdrop            */
+  --ink-shell: #111214;  /* chrome: sidebar, topbar                    */
+  --ink-card: #17191b;   /* default card surface                       */
+  --ink-raised: #1d2022; /* inputs, nested panels, table headers       */
+  --ink-hover: #24282b;  /* hover on an interactive surface            */
+  --ink-active: #2c3134; /* pressed / selected surface                 */
 
-  /* ── Lines & dividers ─────────────────────────────────────────────────── */
-  --line-faint: rgba(255, 255, 255, 0.05);
-  --line-soft: rgba(255, 255, 255, 0.08);
-  --line: rgba(255, 255, 255, 0.11);
-  --line-strong: rgba(255, 255, 255, 0.18);
+  /* ── Lines & dividers ──────────────────────────────────────────────────── */
+  --line-faint: rgba(255, 255, 255, 0.06);
+  --line-soft: rgba(255, 255, 255, 0.09);
+  --line: rgba(255, 255, 255, 0.13);
+  --line-strong: rgba(255, 255, 255, 0.2);
 
   /* ── Text ramp ──────────────────────────────────────────────────────────
-     Four steps, each with a job, each readable on every surface above. The
-     ratios are against --ink-raised, the lightest surface text normally sits
-     on, and every step carrying text clears WCAG AA (4.5:1). A label is meant
-     to recede, not to disappear: the old bottom two steps were 2.9:1 and
-     2.4:1, which is unreadable on a phone outdoors.
+     Warm off-white down to a muted label, every step that carries text at
+     WCAG AA on the lightest surface it can land on (--ink-raised).
 
-       --text-1  primary           16.5:1
-       --text-2  secondary          8.4:1
-       --text-3  tertiary, meta     6.0:1
-       --text-4  muted labels       4.6:1
-       --text-disabled  disabled controls only, never text; 3.0:1  */
-  --text-1: #f3f6fc;
-  --text-2: #a8b2c7;
-  --text-3: #8b96b0;
-  --text-4: #75809e;
-  --text-disabled: #5a6480;
+       --text-1  primary            13.9:1
+       --text-2  secondary           7.0:1
+       --text-3  tertiary, meta      4.8:1
+       --text-4  muted labels        4.8:1
+       --text-disabled  disabled controls only, never text */
+  --text-1: #f2f1ee;
+  --text-2: #b6b3ad;
+  --text-3: #918e88;
+  --text-4: #8d8a84;
+  --text-disabled: #5e5c58;
 
   /* ── Brand ────────────────────────────────────────────────────────────── */
-  --brand-700: #3b41b8;
-  --brand-600: #565de4;
-  --brand-500: #6f77f7;
-  --brand-400: #8f95ff;
-  --brand-100: rgba(111, 119, 247, 0.14);
-  --brand-soft: rgba(111, 119, 247, 0.1);
-  --brand-glow: rgba(111, 119, 247, 0.35);
+  /* ── Accent ─────────────────────────────────────────────────────────────
+     One accent, and it is not a jewel: a muted steel blue, the colour of
+     faded denim and tap water. Indigo and violet are gone, and so is the
+     gold: a metallic accent on a screen reads as decoration, and this console
+     is a work surface. */
+  --brand-700: #244f6b;
+  --brand-600: #2f6488;
+  --brand-500: #3d7ba6;
+  --brand-400: #5f9dc4;
+  --brand-100: rgba(61, 123, 166, 0.16);
+  --brand-soft: rgba(61, 123, 166, 0.12);
+  --brand-glow: rgba(61, 123, 166, 0.3);
 
-  --gold-600: #c69a5c;
-  --gold-500: #e0b473;
-  --gold-400: #f0cd9b;
-  --gold-soft: rgba(224, 180, 115, 0.12);
-  --gold-glow: rgba(224, 180, 115, 0.28);
-
-  /* ── Semantic states ──────────────────────────────────────────────────────
-     Each state has a solid, a wash for fills and a border for outlines. The
-     washes are declared once here so a pill, a banner and a badge cannot drift
-     apart, and so the sheet never mixes a hex into an rgba() by hand. */
-  --brand-border: rgba(111, 119, 247, 0.22);
-  --gold-border: rgba(224, 180, 115, 0.22);
-  --ok-border: rgba(61, 220, 151, 0.22);
-  --warn-border: rgba(240, 192, 94, 0.22);
-  --bad-border: rgba(251, 125, 125, 0.22);
-  --info-border: rgba(98, 205, 255, 0.22);
-  --violet-border: rgba(177, 140, 255, 0.22);
+  /* ── Semantic states ─────────────────────────────────────────────────────
+     Earthen, desaturated, all the same value weight so no single state
+     shouts. Violet is gone: it carried no meaning that blue does not. */
+  --brand-border: rgba(61, 123, 166, 0.26);
+  --ok-500: #5f9a72;
+  --ok-soft: rgba(95, 154, 114, 0.14);
+  --ok-border: rgba(95, 154, 114, 0.26);
+  --warn-500: #c39154;
+  --warn-soft: rgba(195, 145, 84, 0.14);
+  --warn-border: rgba(195, 145, 84, 0.26);
+  --bad-500: #c06a5c;
+  --bad-soft: rgba(192, 106, 92, 0.14);
+  --bad-border: rgba(192, 106, 92, 0.26);
+  --info-500: #6a94a8;
+  --info-soft: rgba(106, 148, 168, 0.14);
+  --info-border: rgba(106, 148, 168, 0.26);
   --on-brand: #ffffff;
-  --on-gold: #241a08;
-  --on-ok: #062316;
-  --ok-500: #3ddc97;
-  --ok-soft: rgba(61, 220, 151, 0.13);
-  --warn-500: #f0c05e;
-  --warn-soft: rgba(240, 192, 94, 0.13);
-  --bad-500: #fb7d7d;
-  --bad-soft: rgba(251, 125, 125, 0.13);
-  --info-500: #62cdff;
-  --info-soft: rgba(98, 205, 255, 0.13);
-  --violet-500: #b18cff;
-  --violet-soft: rgba(177, 140, 255, 0.13);
+  --on-ok: #0d1a12;
+  --on-warn: #241a0c;
+  --on-bad: #ffffff;
 
   /* ── Workflow ramp ─────────────────────────────────────────────────────
-     One colour per production stage, shared by the order pipeline, the stage
-     timeline and any stage badge, so a stage reads the same everywhere.   */
-  --stage-received: #378add;
-  --stage-queued: #6f77f7;
-  --stage-washing: #dba96a;
-  --stage-drying: #f97316;
-  --stage-ironing: #ec4899;
-  --stage-packaging: #b18cff;
-  --stage-ready: #3ddc97;
-  --stage-delivery: #62cdff;
-  --stage-completed: #2bbd84;
+     One colour per production stage, in the same earthen range as the
+     states, so the pipeline reads as a progression rather than a spectrum. */
+  --stage-received: #4a7fa0;
+  --stage-queued: #3d7ba6;
+  --stage-washing: #7a9bb0;
+  --stage-drying: #c39154;
+  --stage-ironing: #a97e94;
+  --stage-packaging: #8c8fa8;
+  --stage-ready: #5f9a72;
+  --stage-delivery: #6a94a8;
+  --stage-completed: #4f8563;
 
   /* ── Spacing rhythm (4px base) ────────────────────────────────────────── */
   --sp-1: 4px;
@@ -139,12 +136,20 @@
   --icon-xl: 24px;
   --icon-stroke: 1.9;
 
-  /* ── Elevation ────────────────────────────────────────────────────────── */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 24px -12px rgba(0, 0, 0, 0.7);
-  --shadow-lg: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
-  --shadow-pop: 0 18px 48px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--line-soft);
-  --ring-brand: 0 0 0 3px rgba(111, 119, 247, 0.28);
+  /* ── Elevation ──────────────────────────────────────────────────────────
+     Three shadows, and each one means something:
+
+       --shadow-sm     a control that sits on a surface (a pressed segment)
+       --shadow-md     a surface that genuinely sits above another one
+       --shadow-modal  the one shadow every overlay uses: dropdowns, sheets,
+                       drawers, dialogs. One overlay, one shadow.
+
+     They are close, soft and dark rather than wide and black, and nothing
+     glows: a coloured shadow reads as light leaking out of the component. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
+  --shadow-md: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+  --shadow-modal: 0 24px 56px -24px rgba(0, 0, 0, 0.78), 0 0 0 1px var(--line-faint);
 
   /* ── Motion ──────────────────────────────────────────────────────────────
      Three speeds with a job: press feedback, state change, surface entrance.

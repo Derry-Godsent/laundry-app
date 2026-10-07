@@ -21,14 +21,14 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: var(--brand-600);
   color: #fff;
-  box-shadow: 0 14px 34px -14px var(--brand-glow), var(--shadow-md);
+  box-shadow: var(--shadow-md);
   transition: transform var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out);
 }
 
 .fab-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 40px -16px var(--brand-glow), var(--shadow-lg);
+  box-shadow: var(--shadow-lg);
 }
 
 .fab-button:active { transform: translateY(0); }
@@ -74,7 +74,7 @@
   font-size: 13px;
   font-weight: 550;
   white-space: nowrap;
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-modal);
   transition: background-color var(--dur-fast) var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
 }

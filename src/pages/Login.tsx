@@ -20,8 +20,6 @@ export const Login = () => {
   const [isOnline, setIsOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
-  const [parallax, setParallax] = useState({ x: 0, y: 0 });
-  const rafRef = useRef<number | null>(null);
   const errorId = useRef(`login-error-${Math.random().toString(36).slice(2, 9)}`);
 
   const handleRoleRedirect = useCallback(async (user: User) => {
@@ -111,20 +109,9 @@ export const Login = () => {
     }
   }, [email, password, isOnline]);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (rafRef.current) return;
-    const { clientX, clientY, currentTarget } = e;
-    rafRef.current = requestAnimationFrame(() => {
-      const rect = currentTarget.getBoundingClientRect();
-      const x = ((clientX - rect.left) / rect.width - 0.5) * 2;
-      const y = ((clientY - rect.top) / rect.height - 0.5) * 2;
-      setParallax({ x, y });
-      rafRef.current = null;
-    });
-  }, []);
 
-  const statusColor = isOnline ? "#34d399" : "#f87171";
-  const statusGlow = isOnline ? "rgba(52,211,153,0.5)" : "rgba(248,113,113,0.5)";
+  const statusColor = isOnline ? "var(--ok-500)" : "var(--bad-500)";
+  const statusGlow = isOnline ? "var(--ok-border)" : "var(--bad-border)";
 
   if (session) {
     return (
@@ -142,35 +129,20 @@ export const Login = () => {
   }
 
   return (
-    <div className="login-root" onMouseMove={handleMouseMove}>
+    <div className="login-root">
       {!isOnline && (
         <div className="login-banner">
-          <WifiOff size={15} color="#f87171" />
+          <WifiOff size={15} color="var(--bad-500)" />
           <span className="login-banner-text">You are offline.</span>
           <span className="login-banner-sub">Sign-in needs a connection. Reconnect and try again.</span>
         </div>
       )}
 
       <div className="login-layout">
-        <div className="login-ambient" />
-        <div className="login-grid" />
-        <div
-          className="login-orb login-orb-accent"
-          style={{ transform: `translate(${parallax.x * 16}px, ${parallax.y * 16}px)` }}
-        />
-        <div
-          className="login-orb login-orb-gold"
-          style={{ transform: `translate(${parallax.x * -12}px, ${parallax.y * -12}px)` }}
-        />
-        <div
-          className="login-orb login-orb-emerald"
-          style={{ transform: `translate(${parallax.x * 8}px, ${parallax.y * 8}px)` }}
-        />
-
         <div className="login-brand-panel">
           <div className="login-brand">
             <div className="login-brand-logo">
-              <Building2 size={24} color="#fff" />
+              <Building2 size={24} color="var(--on-brand)" />
             </div>
             <div className="login-brand-name">Chapman Prestige Limited</div>
           </div>
@@ -197,7 +169,7 @@ export const Login = () => {
               >
                 <feature.icon
                   size={18}
-                  color="#34d399"
+                  color="var(--ok-500)"
                   className="login-feature-icon"
                 />
                 {feature.text}

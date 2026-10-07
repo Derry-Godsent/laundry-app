@@ -2,11 +2,11 @@ import { Mail, Phone, MapPin, MessageCircle, ChevronDown, ChevronUp } from "luci
 import { useState } from "react";
 
 const T = {
-  bgBase: "#07090e", bgSurface: "#0c0f18", bgRaised: "#111520", bgElevated: "#161c2c",
-  borderFaint: "rgba(255,255,255,0.05)", borderSoft: "rgba(255,255,255,0.09)",
-  textPrimary: "#edf0f8", textSec: "#9aa3b5", textTert: "#556070",
-  accent: "#6c72f3", accentDim: "rgba(108,114,243,0.13)", accentBord: "rgba(108,114,243,0.28)",
-  emerald: "#34d399", emeraldDim: "rgba(52,211,153,0.1)",
+  bgBase: "var(--ink-base)", bgSurface: "var(--ink-shell)", bgRaised: "var(--ink-card)", bgElevated: "var(--ink-raised)",
+  borderFaint: "var(--line-faint)", borderSoft: "var(--line-soft)",
+  textPrimary: "var(--text-1)", textSec: "var(--text-2)", textTert: "var(--text-3)",
+  accent: "var(--brand-500)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)",
+  emerald: "var(--ok-500)", emeraldDim: "var(--ok-soft)",
 };
 
 const FONT = "var(--font-ui)";
@@ -53,7 +53,7 @@ export const Help = () => {
             <Phone size={16} color={T.emerald} /> +233 534 134 809
           </div>
           <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
-            <MapPin size={16} color="#dba96a" /> Kwadaso-Ohwimase, Kumasi
+            <MapPin size={16} color="var(--text-2)" /> Kwadaso-Ohwimase, Kumasi
           </div>
         </div>
       </div>

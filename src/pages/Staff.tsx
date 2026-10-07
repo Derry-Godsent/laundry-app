@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   Plus, X, Search, Phone, MapPin, Shield, Package, ArrowRight,
   Check, ChevronLeft, ChevronRight, RefreshCw, Download, Users,
-  Zap, TrendingUp, Clock, AlertCircle, WifiOff,
+  UserCheck, TrendingUp, Clock, AlertCircle, WifiOff,
 } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
@@ -59,16 +59,16 @@ interface NewStaffForm {
 
 /* ─── CONSTANTS ──────────────────────────────────────────────────────────── */
 const ROLE_META: Record<StaffRole, { label: string; color: string; bg: string }> = {
-  admin:      { label: "Admin",      color: "#6c72f3", bg: "rgba(108,114,243,0.12)" },
-  staff:      { label: "Staff",      color: "#34d399", bg: "rgba(52,211,153,0.12)"  },
-  courier:    { label: "Courier",    color: "#dba96a", bg: "rgba(219,169,106,0.12)" },
-  manager:    { label: "Manager",    color: "#a78bfa", bg: "rgba(167,139,250,0.12)" },
+  admin:      { label: "Admin",      color: "var(--brand-500)", bg: "var(--brand-soft)" },
+  staff:      { label: "Staff",      color: "var(--ok-500)", bg: "var(--ok-soft)"  },
+  courier:    { label: "Courier",    color: "var(--warn-500)", bg: "var(--warn-soft)" },
+  manager:    { label: "Manager",    color: "var(--brand-400)", bg: "rgba(167,139,250,0.12)" },
   strategist: { label: "Strategist", color: "#22d3ee", bg: "rgba(34,211,238,0.12)"  },
 };
 
 const STATUS_META: Record<StaffStatus, { label: string; color: string; next: StaffStatus }> = {
-  active:  { label: "Active",   color: "#34d399", next: "onduty"  },
-  onduty:  { label: "On Duty",  color: "#dba96a", next: "offline" },
+  active:  { label: "Active",   color: "var(--ok-500)", next: "onduty"  },
+  onduty:  { label: "On Duty",  color: "var(--warn-500)", next: "offline" },
   offline: { label: "Offline",  color: "#3a4460", next: "active"  },
 };
 
@@ -116,7 +116,7 @@ function EfficiencyRing({ value, size = 52, color }: { value: number; size?: num
         style={{ transition: "stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)" }}
       />
       <text x={size/2} y={size/2 + 4} textAnchor="middle"
-        fill="#edf0f8" fontSize={size > 48 ? 11 : 9} fontWeight="700"
+        fill="var(--text-1)" fontSize={size > 48 ? 11 : 9} fontWeight="700"
         fontFamily="'DM Mono', monospace">
         {value}%
       </text>
@@ -127,25 +127,26 @@ function EfficiencyRing({ value, size = 52, color }: { value: number; size?: num
 function Avatar({ name, size = 36, ring }: { name: string; size?: number; ring?: string }) {
   const safeName = name || "U";
   const initials = safeName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
-  const hue = (safeName.charCodeAt(0) * 37 + (safeName.charCodeAt(1) || 0) * 11) % 360;
+  /* One neutral avatar surface: a different hue per person made a staff list
+     read as a colour chart, and the hue carried no information. */
   return (
     <div className="stf-av" style={{
       width: size, height: size, minWidth: size,
-      background: `linear-gradient(155deg, hsl(${hue},40%,24%), hsl(${hue},35%,14%))`,
-      color: `hsl(${hue},65%,74%)`,
+      background: "var(--ink-active)",
+      color: "var(--text-2)",
       fontSize: size < 40 ? 12 : size < 60 ? 15 : 20,
-      boxShadow: ring ? `0 0 0 2.5px ${ring}, 0 4px 14px -4px rgba(0,0,0,0.55)` : "0 4px 14px -4px rgba(0,0,0,0.55)",
+      boxShadow: ring ? `0 0 0 2px ${ring}` : "none",
     }}>{initials}</div>
   );
 }
 
 function RoleBadge({ role }: { role: StaffRole }) {
-  const m = ROLE_META[role] || { label: role || "Staff", color: "#9aa3b5", bg: "rgba(154,163,181,0.12)" };
+  const m = ROLE_META[role] || { label: role || "Staff", color: "var(--text-2)", bg: "rgba(154,163,181,0.12)" };
   return <span className="role-badge" style={{ color: m.color, background: m.bg, borderColor: m.color + "35" }}>{m.label}</span>;
 }
 
 function StatusChip({ status, onClick, canEdit }: { status: StaffStatus; onClick?: (e?: any) => void; canEdit?: boolean }) {
-  const m = STATUS_META[status] || { label: status || "Unknown", color: "#9aa3b5", next: "active" as StaffStatus };
+  const m = STATUS_META[status] || { label: status || "Unknown", color: "var(--text-2)", next: "active" as StaffStatus };
   const nextMeta = STATUS_META[m.next];
   return (
     <button 
@@ -166,21 +167,30 @@ function StatusChip({ status, onClick, canEdit }: { status: StaffStatus; onClick
   );
 }
 
-function KpiCard({ label, value, icon, accent, sub, delay = 0 }: {
+function KpiCard({ label, value, of, unit, icon, accent, sub, delay = 0 }: {
   label: string; value: number; icon: JSX.Element;
   accent: string; sub?: string; delay?: number;
+  /** The whole this figure is part of. The bar only exists when there is one. */
+  of?: number;
+  /** What the denominator counts, for the bar's tooltip: "12 staff". */
+  unit?: string;
 }) {
   const counted = useCountUp(value, 900, delay);
+  const share = typeof of === "number" && of > 0 ? Math.min(1, value / of) : null;
   return (
     <div className="kpi" style={{ "--kpi-accent": accent, animationDelay: `${delay}ms` } as any}>
-      <div className="kpi-glow" style={{ background: accent }} />
       <div className="kpi-top">
         <div className="kpi-ico" style={{ background: accent + "18", color: accent }}>{icon}</div>
       </div>
       <div className="kpi-lbl">{label}</div>
       <div className="kpi-val">{counted}</div>
       {sub && <div className="kpi-sub">{sub}</div>}
-      <div className="kpi-bar"><div className="kpi-bar-fill" style={{ background: accent }} /></div>
+      {share !== null && (
+        <div className="kpi-bar" title={`${value} of ${of} ${unit ?? ""}`.trim()} role="img"
+             aria-label={`${value} of ${of} ${unit ?? ""}`.trim()}>
+          <div className="kpi-bar-fill" style={{ width: `${Math.round(share * 100)}%`, background: accent }} />
+        </div>
+      )}
     </div>
   );
 }
@@ -193,7 +203,6 @@ function EffBar({ value, color }: { value: number; color: string }) {
       <span className="eff-num" style={{ color }}>{value}%</span>
       <div className="eff-track">
         <div className="eff-fill" style={{ width: `${w}%`, background: color }} />
-        <div className="eff-shine" style={{ width: `${w}%` }} />
       </div>
     </div>
   );
@@ -209,15 +218,15 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
   return (
     <div style={{ 
       position: "fixed", bottom: 24, right: 24, zIndex: 10000, 
-      background: type === 'error' ? "rgba(248,113,113,0.1)" : "rgba(52,211,153,0.1)", 
-      border: `1px solid ${type === 'error' ? "rgba(248,113,113,0.2)" : "rgba(52,211,153,0.2)"}`, 
+      background: type === 'error' ? "var(--bad-soft)" : "var(--ok-soft)", 
+      border: `1px solid ${type === 'error' ? "var(--bad-soft)" : "var(--ok-soft)"}`, 
       borderRadius: 10, padding: "12px 20px", display: "flex", alignItems: "center", gap: 12, 
-      boxShadow: "0 14px 36px rgba(0,0,0,0.45)", animation: "sfFadeUp 0.3s ease both" 
+      boxShadow: "var(--shadow-modal)", animation: "sfFadeUp 0.3s ease both" 
     }}>
-      <span style={{ fontSize: 14, color: type === 'error' ? "#f87171" : "#34d399", fontWeight: 500, fontFamily: "var(--sf-font)" }}>
+      <span style={{ fontSize: 14, color: type === 'error' ? "var(--bad-500)" : "var(--ok-500)", fontWeight: 500, fontFamily: "var(--sf-font)" }}>
         {msg}
       </span>
-      <button onClick={onClose} style={{ padding: 4, background: "transparent", border: "none", color: "#556070", cursor: "pointer" }}>
+      <button onClick={onClose} style={{ padding: 4, background: "transparent", border: "none", color: "var(--text-4)", cursor: "pointer" }}>
         <X size={14} />
       </button>
     </div>
@@ -517,7 +526,7 @@ export const Staff = () => {
   };
 
   const hasFilters = roleFilter !== "all" || statusFilter !== "all" || q;
-  const effColor = (e: number) => e >= 95 ? "#34d399" : e >= 85 ? "#dba96a" : "#f87171";
+  const effColor = (e: number) => e >= 95 ? "var(--ok-500)" : e >= 85 ? "var(--warn-500)" : "var(--bad-500)";
 
   if (loading || permLoading) return (
     <div className="sf">
@@ -529,11 +538,11 @@ export const Staff = () => {
     <div className="sf">
       <style>{`
         :root {
-          --sf-bg-base: #07090e; --sf-bg-surface: #0c0f18; --sf-bg-raised: #111520; --sf-bg-elevated: #161c2c;
-          --sf-border-faint: rgba(255,255,255,0.05); --sf-border-soft: rgba(255,255,255,0.09); --sf-border-mid: rgba(255,255,255,0.15);
-          --sf-text-primary: #edf0f8; --sf-text-sec: #9aa3b5; --sf-text-tert: #556070; --sf-text-hint: #2e3a4e;
-          --sf-accent: #6c72f3; --sf-accent-dim: rgba(108,114,243,0.13); --sf-accent-bord: rgba(108,114,243,0.28); --sf-accent-glow: rgba(108,114,243,0.35);
-          --sf-gold: #dba96a; --sf-emerald: #34d399; --sf-danger: #f87171;
+          --sf-bg-base: var(--ink-base); --sf-bg-surface: var(--ink-shell); --sf-bg-raised: var(--ink-card); --sf-bg-elevated: var(--ink-raised);
+          --sf-border-faint: var(--line-faint); --sf-border-soft: var(--line-soft); --sf-border-mid: var(--line);
+          --sf-text-primary: var(--text-1); --sf-text-sec: var(--text-2); --sf-text-tert: var(--text-3); --sf-text-hint: var(--text-4);
+          --sf-accent: var(--brand-500); --sf-accent-dim: var(--brand-soft); --sf-accent-bord: var(--brand-border); --sf-accent-glow: var(--brand-border);
+          --sf-gold: var(--warn-500); --sf-emerald: var(--ok-500); --sf-danger: var(--bad-500);
           --sf-font: var(--font-ui); --sf-mono: var(--font-mono);
         }
         @keyframes sfFadeUp { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: none;} }
@@ -543,8 +552,6 @@ export const Staff = () => {
         @keyframes sfSlideInR { from { transform: translateX(24px); opacity:0;} to { transform: none; opacity:1;} }
         @keyframes sfPanelIn { from { transform: translateX(100%);} to { transform: none;} }
         @keyframes sfScaleIn { from { opacity:0; transform: scale(.96) translateY(6px);} to { opacity:1; transform: none;} }
-        @keyframes sfShine { 0% { transform: translateX(-120%);} 100% { transform: translateX(220%);} }
-        @keyframes sfAurora { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(3%,-2%) scale(1.05);} }
 
         /* Fills the shell frame: the shell owns the page scroll, .sf-tbl-wrap owns the
    table scroll. min-height:100vh inside the shell is what forced the whole page
@@ -552,14 +559,14 @@ export const Staff = () => {
 .sf { background: var(--sf-bg-base); min-height: 100%; font-family: var(--sf-font); color: var(--sf-text-primary); padding: 24px var(--page-pad-x) 48px; position: relative; }
 
         .sf-offline { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-          background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); border-radius: 10px;
+          background: var(--bad-soft); border: 1px solid var(--bad-border); border-radius: 10px;
           padding: 10px 16px; margin-bottom: 18px; animation: sfFadeUp .3s ease; }
         .sf-offline-l { display:flex; align-items:center; gap:10px; font-size:13px; color:#fca5a5; }
         .sf-offline-dot { width:8px; height:8px; border-radius:50%; background: var(--sf-danger); animation: sfPulse 1.6s ease-in-out infinite; }
         .sf-offline-retry { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:7px;
-          background: rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.25); color: var(--sf-danger);
+          background: var(--bad-soft); border:1px solid var(--bad-border); color: var(--sf-danger);
           font-size:12.5px; font-weight:600; cursor:pointer; font-family: var(--sf-font); transition: background .18s ease, transform .18s ease; }
-        .sf-offline-retry:hover { background: rgba(248,113,113,0.18); }
+        .sf-offline-retry:hover { background: var(--bad-soft); }
         .sf-offline-retry:active { transform: scale(.96); }
         .sf-spin-icon { animation: sfSpin .8s linear infinite; }
 
@@ -571,31 +578,30 @@ export const Staff = () => {
         .sf-acts { display:flex; align-items:center; gap:8px; }
         .sf-btn { display:flex; align-items:center; gap:7px; padding:9px 14px; border-radius:9px; border:1px solid var(--sf-border-soft);
           background: var(--sf-bg-raised); color: var(--sf-text-sec); font-size:13px; font-weight:600; cursor:pointer;
-          font-family: var(--sf-font); transition: transform .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease; }
-        .sf-btn.ghost:hover { transform: translateY(-1px); border-color: var(--sf-border-mid); color: var(--sf-text-primary); }
-        .sf-btn.primary { background: linear-gradient(155deg, var(--sf-accent), #5459d6); border-color: transparent; color:#fff; padding: 9px 16px; }
-        .sf-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -10px var(--sf-accent-glow); }
-        .sf-btn.primary:active, .sf-btn.ghost:active { transform: translateY(0) scale(.97); }
+          font-family: var(--sf-font); transition: border-color .16s ease, color .16s ease, background-color .16s ease; }
+        .sf-btn.ghost:hover { border-color: var(--sf-border-mid); color: var(--sf-text-primary); }
+        .sf-btn.primary { background: var(--brand-600); border-color: var(--brand-500); color: var(--on-brand); padding: 9px 16px; }
+        .sf-btn.primary:hover { background: var(--brand-500); }
+        .sf-btn.primary:active, .sf-btn.ghost:active { filter: brightness(1.06); }
         .spin { animation: sfSpin .8s linear infinite; }
 
         .kpi-row { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 22px; }
         .kpi { position:relative; overflow:hidden; background: var(--sf-bg-raised); border:1px solid var(--sf-border-soft); border-radius: 14px;
           padding: 16px 16px 14px; animation: sfFadeUp .5s cubic-bezier(.16,1,.3,1) both; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
-        .kpi:hover { transform: translateY(-3px); border-color: var(--kpi-accent, var(--sf-border-mid)); box-shadow: 0 16px 32px -18px rgba(0,0,0,.6); }
-        .kpi-glow { position:absolute; top:-40%; right:-30%; width: 120px; height: 120px; border-radius:50%; filter: blur(38px); opacity:.16; pointer-events:none; }
+        .kpi:hover { border-color: var(--kpi-accent, var(--sf-border-mid)); }
         .kpi-top { display:flex; justify-content:flex-end; margin-bottom: 2px; }
         .kpi-ico { width: 30px; height: 30px; border-radius: 8px; display:flex; align-items:center; justify-content:center; }
         .kpi-lbl { font-size: 11px; color: var(--sf-text-tert); text-transform: uppercase; letter-spacing: .07em; font-weight: 700; margin-top: -22px; }
         .kpi-val { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; font-family: var(--sf-mono); margin-top: 6px; }
         .kpi-sub { font-size: 11.5px; color: var(--sf-text-hint); margin-top: 2px; }
         .kpi-bar { height: 3px; border-radius: 3px; background: rgba(255,255,255,.05); margin-top: 12px; overflow:hidden; }
-        .kpi-bar-fill { height: 100%; width: 62%; border-radius: 3px; opacity: .8; }
+        .kpi-bar-fill { height: 100%; border-radius: 3px; opacity: .8; transition: width var(--dur-slow) var(--ease-out); }
 
         .sf-filters { display:flex; align-items:center; gap:10px; margin-bottom: 16px; flex-wrap: wrap; }
         .sf-srch { position:relative; display:flex; align-items:center; flex: 1 1 240px; min-width: 200px; background: var(--sf-bg-raised);
           border:1px solid var(--sf-border-soft); border-radius: 9px; padding: 0 10px; transition: border-color .18s ease, box-shadow .18s ease; }
-        .sf-srch:focus-within { border-color: var(--sf-accent-bord); box-shadow: 0 0 0 3px var(--sf-accent-dim); }
-        .sf-srch-ico { color: var(--sf-text-hint); flex-shrink:0; }
+        .sf-srch:focus-within { border-color: var(--sf-accent-bord); box-shadow: var(--focus-ring); }
+        .sf-srch-ico { color: var(--sf-text-tert); flex-shrink:0; }
         .sf-srch-inp { flex:1; background: transparent; border:none; outline:none; color: var(--sf-text-primary); font-size: 13.5px;
           padding: 9px 8px; font-family: var(--sf-font); }
         .sf-srch-x { background: var(--sf-bg-elevated); border:none; border-radius: 5px; color: var(--sf-text-tert); cursor:pointer;
@@ -606,10 +612,10 @@ export const Staff = () => {
         .sfp { background: var(--sf-bg-raised); border:1px solid var(--sf-border-soft); border-radius: 9px; color: var(--sf-text-sec);
           font-size: 13px; padding: 9px 10px; font-family: var(--sf-font); cursor:pointer; transition: border-color .18s ease, color .18s ease; }
         .sfp:hover { border-color: var(--sf-border-mid); color: var(--sf-text-primary); }
-        .sfp-clr { display:flex; align-items:center; gap:6px; background: rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.22);
+        .sfp-clr { display:flex; align-items:center; gap:6px; background: var(--bad-soft); border:1px solid var(--bad-border);
           color: var(--sf-danger); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; font-weight:600; cursor:pointer;
           font-family: var(--sf-font); transition: background .18s ease; }
-        .sfp-clr:hover { background: rgba(248,113,113,.15); }
+        .sfp-clr:hover { background: var(--bad-soft); }
 
         .sf-body { background: var(--sf-bg-raised); border: 1px solid var(--sf-border-soft); border-radius: 14px; overflow:hidden; }
         .sf-tbl-wrap { overflow-x: auto; }
@@ -661,8 +667,6 @@ export const Staff = () => {
         .eff-num { font-size: 11.5px; font-weight: 700; font-family: var(--sf-mono); }
         .eff-track { position: relative; height: 5px; border-radius: 5px; background: rgba(255,255,255,.06); overflow: hidden; }
         .eff-fill { height: 100%; border-radius: 5px; transition: width 1s cubic-bezier(.4,0,.2,1); position: relative; }
-        .eff-shine { position: absolute; top:0; left:0; height: 100%; width: 30%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
-          animation: sfShine 2.6s ease-in-out infinite; }
 
         .sf-ov { position: fixed; inset:0; background: rgba(4,5,9,0.6); backdrop-filter: blur(2px); opacity:0; pointer-events:none;
           transition: opacity .25s ease; z-index: 60; }
@@ -671,7 +675,7 @@ export const Staff = () => {
           border-left: 1px solid var(--sf-border-soft); z-index: 61; display:flex; flex-direction: column;
           transform: translateX(100%); transition: transform .32s cubic-bezier(.16,1,.3,1); }
         .sf-panel.on { transform: translateX(0); }
-        .sp-hero { position: relative; padding: 28px 24px 22px; text-align:center; background: radial-gradient(120% 100% at 50% 0%, var(--sf-accent-dim), transparent 60%);
+        .sp-hero { position: relative; padding: 28px 24px 22px; text-align:center; background: var(--ink-raised);
           border-bottom: 1px solid var(--sf-border-faint); }
         .sp-cl { position:absolute; top: 16px; right: 16px; background: var(--sf-bg-elevated); border:none; border-radius: 8px;
           color: var(--sf-text-sec); padding: 7px; cursor:pointer; transition: background .15s ease, color .15s ease; }
@@ -704,23 +708,23 @@ export const Staff = () => {
           border: 1px solid var(--sf-border-faint); border-radius: 10px; padding: 10px 12px; animation: sfSlideInR .3s ease both; }
         .sp-oid { font-size: 13px; font-weight: 600; font-family: var(--sf-mono); }
         .sp-ostg { font-size: 11px; color: var(--sf-gold); margin-top: 2px; }
-        .sp-unassign { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.25); color: var(--sf-danger);
+        .sp-unassign { background: var(--bad-soft); border: 1px solid var(--bad-border); color: var(--sf-danger);
           border-radius: 7px; padding: 6px; cursor:pointer; transition: background .15s ease, transform .15s ease; }
-        .sp-unassign:hover { background: rgba(248,113,113,.2); transform: scale(1.06); }
+        .sp-unassign:hover { background: var(--bad-soft); transform: scale(1.06); }
         .sp-footer { display:flex; gap: 10px; padding: 18px 24px; border-top: 1px solid var(--sf-border-faint); background: var(--sf-bg-surface); }
         .spf-s { flex: 1; background: var(--sf-bg-elevated); border: 1px solid var(--sf-border-soft); color: var(--sf-text-sec);
           border-radius: 9px; padding: 10px; font-size: 13.5px; font-weight: 600; cursor:pointer; font-family: var(--sf-font); transition: border-color .15s ease; }
         .spf-s:hover { border-color: var(--sf-border-mid); color: var(--sf-text-primary); }
-        .spf-p { flex: 1.4; display:flex; align-items:center; justify-content:center; gap: 7px; background: linear-gradient(155deg, var(--sf-accent), #5459d6);
-          border: none; color: #fff; border-radius: 9px; padding: 10px; font-size: 13.5px; font-weight: 700; cursor:pointer;
-          font-family: var(--sf-font); transition: transform .15s ease, box-shadow .15s ease; }
-        .spf-p:hover { transform: translateY(-1px); box-shadow: 0 10px 22px -10px var(--sf-accent-glow); }
+        .spf-p { flex: 1.4; display:flex; align-items:center; justify-content:center; gap: 7px; background: var(--brand-600);
+          border: 1px solid var(--brand-500); color: var(--on-brand); border-radius: 9px; padding: 10px; font-size: 13.5px; font-weight: 700; cursor:pointer;
+          font-family: var(--sf-font); transition: background-color .15s ease; }
+        .spf-p:hover { background: var(--brand-500); }
 
         .sf-modal-ov { position: fixed; inset:0; background: rgba(4,5,9,0.66); backdrop-filter: blur(3px); opacity:0; pointer-events:none;
           display:flex; align-items:center; justify-content:center; transition: opacity .22s ease; z-index: 70; padding: 20px; }
         .sf-modal-ov.on { opacity:1; pointer-events:auto; }
         .sf-modal { background: var(--sf-bg-surface); border: 1px solid var(--sf-border-soft); border-radius: 16px; width: 460px; max-width: 100%;
-          box-shadow: 0 30px 70px -20px rgba(0,0,0,.7); animation: sfScaleIn .28s cubic-bezier(.16,1,.3,1); }
+          box-shadow: var(--shadow-modal); animation: sfScaleIn .28s cubic-bezier(.16,1,.3,1); }
         .sm-head { display:flex; justify-content:space-between; align-items:flex-start; padding: 20px 22px 16px; border-bottom: 1px solid var(--sf-border-faint); }
         .sm-title { font-size: 16px; font-weight: 700; }
         .sm-sub { font-size: 12px; color: var(--sf-text-tert); margin-top: 4px; }
@@ -734,9 +738,9 @@ export const Staff = () => {
         .sm-inp { background: var(--sf-bg-raised); border: 1px solid var(--sf-border-soft); border-radius: 8px; color: var(--sf-text-primary);
           font-size: 13.5px; padding: 10px 12px; outline: none; font-family: var(--sf-font); transition: border-color .18s ease, box-shadow .18s ease; }
         .sm-inp:hover { border-color: var(--sf-border-mid); }
-        .sm-inp:focus { border-color: var(--sf-accent-bord); box-shadow: 0 0 0 3px var(--sf-accent-dim); }
-        .sm-inp.err { border-color: rgba(248,113,113,.5); }
-        .sm-inp.err:focus { box-shadow: 0 0 0 3px rgba(248,113,113,.15); }
+        .sm-inp:focus { border-color: var(--sf-accent-bord); box-shadow: var(--focus-ring); }
+        .sm-inp.err { border-color: var(--bad-border); }
+        .sm-inp.err:focus { box-shadow: 0 0 0 2px var(--bad-border); }
         .sm-err { font-size: 11px; color: var(--sf-danger); }
         .sm-sel { background: var(--sf-bg-raised); border: 1px solid var(--sf-border-soft); border-radius: 8px; color: var(--sf-text-primary);
           font-size: 13.5px; padding: 10px 12px; outline: none; font-family: var(--sf-font); cursor:pointer; transition: border-color .18s ease; }
@@ -745,10 +749,10 @@ export const Staff = () => {
         .smf-s { flex:1; background: var(--sf-bg-elevated); border: 1px solid var(--sf-border-soft); color: var(--sf-text-sec);
           border-radius: 9px; padding: 10px; font-size: 13.5px; font-weight: 600; cursor:pointer; font-family: var(--sf-font); transition: border-color .15s ease; }
         .smf-s:hover { border-color: var(--sf-border-mid); color: var(--sf-text-primary); }
-        .smf-p { flex: 1.4; display:flex; align-items:center; justify-content:center; gap: 7px; background: linear-gradient(155deg, var(--sf-accent), #5459d6);
-          border:none; color:#fff; border-radius: 9px; padding: 10px; font-size: 13.5px; font-weight: 700; cursor:pointer;
-          font-family: var(--sf-font); transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease; }
-        .smf-p:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 22px -10px var(--sf-accent-glow); }
+        .smf-p { flex: 1.4; display:flex; align-items:center; justify-content:center; gap: 7px; background: var(--brand-600);
+          border: 1px solid var(--brand-500); color: var(--on-brand); border-radius: 9px; padding: 10px; font-size: 13.5px; font-weight: 700; cursor:pointer;
+          font-family: var(--sf-font); transition: background-color .15s ease, opacity .15s ease; }
+        .smf-p:hover:not(:disabled) { background: var(--brand-500); }
         .smf-p:disabled { opacity: .6; cursor: not-allowed; }
 
         @media (max-width: 1180px) {
@@ -874,7 +878,7 @@ export const Staff = () => {
         <div className="sf-offline">
           <div className="sf-offline-l">
             <span className="sf-offline-dot" />
-            <WifiOff size={15} color="#f87171" />
+            <WifiOff size={15} color="var(--bad-500)" />
             <span>System is offline. Showing local cached data. Changes may not be saved.</span>
           </div>
           <button className="sf-offline-retry" onClick={handleRetry}>
@@ -889,7 +893,7 @@ export const Staff = () => {
           <p className="sf-sub">
             <span>{stats.total} members</span>
             <span className="dsep">·</span>
-            <span style={{ color: "#34d399" }}>{stats.onDuty} on duty</span>
+            <span style={{ color: "var(--ok-500)" }}>{stats.onDuty} on duty</span>
             <span className="dsep">·</span>
             <span style={{ color: "#3a4460" }}>{stats.offline} offline</span>
           </p>
@@ -911,11 +915,11 @@ export const Staff = () => {
       </div>
 
       <div className="kpi-row">
-        <KpiCard label="Total Staff"    value={stats.total}       icon={<Users size={18} />}      accent="#6c72f3" sub="All roles" delay={0}   />
-        <KpiCard label="On Duty Now"    value={stats.onDuty}      icon={<Zap size={18} />}         accent="#dba96a" sub="Working"   delay={80}  />
-        <KpiCard label="Active"         value={stats.active}      icon={<Check size={18} />}       accent="#34d399" sub="Available" delay={160} />
-        <KpiCard label="Avg Efficiency" value={stats.avgEff}      icon={<TrendingUp size={18} />}  accent="#a78bfa" sub="Team rate" delay={240} />
-        <KpiCard label="Orders Assigned" value={stats.totalAssigned} icon={<Package size={18} />} accent="#22d3ee" sub="Active now" delay={320} />
+        <KpiCard label="Total Staff"    value={stats.total}       icon={<Users size={18} />}      accent="var(--brand-500)" sub="All roles" delay={0}   />
+        <KpiCard label="On Duty Now"    value={stats.onDuty}      of={stats.total} unit="staff" icon={<UserCheck size={18} />}   accent="var(--ok-500)" sub="Working"   delay={80}  />
+        <KpiCard label="Active"         value={stats.active}      of={stats.total} unit="staff" icon={<Check size={18} />}       accent="var(--ok-500)" sub="Available" delay={160} />
+        <KpiCard label="Avg Efficiency" value={stats.avgEff}      icon={<TrendingUp size={18} />}  accent="var(--brand-400)" sub="Team rate" delay={240} />
+        <KpiCard label="Orders Assigned" value={stats.totalAssigned} icon={<Package size={18} />} accent="var(--info-500)" sub="Active now" delay={320} />
       </div>
 
       <div className="sf-filters">
@@ -1069,9 +1073,9 @@ export const Staff = () => {
                       <button 
                         className="status-chip" 
                         style={{ 
-                          color: openStaff.is_banned ? "#f87171" : "#34d399", 
-                          borderColor: (openStaff.is_banned ? "#f87171" : "#34d399") + "40", 
-                          background: (openStaff.is_banned ? "#f87171" : "#34d399") + "12" 
+                          color: openStaff.is_banned ? "var(--bad-500)" : "var(--ok-500)", 
+                          borderColor: (openStaff.is_banned ? "var(--bad-500)" : "var(--ok-500)") + "40", 
+                          background: (openStaff.is_banned ? "var(--bad-500)" : "var(--ok-500)") + "12" 
                         }}
                         onClick={async () => {
                           const newBannedStatus = !openStaff.is_banned;
@@ -1084,7 +1088,7 @@ export const Staff = () => {
                           }
                         }}
                       >
-                        <span className="sc-dot" style={{ background: openStaff.is_banned ? "#f87171" : "#34d399" }} />
+                        <span className="sc-dot" style={{ background: openStaff.is_banned ? "var(--bad-500)" : "var(--ok-500)" }} />
                         {openStaff.is_banned ? "Banned" : "Active"}
                       </button>
                     </div>
@@ -1095,11 +1099,11 @@ export const Staff = () => {
                   <div className="sp-sec-lbl">Performance</div>
                   <div className="sp-perf-row">
                     <div className="sp-perf-card">
-                      <div className="spc-val" style={{ color: "#dba96a" }}>{openStaff.activeOrders}</div>
+                      <div className="spc-val" style={{ color: "var(--warn-500)" }}>{openStaff.activeOrders}</div>
                       <div className="spc-lbl">Active</div>
                     </div>
                     <div className="sp-perf-card">
-                      <div className="spc-val" style={{ color: "#34d399" }}>{openStaff.completedOrders}</div>
+                      <div className="spc-val" style={{ color: "var(--ok-500)" }}>{openStaff.completedOrders}</div>
                       <div className="spc-lbl">Completed</div>
                     </div>
                     <div className="sp-perf-card">
@@ -1249,7 +1253,7 @@ export const Staff = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
-                    background: 'none', border: 'none', color: '#9aa3b5', cursor: 'pointer',
+                    background: 'none', border: 'none', color: 'var(--text-2)', cursor: 'pointer',
                     padding: '4px', display: 'flex'
                   }}
                   title={showPassword ? "Hide password" : "Show password"}

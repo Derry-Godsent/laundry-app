@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export type PillTone = "neutral" | "brand" | "gold" | "ok" | "warn" | "bad" | "info" | "violet";
+export type PillTone = "neutral" | "brand" | "accent" | "ok" | "warn" | "bad" | "info";
 
 export interface StatusPillProps {
   tone?: PillTone;

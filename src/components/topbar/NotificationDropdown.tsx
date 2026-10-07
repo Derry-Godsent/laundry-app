@@ -15,13 +15,13 @@ const CSS = `
   border-radius: 9px;
   border: 1px solid rgba(255,255,255,0.07);
   background: rgba(255,255,255,0.03);
-  color: #556070;
+  color: var(--text-4);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
-.nd-bell:hover { background: rgba(255,255,255,0.07); color: #9aa3b5; border-color: rgba(255,255,255,0.11); }
-.nd-bell.open  { background: rgba(108,114,243,0.12); color: #6c72f3; border-color: rgba(108,114,243,0.3); }
+.nd-bell:hover { background: rgba(255,255,255,0.07); color: var(--text-2); border-color: rgba(255,255,255,0.11); }
+.nd-bell.open  { background: var(--brand-soft); color: var(--brand-500); border-color: var(--brand-border); }
 .nd-bell:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* Unread badge */
@@ -29,7 +29,7 @@ const CSS = `
   position: absolute; top: -4px; right: -4px;
   min-width: 17px; height: 17px; padding: 0 4px;
   border-radius: 20px;
-  background: #f87171; color: #fff;
+  background: var(--bad-500); color: #fff;
   font-size: 9.5px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   border: 2px solid #07090e;
@@ -52,7 +52,7 @@ const CSS = `
      --nd-x is the distance from the viewport's right edge. */
   position: fixed; top: var(--nd-top, 84px); right: var(--nd-x, 24px);
   width: 340px; max-width: calc(100vw - 24px);
-  background: #0f1320;
+  background: var(--ink-card);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
@@ -69,14 +69,14 @@ const CSS = `
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .nd-head-title {
-  font-size: 13.5px; font-weight: 700; color: #edf0f8;
+  font-size: 13.5px; font-weight: 700; color: var(--text-1);
   display: flex; align-items: center; gap: 8px;
 }
 .nd-head-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .nd-unread-chip {
   font-size: 10px; font-weight: 700;
   padding: 2px 7px; border-radius: 20px;
-  background: rgba(108,114,243,0.15); color: #6c72f3;
+  background: var(--brand-soft); color: var(--brand-500);
 }
 .nd-mark-all {
   font-size: 11.5px; font-weight: 600; color: #3a4460;
@@ -84,7 +84,7 @@ const CSS = `
   font-family: var(--font-ui);
   transition: color 0.15s; padding: 0;
 }
-.nd-mark-all:hover { color: #9aa3b5; }
+.nd-mark-all:hover { color: var(--text-2); }
 .nd-mark-all:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* List. It is the scroller of the panel's flex column, so a long list scrolls
@@ -123,7 +123,7 @@ const CSS = `
 }
 .nd-item:last-child { border-bottom: none; }
 .nd-item:hover { background: rgba(255,255,255,0.03); }
-.nd-item.unread { background: rgba(108,114,243,0.04); }
+.nd-item.unread { background: var(--brand-soft); }
 
 /* Colour strip on left edge */
 .nd-strip {
@@ -145,7 +145,7 @@ const CSS = `
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .nd-item-desc {
-  font-size: 11.5px; color: #556070;
+  font-size: 11.5px; color: var(--text-4);
   line-height: 1.45;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
@@ -169,18 +169,18 @@ const CSS = `
   width: 24px; height: 24px; border-radius: 6px;
   border: 1px solid rgba(255,255,255,0.08);
   background: rgba(255,255,255,0.04);
-  color: #9aa3b5; cursor: pointer;
+  color: var(--text-2); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.nd-act-btn:hover { background: rgba(255,255,255,0.1); color: #edf0f8; }
-.nd-act-btn.dismiss:hover { background: rgba(248,113,113,0.12); color: #f87171; border-color: rgba(248,113,113,0.2); }
+.nd-act-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-1); }
+.nd-act-btn.dismiss:hover { background: var(--bad-soft); color: var(--bad-500); border-color: var(--bad-soft); }
 .nd-act-btn:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 /* Unread dot */
 .nd-unread-dot {
   width: 7px; height: 7px; border-radius: 50%;
-  background: #6c72f3; flex-shrink: 0; margin-top: 5px;
+  background: var(--brand-500); flex-shrink: 0; margin-top: 5px;
 }
 
 /* Footer */
@@ -193,11 +193,11 @@ const CSS = `
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 8px;
-  color: #556070; font-size: 12.5px; font-weight: 600;
+  color: var(--text-4); font-size: 12.5px; font-weight: 600;
   cursor: pointer; font-family: var(--font-ui);
   transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
-.nd-view-all:hover { background: rgba(255,255,255,0.06); color: #9aa3b5; }
+.nd-view-all:hover { background: rgba(255,255,255,0.06); color: var(--text-2); }
 .nd-view-all:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
 
 @keyframes ndSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: none; } }
@@ -290,13 +290,13 @@ const CSS = `
   color: var(--text-3);
 }
 .nd-bell:hover { background: var(--ink-hover); border-color: var(--line); color: var(--text-1); }
-.nd-bell.open { background: var(--brand-soft); border-color: rgba(111, 119, 247, 0.3); color: var(--brand-400); }
+.nd-bell.open { background: var(--brand-soft); border-color: var(--brand-border); color: var(--brand-400); }
 .nd-badge { background: var(--bad-500); color: #2b0505; border-color: var(--ink-shell); }
 .nd-panel {
   background: var(--ink-hover);
   border-color: var(--line-soft);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-modal);
 }
 .nd-head { border-bottom-color: var(--line-faint); }
 .nd-head-title { color: var(--text-1); }
@@ -343,10 +343,10 @@ interface NotificationDropdownProps {
 }
 
 const TYPE_META: Record<string, { color: string; bg: string; icon: React.ElementType }> = {
-  success: { color: "#34d399", bg: "rgba(52,211,153,0.12)",  icon: CheckCircle },
-  info:    { color: "#6c72f3", bg: "rgba(108,114,243,0.12)", icon: Info },
-  warning: { color: "#dba96a", bg: "rgba(219,169,106,0.12)", icon: AlertTriangle },
-  error:   { color: "#f87171", bg: "rgba(248,113,113,0.12)", icon: AlertCircle },
+  success: { color: "var(--ok-500)", bg: "var(--ok-soft)",  icon: CheckCircle },
+  info:    { color: "var(--brand-500)", bg: "var(--brand-soft)", icon: Info },
+  warning: { color: "var(--warn-500)", bg: "var(--warn-soft)", icon: AlertTriangle },
+  error:   { color: "var(--bad-500)", bg: "var(--bad-soft)", icon: AlertCircle },
 };
 
 export const NotificationDropdown = ({

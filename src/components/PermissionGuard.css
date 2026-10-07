@@ -22,8 +22,8 @@
 
 .pg-banner {
   border-color: rgba(224, 180, 115, 0.24);
-  background: var(--gold-soft);
-  color: var(--gold-400);
+  background: var(--warn-soft);
+  color: var(--warn-500);
 }
 
 .pg-banner svg,

@@ -5,7 +5,7 @@
   /* Fills the shell frame; .main-body owns the page scroll. */
   min-height: 100%;
   font-family: var(--font-ui);
-  color: #edf0f8;
+  color: var(--text-1);
 }
 
 /* ── Header ────────────────────────────────────── */
@@ -25,12 +25,12 @@
 
 .ob-header-sub {
   font-size: 12px;
-  color: #556070;
+  color: var(--text-4);
 }
 
 .ob-submit-btn {
   padding: 10px 24px;
-  background: #6c72f3;
+  background: var(--brand-500);
   border: none;
   border-radius: 9px;
   color: #fff;
@@ -64,7 +64,7 @@
 
 /* ── Panel ─────────────────────────────────────── */
 .ob-panel {
-  background: #111520;
+  background: var(--ink-shell);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 12px;
   padding: 20px;
@@ -86,7 +86,7 @@
   background: #0c0f18;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 8px;
-  color: #edf0f8;
+  color: var(--text-1);
   font-size: 14px;
   outline: none;
   font-family: var(--font-ui);
@@ -94,8 +94,8 @@
 }
 
 .ob-input:focus {
-  border-color: #6c72f3;
-  box-shadow: 0 0 0 3px rgba(108, 114, 243, 0.13);
+  border-color: var(--brand-500);
+  box-shadow: var(--focus-ring);
 }
 
 .ob-input::placeholder {
@@ -116,7 +116,7 @@
 /* ── Date Input ────────────────────────────────── */
 .ob-date-label {
   font-size: 11px;
-  color: #556070;
+  color: var(--text-4);
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -154,17 +154,17 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #556070;
+  color: var(--text-4);
   pointer-events: none;
   transition: color 0.2s ease;
 }
 
 .ob-date-wrap:hover .ob-date-icon {
-  color: #6c72f3;
+  color: var(--brand-500);
 }
 
 .ob-date-wrap:focus-within .ob-date-icon {
-  color: #6c72f3;
+  color: var(--brand-500);
 }
 
 /* Webkit date picker icon */
@@ -193,7 +193,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 6px;
   padding: 4px 8px;
-  color: #edf0f8;
+  color: var(--text-1);
   font-size: 12px;
   outline: none;
   font-family: var(--font-ui);
@@ -226,7 +226,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   max-height: 200px;
   overflow-y: auto;
   z-index: 50;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-modal);
 }
 
 .ob-dropdown-item {
@@ -239,7 +239,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 
 .ob-dropdown-item:hover,
 .ob-dropdown-item.active {
-  background: rgba(108, 114, 243, 0.1);
+  background: var(--brand-soft);
 }
 
 .ob-dropdown-item:last-child {
@@ -252,12 +252,12 @@ input[type="date"]::-moz-calendar-picker-indicator {
 
 .ob-dropdown-meta {
   font-size: 11px;
-  color: #556070;
+  color: var(--text-4);
 }
 
 .ob-dropdown-empty {
   padding: 12px;
-  color: #556070;
+  color: var(--text-4);
   font-size: 13px;
 }
 
@@ -274,7 +274,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-client-phone {
-  color: #9aa3b5;
+  color: var(--text-2);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -282,8 +282,8 @@ input[type="date"]::-moz-calendar-picker-indicator {
 
 .ob-client-tier {
   padding: 4px 8px;
-  background: rgba(219, 169, 106, 0.1);
-  color: #dba96a;
+  background: var(--warn-soft);
+  color: var(--warn-500);
   border-radius: 6px;
   font-size: 11px;
   font-weight: 600;
@@ -310,7 +310,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-service-item:hover {
-  background: rgba(108, 114, 243, 0.08);
+  background: var(--brand-soft);
 }
 
 .ob-service-item:last-child {
@@ -323,12 +323,12 @@ input[type="date"]::-moz-calendar-picker-indicator {
 
 .ob-service-category {
   font-size: 11px;
-  color: #556070;
+  color: var(--text-4);
 }
 
 .ob-service-price {
   font-family: var(--font-mono);
-  color: #34d399;
+  color: var(--ok-500);
   font-weight: 600;
 }
 
@@ -346,7 +346,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .ob-cart-empty {
   padding: 40px;
   text-align: center;
-  color: #556070;
+  color: var(--text-4);
   font-size: 14px;
 }
 
@@ -359,7 +359,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .ob-cart-table th {
   padding: 12px 16px;
   text-align: left;
-  color: #556070;
+  color: var(--text-4);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -395,7 +395,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   border-radius: 4px;
   background: #161c2c;
   border: none;
-  color: #9aa3b5;
+  color: var(--text-2);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -404,7 +404,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-qty-btn:hover {
-  color: #edf0f8;
+  color: var(--text-1);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -416,7 +416,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 
 .ob-cart-price {
   font-family: var(--font-mono);
-  color: #9aa3b5;
+  color: var(--text-2);
 }
 
 .ob-cart-total {
@@ -437,7 +437,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-cart-remove:hover {
-  color: #f87171;
+  color: var(--bad-500);
 }
 
 /* ── Options ───────────────────────────────────── */
@@ -458,14 +458,14 @@ input[type="date"]::-moz-calendar-picker-indicator {
 
 .ob-option-label {
   font-size: 13px;
-  color: #9aa3b5;
+  color: var(--text-2);
 }
 
 .ob-option-hint {
   font-size: 11px;
-  color: #556070;
+  color: var(--text-4);
   padding: 4px 12px;
-  background: rgba(219, 169, 106, 0.1);
+  background: var(--warn-soft);
   border-radius: 6px;
   margin-top: 8px;
 }
@@ -473,7 +473,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .ob-option-input {
   width: 18px;
   height: 18px;
-  accent-color: #dba96a;
+  accent-color: var(--warn-500);
   cursor: pointer;
 }
 
@@ -495,15 +495,15 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-total-row.secondary {
-  color: #9aa3b5;
+  color: var(--text-2);
 }
 
 .ob-total-row.gold {
-  color: #dba96a;
+  color: var(--warn-500);
 }
 
 .ob-total-row.emerald {
-  color: #34d399;
+  color: var(--ok-500);
 }
 
 .ob-total-mono {
@@ -531,11 +531,11 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-total-balance.ember {
-  color: #f87171;
+  color: var(--bad-500);
 }
 
 .ob-total-balance.emerald {
-  color: #34d399;
+  color: var(--ok-500);
 }
 
 /* ── Toast ─────────────────────────────────────── */
@@ -548,20 +548,20 @@ input[type="date"]::-moz-calendar-picker-indicator {
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-modal);
   z-index: 10000;
   animation: obToastIn 0.3s ease both;
   max-width: 400px;
 }
 
 .ob-toast.error {
-  background: rgba(248, 113, 113, 0.1);
-  border: 1px solid rgba(248, 113, 113, 0.2);
+  background: var(--bad-soft);
+  border: 1px solid var(--bad-soft);
 }
 
 .ob-toast.success {
-  background: rgba(52, 211, 153, 0.1);
-  border: 1px solid rgba(52, 211, 153, 0.2);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-soft);
 }
 
 .ob-toast-text {
@@ -570,17 +570,17 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-toast.error .ob-toast-text {
-  color: #f87171;
+  color: var(--bad-500);
 }
 
 .ob-toast.success .ob-toast-text {
-  color: #34d399;
+  color: var(--ok-500);
 }
 
 .ob-toast-close {
   background: transparent;
   border: none;
-  color: #9aa3b5;
+  color: var(--text-2);
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -591,13 +591,13 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-toast-close:hover {
-  color: #edf0f8;
+  color: var(--text-1);
 }
 
 /* ── Loading ───────────────────────────────────── */
 .ob-loading {
   padding: 40px;
-  color: #556070;
+  color: var(--text-4);
   font-family: var(--font-ui);
 }
 
@@ -665,7 +665,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #556070;
+    color: var(--text-4);
   }
 
   .ob-cart-table td[data-label="Treatment"] .ob-select,
@@ -764,7 +764,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #6c72f3;
+  outline: 2px solid var(--brand-500);
   outline-offset: 2px;
 }
 

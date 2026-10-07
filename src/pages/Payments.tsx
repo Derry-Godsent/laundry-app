@@ -11,40 +11,40 @@ import { usePermission } from "../hooks/usePermission";
 import { PermissionGuard } from "../components/PermissionGuard";
 
 const T = {
-  bgBase:      "#05060a",
-  bgSurface:   "#0a0c13",
-  bgRaised:    "#10131d",
-  bgElevated:  "#161a28",
-  bgGlass:     "rgba(16,19,29,0.72)",
+  bgBase:      "var(--ink-base)",
+  bgSurface:   "var(--ink-shell)",
+  bgRaised:    "var(--ink-card)",
+  bgElevated:  "var(--ink-raised)",
+  bgGlass:     "var(--ink-raised)",
 
-  borderFaint: "rgba(255,255,255,0.045)",
-  borderSoft:  "rgba(255,255,255,0.085)",
-  borderMid:   "rgba(255,255,255,0.14)",
+  borderFaint: "var(--line-faint)",
+  borderSoft:  "var(--line-soft)",
+  borderMid:   "var(--line)",
 
-  textPrimary: "#eef1f8",
-  textSec:     "#98a1b5",
-  textTert:    "#57617a",
-  textHint:    "#333d54",
+  textPrimary: "var(--text-1)",
+  textSec:     "var(--text-2)",
+  textTert:    "var(--text-3)",
+  textHint:    "var(--text-4)",
 
-  accent:      "#8388f8",
-  accentSoft:  "#6c72f3",
-  accentDim:   "rgba(108,114,243,0.14)",
-  accentBord:  "rgba(108,114,243,0.32)",
-  accentGlow:  "rgba(108,114,243,0.35)",
+  accent:      "var(--brand-500)",
+  accentSoft:  "var(--brand-soft)",
+  accentDim:   "var(--brand-soft)",
+  accentBord:  "var(--brand-border)",
+  accentGlow:  "var(--brand-glow)",
 
-  gold:        "#e2b57e",
-  goldDim:     "rgba(226,181,126,0.12)",
-  goldBord:    "rgba(226,181,126,0.26)",
-  goldGlow:    "rgba(226,181,126,0.28)",
+  gold:        "var(--warn-500)",
+  goldDim:     "var(--warn-soft)",
+  goldBord:    "var(--warn-border)",
+  goldGlow:    "var(--warn-soft)",
 
-  emerald:     "#3fe3a6",
-  emeraldDim:  "rgba(63,227,166,0.12)",
-  emeraldBord: "rgba(63,227,166,0.24)",
-  emeraldGlow: "rgba(63,227,166,0.30)",
+  emerald:     "var(--ok-500)",
+  emeraldDim:  "var(--ok-soft)",
+  emeraldBord: "var(--ok-border)",
+  emeraldGlow: "var(--ok-soft)",
 
-  ember:       "#fb7676",
-  emberDim:    "rgba(251,118,118,0.12)",
-  emberBord:   "rgba(251,118,118,0.24)",
+  ember:       "var(--bad-500)",
+  emberDim:    "var(--bad-soft)",
+  emberBord:   "var(--bad-border)",
 };
 
 const FONT    = "var(--font-ui)";
@@ -57,7 +57,7 @@ const GlobalStyle = () => (
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
     @keyframes scaleIn { from { opacity:0; transform:scale(0.96) translateY(6px); } to { opacity:1; transform: none; } }
     @keyframes pulseDot { 0%,100% { opacity:1; box-shadow:0 0 0 0 currentColor; } 50% { opacity:0.55; } }
-    @keyframes ringPulse { 0% { box-shadow:0 0 0 0 rgba(63,227,166,0.35); } 70% { box-shadow:0 0 0 8px rgba(63,227,166,0); } 100% { box-shadow:0 0 0 0 rgba(63,227,166,0); } }
+    @keyframes ringPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
     @keyframes shimmer { 0% { background-position:-400px 0; } 100% { background-position:400px 0; } }
     @keyframes drift { 0%,100% { transform:translate(0,0); } 50% { transform:translate(-3%,4%); } }
     @keyframes slideBanner { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform: none; } }
@@ -68,16 +68,16 @@ const GlobalStyle = () => (
     .pay-card { animation:fadeInUp 0.45s ease both; }
     .pay-stat { animation:scaleIn 0.5s cubic-bezier(.2,.8,.2,1) both; }
 
-    .pay-searchbox:focus-within { border-color:${T.accentBord} !important; box-shadow:0 0 0 3px ${T.accentDim}; }
-    .pay-input:focus { border-color:${T.accentBord} !important; box-shadow:0 0 0 3px ${T.accentDim}; }
-    .pay-select:focus { border-color:${T.accentBord} !important; box-shadow:0 0 0 3px ${T.accentDim}; }
+    .pay-searchbox:focus-within { border-color:${T.accentBord} !important; box-shadow:var(--focus-ring); }
+    .pay-input:focus { border-color:${T.accentBord} !important; box-shadow:var(--focus-ring); }
+    .pay-select:focus { border-color:${T.accentBord} !important; box-shadow:var(--focus-ring); }
 
     .pay-filter-btn { transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease; }
     .pay-filter-btn:hover { transform:translateY(-1px); }
     .pay-filter-btn:active { transform:translateY(0); }
 
     .pay-primary-btn { transition:transform .16s ease, box-shadow .2s ease, filter .16s ease; }
-    .pay-primary-btn:hover { transform:translateY(-1px); filter:brightness(1.06); box-shadow:0 8px 24px -8px ${T.emeraldGlow}; }
+    .pay-primary-btn:hover { filter:brightness(1.06); }
     .pay-primary-btn:active { transform:translateY(0); }
 
     .pay-ghost-btn { transition:background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease; }
@@ -93,7 +93,7 @@ const GlobalStyle = () => (
     .pay-close-btn { transition:all .16s ease; }
     .pay-close-btn:hover { background:${T.emberDim}; border-color:${T.emberBord}; color:${T.ember}; transform:rotate(90deg); }
 
-    .pay-skeleton { background:linear-gradient(90deg, ${T.bgElevated} 0%, rgba(255,255,255,0.06) 50%, ${T.bgElevated} 100%); background-size:800px 100%; animation:shimmer 1.6s infinite linear; }
+    .pay-skeleton { background: ${T.bgElevated}; animation: skeletonPulse 1.8s var(--ease-in-out) infinite; }
     .pay-orb { animation:drift 14s ease-in-out infinite; }
     .pay-cards-view { display:none; }
 
@@ -305,18 +305,18 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
         className="pay-modal"
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: `linear-gradient(180deg, ${T.bgElevated} 0%, ${T.bgRaised} 100%)`,
+          background: T.bgElevated,
           border: `1px solid ${T.borderMid}`, borderRadius: 18, width: 520, maxWidth: "94vw",
           maxHeight: "85vh", overflowY: "auto",
           display: "flex", flexDirection: "column",
-          boxShadow: "0 30px 80px -20px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.02)",
+          boxShadow: "var(--shadow-modal)",
           animation: "scaleIn 0.25s cubic-bezier(.2,.8,.2,1) both",
         }}
       >
         <div style={{
           padding: "22px 26px", borderBottom: `1px solid ${T.borderFaint}`,
           display: "flex", justifyContent: "space-between", alignItems: "center",
-          background: `linear-gradient(135deg, ${T.emeraldDim}, transparent 60%)`,
+          background: T.emeraldDim,
           position: "sticky", top: 0, zIndex: 2,
         }}>
           <div>
@@ -627,11 +627,7 @@ export const Payments = () => {
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
       {showModal && <PaymentModal onClose={() => setShowModal(false)} onSave={addPayment} outstandingOrders={outstandingOrders} />}
       
-      <div className="pay-root" style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT, color: T.textPrimary, position: "relative", overflow: "hidden" }}>
-        <div aria-hidden style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
-          <div className="pay-orb" style={{ position: "absolute", top: "-10%", right: "8%", width: 420, height: 420, borderRadius: "50%", background: `radial-gradient(circle, ${T.accentGlow} 0%, transparent 70%)`, opacity: 0.12, filter: "blur(40px)" }} />
-          <div className="pay-orb" style={{ position: "absolute", bottom: "-15%", left: "4%", width: 480, height: 480, borderRadius: "50%", background: `radial-gradient(circle, ${T.goldGlow} 0%, transparent 70%)`, opacity: 0.08, filter: "blur(50px)", animationDelay: "3s" }} />
-        </div>
+      <div className="pay-root" style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT, color: T.textPrimary }}>
 
         <div style={{ position: "relative", zIndex: 1 }}>
           <div className="pay-header-row" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "22px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -694,7 +690,7 @@ export const Payments = () => {
                 </div>
               ) : (
                 <>
-                  <div className="pay-table-view" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, overflow: "hidden", boxShadow: "0 20px 50px -30px rgba(0,0,0,0.6)" }}>
+                  <div className="pay-table-view" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, overflow: "hidden", boxShadow: "var(--shadow-modal)" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
                       <thead>
                         <tr style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderSoft}` }}>

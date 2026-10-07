@@ -107,44 +107,31 @@ the five-screen correctness pass and the definition of done live in
       customer through `customer_accounts` and, failing that, the linked `clients` row, showing
       the name and number in the queue, the header and the detail; the placeholders that claimed
       "Verified customer" are gone.
-- [ ] Phase E, overall appearance: refine the dark operational style, do not replace it.
-      Nine agreed rules, five slices, one commit each, all on PR #7. Full plan and the
-      wording and money rules: `docs/staff-console-redesign.md`, "Phase E: overall appearance".
-  - [x] E1, foundation. One type family (Inter) loaded once in `index.html` and one mono;
-        the phantom `'Outfit'` (19 declarations, never loaded, so the notification panel and
-        the account menu rendered in the browser fallback) is gone, and so is the second
-        stylesheet `@import` that pulled DM Sans into the whole bundle. A nine-step type
-        scale replaces the 28 sizes in use. The text ramp is rebuilt so every step that
-        carries text clears WCAG AA on the lightest surface (the old bottom two were 2.9:1
-        and 2.4:1, unreadable outdoors on a phone) with a separate disabled step. Every
-        gradient is out of the chrome and the shared sheet: button fills, card overlay, the
-        shell's drifting glow blobs, the sidebar and nav rails, the avatar, the dividers and
-        the skeleton sheen, which is now a settled pulse. The 14 unused AI illustration SVGs
-        in `src/assets` (1.2 MB, zero references) are deleted, the emoji that stood in for
-        icons are real icons (bell, loyalty tiers, trend arrows, comment ticks), and
-        `npm run check:visual` now fails on a gradient, an emoji, a colour literal, a stray
-        font family or a size off the scale, with a PENDING list that can only shrink.
-  - [x] E2, primitives. `StatTile` now declares a role: hero (once per row, larger, two
-        columns where there is room), standard, compact, split (a figure that breaks into
-        two) and progress (a figure with a bar and its caption), so a row of figures says
-        which one matters instead of repeating one box. Trends are sparklines now, not delta
-        badges: `KpiCard` draws the series and the words stay as meta. Cards lost their
-        shadow, their top sheen and their hover lift (hover changes surface and hairline);
-        the blurred accent orb on every tile became a 2px rail; elevation is kept for
-        overlays only. Buttons: shared focus ring, a disabled style that stops shouting
-        instead of fading to half opacity, and a press that is a brightness step rather than
-        a nudge. Fields: an invalid state that rings the input, a colour-based disabled step,
-        text on the type scale, and state border and on-colour tokens so the sheet stops
-        mixing hexes into rgba(). Pills take their borders from those tokens; a count is a
-        mono figure with a hairline. The `/preview` gallery gained the tile family and the
-        button hierarchy with disabled states.
-  - [ ] E3, operations pages: Requests, Service Requests, Orders, Order Builder, Clients,
-        Dashboard.
-  - [ ] E4, management and settings pages: Staff, System Admin, Reports, Services, Payments,
-        Receipt, Security, Settings, App Ideas, App Accounts, Help, Profile, Login.
-  - [ ] E5, copy and formats: one money helper (`GH₵420.00`), one date and time set, one
-        locale, sentence case, the customer/client wording rule; then the guards go strict
-        (PENDING empty) and the final report is written.
+- [ ] - [x] Phase E, the whole appearance, in one pass. Not slices: every page and every
+      primitive, landed together.
+  - [x] The palette. Warm neutral graphite surfaces, one muted steel blue accent, four
+        earthen state colours and a workflow ramp, all in `tokens.css`. The metallic gold
+        and the violet/indigo range are gone, along with the blue-black surfaces that made
+        the console read as "galaxy" rather than as a dim room. Text ramp: 14.5:1 at the top,
+        4.8:1 at the quietest label, one separate step for disabled controls.
+  - [x] Gradients, glows and lifts. Every page backdrop wash, drifting orb, blurred corner
+        glow, gradient button fill, gradient tab rule and highlight sheen is out. Nothing
+        lifts on hover: hover changes surface, border or brightness. One shadow for every
+        overlay (dropdown, sheet, drawer, modal, palette) and no coloured shadow anywhere.
+  - [x] Real icons. The sparkle, the lightning bolt and the star are gone from section
+        markers, category maps, eyebrows and status glyphs. Service categories, loyalty
+        tiers and quick actions use icons that describe the thing. No emoji or glyph
+        stand-ins left anywhere in `src`.
+  - [x] Bars that mean something. The summary tiles on Staff and Clients drew a fixed 62%
+        and 75% bar under every figure. Both now draw the figure as a share of a real
+        total with the ratio in the tooltip, and draw nothing where there is no total.
+  - [x] One palette per page. The nine pages that carried their own `T` colour object now
+        read the tokens, which removes the second palette by construction: a page cannot
+        reach the old colours even by accident.
+  - [x] `npm run check:visual` now also fails on a `var()` that nothing defines, which is
+        how a renamed token silently draws nothing. Two files (Login.css, Login.tsx) have
+        left the PENDING list entirely; the rest are the pages still carrying raw literals
+        and off-scale sizes in their own CSS.
 - [ ] Phase F, mobile app integration: Mobile Requests, Service Requests, customer
       replies, App Ideas, App Accounts, realtime alerts, staff actions from the app.
 - [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.

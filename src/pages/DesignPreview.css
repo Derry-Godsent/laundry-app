@@ -178,7 +178,7 @@
 
 .probe__btn.is-active {
   color: var(--brand-400);
-  border-color: rgba(111, 119, 247, 0.35);
+  border-color: var(--brand-border);
   background: var(--brand-soft);
 }
 

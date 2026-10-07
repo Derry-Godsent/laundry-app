@@ -2,8 +2,9 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import {
   Search, Plus, X, Check, AlertCircle, Building2, Edit2, Package,
-  Shirt, Star, Layers, Home, Sparkles, Wind, Grid, SprayCan, Car,
-  Droplets, Trash2, WifiOff, RefreshCw, Loader2, Clock, Download
+  Shirt, Layers, Flower2, BedDouble, WashingMachine, Wind, Grid3x3, SprayCan, Car,
+  Droplets, Trash2, WifiOff, RefreshCw, Loader2, Clock, Download,
+  Sofa, Scissors, Tag, Home, LayoutGrid
 } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
@@ -12,48 +13,48 @@ import { PermissionGuard } from "../components/PermissionGuard";
 import { LoadingRows } from "../components/ui";
 
 const T = {
-  bgBase:      "#050609",
-  bgSurface:   "#0a0c14",
-  bgRaised:    "#0f1220",
-  bgElevated:  "#151830",
-  bgHover:     "#1c2140",
-  borderFaint: "rgba(255,255,255,0.05)",
-  borderSoft:  "rgba(255,255,255,0.09)",
-  borderMid:   "rgba(255,255,255,0.15)",
+  bgBase:      "var(--ink-base)",
+  bgSurface:   "var(--ink-shell)",
+  bgRaised:    "var(--ink-card)",
+  bgElevated:  "var(--ink-raised)",
+  bgHover:     "var(--ink-hover)",
+  borderFaint: "var(--line-faint)",
+  borderSoft:  "var(--line-soft)",
+  borderMid:   "var(--line)",
 
-  textPrimary: "#f4f6fc",
-  textSec:     "#98a2ba",
-  textTert:    "#5a6683",
-  textHint:    "#323a54",
+  textPrimary: "var(--text-1)",
+  textSec:     "var(--text-2)",
+  textTert:    "var(--text-3)",
+  textHint:    "var(--text-4)",
 
-  accent:      "#7c82ff",
-  accentSoft:  "#b4b8ff",
-  accentDim:   "rgba(124,130,255,0.14)",
-  accentBord:  "rgba(124,130,255,0.35)",
-  accentGlow:  "rgba(124,130,255,0.45)",
+  accent:      "var(--brand-500)",
+  accentSoft:  "var(--brand-soft)",
+  accentDim:   "var(--brand-soft)",
+  accentBord:  "var(--brand-border)",
+  accentGlow:  "var(--brand-glow)",
 
-  gold:        "#f0b04e",
-  goldDim:     "rgba(240,176,78,0.12)",
-  goldBord:    "rgba(240,176,78,0.32)",
-  goldGlow:    "rgba(240,176,78,0.4)",
+  gold:        "var(--warn-500)",
+  goldDim:     "var(--warn-soft)",
+  goldBord:    "var(--warn-border)",
+  goldGlow:    "var(--warn-soft)",
 
-  emerald:     "#2fe0a0",
-  emeraldDim:  "rgba(47,224,160,0.12)",
-  emeraldBord: "rgba(47,224,160,0.32)",
-  emeraldGlow: "rgba(47,224,160,0.4)",
+  emerald:     "var(--ok-500)",
+  emeraldDim:  "var(--ok-soft)",
+  emeraldBord: "var(--ok-border)",
+  emeraldGlow: "var(--ok-soft)",
 
-  ember:       "#ff6060",
-  emberDim:    "rgba(255,96,96,0.12)",
-  emberBord:   "rgba(255,96,96,0.32)",
-  emberGlow:   "rgba(255,96,96,0.4)",
+  ember:       "var(--bad-500)",
+  emberDim:    "var(--bad-soft)",
+  emberBord:   "var(--bad-border)",
+  emberGlow:   "var(--bad-soft)",
 
-  sky:         "#4fb3ff",
-  skyDim:      "rgba(79,179,255,0.12)",
-  skyBord:     "rgba(79,179,255,0.32)",
+  sky:         "var(--info-500)",
+  skyDim:      "var(--info-soft)",
+  skyBord:     "var(--info-border)",
 
-  violet:      "#c084ff",
-  violetDim:   "rgba(192,132,255,0.12)",
-  violetBord:  "rgba(192,132,255,0.32)",
+  violet:      "var(--brand-400)",
+  violetDim:   "var(--brand-soft)",
+  violetBord:  "var(--brand-border)",
 };
 
 const FONT = "var(--font-ui)";
@@ -79,10 +80,7 @@ const GLOBAL_CSS = `
 .svc-aurora {
   position:absolute; inset:-40%; z-index:0; pointer-events:none;
   background:
-    radial-gradient(circle at 20% 30%, rgba(124,130,255,0.16), transparent 55%),
-    radial-gradient(circle at 80% 20%, rgba(240,176,78,0.10), transparent 50%),
-    radial-gradient(circle at 60% 80%, rgba(47,224,160,0.08), transparent 55%);
-  animation: svcAuroraDrift 22s ease-in-out infinite;
+    var(--ink-base);
 }
 
 .svc-card {
@@ -106,7 +104,7 @@ const GLOBAL_CSS = `
 .corp-card:hover {
   transform: translateY(-3px);
   background: #12152a !important;
-  box-shadow: 0 14px 36px rgba(0,0,0,0.4);
+  box-shadow: var(--shadow-modal);
 }
 
 .super-tab {
@@ -139,14 +137,13 @@ const GLOBAL_CSS = `
 .svc-offline-bar { animation: svcSlideDown 0.28s cubic-bezier(0.16,1,0.3,1) both; }
 
 .svc-skeleton {
-  background: linear-gradient(90deg, #151830 25%, rgba(255,255,255,0.06) 37%, #151830 63%);
-  background-size: 400px 100%;
-  animation: svcShimmer 1.4s ease infinite;
+  background: var(--ink-raised);
+  animation: skeletonPulse 1.8s var(--ease-in-out) infinite;
 }
 .svc-spinner { animation: svcSpin 0.85s linear infinite; }
 
-.price-input:focus { border-color: #7c82ff !important; box-shadow: 0 0 0 3px rgba(124,130,255,0.18) !important; }
-.search-input:focus { border-color: rgba(124,130,255,0.5) !important; box-shadow: 0 0 0 3px rgba(124,130,255,0.12) !important; }
+.price-input:focus { border-color: var(--brand-border) !important; box-shadow: var(--focus-ring) !important; }
+.search-input:focus { border-color: var(--brand-border) !important; box-shadow: var(--focus-ring) !important; }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -233,27 +230,27 @@ const GLOBAL_CSS = `
 const EXPRESS = 10;
 
 const LOYALTY = [
-  { name:"Standard", visits:"< 5 visits",   discount:0,  color:"#5a6683" },
-  { name:"Bronze",   visits:"5–14 visits",   discount:5,  color:"#d08a4a" },
-  { name:"Silver",   visits:"15–29 visits",  discount:10, color:"#9aabc9" },
-  { name:"Gold",     visits:"30+ visits",    discount:15, color:"#f0b04e" },
-  { name:"VIP",      visits:"By management", discount:20, color:"#c084ff" },
+  { name:"Standard", visits:"< 5 visits",    discount:0,  color:"var(--text-3)" },
+  { name:"Bronze",   visits:"5 to 14 visits", discount:5,  color:"var(--warn-500)" },
+  { name:"Silver",   visits:"15 to 29 visits", discount:10, color:"var(--text-2)" },
+  { name:"Gold",     visits:"30 or more",     discount:15, color:"var(--text-1)" },
+  { name:"VIP",      visits:"By management",  discount:20, color:"var(--brand-400)" },
 ];
 
 const SUPER_CATS = [
-  { key:"all",        label:"All Services",  icon:Grid,     color:T.accent,   dim:T.accentDim,   bord:T.accentBord   },
+  { key:"all",        label:"All Services",  icon:LayoutGrid, color:T.accent,   dim:T.accentDim,   bord:T.accentBord   },
   { key:"laundry",    label:"Laundry",       icon:Shirt,    color:T.sky,      dim:T.skyDim,      bord:T.skyBord      },
   { key:"cleaning",   label:"Cleaning",      icon:Droplets, color:T.emerald,  dim:T.emeraldDim,  bord:T.emeraldBord  },
-  { key:"fumigation", label:"Fumigation",    icon:SprayCan, color:T.violet,   dim:T.violetDim,   bord:T.violetBord   },
-  { key:"car",        label:"Car Detailing", icon:Car,      color:T.gold,     dim:T.goldDim,     bord:T.goldBord     },
+  { key:"fumigation", label:"Fumigation",    icon:SprayCan, color:T.ember,    dim:T.emberDim,    bord:T.emberBord    },
+  { key:"car",        label:"Car Detailing", icon:Car,      color:T.textSec,  dim:T.bgHover,     bord:T.borderMid    },
 ];
 
 const CAT_ICONS: Record<string,any> = {
-  Tops:Shirt, Bottoms:Layers, Ladies:Star, Suits:Package,
-  Traditional:Sparkles, Basics:Grid, Fabric:Wind,
-  Linen:Home, Home:Home, Specialty:Star,
+  Tops:Shirt, Bottoms:Layers, Ladies:Flower2, Suits:Package,
+  Traditional:Scissors, Basics:Grid3x3, Fabric:Wind,
+  Linen:BedDouble, Home:Home, Specialty:WashingMachine,
   Residential:Home, Commercial:Building2, Industrial:SprayCan,
-  Exterior:Car, Interior:Star, "Full Detail":Sparkles,
+  Exterior:Car, Interior:Sofa, "Full Detail":Tag,
   "Deep Clean":Droplets,
 };
 
@@ -305,7 +302,7 @@ const Chip = ({ label, value, accent }: { label:string; value:number; accent?:st
 
 const OfflineBanner = ({ onRetry, retrying, lastSynced }: { onRetry:()=>void; retrying:boolean; lastSynced: Date | null }) => (
   <div className="svc-offline-bar" style={{
-    background: "linear-gradient(90deg, rgba(255,96,96,0.14), rgba(255,96,96,0.06))",
+    background: "var(--bad-soft)",
     borderBottom: `1px solid ${T.emberBord}`,
     padding: "10px 32px", display: "flex", alignItems: "center", gap: 12,
   }}>
@@ -349,7 +346,7 @@ const ServiceCard = ({ item, onEdit, superConf, index }: {
 
       <div style={{ display:"flex", alignItems:"flex-start", gap:11 }}>
         <div style={{ width:36, height:36, borderRadius:9, flexShrink:0,
-          background: `linear-gradient(135deg, ${superConf.dim}, transparent)`,
+          background: superConf.dim,
           border:`1px solid ${superConf.bord}`,
           display:"flex", alignItems:"center", justifyContent:"center" }}>
           <Icon size={15} color={superConf.color} />
@@ -1311,7 +1308,7 @@ export const Services = () => {
                   <div style={{ display:"flex", justifyContent:"space-between",
                     alignItems:"center" }}>
                     <div style={{ width:38, height:38, borderRadius:10,
-                      background:`linear-gradient(135deg, ${T.accentDim}, transparent)`,
+                      background: T.accentDim,
                       border:`1px solid ${T.accentBord}`,
                       display:"flex", alignItems:"center", justifyContent:"center" }}>
                       <Building2 size={17} color={T.accent}/>
@@ -1325,7 +1322,7 @@ export const Services = () => {
                           background: client.active ? T.emeraldDim : "rgba(90,102,131,0.15)",
                           color: client.active ? T.emerald : T.textTert,
                           boxShadow: client.active ? `0 0 14px -4px ${T.emeraldGlow}` : "none" }}>
-                        {client.active ? "● Active" : "○ Inactive"}
+                        {client.active ? "Active" : "Inactive"}
                       </button>
                     ) : (
                       <span style={{ padding:"4px 13px", borderRadius:100,

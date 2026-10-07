@@ -42,8 +42,6 @@ const PENDING = new Set([
   "src/pages/DesignPreview.css",
   "src/pages/DesignPreview.tsx",
   "src/pages/Help.tsx",
-  "src/pages/Login.css",
-  "src/pages/Login.tsx",
   "src/pages/MobileRequests.css",
   "src/pages/OrderBuilder.css",
   "src/pages/OrderBuilder.tsx",
@@ -71,6 +69,16 @@ const FONT_SIZES = new Set([
 
 const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]/u;
 const HEX = /#[0-9a-fA-F]{3,8}\b/;
+
+/* A var() that no stylesheet defines renders as nothing: the declaration is
+   thrown away and the element silently loses its colour, size or shadow. This
+   caught a set of references to tokens that had been renamed. Properties that
+   only exist at runtime are listed here. */
+const RUNTIME_PROPERTIES = new Set([
+  "--vv-h", "--vv-top", "--vv-bottom", /* measured by useVisualViewport */
+  "--kpi-accent", "--qa-accent", "--nd-top", "--nd-x", "--sys-table-min",
+  /* page-local palettes declared per page, matched by prefix below */
+]);
 
 const files = [];
 const walk = (dir) => {
@@ -121,6 +129,39 @@ for (const full of files) {
     const inline = code.match(/fontSize\s*:\s*([\d.]+)/);
     if (inline) {
       add(file, n, `fontSize ${inline[1]}: use a --fs-* step`);
+    }
+  });
+}
+
+/* ── the token check ─────────────────────────────────────────────────────────
+   Runs after the per-file rules. Definitions are collected from every
+   stylesheet, every inline style object, and the runtime list above. */
+const DEFINED = new Set(RUNTIME_PROPERTIES);
+const all = [];
+const walkAll = (dir) => {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) walkAll(full);
+    else all.push(full);
+  }
+};
+walkAll("src");
+for (const full of all) {
+  if (![".css", ".tsx", ".ts"].includes(extname(full))) continue;
+  const source = readFileSync(full, "utf8");
+  for (const m of source.matchAll(/(--[a-z0-9-]+)\s*:/g)) DEFINED.add(m[1]);
+  for (const m of source.matchAll(/setProperty\(\s*"(--[a-z0-9-]+)"/g)) DEFINED.add(m[1]);
+  for (const m of source.matchAll(/"(--[a-z0-9-]+)"\s*[:,]/g)) DEFINED.add(m[1]);
+}
+for (const full of all) {
+  if (![".css", ".tsx", ".ts"].includes(extname(full))) continue;
+  const file = relative(".", full).replaceAll("\\", "/");
+  readFileSync(full, "utf8").split("\n").forEach((line, index) => {
+    for (const m of line.matchAll(/var\((--[a-z0-9-]+)/g)) {
+      const name = m[1];
+      if (DEFINED.has(name)) continue;
+      if (/^--(sf|cl|rp|ai|aa|pay|svc|sec|cs|ord|nd|kpi|qa|sm|sp|sys|stf)-/.test(name)) continue;
+      add(file, index + 1, `undefined token ${name}: nothing defines it, so this draws nothing`);
     }
   });
 }

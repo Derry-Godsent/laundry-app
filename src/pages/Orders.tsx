@@ -59,7 +59,7 @@ const STAGES: { key: OrderStatus; label: string; short: string; color: string }[
 const SERVICE_TONE: Record<string, PillTone> = {
   Laundry: "brand",
   Cleaning: "info",
-  Fumigation: "gold",
+  Fumigation: "warn",
   "Car Detailing": "ok",
 };
 
@@ -72,7 +72,7 @@ const SERVICE_ICON: Record<string, JSX.Element> = {
 
 const PAY_META: Record<PaymentStatus, { label: string; tone: PillTone }> = {
   paid: { label: "Paid", tone: "ok" },
-  pending: { label: "Pending", tone: "gold" },
+  pending: { label: "Pending", tone: "warn" },
   partial: { label: "Partial", tone: "bad" },
 };
 

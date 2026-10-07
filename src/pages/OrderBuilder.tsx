@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom"; // Added
 import { supabase } from "../lib/supabaseClient";
 import {
   Search, Plus, Minus, Trash2, Check, X, Package, Users,
-  Receipt, Truck, Percent, Zap, Clock, Save, Calendar,
+  Receipt, Truck, Percent, Zap, Clock, Save, Calendar, SlidersHorizontal,
   Phone, Lightbulb, Inbox
 } from "lucide-react";
 import "./OrderBuilder.css";
@@ -435,7 +435,7 @@ export const OrderBuilder = () => {
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <div className="ob-panel">
               <div className="ob-panel-title">
-                <Users size={16} color="#6c72f3" /> Client
+                <Users size={16} color="var(--brand-500)" /> Client
               </div>
               <div style={{ position: "relative" }} ref={clientDropdownRef}>
                 <input
@@ -450,7 +450,7 @@ export const OrderBuilder = () => {
                   className="ob-input"
                   disabled={!canEdit}
                   style={{
-                    borderColor: selectedClient ? "rgba(52, 211, 153, 0.2)" : undefined,
+                    borderColor: selectedClient ? "var(--ok-soft)" : undefined,
                     opacity: !canEdit ? 0.7 : 1,
                     cursor: !canEdit ? "not-allowed" : "text"
                   }}
@@ -495,7 +495,7 @@ export const OrderBuilder = () => {
 
             <div className="ob-panel">
               <div className="ob-panel-title">
-                <Package size={16} color="#dba96a" /> Add Items
+                <Package size={16} color="var(--text-2)" /> Add Items
               </div>
               <div className="ob-search-wrap">
                 <Search size={14} className="ob-search-icon" />
@@ -537,7 +537,7 @@ export const OrderBuilder = () => {
 
             <div className="ob-panel ob-panel--cart" style={{ flex: 1, padding: 0 }}>
               <div className="ob-cart-header">
-                <Receipt size={16} color="#34d399" /> Cart ({cart.length} items)
+                <Receipt size={16} color="var(--ok-500)" /> Cart ({cart.length} items)
               </div>
               {cart.length === 0 ? (
                 <div className="ob-cart-empty">
@@ -636,7 +636,7 @@ export const OrderBuilder = () => {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="ob-panel" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div className="ob-panel-title">
-                <Zap size={16} color="#dba96a" /> Order Options
+                <SlidersHorizontal size={16} color="var(--text-2)" /> Order Options
               </div>
 
               <div>
@@ -700,7 +700,7 @@ export const OrderBuilder = () => {
               </label>
 
               <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
-                <div style={{ fontSize: 11, color: "#556070", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Delivery Fee
                 </div>
                 <input
@@ -714,7 +714,7 @@ export const OrderBuilder = () => {
               </div>
 
               <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
-                <div style={{ fontSize: 11, color: "#556070", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Discount (%)
                 </div>
                 <input
@@ -728,7 +728,7 @@ export const OrderBuilder = () => {
               </div>
 
               <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
-                <div style={{ fontSize: 11, color: "#556070", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Amount Paid
                 </div>
                 <input
@@ -738,14 +738,14 @@ export const OrderBuilder = () => {
                   className="ob-input ob-input-number"
                   disabled={!canEdit}
                   style={{
-                    borderColor: balance > 0 ? "rgba(248, 113, 113, 0.2)" : "rgba(52, 211, 153, 0.2)",
+                    borderColor: balance > 0 ? "var(--bad-soft)" : "var(--ok-soft)",
                     cursor: !canEdit ? "not-allowed" : "text"
                   }}
                 />
               </div>
 
               <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
-                <div style={{ fontSize: 11, color: "#556070", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Notes
                 </div>
                 <textarea

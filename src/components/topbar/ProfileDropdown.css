@@ -37,12 +37,12 @@
   font-weight: 700;
   font-size: 13px;
   color: #ffffff;
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 2px var(--brand-soft);
   transition: box-shadow 0.2s ease;
 }
 
 .profile-trigger:hover .profile-avatar {
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 0 2px var(--brand-border);
 }
 
 .profile-info {
@@ -127,14 +127,14 @@
   outline-offset: 2px;
 }
 
-.profile-menu-item.logout { color: #ef4444; }
+.profile-menu-item.logout { color: var(--bad-500); }
 .profile-menu-item.logout:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
+  background: var(--bad-soft);
+  color: var(--bad-500);
 }
 
 .profile-menu-item.logout:focus-visible {
-  outline: 2px solid #ef4444;
+  outline: 2px solid var(--bad-500);
   outline-offset: 2px;
 }
 

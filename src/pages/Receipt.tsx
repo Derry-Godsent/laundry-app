@@ -10,13 +10,13 @@ import {
 } from "lucide-react";
 
 const T = {
-  bgBase: "#07090e", bgSurface: "#0c0f18", bgRaised: "#111520", bgElevated: "#161c2c",
-  borderFaint: "rgba(255,255,255,0.05)", borderSoft: "rgba(255,255,255,0.09)", borderMid: "rgba(255,255,255,0.15)",
-  textPrimary: "#edf0f8", textSec: "#9aa3b5", textTert: "#556070", textHint: "#2e3a4e",
-  accent: "#6c72f3", accentDim: "rgba(108,114,243,0.13)", accentBord: "rgba(108,114,243,0.28)",
-  gold: "#dba96a", goldDim: "rgba(219,169,106,0.1)", goldBord: "rgba(219,169,106,0.22)",
-  emerald: "#34d399", emeraldDim: "rgba(52,211,153,0.1)", emeraldBord: "rgba(52,211,153,0.2)",
-  ember: "#f87171", emberDim: "rgba(248,113,113,0.1)", emberBord: "rgba(248,113,113,0.32)",
+  bgBase: "var(--ink-base)", bgSurface: "var(--ink-shell)", bgRaised: "var(--ink-card)", bgElevated: "var(--ink-raised)",
+  borderFaint: "var(--line-faint)", borderSoft: "var(--line-soft)", borderMid: "var(--line)",
+  textPrimary: "var(--text-1)", textSec: "var(--text-2)", textTert: "var(--text-3)", textHint: "var(--text-4)",
+  accent: "var(--brand-500)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)",
+  gold: "var(--warn-500)", goldDim: "var(--warn-soft)", goldBord: "var(--warn-border)",
+  emerald: "var(--ok-500)", emeraldDim: "var(--ok-soft)", emeraldBord: "var(--ok-border)",
+  ember: "var(--bad-500)", emberDim: "var(--bad-soft)", emberBord: "var(--bad-border)",
 };
 
 const FONT = "var(--font-ui)";
@@ -24,7 +24,7 @@ const MONO = "var(--font-mono)";
 
 const OfflineBanner = ({ onRetry, retrying, lastSynced }: { onRetry:()=>void; retrying:boolean; lastSynced: Date | null }) => (
   <div className="no-print" style={{
-    background: "linear-gradient(90deg, rgba(248,113,113,0.14), rgba(248,113,113,0.06))",
+    background: "var(--bad-soft)",
     borderBottom: `1px solid ${T.emberBord}`,
     padding: "10px 32px", display: "flex", alignItems: "center", gap: 12,
   }}>
@@ -105,7 +105,7 @@ export const Receipt = () => {
     fetchRecentOrders();
   }, []);
 
-  // ✅ FIX: Auto-select order from URL query parameter (?order=...)
+  // Auto-select order from URL query parameter (?order=...)
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const urlOrderId = searchParams.get('order');
@@ -181,9 +181,8 @@ export const Receipt = () => {
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { animation: spin 0.8s linear infinite; }
         .skeleton {
-          background: linear-gradient(90deg, #111520 25%, rgba(255,255,255,0.05) 37%, #111520 63%);
-          background-size: 400px 100%;
-          animation: shimmer 1.4s ease infinite;
+          background: var(--ink-raised);
+          animation: skeletonPulse 1.8s var(--ease-in-out) infinite;
           border-radius: 6px;
         }
 
@@ -283,7 +282,7 @@ export const Receipt = () => {
 
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", padding: "40px 20px" }}>
-          <div style={{ width: "100%", maxWidth: 620, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+          <div style={{ width: "100%", maxWidth: 620, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 16, overflow: "hidden", boxShadow: "var(--shadow-modal)" }}>
             <div style={{ padding: "32px", textAlign: "center", borderBottom: `1px solid ${T.borderFaint}` }}>
               <div className="skeleton" style={{ height: 24, width: 200, margin: "0 auto 8px" }} />
               <div className="skeleton" style={{ height: 14, width: 280, margin: "0 auto" }} />
@@ -317,7 +316,7 @@ export const Receipt = () => {
           <div className="receipt-stage" style={{ display: "flex", justifyContent: "center", padding: "40px 20px" }}>
             <div className="receipt-card" style={{ 
               width: "100%", maxWidth: 620, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, 
-              borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" 
+              borderRadius: 16, overflow: "hidden", boxShadow: "var(--shadow-modal)" 
             }}>
               <div className="receipt-header" style={{ padding: "32px", textAlign: "center", borderBottom: `1px solid ${T.borderFaint}` }}>
                 <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 8, textTransform: "uppercase" }}>Chapman Prestige Ltd</div>

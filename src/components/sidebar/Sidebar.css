@@ -47,12 +47,12 @@
   height: 34px;
   flex-shrink: 0;
   border-radius: var(--r-md);
-  background: var(--gold-500);
+  background: var(--brand-500);
   color: #251a06;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;
-  box-shadow: 0 6px 16px -8px var(--gold-glow);
+  box-shadow: 0 6px 16px -8px transparent;
 }
 
 .brand__text {
