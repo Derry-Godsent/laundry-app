@@ -149,6 +149,13 @@ the five-screen correctness pass and the definition of done live in
         Reports carry a flat wash of their own accent plus a rail and a tinted icon
         chip; every remaining old-palette literal in the pages (indigo, gold, navy,
         cyan, neon green) is on tokens, and the last coloured button glows are gone.
+- [ ] Next, in order:
+  - [ ] Type, on the scale. The palette rule is met everywhere now; with the
+        guard's pending list emptied it reports 624 font-size declarations and 34
+        font-family declarations outside `--fs-*` and the two font stacks. That is
+        the "more visible, bigger or better arranged" half of the appearance ask,
+        and it touches every page, so it wants its own pass.
+  - [ ] Then Phase F, then sign-off.
 - [ ] Phase F, mobile app integration: Mobile Requests, Service Requests, customer
       replies, App Ideas, App Accounts, realtime alerts, staff actions from the app.
 - [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.
