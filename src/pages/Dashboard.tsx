@@ -256,7 +256,7 @@ function AreaChart({ data, timeRange }: { data: ChartPoint[]; timeRange: TimeRan
   );
 }
 
-function DonutChart({ segments }: { segments: ServiceSegment[] }) {
+function DonutChart({ segments, items }: { segments: ServiceSegment[]; items: number }) {
   const total = segments.reduce((s, x) => s + x.value, 0) || 1;
   const R = 54, cx = 70, cy = 70, stroke = 18;
   let offset = -90;
@@ -279,10 +279,10 @@ function DonutChart({ segments }: { segments: ServiceSegment[] }) {
         />
       ))}
       <text x={cx} y={cy - 4} textAnchor="middle" fill="var(--text-1)" fontSize="20" fontWeight="750">
-        {total}
+        {items}
       </text>
       <text x={cx} y={cy + 14} textAnchor="middle" fill="var(--text-4)" fontSize="9" fontWeight="600" letterSpacing="1.4">
-        ORDERS
+        ITEMS
       </text>
     </svg>
   );
@@ -358,12 +358,12 @@ export const Dashboard = () => {
     { label: "Ready for Delivery", key: "Ready", value: 0, count: 0, color: "var(--ok-500)" },
     { label: "Delivered", key: "Delivered", value: 0, count: 0, color: "var(--brand-400)" },
   ]);
-  const [services, setServices] = useState<ServiceSegment[]>([
-    { label: "Laundry", value: 42, color: "var(--brand-500)" },
-    { label: "Cleaning", value: 28, color: "var(--info-500)" },
-    { label: "Fumigation", value: 18, color: "var(--warn-500)" },
-    { label: "Car Detail", value: 12, color: "var(--ok-500)" },
-  ]);
+  /* The service mix is a share of real items, so it has no default: before the
+     query returns it is empty, and if there is nothing to show the card says
+     so. It used to open on four invented shares, which read as real figures on
+     a dashboard and were the app's own placeholder. */
+  const [services, setServices] = useState<ServiceSegment[]>([]);
+  const [serviceItems, setServiceItems] = useState(0);
   const [sparklines, setSparklines] = useState<Record<string, number[]>>({});
 
   const fetchData = useCallback(async (isRefresh = false) => {
@@ -450,19 +450,28 @@ export const Dashboard = () => {
 
       const items = orderItems || [];
 
-      if (items.length > 0) {
+      {
         const serviceCounts: Record<string, number> = {};
         items.forEach((item: OrderItem) => {
-          const cat = item.services?.category || "Other";
+          const cat = item.services?.category || "Uncategorised";
           serviceCounts[cat] = (serviceCounts[cat] || 0) + (item.quantity || 1);
         });
-        const colors = ["var(--brand-500)", "var(--info-500)", "var(--warn-500)", "var(--ok-500)", "var(--brand-400)"];
-        const totalSvc = Object.values(serviceCounts).reduce((a, b) => a + b, 0) || 1;
-        setServices(Object.entries(serviceCounts).slice(0, 4).map(([label, value], i) => ({
+
+        /* Counts, not percentages: the ring divides them itself, so the legend
+           can print a share that adds up. Everything past the third category
+           is grouped rather than dropped, or the ring would not be a whole. */
+        const ranked = Object.entries(serviceCounts).sort((a, b) => b[1] - a[1]);
+        const colors = ["var(--brand-500)", "var(--info-500)", "var(--warn-500)"];
+        const next: ServiceSegment[] = ranked.slice(0, 3).map(([label, count], i) => ({
           label,
-          value: Math.round(((value as number) / totalSvc) * 100),
+          value: count,
           color: colors[i % colors.length],
-        })));
+        }));
+        const tail = ranked.slice(3).reduce((sum, [, count]) => sum + count, 0);
+        if (tail > 0) next.push({ label: "Other categories", value: tail, color: "var(--text-4)" });
+
+        setServices(next);
+        setServiceItems(ranked.reduce((sum, [, count]) => sum + count, 0));
       }
 
       setActivities(orders.slice(0, 8).map((o: Order) => ({
@@ -669,18 +678,31 @@ export const Dashboard = () => {
           <Card>
             <CardHeader title="Service mix" subtitle="Share of items by service category" />
             <CardBody className="dash-donut-body">
-              <div className="donut-wrap">
-                <DonutChart segments={services} />
-              </div>
-              <div className="donut-legend">
-                {services.map((s) => (
-                  <div key={s.label} className="legend-row">
-                    <span className="legend-row__dot" style={{ background: s.color }} />
-                    <span className="legend-row__name">{s.label}</span>
-                    <span className="legend-row__value">{s.value}%</span>
+              {services.length === 0 ? (
+                <div className="donut-empty">
+                  <p>No service items recorded yet. The mix is drawn from the items on your orders, so it stays empty until there are some.</p>
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/new-order")}>
+                    New order <ArrowRight size={14} />
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="donut-wrap">
+                    <DonutChart segments={services} items={serviceItems} />
                   </div>
-                ))}
-              </div>
+                  <div className="donut-legend">
+                    {services.map((s) => (
+                      <div key={s.label} className="legend-row">
+                        <span className="legend-row__dot" style={{ background: s.color }} />
+                        <span className="legend-row__name">{s.label}</span>
+                        <span className="legend-row__value">
+                          {serviceItems > 0 ? Math.round((s.value / serviceItems) * 100) : 0}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </CardBody>
           </Card>
         </section>

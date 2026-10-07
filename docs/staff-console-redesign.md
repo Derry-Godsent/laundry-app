@@ -512,6 +512,21 @@ directly (an unauthenticated health endpoint), and everything reads it:
 - Every one of these is a flat colour mixed from the accent and the surface.
   None of it is a gradient.
 
+**Two rules that came out of the live console.**
+
+- **A figure on a screen comes from a record or it is not drawn.** The service
+  mix used to open on four invented shares, and the ring's centre printed the
+  sum of those percentages under the word "ORDERS". A tile, a bar or a share
+  that was not measured is now either absent or, where the absence is the
+  information, replaced by a line saying what is missing.
+- **A save names the store and reports the server's reason.** Settings read and
+  wrote a table that no migration creates, so the page could not be edited and
+  reported the refusal as a possible access problem. Writes go to
+  `system_settings`, one row per store, with the profile as JSON; a refused
+  write prints the database's code and reason, a refused read says that the
+  values on screen are the built-in ones, and a store that has never been
+  written says so quietly until it is.
+
 **Wording rule.** Anyone who books through the customer app is a **customer**,
 in copy and in the queue. **Client** is the console's own record: the Clients
 page, the order's billing party, the client id. A sentence does not mix them.

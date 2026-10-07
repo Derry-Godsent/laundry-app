@@ -44,6 +44,61 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
     </div>
   );
 }
+/* Where this page keeps its values. `system_settings` is the console's
+   key/value table, the one System Admin already reads and writes, and it is
+   the only settings store the database migrations create. This page used to
+   address a flat `settings` table with typed columns: nothing creates that
+   table, so every read came back empty and every save was refused, and the
+   page could not be edited no matter who was signed in. One row holds the
+   profile as JSON, so a save is a single write that cannot half-apply. */
+const SETTINGS_KEY = "business_profile";
+
+/* PostgREST answers with the reason a write was refused, and the reason
+   matters: a missing table is a job for whoever owns the database, a policy
+   refusal is a job for an administrator, and a mismatched column is a schema
+   problem. Reporting all three as "check your access" sent the reader looking
+   in the wrong place. */
+function isPermissionRefusal(err: any): boolean {
+  const code: string = err?.code || err?.status || "";
+  return code === "42501";
+}
+
+function explainDbError(err: any): string {
+  const code: string = err?.code || err?.status || "";
+  const message: string = err?.message || err?.error_description || String(err);
+  if (code === "42P01" || code === "PGRST205") return "the settings table is not in the database";
+  if (code === "42501") return "the database refused the write: this role has no write policy on system_settings";
+  if (code === "23503") return "the write referenced a store row that does not exist";
+  if (code === "42804" || code === "22P02") return `the settings column rejected the value (${code})`;
+  return `${message}${code ? ` (${code})` : ""}`;
+}
+
+/* The stored profile is read defensively: the column may hand back an object
+   or the JSON text, and an older or hand-edited row must not break the page. */
+function parseProfile(value: unknown): Partial<{
+  name: string; address: string; phone: string; email: string;
+  expressSurcharge: number; sheetPass: string;
+  notifications: { sms: boolean; email: boolean; orderReady: boolean; paymentReceived: boolean };
+  autoBackup: boolean;
+}> | null {
+  if (!value) return null;
+  let raw: any = value;
+  if (typeof raw === "string") {
+    try { raw = JSON.parse(raw); } catch { return null; }
+  }
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return null;
+  const out: any = {};
+  if (typeof raw.name === "string") out.name = raw.name;
+  if (typeof raw.address === "string") out.address = raw.address;
+  if (typeof raw.phone === "string") out.phone = raw.phone;
+  if (typeof raw.email === "string") out.email = raw.email;
+  if (Number.isFinite(Number(raw.expressSurcharge))) out.expressSurcharge = Number(raw.expressSurcharge);
+  if (typeof raw.sheetPass === "string") out.sheetPass = raw.sheetPass;
+  if (raw.notifications && typeof raw.notifications === "object") out.notifications = raw.notifications;
+  if (typeof raw.autoBackup === "boolean") out.autoBackup = raw.autoBackup;
+  return out;
+}
+
 /* ─── MAIN COMPONENT ────────────────────────────────────────── */
 export const Settings = () => {
   const location = useLocation();
@@ -58,6 +113,12 @@ export const Settings = () => {
   const { status: connectionStatus, retry: retryConnection } = useConnection();
   const isOffline = connectionStatus === "offline";
   const [saveFailed, setSaveFailed] = useState(false);
+  /* Set when the database refused the read, so the page can say that what it
+     is showing are its own defaults rather than stored values. */
+  const [loadError, setLoadError] = useState<string | null>(null);
+  /* null until the read answers, then whether a saved row came back. The
+     defaults and a stored profile look identical on screen otherwise. */
+  const [hasStored, setHasStored] = useState<boolean | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const [config, setConfig] = useState({
@@ -76,8 +137,12 @@ export const Settings = () => {
     const fetchSettings = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('settings').select('*').maybeSingle();
-      
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('value')
+        .eq('key', SETTINGS_KEY)
+        .maybeSingle();
+
       if (error) {
         /* A refused read is not an outage: a missing row, a policy or a
            permission all come back as errors over a working connection. Only a
@@ -85,24 +150,19 @@ export const Settings = () => {
         if (isNetworkError(error)) {
           void retryConnection();
         } else {
+          /* A refused read is not an outage: a missing row, a policy or a
+             permission all come back as errors over a working connection.
+             The page says so rather than showing its own defaults, because
+             the reader cannot tell the two apart otherwise. */
+          setLoadError(explainDbError(error));
           console.warn('Settings read refused (table, row or policy):', error);
         }
         return;
       }
 
-      if (data) {
-        setConfig(prev => ({
-          ...prev,
-          name: data.business_name || prev.name,
-          address: data.address || prev.address,
-          phone: data.phone || prev.phone,
-          email: data.email || prev.email,
-          expressSurcharge: Number(data.express_surcharge) || prev.expressSurcharge,
-          sheetPass: data.sheet_password || prev.sheetPass,
-          notifications: data.notifications || prev.notifications,
-          autoBackup: data.auto_backup ?? prev.autoBackup,
-        }));
-      }
+      const stored = parseProfile(data?.value);
+      if (stored) setConfig(prev => ({ ...prev, ...stored }));
+      setHasStored(Boolean(stored));
     } catch (err: any) {
       console.error('Settings fetch error:', err);
       if (isNetworkError(err)) void retryConnection();
@@ -121,29 +181,41 @@ export const Settings = () => {
     setSaved(true);
     setSaveFailed(false);
     try {
-      const { error } = await supabase.from('settings').upsert({
-        id: 1,
-        business_name: config.name,
-        address: config.address,
-        phone: config.phone,
-        email: config.email,
-        express_surcharge: config.expressSurcharge,
-        sheet_password: config.sheetPass,
-        notifications: config.notifications,
-        auto_backup: config.autoBackup,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'id' });
+      const payload = JSON.stringify({ ...config, updatedAt: new Date().toISOString() });
+
+      /* Update first, then insert if the row is not there: the table may not
+         carry a unique constraint on the key, and an update that matches
+         nothing returns success with no rows, which would report a save that
+         never happened. */
+      const { data: written, error } = await supabase
+        .from('system_settings')
+        .update({ value: payload })
+        .eq('key', SETTINGS_KEY)
+        .select('key');
 
       if (error) throw error;
-      setToast({ msg: "Settings saved successfully", type: "success" });
+
+      if (!written || written.length === 0) {
+        const { error: insertError } = await supabase
+          .from('system_settings')
+          .insert({ key: SETTINGS_KEY, value: payload });
+        if (insertError) throw insertError;
+      }
+
+      setLoadError(null);
+      setToast({ msg: "Settings saved", type: "success" });
     } catch (err) {
       console.error('Settings save error:', err);
       if (isNetworkError(err)) {
         void retryConnection();
         setToast({ msg: "Not saved: the connection dropped.", type: "error" });
       } else {
+        const reason = explainDbError(err);
         setSaveFailed(true);
-        setToast({ msg: "The system refused that save. Check your access.", type: "error" });
+        setToast({
+          msg: `Not saved: ${isPermissionRefusal(err) ? "this role cannot write settings" : reason}.`,
+          type: "error",
+        });
       }
     } finally {
       setTimeout(() => setSaved(false), 2500);
@@ -337,6 +409,27 @@ export const Settings = () => {
           </button>
         </div>
       </div>
+
+      {hasStored === false && !loadError && (
+        <div style={{ padding: "9px 32px", borderBottom: `1px solid ${T.borderFaint}`, fontSize: 12, color: "var(--text-4)", fontFamily: FONT }}>
+          Nothing has been saved from this page yet, so these are the built-in values.
+        </div>
+      )}
+
+      {loadError && (
+        <div className="cs-readonly cs-readonly--bad" style={{ background: "var(--tint-bad)", borderBottom: "1px solid var(--bad-border)", padding: "10px 32px", display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
+          <AlertCircle size={14} style={{ color: "var(--bad-500)", flexShrink: 0 }} />
+          <span style={{ fontSize: 12.5, color: "var(--text-2)", fontFamily: FONT }}>
+            Showing built-in values: the database would not return your saved settings ({loadError}).
+          </span>
+          <button
+            onClick={() => fetchSettings()}
+            style={{ padding: "5px 12px", background: "var(--bad-700)", border: "none", borderRadius: 7, color: "var(--on-brand)", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
       {!canEdit && !permLoading && (
         <div className="cs-readonly" style={{ background: "var(--tint-warn)", borderBottom: "1px solid var(--warn-border)", padding: "10px 32px", display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>

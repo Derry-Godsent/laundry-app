@@ -149,6 +149,25 @@ the five-screen correctness pass and the definition of done live in
         Reports carry a flat wash of their own accent plus a rail and a tinted icon
         chip; every remaining old-palette literal in the pages (indigo, gold, navy,
         cyan, neon green) is on tokens, and the last coloured button glows are gone.
+- [x] Two reports from the live console.
+  - [x] The dashboard service mix opened on four figures (Laundry 42%, Cleaning
+        28%, Fumigation 18%, Car Detail 12%) that were the app's own placeholder,
+        and the mix was recomputed only when there were order items to count, so
+        a database without any showed the placeholder as if it were real. The mix
+        is now built from the items on the orders: counts on the ring, shares in
+        the legend that add up, everything past the third category grouped as
+        Other rather than dropped, the centre showing the real number of items,
+        and an empty state that names the reason when there is nothing to draw.
+  - [x] Settings could not be saved at all. The page read and wrote a flat
+        `settings` table (business_name, express_surcharge, sheet_password, ...)
+        that no migration creates, so the read came back with nothing and the
+        write was refused; the page then reported the refusal as a possible
+        permission problem, which sent the reader looking in the wrong place. It
+        now stores its profile in `system_settings`, the console's key/value
+        table, under one key, updating the row and inserting it if it is not
+        there. A refused write reports the database's own reason, and a refused
+        read says that what is on screen are built-in values rather than saved
+        ones.
 - [ ] Next, in order:
   - [ ] Type, on the scale. The palette rule is met everywhere now; with the
         guard's pending list emptied it reports 624 font-size declarations and 34
