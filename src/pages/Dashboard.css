@@ -265,6 +265,28 @@
 
 .qa-btn:hover .qa-arrow { color: var(--text-2); transform: translateX(2px); }
 
+/* ── Phone ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  /* The grids stack; the tiles, quick actions and feed rows are thumb sized. */
+  .dash-mid-grid, .dash-bot-grid { gap: var(--sp-3); margin-top: var(--sp-4); }
+
+  .qa-grid { grid-template-columns: minmax(0, 1fr); }
+  .qa-btn { min-height: var(--tap-min); padding: 11px var(--sp-3); }
+  .qa-icon { width: 28px; height: 28px; }
+
+  .act-item { padding: 10px 8px; }
+  .act-text { white-space: normal; overflow: visible; }
+  .act-row { gap: var(--sp-2); }
+  .act-time { font-size: 11px; }
+
+  .live-bar__head { font-size: 12.5px; }
+  .donut-wrap { width: 132px; }
+
+  /* The chart keeps its own measured box; only the gap around it changes. */
+  .area-chart-wrap { margin: 0 -2px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   .act-item,

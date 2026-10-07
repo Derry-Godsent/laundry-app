@@ -356,6 +356,15 @@ always one of four things, and all four are greppable before touching anything.
 A `min-width` in pixels with no release, a `100vh` inside the shell frame, a
 `position: fixed` pane that ignores the visual viewport, and a field under 16px.
 
+D2 landed the three pages that already composed from the shared system, so it
+was phone polish rather than restructure:
+
+| Screen | What changed |
+| --- | --- |
+| App Accounts | The list-and-detail pair now uses the same `DetailView` takeover at 900px as the request queues, so an account is a full screen with a Back button instead of a panel below the list. The list scrolls only on a desk; on a phone the page scrolls once in `.main-body`. Shared `LoadingRows` and `EmptyState`, shared page padding, a 16px search field, a stacked header, and tiles two per row. |
+| App Ideas | Shared `Banner`, `EmptyState` and `LoadingRows`; shared page padding; a stacked header with a full-width action; the four status buttons at thumb height sharing the row; six counted tiles two per row; long pasted text wraps instead of pushing the page sideways. |
+| Dashboard | The area chart was a 600-unit viewBox scaled to the container, so on a phone its axis labels rendered at about four pixels. It now measures its box with a `ResizeObserver` and draws at that width (clamped 280 to 900), which keeps text at the size it was written, shortens the chart on a narrow box and spaces the labels by available width instead of a fixed count. The loading skeleton is fluid, and quick actions and feed rows are phone-sized. |
+
 **Copy rules (repo-wide).** No em dashes. `npm run check:copy` fails on U+2014
 anywhere in the repo; use a full stop, a colon, a comma or a middot separator
 instead, and a plain hyphen for "no value" cells. En dashes survive only in

@@ -3,6 +3,7 @@ import { Lightbulb, RefreshCw, Sparkles } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { usePermission } from "../hooks/usePermission";
+import { Banner, EmptyState, LoadingRows } from "../components/ui";
 import "./AppIdeas.css";
 
 /**
@@ -182,8 +183,8 @@ function AppIdeasContent() {
             </button>
           </div>
 
-          {error && <div className="ai-error">{error}</div>}
-          {savedMessage && <div className="ai-saved">{savedMessage}</div>}
+          {savedMessage ? <Banner tone="ok" role="status">{savedMessage}</Banner> : null}
+          {error ? <Banner tone="bad" role="alert">{error}</Banner> : null}
 
           <div className="ai-panel">
             <div className="ai-list-heading">
@@ -195,12 +196,13 @@ function AppIdeasContent() {
             </div>
 
             {loading ? (
-              <div className="ai-empty"><h3>Reading ideas...</h3></div>
+              <LoadingRows rows={4} label="Reading ideas" />
             ) : visible.length === 0 ? (
-              <div className="ai-empty">
-                <h3>Nothing here yet</h3>
-                <p>The app tells a customer when an idea is sent, so anything sent will appear here by itself.</p>
-              </div>
+              <EmptyState
+                icon={<Lightbulb size={20} />}
+                title="Nothing here yet"
+                message="The app tells a customer when an idea is sent, so anything sent will appear here by itself."
+              />
             ) : (
               <div className="ai-list">
                 {visible.map((idea) => (

@@ -67,7 +67,13 @@ the five-screen correctness pass and the definition of done live in
         sideways scroller, the Add Staff dialog becomes a bottom sheet, the tabs slide.
         Reports: the range buttons were ~400px wide and pushed the page sideways at 320px;
         they are a slide strip now, the header stacks and charts drop to 220px on a phone.
-  - [ ] D2, Dashboard, App Ideas, App Accounts.
+  - [x] D2, Dashboard, App Ideas, App Accounts. App Accounts uses the shared `DetailView`
+        takeover at 900px, with the list scrolling only on a desk, shared states and tokens,
+        a 16px search field and two-up tiles. App Ideas uses `Banner`/`EmptyState`/`LoadingRows`,
+        shared padding, a stacked header, thumb-height status buttons and wrapping idea text.
+        Dashboard's area chart now measures its box instead of scaling a 600-unit drawing
+        (its phone labels were rendering at about 4px), with label spacing from the measured
+        width; the loading skeleton is fluid and quick actions are thumb sized.
   - [ ] D3, Services, Payments, Receipt.
   - [ ] D4, Security, Settings, Login, Help, Profile, then the `legacy-bridge` cleanup.
 - [ ] Phase E, overall appearance: palette, type, surfaces, border contrast, spacing,

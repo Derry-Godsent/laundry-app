@@ -1,6 +1,16 @@
 /* App Accounts page. Who signed in to the app, and every security moment. */
 
-.aa-page { display: flex; flex-direction: column; gap: 18px; padding: 22px 24px 40px; color: #e6e9f2; font-family: "DM Sans", system-ui, sans-serif; }
+/* Fills the shell frame: .main-body owns the page scroll, and the shared
+   tokens own the padding, so this page lines up with every other one. */
+.aa-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 100%;
+  padding: var(--page-pad-y) var(--page-pad-x) var(--page-pad-bottom);
+  color: #e6e9f2;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
 
 .aa-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
 .aa-eyebrow { display: flex; align-items: center; gap: 7px; color: #61d7bc; font-size: 11px; font-weight: 700; letter-spacing: 1.3px; }
@@ -33,7 +43,14 @@
 .aa-search { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border: 1px solid rgba(255,255,255,0.12); border-radius: 11px; background: rgba(255,255,255,0.04); color: #8b94a7; }
 .aa-search input { flex: 1; min-width: 0; border: none; background: transparent; color: #e6e9f2; font-size: 13px; outline: none; font-family: inherit; }
 
-.aa-list { display: flex; flex-direction: column; gap: 9px; max-height: 62vh; overflow-y: auto; }
+.aa-list { display: flex; flex-direction: column; gap: 9px; }
+
+/* On a desk the queue keeps its own scroll so the record being read stays put.
+   On a phone the page scrolls once, in .main-body. */
+@media (min-width: 901px) {
+  .aa-list { max-height: 62vh; overflow-y: auto; }
+  .aa-detail { max-height: calc(100dvh - 260px); }
+}
 .aa-person { display: flex; flex-direction: column; gap: 7px; padding: 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; background: rgba(255,255,255,0.03); color: inherit; text-align: left; cursor: pointer; }
 .aa-person:hover { border-color: rgba(97,215,188,0.4); }
 .aa-person.selected { border-color: rgba(97,215,188,0.7); background: rgba(97,215,188,0.08); }
@@ -41,16 +58,6 @@
 .aa-person-top strong { font-size: 13px; font-weight: 800; }
 .aa-pin { padding: 4px 9px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.4px; }
 .aa-person-meta { display: flex; flex-wrap: wrap; gap: 10px; color: #9aa3b5; font-size: 11px; }
-
-.aa-detail-panel { display: flex; flex-direction: column; gap: 14px; padding: 17px; border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; background: rgba(255,255,255,0.035); }
-.aa-detail-empty { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 52px 20px; color: #8b94a7; text-align: center; }
-.aa-detail-empty h2 { margin: 0; color: #e6e9f2; font-size: 16px; }
-.aa-detail-empty p { margin: 0; max-width: 380px; font-size: 12px; line-height: 18px; }
-.aa-detail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.aa-detail-label { color: #61d7bc; font-size: 10px; font-weight: 800; letter-spacing: 1.3px; }
-.aa-detail-header h2 { margin: 5px 0 4px; font-size: 19px; font-weight: 800; }
-.aa-detail-header p { margin: 0; color: #8b94a7; font-size: 11px; }
-.aa-detail-header button { width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; background: rgba(255,255,255,0.05); color: #cfd6e6; cursor: pointer; font-size: 11px; }
 
 .aa-honest { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid rgba(97,215,188,0.28); border-radius: 13px; background: rgba(97,215,188,0.08); color: #9fe3d2; font-size: 12px; line-height: 18px; }
 
@@ -61,11 +68,34 @@
 .aa-moment-copy span { color: #cfd6e6; font-size: 12.5px; line-height: 18px; }
 .aa-moment-copy time { color: #8b94a7; font-size: 11px; }
 
-.aa-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 30px 14px; color: #8b94a7; text-align: center; }
-.aa-empty h3 { margin: 0; color: #e6e9f2; font-size: 14px; }
-.aa-empty p { margin: 0; font-size: 12px; line-height: 17px; max-width: 430px; }
+.aa-detail-panel { display: flex; flex-direction: column; min-width: 0; }
+.aa-detail-empty-card { padding: var(--sp-4); }
 
 @media (max-width: 1000px) {
   .aa-workspace { grid-template-columns: minmax(0, 1fr); }
   .aa-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ── Phone ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  /* The record takes over the screen (see .detail-view.is-overlay), so the
+     list sits alone: it is the page on a phone. */
+  .aa-workspace { grid-template-columns: minmax(0, 1fr); }
+
+  /* 16px keeps iOS from zooming the page in on focus and leaving it zoomed. */
+  .aa-search input { font-size: 16px; }
+  .aa-search { height: var(--tap-min); }
+}
+
+@media (max-width: 640px) {
+  .aa-page { gap: 14px; }
+  .aa-header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .aa-header h1 { font-size: 21px; }
+  .aa-refresh { width: 100%; justify-content: center; min-height: var(--tap-min); }
+  .aa-summary-card { padding: 12px 13px; border-radius: var(--r-md); }
+  .aa-summary-card strong { font-size: 20px; }
+  .aa-list-panel { padding: var(--sp-3); }
+  .aa-person { padding: 12px; }
+  .aa-moment { padding: 11px; }
 }

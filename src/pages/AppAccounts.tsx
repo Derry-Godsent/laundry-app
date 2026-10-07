@@ -3,6 +3,8 @@ import { KeyRound, RefreshCw, Search, ShieldCheck, Smartphone, UserCheck } from 
 import { supabase } from "../lib/supabaseClient";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { usePermission } from "../hooks/usePermission";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import { DetailView, EmptyState, LoadingRows } from "../components/ui";
 import "./AppAccounts.css";
 
 /**
@@ -147,6 +149,10 @@ function AppAccountsContent() {
       (person.full_name ?? "").toLowerCase().includes(needle) || (person.phone ?? "").toLowerCase().includes(needle));
   }, [customers, query]);
 
+  /* Under 900px the account takes over the screen: the list and the record
+     cannot share a phone. Same breakpoint as .detail-view.is-overlay. */
+  const isNarrow = useMediaQuery("(max-width: 900px)");
+
   const selected = useMemo(() => customers.find((person) => person.auth_user_id === selectedId) ?? null, [customers, selectedId]);
   const selectedHistory = useMemo(() => (selectedId ? byCustomer.get(selectedId) ?? [] : []), [byCustomer, selectedId]);
 
@@ -221,12 +227,13 @@ function AppAccountsContent() {
           </label>
 
           {loading ? (
-            <div className="aa-empty"><h3>Reading accounts...</h3></div>
+            <LoadingRows rows={4} label="Reading accounts" />
           ) : visible.length === 0 ? (
-            <div className="aa-empty">
-              <h3>No app accounts yet</h3>
-              <p>An account appears here the first time a customer signs in to the app with their phone.</p>
-            </div>
+            <EmptyState
+              icon={<UserCheck size={20} />}
+              title="No app accounts yet"
+              message="An account appears here the first time a customer signs in to the app with their phone."
+            />
           ) : (
             <div className="aa-list">
               {visible.map((person) => {
@@ -254,23 +261,24 @@ function AppAccountsContent() {
           )}
         </section>
 
-        <section className="aa-detail-panel">
+        <section className="aa-detail-panel" aria-live="polite">
           {!selected ? (
-            <div className="aa-detail-empty">
-              <UserCheck size={24} />
-              <h2>Choose an account</h2>
-              <p>Pick a customer on the left to see every moment recorded on their account, newest first.</p>
+            <div className="aa-detail-empty-card">
+              <EmptyState
+                icon={<UserCheck size={22} />}
+                title="Choose an account"
+                message="Pick a customer to see every moment recorded on their account, newest first."
+              />
             </div>
           ) : (
-            <>
-              <div className="aa-detail-header">
-                <div>
-                  <span className="aa-detail-label">APP ACCOUNT</span>
-                  <h2>{selected.full_name?.trim() || "Name not given"}</h2>
-                  <p>{selected.phone ?? "No number"} · joined {formatMoment(selected.created_at)}</p>
-                </div>
-                <button onClick={() => setSelectedId(null)}>Close</button>
-              </div>
+            <DetailView
+              key={selected.auth_user_id}
+              className="aa-detail"
+              variant={isNarrow ? "overlay" : "inline"}
+              onClose={() => setSelectedId(null)}
+              title={selected.full_name?.trim() || "Name not given"}
+              subtitle={`${selected.phone ?? "No number"} · joined ${formatMoment(selected.created_at)}`}
+            >
 
               <div className="aa-honest">
                 <KeyRound size={15} />
@@ -282,14 +290,15 @@ function AppAccountsContent() {
 
               <div className="aa-history">
                 {selectedHistory.length === 0 ? (
-                  <div className="aa-empty">
-                    <h3>No moments recorded yet</h3>
-                    <p>
-                      {historyOff
+                  <EmptyState
+                    icon={<KeyRound size={20} />}
+                    title="No moments recorded yet"
+                    message={
+                      historyOff
                         ? "The history table is not switched on in this project yet, so nothing has been saved."
-                        : "This customer has not signed in or touched their PIN since the record began."}
-                    </p>
-                  </div>
+                        : "This customer has not signed in or touched their PIN since the record began."
+                    }
+                  />
                 ) : (
                   selectedHistory.map((note) => {
                     const meta = KIND_META[note.kind] ?? { label: note.kind, sentence: "", color: "#9aa3b5", background: "rgba(154,163,181,0.13)" };
@@ -305,7 +314,7 @@ function AppAccountsContent() {
                   })
                 )}
               </div>
-            </>
+            </DetailView>
           )}
         </section>
       </div>

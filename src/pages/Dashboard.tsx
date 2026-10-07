@@ -108,8 +108,35 @@ function useCountUp(target: number, duration = 1000, delay = 0) {
   return value;
 }
 
+/**
+ * The width of a box, measured rather than guessed.
+ *
+ * The chart is drawn in the units of its own box. Scaling a 600-unit drawing
+ * down to a phone made its axis labels a few pixels tall, which is worse than
+ * no labels at all; measuring keeps text at the size it was written.
+ */
+function useElementWidth<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver((entries) => {
+      const next = entries[0]?.contentRect.width ?? 0;
+      setWidth((prev) => (Math.abs(prev - next) > 1 ? next : prev));
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, width };
+}
+
 function AreaChart({ data, timeRange }: { data: ChartPoint[]; timeRange: TimeRange }) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const { ref: wrapRef, width } = useElementWidth<HTMLDivElement>();
   const [hovered, setHovered] = useState<number | null>(null);
   const [animated, setAnimated] = useState(false);
 
@@ -129,9 +156,12 @@ function AreaChart({ data, timeRange }: { data: ChartPoint[]; timeRange: TimeRan
     );
   }
 
-  const W = 600, H = 200;
+  /* Drawn at the measured width, clamped, so it is never scaled to illegible
+     text on a phone nor blown up to silly text on a wide desk. */
+  const W = Math.round(Math.min(Math.max(width || 600, 280), 900));
+  const H = W < 420 ? 170 : 200;
   const max = Math.max(...data.map(d => d.value), 1);
-  const pad = { t: 44, b: 28, l: 8, r: 8 };
+  const pad = { t: W < 420 ? 18 : 44, b: 28, l: 8, r: 8 };
   const cw = W - pad.l - pad.r;
   const ch = H - pad.t - pad.b;
 
@@ -146,13 +176,15 @@ function AreaChart({ data, timeRange }: { data: ChartPoint[]; timeRange: TimeRan
   const linePath = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
   const areaPath = `${linePath} L ${pts[pts.length - 1].x},${H - pad.b} L ${pts[0].x},${H - pad.b} Z`;
 
-  const showEvery = Math.max(1, Math.floor(data.length / 7));
+  /* One label per ~58px, so they never collide at any width. */
+  const perRow = Math.max(2, Math.floor(cw / 58));
+  const showEvery = Math.max(1, Math.ceil(data.length / perRow));
   const TOOLTIP_H = 26, TOOLTIP_W = 86;
   const getTooltipY = (pointY: number) =>
     pointY - TOOLTIP_H - 10 < pad.t ? pointY + 14 : pointY - TOOLTIP_H - 10;
 
   return (
-    <div className="area-chart-wrap">
+    <div className="area-chart-wrap" ref={wrapRef}>
       <svg
         ref={svgRef}
         viewBox={`0 0 ${W} ${H}`}
