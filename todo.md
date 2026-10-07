@@ -246,9 +246,13 @@ the five-screen correctness pass and the definition of done live in
       the title on it, the other six as thumbnails with their names on plates, and
       the fields directly after the band on a phone. Seven photographs in
       `public/services/`, committed with the app.
-- [ ] The company logo itself: waiting on the artwork. Run
-      `node scripts/prepare-logo.mjs <file>` then `node scripts/make-brand-assets.mjs`,
-      and every icon in the console and the phone app updates at once.
+- [x] The company logo, supplied and in place: background removed, trimmed, and
+      every icon regenerated from it, console and phone. It sits on a light plate
+      wherever it is navy on dark, and the drawn monogram stays in the small slots
+      (tab icon, sidebar, top bar) where the 99px artwork would be a smudge.
+- [ ] If a larger copy of the logo is ever available (1000px or more), every icon
+      gets sharper, and the small slots could carry the artwork too. Nothing else
+      needs to change: drop it in, run the two scripts again.
 
 - [x] Phase C follow-up, zoom on a phone: fields are 16px from 900px down so iOS cannot
       zoom on focus, and the visual viewport is published as `--vv-h` / `--vv-top` /

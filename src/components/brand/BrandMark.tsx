@@ -24,7 +24,20 @@ export interface BrandMarkProps {
 export const BrandMark = ({ size = "md", withText = false, className }: BrandMarkProps) => {
   const [logoFailed, setLogoFailed] = useState(false);
 
-  const mark = logoFailed ? (
+  /* Which mark, and why.
+   *
+   * The supplied artwork is 99 pixels wide and its three letters occupy about
+   * twelve of them, so below roughly 44 pixels of placement the letters are
+   * about four pixels each and read as a smudge. It is also navy, which
+   * disappears on the navy chip and on a dark launcher.
+   *
+   * So the artwork is used where it can be seen, on a light plate, and the
+   * drawn letters are used in the small chrome slots where they are sharper
+   * and always legible. Neither is ever stretched: the artwork keeps its own
+   * aspect inside the plate. */
+  const useArtwork = !logoFailed && (size === "lg" || size === "xl");
+
+  const drawn = (
     /* The same geometry as public/brand/monogram.svg, which is the source of
        the tab icon and the home screen icon: drawn from paths rather than set
        in a font, so the mark cannot change shape with a font that failed to
@@ -36,7 +49,9 @@ export const BrandMark = ({ size = "md", withText = false, className }: BrandMar
         <path d="M368 168 V344 H440" />
       </g>
     </svg>
-  ) : (
+  );
+
+  const mark = useArtwork ? (
     <img
       className="brandmark__img"
       src={BRAND.logo}
@@ -52,11 +67,13 @@ export const BrandMark = ({ size = "md", withText = false, className }: BrandMar
         if (event.currentTarget.naturalWidth === 0) setLogoFailed(true);
       }}
     />
+  ) : (
+    drawn
   );
 
   return (
     <span className={["brandmark", `brandmark--${size}`, className].filter(Boolean).join(" ")}>
-      <span className="brandmark__chip">{mark}</span>
+      <span className={`brandmark__chip${useArtwork ? " brandmark__chip--plate" : ""}`}>{mark}</span>
       {withText && (
         <span className="brandmark__text">
           <span className="brandmark__name">{BRAND.abbr}</span>

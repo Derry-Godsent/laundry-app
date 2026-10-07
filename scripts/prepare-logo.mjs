@@ -22,9 +22,18 @@ const sharp = (await import("sharp")).default;
 
 const CANVAS = 1024; // square edges of the finished file
 const PAD = 0.06; // breathing room around the mark, as a share of the canvas
-const WHITE_HI = 246; // at or above this luminance a neutral pixel is background
-const WHITE_LO = 224; // at or below this it is definitely part of the mark
-const NEUTRAL = 26; // max - min channel spread still counted as "no colour"
+
+/* Where the paper ends and the mark begins.
+ *
+ * The first version of this read the colour spread of each pixel and only
+ * treated neutrals as background, to protect pale tints in the artwork. That
+ * was wrong for the supplied logo: the inside of its droplet is paper white
+ * (253, 253, 253, measured), so a colour rule punched the droplet out of the
+ * mark. The rule is brightness alone. At or below LO a pixel is definitely
+ * part of the mark, at or above HI it is definitely paper, and the ramp
+ * between them keeps the edge of a letter smooth instead of stepped. */
+const HI = 225;
+const LO = 175;
 
 const candidates = [
   process.argv[2],
@@ -66,15 +75,11 @@ for (let i = 0; i < width * height; i++) {
   const srcA = channels === 4 ? data[i * channels + 3] : 255;
 
   const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-  const spread = Math.max(r, g, b) - Math.min(r, g, b);
 
-  let alpha = srcA;
-  if (spread <= NEUTRAL && lum >= WHITE_LO) {
-    // Neutral and bright: this is paper, not paint. Ramp it out so the edge
-    // of a letter keeps its smoothness instead of turning into a jagged step.
-    const ramp = (WHITE_HI - lum) / (WHITE_HI - WHITE_LO);
-    alpha = Math.round(srcA * Math.min(1, Math.max(0, ramp)));
-  }
+  // Ramp the paper out by brightness, so the edge of a letter stays smooth
+  // instead of turning into a jagged step.
+  const ramp = (HI - lum) / (HI - LO);
+  const alpha = Math.round(srcA * Math.min(1, Math.max(0, ramp)));
 
   // A half-transparent edge pixel still holds the white it was blended with.
   // Take that blend back out, or the mark ends up haloed on a dark surface.
@@ -113,7 +118,7 @@ const resized = await sharp(cut.data)
     kernel: "lanczos3",
     fit: "fill",
   })
-  .png({ compressionLevel: 9 })
+  .png({ compressionLevel: 9, effort: 10 })
   .toBuffer();
 
 const target = process.env.LOGO_OUT || "public/brand/logo.png";
@@ -126,7 +131,7 @@ await sharp({
   },
 })
   .composite([{ input: resized, gravity: "center" }])
-  .png({ compressionLevel: 9 })
+  .png({ compressionLevel: 9, effort: 10 })
   .toFile(target);
 
 const done = await sharp(target).metadata();

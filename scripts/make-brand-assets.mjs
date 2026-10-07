@@ -1,14 +1,22 @@
 #!/usr/bin/env node
 /*
- * Generates the app icons from one square source image.
+ * Generates every icon the product uses from one source image.
  *
  *   node scripts/make-brand-assets.mjs
  *
- * Reads `public/brand/logo.png` when the company logo has been added there, and
- * otherwise falls back to `public/brand/monogram.svg`, which is the mark the
- * app itself shows in that case. Writes the sizes a browser tab, an Android
- * home screen and an iPhone home screen ask for, then they are all one file
- * swap away from the real logo.
+ * Reads `public/brand/logo.png` (put it there with scripts/prepare-logo.mjs) and
+ * falls back to `public/brand/monogram.svg` when there is no logo, so the
+ * script always produces a complete, correct set.
+ *
+ * Two rules, learned from the supplied artwork:
+ *
+ *   1. The supplied logo is 99 pixels wide and its three letters take about
+ *      twelve of them. At 16 and 32 pixels the letters are under two pixels
+ *      each and read as a smudge, so the small favicons use the drawn monogram,
+ *      which is legible down to 16px.
+ *   2. The logo is navy, and a launcher or a home screen can be any colour, so
+ *      every icon that carries the artwork carries it on a light plate. A
+ *      transparent navy mark would vanish on a dark home screen.
  *
  * Run it after replacing the source and commit the result.
  */
@@ -29,71 +37,85 @@ const PUBLIC = "public";
 const LOGO = join(PUBLIC, "brand", "logo.png");
 const MONOGRAM = join(PUBLIC, "brand", "monogram.svg");
 
-/* Sizes the manifest and iOS ask for. A PNG is not scalable, so each size is
-   rendered rather than resized: the monogram stays crisp at 32px. */
-const TARGETS = [
-  { file: "logo192.png", size: 192 },
-  { file: "logo512.png", size: 512 },
-  { file: "apple-touch-icon.png", size: 180 },
-  { file: "favicon-32.png", size: 32 },
-  { file: "favicon-16.png", size: 16 },
-];
+const FIELD = { r: 255, g: 255, b: 255 }; // the plate the logo was drawn on
+const MONOGRAM_FIELD = { r: 36, g: 80, b: 110 }; // --brand-700, the tile navy
+const INNER = 0.78; // the mark's share of the plate, leaving air around it
 
 const exists = async (path) => {
   try { await access(path); return true; } catch { return false; }
 };
 
 const usingLogo = await exists(LOGO);
-const source = usingLogo ? LOGO : MONOGRAM;
-const bytes = await readFile(source);
+const logoBytes = usingLogo ? await readFile(LOGO) : null;
+const monogramBytes = await readFile(MONOGRAM);
+
+const mark = async (size) =>
+  sharp(usingLogo ? logoBytes : monogramBytes, { density: 512 })
+    .resize(Math.round(size * INNER), Math.round(size * INNER), { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+
+/* A mark on a plate, or the monogram's own rounded tile with its transparent
+   corners, which is what a favicon wants. */
+const onPlate = async (size, field) => {
+  const inner = await mark(size);
+  return sharp({ create: { width: size, height: size, channels: 4, background: { ...field, alpha: 1 } } })
+    .composite([{ input: inner, gravity: "center" }])
+    .png({ compressionLevel: 9, effort: 10 })
+    .toBuffer();
+};
+
+const tile = async (size) =>
+  sharp(monogramBytes, { density: 512 })
+    .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png({ compressionLevel: 9, effort: 10 })
+    .toBuffer();
+
+/* Small sizes: always the drawn monogram, whatever the source is. */
+const SMALL = [
+  { file: "public/favicon-16.png", size: 16 },
+  { file: "public/favicon-32.png", size: 32 },
+  { file: "mobile/assets/favicon.png", size: 48 },
+];
+
+/* Everything else: the artwork when there is one, on its light plate. */
+const PLATED = [
+  { file: "public/logo192.png", size: 192 },
+  { file: "public/logo512.png", size: 512 },
+  { file: "public/apple-touch-icon.png", size: 180 },
+  { file: "mobile/assets/icon.png", size: 1024 },
+  { file: "mobile/assets/adaptive-icon.png", size: 1024 },
+  { file: "mobile/assets/splash-icon.png", size: 512 },
+];
+
+/* The app's in-app mark sits on its own light surface, so it stays transparent
+   and is not boxed into a plate inside the app. */
+const IN_APP = [{ file: "mobile/assets/logo.png", size: 512 }];
 
 if (!usingLogo) {
-  console.log("No public/brand/logo.png, so the monogram is the source.");
+  console.log("No public/brand/logo.png, so the monogram is the source for all of it.");
   console.log("Add the company logo there and run this again to replace every icon.");
 }
 
-for (const { file, size } of TARGETS) {
-  const png = await sharp(bytes, { density: 512 })
-    .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png({ compressionLevel: 9 })
-    .toBuffer();
-  await writeFile(join(PUBLIC, file), png);
-  const kb = (png.length / 1024).toFixed(1);
-  console.log(`  ${file.padEnd(24)} ${size}x${size}  ${kb} kB`);
+for (const { file, size } of SMALL) {
+  const png = await tile(size);
+  await writeFile(file, png);
+  console.log(`  ${file.padEnd(34)} ${size}x${size}  ${(png.length / 1024).toFixed(1)} kB   monogram`);
 }
 
-/* ---------------------------------------------------------------- the phone
- * The customer app carries its own copies of the mark, so it does not depend
- * on a file that has to be fetched at launch. An app icon also has to be a
- * full square with no transparency: iOS masks the corners itself and Android
- * crops an adaptive icon hard, so the mark is drawn small enough to survive
- * both, on the same field the console uses.
- */
-const FIELD = usingLogo ? { r: 255, g: 255, b: 255 } : { r: 36, g: 80, b: 110 };
-const INNER = { icon: 0.62, adaptive: 0.52, splash: 0.52, logo: 0.82 };
+for (const { file, size } of PLATED) {
+  const png = await onPlate(size, usingLogo ? FIELD : MONOGRAM_FIELD);
+  await writeFile(file, png);
+  console.log(`  ${file.padEnd(34)} ${size}x${size}  ${(png.length / 1024).toFixed(1)} kB   ${usingLogo ? "logo on light plate" : "monogram tile"}`);
+}
 
-const MOBILE = [
-  { file: "mobile/assets/icon.png", size: 1024, inner: INNER.icon, field: true },
-  { file: "mobile/assets/adaptive-icon.png", size: 1024, inner: INNER.adaptive, field: true },
-  { file: "mobile/assets/splash-icon.png", size: 512, inner: INNER.splash, field: true },
-  { file: "mobile/assets/favicon.png", size: 48, inner: INNER.logo, field: true },
-  { file: "mobile/assets/logo.png", size: 512, inner: INNER.logo, field: false },
-];
-
-for (const { file, size, inner, field } of MOBILE) {
-  const mark = await sharp(bytes, { density: 512 })
-    .resize(Math.round(size * inner), Math.round(size * inner), { fit: "contain" })
-    .png()
-    .toBuffer();
-  const base = field
-    ? sharp({ create: { width: size, height: size, channels: 4, background: FIELD } })
-    : sharp({ create: { width: size, height: size, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } });
-  const png = await base
-    .composite([{ input: mark, gravity: "center" }])
-    .png({ compressionLevel: 9 })
+for (const { file, size } of IN_APP) {
+  const png = await sharp(usingLogo ? logoBytes : monogramBytes, { density: 512 })
+    .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png({ compressionLevel: 9, effort: 10 })
     .toBuffer();
   await writeFile(file, png);
-  console.log(`  ${file.replace("mobile/assets/", "mobile ").padEnd(24)} ${size}x${size}  ${(png.length / 1024).toFixed(1)} kB`);
+  console.log(`  ${file.padEnd(34)} ${size}x${size}  ${(png.length / 1024).toFixed(1)} kB   transparent`);
 }
 
-console.log(`\nDone. Source: ${source}`);
+console.log(`\nDone. Source: ${usingLogo ? LOGO : MONOGRAM}`);

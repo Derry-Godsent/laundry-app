@@ -34,17 +34,23 @@
   color: var(--on-brand);
 }
 
-/* The image fills the chip minus its own padding, so a square icon reads as a
-   tile and a wordmark reads as a wordmark, without either being cropped. */
+/* The supplied logo is navy on a light background, so at the sizes where it is
+   used it sits on its own light plate: on the navy chip it would be invisible,
+   and the plate is how the artwork was drawn in the first place. */
+.brandmark__chip--plate {
+  background: #ffffff;
+  border-color: var(--line);
+}
+
+/* The artwork keeps its own shape inside the plate, never stretched to fill a
+   square, because it is a wordmark with a droplet beside it. */
 .brandmark__img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: 18%;
+  padding: 14%;
 }
-
-.brandmark--xl .brandmark__chip { padding: 0; }
 
 .brandmark__text {
   display: flex;

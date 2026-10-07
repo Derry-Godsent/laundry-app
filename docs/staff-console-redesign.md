@@ -641,9 +641,29 @@ that drawn mark, and `scripts/make-brand-assets.mjs` rasterises it, or the real
 logo, into every size the browser and the phone ask for:
 
 ```
-node scripts/prepare-logo.mjs <supplied-image>   # background out, square, 1024px
-node scripts/make-brand-assets.mjs               # every icon, console + phone
 ```
+node scripts/prepare-logo.mjs public/brand/cpl-logo.jpg   # background out, square, 1024px
+node scripts/make-brand-assets.mjs                        # every icon, console + phone
+```
+
+The supplied artwork is 99 pixels wide. Its three letters take about twelve of
+those pixels, which drives two rules that are easy to break by "improving" them:
+
+1. **Under about 44 pixels of placement the artwork is a smudge.** At 32px each
+   letter is under four pixels. So the 16px and 32px favicons use the drawn
+   monogram, which is legible at 16px, and everything larger uses the artwork.
+   `BrandMark` follows the same rule: artwork at `lg` and `xl`, drawn letters at
+   `sm` and `md`.
+2. **The artwork is navy.** On the navy chip, and on a dark phone home screen, it
+   would disappear. So every icon that carries it carries it on a light plate,
+   which is the background it was drawn on. `BrandMark` puts that plate behind
+   the chip at the sizes where it uses the artwork.
+
+`prepare-logo.mjs` removes the paper by brightness alone. The earlier version
+also required a pixel to be colourless before treating it as background, to
+protect pale tints in artwork; that was wrong for this logo, because the inside
+of its droplet is paper white (253, 253, 253, measured), and the colour rule
+punched the droplet out of the mark.
 
 `prepare-logo.mjs` takes a logo that arrived on a white background, makes the
 paper transparent without touching the mark's own colours, takes the white back
