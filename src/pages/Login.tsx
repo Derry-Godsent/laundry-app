@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import {
-  Mail, Lock, Eye, EyeOff, AlertCircle, WifiOff, Loader2, ArrowRight,
+  Mail, Lock, Eye, EyeOff, AlertCircle, WifiOff, Loader2,
   WashingMachine, Droplets, SprayCan, Car, Layers, Sofa, Cylinder,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -13,60 +13,67 @@ import "./Login.css";
 
 import type { Session, User } from "@supabase/supabase-js";
 
-/* The services this console runs on. Each keeps the hue it has everywhere else
-   in the console, so a service reads as the same thing whichever screen it
-   appears on. Adding one is a single entry here; the tile grid takes care of
-   the rest, and a longer list wraps rather than breaking the layout. */
-const SERVICES: { slug: string; name: string; blurb: string; icon: LucideIcon; hue: string }[] = [
-  { slug: "laundry", name: "Laundry", blurb: "Wash, dry, press and fold, tracked from intake to delivery.", icon: WashingMachine, hue: "var(--info-500)" },
-  { slug: "cleaning", name: "Cleaning", blurb: "Homes and offices, booked as jobs and logged against the client.", icon: Droplets, hue: "var(--ok-500)" },
-  { slug: "fumigation", name: "Fumigation", blurb: "Treatments scheduled, priced and recorded with their dates.", icon: SprayCan, hue: "var(--warn-500)" },
-  { slug: "car-detailing", name: "Car detailing", blurb: "Interior and exterior work, quoted and tracked per vehicle.", icon: Car, hue: "var(--brand-500)" },
-  { slug: "carpet-washing", name: "Carpet washing", blurb: "Rugs and fitted carpets, counted by the piece on the order.", icon: Layers, hue: "var(--stage-ironing)" },
-  { slug: "upholstery", name: "Sofa and upholstery", blurb: "Sofas, chairs and upholstery, cleaned and returned on schedule.", icon: Sofa, hue: "var(--stage-received)" },
-  { slug: "polytank", name: "Polytank washing", blurb: "Polytanks and water storage, washed to order and invoiced.", icon: Cylinder, hue: "var(--brand-400)" },
+/* The work this console runs on, in the order a customer meets it.
+ *
+ * Each service carries the hue it has everywhere else in the console, so the
+ * same thing reads the same on this screen as it does on the Services page.
+ * `line` is the one thing somebody signing in should be able to read off the
+ * picture: what the work is, not what the software does. */
+const FEATURE = {
+  slug: "laundry",
+  name: "Laundry",
+  line: "Wash, dry, press and fold, tracked from intake to delivery.",
+  icon: WashingMachine,
+  hue: "var(--info-500)",
+};
+
+const SERVICES: { slug: string; name: string; line: string; icon: LucideIcon; hue: string }[] = [
+  { slug: "cleaning", name: "Cleaning", line: "Homes, offices and shops.", icon: Droplets, hue: "var(--ok-500)" },
+  { slug: "fumigation", name: "Fumigation", line: "Treatments, dates and certificates.", icon: SprayCan, hue: "var(--warn-500)" },
+  { slug: "car-detailing", name: "Car detailing", line: "Interior and exterior, per vehicle.", icon: Car, hue: "var(--brand-500)" },
+  { slug: "carpet-washing", name: "Carpet washing", line: "Rugs and fitted carpets, by the piece.", icon: Layers, hue: "var(--stage-ironing)" },
+  { slug: "upholstery", name: "Sofa and upholstery", line: "Sofas, chairs and office seating.", icon: Sofa, hue: "var(--stage-received)" },
+  { slug: "polytank", name: "Polytank washing", line: "Polytanks and water storage.", icon: Cylinder, hue: "var(--brand-400)" },
 ];
 
-/* Photographs for the service tiles.
+/* One piece of work, as a picture.
  *
- * Put named files in `public/services/` (`laundry.jpg`, `cleaning.jpg`, and so
- * on, matching each `slug` above) and set this to true: every tile then shows
- * its photograph above the name. Until then the tiles carry their icon, and no
- * request is made for a file that is not there. */
-const SERVICE_PHOTOS = false;
-
-/* One service tile. It shows its photograph when there is one to show, and its
-   icon when there is not, so a missing file can never leave an empty box. */
-const ServiceTile = ({ service }: { service: (typeof SERVICES)[number] }) => {
-  const [photoFailed, setPhotoFailed] = useState(!SERVICE_PHOTOS);
+ * The photograph carries the meaning; the plate over it names the service in
+ * the console's own type. `/services/<slug>.jpg` is committed with the app, and
+ * if one is ever renamed or missing the frame falls back to the service's icon
+ * on its hue rather than leaving a hole in the page. */
+const ServiceCard = ({ service }: { service: typeof FEATURE }) => {
+  const [photoFailed, setPhotoFailed] = useState(false);
   const Icon = service.icon;
 
   return (
     <li
-      className="login-service"
+      className="login-tile"
       style={{ "--svc-hue": service.hue } as React.CSSProperties}
     >
-      {!photoFailed && (
-        <span className="login-service__media">
+      <figure className="login-tile__frame">
+        {photoFailed ? (
+          <span className="login-tile__fallback">
+            <Icon size={26} aria-hidden="true" />
+          </span>
+        ) : (
           <img
-            className="login-service__photo"
+            className="login-tile__photo"
             src={`/services/${service.slug}.jpg`}
             alt=""
             loading="lazy"
             decoding="async"
             onError={() => setPhotoFailed(true)}
           />
-        </span>
-      )}
-      <span className="login-service__body">
-        <span className="login-service__icon" aria-hidden="true">
-          <Icon size={17} />
-        </span>
-        <span className="login-service__text">
-          <span className="login-service__name">{service.name}</span>
-          <span className="login-service__blurb">{service.blurb}</span>
-        </span>
-      </span>
+        )}
+        <figcaption className="login-tile__plate">
+          <span className="login-tile__icon" aria-hidden="true">
+            <Icon size={15} />
+          </span>
+          <span className="login-tile__name">{service.name}</span>
+        </figcaption>
+      </figure>
+      <p className="login-tile__line">{service.line}</p>
     </li>
   );
 };
@@ -210,26 +217,34 @@ export const Login = () => {
           </div>
         </header>
 
-        <div className="login-body">
-          <section className="login-showcase" aria-labelledby="login-services-title">
-            <h1 className="login-hero">Everything we run, on one console.</h1>
+        {/* The work itself, before anything is asked for: the flagship service
+            as a wide photograph, with its own name on it and the page's title
+            over it. Laundry appears here and not again below, so no service is
+            shown twice and every row of pictures stays full. */}
+        <section className="login-band" style={{ "--svc-hue": FEATURE.hue } as React.CSSProperties}>
+          <img
+            className="login-band__photo"
+            src={`/services/${FEATURE.slug}.jpg`}
+            alt=""
+            decoding="async"
+          />
+          <span className="login-band__scrim" aria-hidden="true" />
+          <span className="login-band__chip">
+            <span className="login-band__chip-icon" aria-hidden="true">
+              <FEATURE.icon size={16} />
+            </span>
+            {FEATURE.name}
+          </span>
+          <div className="login-band__text">
+            <h1 className="login-hero">Every job we run, in one place.</h1>
             <p className="login-hero__sub">
-              Orders, clients, staff, payments and service requests for every
-              service below, from intake to delivery.
+              Laundry, cleaning, fumigation, car detailing and more, logged from
+              the first call to the receipt.
             </p>
+          </div>
+        </section>
 
-            <a className="login-jump" href="#sign-in">
-              Sign in <ArrowRight size={15} aria-hidden="true" />
-            </a>
-
-            <h2 id="login-services-title" className="login-services__title">What we run</h2>
-            <ul className="login-services">
-              {SERVICES.map((service) => (
-                <ServiceTile key={service.slug} service={service} />
-              ))}
-            </ul>
-          </section>
-
+        <div className="login-body">
           <section className="login-panel" id="sign-in" aria-labelledby="login-title">
             <div className="login-card">
               <div className="login-card__head">
@@ -326,7 +341,16 @@ export const Login = () => {
 
               <p className="login-help">Contact administration for access provisioning.</p>
             </div>
+          </section>
 
+          <section className="login-showcase" aria-labelledby="login-services-title">
+            <h2 id="login-services-title" className="login-services__title">What we run</h2>
+
+            <ul className="login-tiles">
+              {SERVICES.map((service) => (
+                <ServiceCard key={service.slug} service={service} />
+              ))}
+            </ul>
           </section>
         </div>
 

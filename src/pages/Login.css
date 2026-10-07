@@ -1,17 +1,18 @@
 /* Sign-in.
  *
- * A whole page rather than a bare form: the company, what it does, and then the
- * fields. The services are the console's own list, each tile carrying the hue
- * that service has everywhere else, so the same thing reads the same on this
- * screen as it does on the Services page.
+ * A picture of the work, then the fields. The company's services are shown as
+ * photographs with the service named over them, so a member of staff arriving
+ * on a phone sees the business before being asked for a password.
  *
- * Layout: two columns from 1024px, where the sign-in card stays in view while
- * the services scroll. On a phone the services come first and the card sits
- * under them, with a jump link at the top so somebody arriving only to sign in
- * reaches the fields in one tap.
+ * Layout: one wide photograph across the top carrying the title, then the
+ * sign-in card beside the pictures from 1024px, where the card stays in view
+ * while the pictures scroll. On a phone the band comes first, the card follows
+ * straight after it so signing in is still quick, and the photographs carry on
+ * underneath.
  *
- * No gradients, no decorative motion: the only thing that moves is the spinner
- * while credentials are checked.
+ * No gradients: every dimmed area is a flat translucent surface from the
+ * palette, not a fade. No decorative motion: the only thing that moves is the
+ * spinner while credentials are checked.
  */
 
 .login-page {
@@ -39,8 +40,6 @@
   align-items: center;
   gap: var(--sp-3);
   flex-wrap: wrap;
-  padding-bottom: var(--sp-4);
-  border-bottom: 1px solid var(--line-faint);
 }
 
 .login-top__text {
@@ -95,6 +94,87 @@
   white-space: nowrap;
 }
 
+/* ── The band: the work, with the page title over it ─────────────────────── */
+
+.login-band {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 210px;
+  padding: var(--sp-5);
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  background: var(--ink-card);
+}
+
+.login-band__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+}
+
+/* Flat, not a fade: the whole picture is dimmed the same amount, so the title
+   holds its contrast wherever the crop lands. */
+.login-band__scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink-base) 66%, transparent);
+}
+
+/* The service the band is showing, named on the picture itself, in the hue
+   that service has everywhere else in the console. */
+.login-band__chip {
+  position: absolute;
+  top: var(--sp-4);
+  left: var(--sp-4);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px 12px 6px 9px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-soft);
+  background: color-mix(in srgb, var(--ink-base) 82%, transparent);
+  font-size: var(--fs-xs);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
+}
+
+.login-band__chip-icon {
+  display: grid;
+  place-items: center;
+  color: var(--svc-hue);
+}
+
+.login-band__text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  max-width: 56ch;
+}
+
+.login-hero {
+  margin: 0;
+  text-wrap: balance;
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  color: var(--text-1);
+}
+
+.login-hero__sub {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
 /* ── The page body ───────────────────────────────────────────────────────── */
 
 .login-body {
@@ -111,156 +191,106 @@
   min-width: 0;
 }
 
-.login-hero {
-  margin: 0;
-  font-size: var(--fs-2xl);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.15;
-  color: var(--text-1);
-  max-width: 22ch;
-}
-
-.login-hero__sub {
-  margin: 0;
-  font-size: var(--fs-md);
-  line-height: 1.6;
-  color: var(--text-2);
-  max-width: 56ch;
-}
-
-/* Only needed where the sign-in card is not already beside the copy. */
-.login-jump {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-  align-self: flex-start;
-  min-height: var(--tap-min);
-  padding: 0 var(--sp-4);
-  border-radius: var(--r-sm);
-  border: 1px solid var(--brand-600);
-  background: var(--brand-700);
-  color: var(--on-brand);
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  text-decoration: none;
-  transition: background var(--dur-fast) var(--ease-out);
-}
-
-.login-jump:hover { background: var(--brand-600); }
-.login-jump:focus-visible { outline: 2px solid var(--brand-400); outline-offset: 2px; }
-
-/* ── The services ────────────────────────────────────────────────────────── */
-
 .login-services__title {
   margin: 0;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-size: var(--fs-2xs);
+  font-weight: 650;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-3);
 }
 
-.login-services {
+/* The pictures. A grid of thumbnails on every width: two across on a phone,
+   three on a tablet, and the wide one always takes the full row. */
+.login-tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--sp-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.login-service {
-  position: relative;
+.login-tile {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.login-tile__frame {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
-  padding: var(--sp-4);
+  border: 1px solid var(--line-soft);
   border-radius: var(--r-md);
-  border: 1px solid color-mix(in srgb, var(--svc-hue) 18%, var(--line-soft));
-  background: color-mix(in srgb, var(--svc-hue) 6%, var(--ink-card));
-  transition: border-color var(--dur-base) var(--ease-out);
+  background: var(--ink-raised);
 }
 
-/* The same 3px rail the console's own tiles carry, in the service's hue. */
-.login-service::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--svc-hue);
-}
-
-.login-service:hover {
-  border-color: color-mix(in srgb, var(--svc-hue) 45%, var(--line));
-}
-
-.login-service__media {
-  display: block;
-  margin: calc(var(--sp-4) * -1) calc(var(--sp-4) * -1) 0;
-  aspect-ratio: 16 / 9;
-  background: color-mix(in srgb, var(--svc-hue) 10%, var(--ink-raised));
-  overflow: hidden;
-}
-
-.login-service__photo {
+.login-tile__photo {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out);
 }
 
-.login-service__body {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--sp-3);
-  min-width: 0;
+.login-tile:hover .login-tile__photo {
+  transform: scale(1.035);
 }
 
-.login-service__icon {
+/* A photograph that failed to arrive still leaves a usable tile: the service
+   icon on its own hue, so the page never shows a broken frame. */
+.login-tile__fallback {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 100%;
+  height: 100%;
+  color: var(--svc-hue);
+  background: color-mix(in srgb, var(--svc-hue) 14%, var(--ink-card));
+}
+
+.login-tile__plate {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 7px 10px;
+  background: color-mix(in srgb, var(--ink-base) 78%, transparent);
+  border-top: 1px solid var(--line-faint);
+}
+
+.login-tile__icon {
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
-  border-radius: var(--r-sm);
-  border: 1px solid color-mix(in srgb, var(--svc-hue) 32%, transparent);
-  background: color-mix(in srgb, var(--svc-hue) 20%, transparent);
   color: var(--svc-hue);
 }
 
-.login-service__text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.login-service__name {
+.login-tile__name {
   font-size: var(--fs-sm);
   font-weight: 620;
   letter-spacing: -0.01em;
   color: var(--text-1);
 }
 
-.login-service__blurb {
+.login-tile__line {
+  margin: 0;
   font-size: var(--fs-xs);
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--text-3);
 }
 
 /* ── The sign-in card ────────────────────────────────────────────────────── */
 
-.login-panel {
-  min-width: 0;
-  scroll-margin-top: var(--sp-5);
-}
-
 .login-card {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-5);
+  gap: var(--sp-4);
   padding: var(--sp-6);
   background: var(--ink-card);
   border: 1px solid var(--line-soft);
@@ -271,7 +301,7 @@
 .login-card__head {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .login-title {
@@ -284,11 +314,9 @@
 
 .login-subtitle {
   margin: 0;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   color: var(--text-3);
 }
-
-/* ── Notices ─────────────────────────────────────────────────────────────── */
 
 .login-notice {
   display: flex;
@@ -296,27 +324,24 @@
   gap: var(--sp-2);
   padding: 10px 12px;
   border-radius: var(--r-sm);
-  border: 1px solid;
-  font-size: var(--fs-sm);
-  line-height: 1.5;
+  border: 1px solid var(--line-soft);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
 }
 
-.login-notice svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-}
+.login-notice svg { flex-shrink: 0; margin-top: 1px; }
 
 .login-notice--offline {
-  background: var(--warn-soft);
-  border-color: var(--warn-border);
-  color: var(--text-2);
+  background: color-mix(in srgb, var(--warn-500) 12%, var(--ink-card));
+  border-color: color-mix(in srgb, var(--warn-500) 34%, transparent);
+  color: var(--text-1);
 }
 
 .login-notice--offline svg { color: var(--warn-500); }
 
 .login-notice--error {
-  background: var(--bad-soft);
-  border-color: var(--bad-border);
+  background: color-mix(in srgb, var(--bad-500) 12%, var(--ink-card));
+  border-color: color-mix(in srgb, var(--bad-500) 34%, transparent);
   color: var(--text-2);
 }
 
@@ -485,11 +510,20 @@
   to { transform: rotate(360deg); }
 }
 
-/* ── Tablet and desktop: the card holds its place while the services scroll ─ */
+/* ── Tablet: a taller band, three across, the card beside the pictures ───── */
+
+@media (min-width: 700px) {
+  .login-band { min-height: 280px; padding: var(--sp-6); }
+  .login-hero { font-size: var(--fs-3xl); }
+  .login-hero__sub { font-size: var(--fs-md); }
+  .login-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); }
+}
+
+/* ── Desktop: the card holds its place while the pictures scroll ─────────── */
 
 @media (min-width: 1024px) {
   .login-body {
-    grid-template-columns: minmax(0, 1fr) 372px;
+    grid-template-columns: 372px minmax(0, 1fr);
     gap: var(--sp-7);
   }
 
@@ -498,10 +532,8 @@
     top: var(--sp-5);
   }
 
-  .login-hero { font-size: var(--fs-3xl); }
-  /* The card is beside the copy from here, so the jump link would only repeat
-     what is already in view. */
-  .login-jump { display: none; }
+  .login-band { min-height: 340px; }
+  .login-hero { font-size: var(--fs-4xl); }
 }
 
 /* ── Phones ──────────────────────────────────────────────────────────────── */
@@ -512,8 +544,13 @@
   }
 
   .login-shell { gap: var(--sp-5); }
+  .login-band {
+    min-height: 250px;
+    padding: var(--sp-4);
+    border-radius: var(--r-md);
+  }
+  .login-band__photo { object-position: 50% 25%; }
   .login-card { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-md); }
-  .login-services { grid-template-columns: minmax(0, 1fr); }
   .login-top { gap: var(--sp-2); }
 }
 
@@ -524,6 +561,6 @@
   .login-input,
   .login-submit,
   .login-input__reveal,
-  .login-jump,
-  .login-service { transition: none; }
+  .login-tile__photo { transition: none; }
+  .login-tile:hover .login-tile__photo { transform: none; }
 }

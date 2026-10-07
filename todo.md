@@ -242,6 +242,10 @@ the five-screen correctness pass and the definition of done live in
       keys and the `Chapman Prestige Limited - Kumasi` branch label stay as they are.
 - [x] The phone app draws its own icons from the same source as the console, and its
       sign-in screen no longer fetches a logo URL that had expired.
+- [x] The sign-in page is pictorial: the flagship service as a wide photograph with
+      the title on it, the other six as thumbnails with their names on plates, and
+      the fields directly after the band on a phone. Seven photographs in
+      `public/services/`, committed with the app.
 - [ ] The company logo itself: waiting on the artwork. Run
       `node scripts/prepare-logo.mjs <file>` then `node scripts/make-brand-assets.mjs`,
       and every icon in the console and the phone app updates at once.

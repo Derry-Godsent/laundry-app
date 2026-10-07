@@ -551,45 +551,41 @@ written `minmax(0, …)`, cards carry `min-width: 0`, and each chart sits in a
 `.rp-chart` box that clips, so nothing a chart draws can reach the card's edge
 between a resize and the next measurement.
 
-**The sign-in screen shows the business before it asks for a password.**
+**The sign-in screen shows the work before it asks for a password.**
 
 The company runs seven services and the console runs all of them, so the screen
-names them: Laundry, Cleaning, Fumigation, Car detailing, Carpet washing, Sofa
-and upholstery, Polytank washing. Each is a tile in the console's own tile
-language, carrying the hue that service has on the Services page, so a service
-reads as the same thing wherever a member of staff meets it.
+shows all seven as photographs. A list of names was tried first and rejected:
+this is the shop window, and the business is pictures of the work, not a
+sentence about each service.
 
-Layout, from the design of the console rather than of a marketing site:
+- One wide photograph carries the page title and the flagship service, Laundry,
+  named in a chip on the picture. Nothing is shown twice: the band is Laundry,
+  and Laundry is not in the grid below it.
+- The other six are thumbnails: two across on a phone, three from 700px, each
+  with the service named on a plate over the picture and one short line under it.
+  Six fills every row at both counts, so there is never a ragged last row.
+- Sign-in sits directly under the band on a phone, so the fields are one short
+  scroll away, and beside the pictures from 1024px where the card holds its place
+  while the grid scrolls. Above 900px the fields are 16px, which is the size that
+  stops iOS zooming the page when one is focused.
+- The connection pill stays in the header, before sign-in, because whether the
+  system is up is the first thing staff need to know.
 
-- two columns from 1024px, with the sign-in card held in view while the services
-  scroll past it; one column below that, services first, card underneath
-- a jump link above the services on phones, so somebody arriving only to sign in
-  reaches the fields in one tap rather than scrolling past the list
-- the live connection state sits in the header, before sign-in, because whether
-  the system is up is the first thing staff need to know
-- the only motion is the spinner while credentials are checked
+Layout rules that are easy to break later: the wide band and the card are both
+allowed to be tall, but a thumbnail is always 4:3 and the band never grows past
+its `min-height`. Every dimmed area is a flat translucent surface from the
+palette, never a CSS gradient, because `check:visual` forbids gradients and the
+flat plate holds its contrast better over an unpredictable photograph anyway.
 
-Adding a service is one entry in `SERVICES` in `src/pages/Login.tsx`. The list is
-static on purpose: the services table is behind a policy that needs a session,
-and this screen runs before there is one.
+Adding or removing a service is one entry in `SERVICES` in `src/pages/Login.tsx`,
+plus its photograph in `public/services/<slug>.jpg`. The list is static on
+purpose: the services table is behind a policy that needs a session, and this
+screen runs before there is one.
 
-Photographs can replace the icons on those tiles. Put named files in
-`public/services/` (`laundry.jpg`, `carpet-washing.jpg`, and so on, matching each
-slug) and set `SERVICE_PHOTOS` to true in the same file. Until then the tiles
-carry their icon, and no request is made for a file that is not there.
-
-**The sign-in screen is a door, not a lobby.**
-
-It used to be a two-column landing page: a brand panel with a headline, three
-feature bullets, a status light, and the form beside it. On a phone the panel
-came first and pushed the form below the fold, and it called the console an
-"Operations Hub" it has never called itself.
-
-It is now one centred column: the mark, the company, the product line, one card
-with two fields and one button, and a footer that carries the company name and
-the rule about who may use it. The only thing that moves is the spinner while
-credentials are checked, and the offline notice is the shell's own connection
-state rather than a second opinion.
+The photographs are committed with the app, at 640x400 (the band at 1100x481) and
+roughly 30kB each, so the screen never waits on a network picture. If one is
+renamed or missing the frame falls back to that service's icon on its hue, so a
+bad file shows a plain tile rather than a broken image.
 
 **One mark, one name.** `src/components/brand/` holds the company name and the
 logo path, and `BrandMark` renders it: `public/brand/logo.png` when that file
