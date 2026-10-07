@@ -18,6 +18,7 @@ import {
 } from "../components/ui";
 import type { PillTone } from "../components/ui";
 import "./Orders.css";
+import { BRAND } from "../components/brand/brand";
 
 type OrderStatus =
   | "received" | "queued" | "washing" | "drying"
@@ -566,7 +567,7 @@ export const Orders = () => {
         </div>
 
         <div style={{ marginTop: 40, textAlign: "center", fontSize: 12, color: "#666" }}>
-          <p>Thank you for choosing Chapman Prestige Limited</p>
+          <p>Thank you for choosing {BRAND.name}</p>
           <p>This is a system-generated document. No signature required.</p>
         </div>
 

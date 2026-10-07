@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Chapman Prestige">
+  <!-- The mark used until the company logo is added to public/brand/logo.png.
+       The letters are drawn as strokes rather than set in a font, so the mark
+       is identical everywhere: in the app, in the browser tab, and on a home
+       screen. scripts/make-brand-assets.mjs rasterises this file into the PNG
+       sizes the manifest and iOS ask for. -->
+  <rect width="512" height="512" rx="112" fill="#24506e" />
+  <g transform="translate(256 256) scale(1.1) translate(-253 -256)"
+     fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M259 186 A92 92 0 1 0 259 326" />
+    <path d="M310 352 V160 H356 A52 52 0 0 1 356 272 H310" />
+  </g>
+</svg>

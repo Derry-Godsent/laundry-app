@@ -551,6 +551,30 @@ written `minmax(0, …)`, cards carry `min-width: 0`, and each chart sits in a
 `.rp-chart` box that clips, so nothing a chart draws can reach the card's edge
 between a resize and the next measurement.
 
+**The sign-in screen is a door, not a lobby.**
+
+It used to be a two-column landing page: a brand panel with a headline, three
+feature bullets, a status light, and the form beside it. On a phone the panel
+came first and pushed the form below the fold, and it called the console an
+"Operations Hub" it has never called itself.
+
+It is now one centred column: the mark, the company, the product line, one card
+with two fields and one button, and a footer that carries the company name and
+the rule about who may use it. The only thing that moves is the spinner while
+credentials are checked, and the offline notice is the shell's own connection
+state rather than a second opinion.
+
+**One mark, one name.** `src/components/brand/` holds the company name and the
+logo path, and `BrandMark` renders it: `public/brand/logo.png` when that file
+exists, and a drawn monogram when it does not, so a missing file can never leave
+a broken image on the sign-in screen or in the sidebar. Drop the real logo at
+that path and every placement picks it up: the sign-in screen, the sidebar, the
+mobile top bar, the browser tab, the home screen icon and the offline cache.
+`scripts/make-brand-assets.mjs` rasterises the tab and home screen sizes from
+the same source (it needs `npm i -D sharp` once). The names in `public/` and the
+pages that show them read from that one module, so renaming the business or
+replacing the mark is a one-file edit.
+
 **Wording rule.** Anyone who books through the customer app is a **customer**,
 in copy and in the queue. **Client** is the console's own record: the Clients
 page, the order's billing party, the client id. A sentence does not mix them.

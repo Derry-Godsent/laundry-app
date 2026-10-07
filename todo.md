@@ -197,6 +197,26 @@ the five-screen correctness pass and the definition of done live in
         painted past the card. Tracks are `minmax(0, ...)`, cards carry
         `min-width: 0`, and every chart sits in a `.rp-chart` box that clips.
   - [x] Chart heights: 320/280 on tablet and desktop, 210/200 on a phone.
+- [x] Sign-in screen, redesigned, and the company mark in every placement.
+  - [x] One centred column instead of a brand panel beside the form: the mark,
+        the company, "Operations console", one card with email, password and one
+        button, and a footer with the company name and "Authorized personnel
+        only". The feature list, the headline, the status light and the two-column
+        layout are gone. Fields are labelled, the reveal button has a name, the
+        button is 44px, and the screen scrolls instead of clipping when a phone
+        keyboard is open.
+  - [x] `src/components/brand/` is the single source for the name and the mark.
+        `BrandMark` renders `public/brand/logo.png` when it exists and a drawn
+        monogram when it does not, and it is used by the sign-in screen, the
+        sidebar, the mobile top bar and the design gallery. Placements: sign-in,
+        sidebar, mobile top bar, browser tab, home screen icon, offline cache.
+  - [x] Icons: the repo had no logo file (the mobile app points at a hosted URL
+        that is very likely expired), so a CP monogram was drawn and rasterised
+        into favicon 16/32, apple-touch-icon 180, logo192 and logo512, with a
+        script to regenerate them from the real logo when it is added.
+  - [ ] Waiting on the user: the real logo file. Drop it at
+        `public/brand/logo.png` and run `npm i -D sharp && node
+        scripts/make-brand-assets.mjs`.
 - [ ] Next, in order:
   - [ ] Type, on the scale. The palette rule is met everywhere now; with the
         guard's pending list emptied it reports 624 font-size declarations and 34

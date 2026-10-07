@@ -1,0 +1,75 @@
+/* The company mark, in one place.
+ *
+ * The chip is a deep accent square with the monogram on it, and the logo, when
+ * one has been added, sits inside the same square with a little air around it,
+ * so a wide wordmark and a square icon both land correctly. */
+
+.brandmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.brandmark__chip {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: var(--brand-700);
+  border: 1px solid var(--brand-600);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.brandmark--sm .brandmark__chip { width: 26px; height: 26px; border-radius: var(--r-sm); }
+.brandmark--md .brandmark__chip { width: 34px; height: 34px; }
+.brandmark--lg .brandmark__chip { width: 44px; height: 44px; border-radius: var(--r-lg); }
+.brandmark--xl .brandmark__chip { width: 72px; height: 72px; border-radius: var(--r-xl); }
+
+.brandmark__mono {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 20%;
+  color: var(--on-brand);
+}
+
+/* The image fills the chip minus its own padding, so a square icon reads as a
+   tile and a wordmark reads as a wordmark, without either being cropped. */
+.brandmark__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 18%;
+}
+
+.brandmark--xl .brandmark__chip { padding: 0; }
+
+.brandmark__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.brandmark__name {
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brandmark__product {
+  color: var(--text-3);
+  font-family: var(--font-ui);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}

@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
-import {
-  Building2, Shield, Package, Users, Mail, Lock,
-  Eye, EyeOff, AlertCircle, CheckCircle, WifiOff, Loader2
-} from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle, WifiOff, Loader2 } from "lucide-react";
 import { useConnection } from "../hooks/useConnection";
+import { BrandMark } from "../components/brand/BrandMark";
+import { BRAND } from "../components/brand/brand";
 import "./Login.css";
 
 import type { Session, User } from "@supabase/supabase-js";
@@ -24,6 +23,7 @@ export const Login = () => {
   const { isOffline } = useConnection();
   const isOnline = !isOffline;
   const errorId = useRef(`login-error-${Math.random().toString(36).slice(2, 9)}`);
+  const emailRef = useRef<HTMLInputElement>(null);
 
   const handleRoleRedirect = useCallback(async (user: User) => {
     try {
@@ -69,12 +69,19 @@ export const Login = () => {
     };
   }, [handleRoleRedirect]);
 
+  /* A phone shows the keyboard as soon as it can, because the first thing this
+     screen is for is typing an email address. */
+  useEffect(() => {
+    if (session) return;
+    emailRef.current?.focus({ preventScroll: true });
+  }, [session]);
+
   const handleLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!isOnline) {
-      setError("You are offline. Check your connection and try again.");
+      setError("Sign-in needs a connection. Reconnect and try again.");
       return;
     }
 
@@ -82,14 +89,14 @@ export const Login = () => {
 
     try {
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
       if (authError) throw authError;
 
       if (data?.user) {
-        supabase
+        await supabase
           .from("staff")
           .update({ last_login: new Date().toISOString() })
           .eq("id", data.user.id)
@@ -105,108 +112,53 @@ export const Login = () => {
     }
   }, [email, password, isOnline]);
 
-
-  const statusColor = isOnline ? "var(--ok-500)" : "var(--bad-500)";
-  const statusGlow = isOnline ? "var(--ok-border)" : "var(--bad-border)";
-
+  /* A session already exists: the redirect is the next thing to happen, so the
+     screen says that and nothing else. */
   if (session) {
     return (
-      <div className="login-root login-session">
-        <div className="login-session-inner">
-          <div className="login-session-icon-wrap">
-            <div className="login-ping online" style={{ background: statusGlow, opacity: 0.35 }} />
-            <CheckCircle size={64} color={statusColor} />
+      <div className="login-page login-page--handoff">
+        <div className="login-handoff">
+          <BrandMark size="xl" />
+          <div className="login-handoff__row">
+            <Loader2 size={16} className="login-spin" aria-hidden="true" />
+            <span className="login-handoff__text">Signing you in</span>
           </div>
-          <div className="login-session-title">Session Authenticated</div>
-          <div className="login-session-sub">Redirecting...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="login-root">
-      {!isOnline && (
-        <div className="login-banner">
-          <WifiOff size={15} color="var(--bad-500)" />
-          <span className="login-banner-text">You are offline.</span>
-          <span className="login-banner-sub">Sign-in needs a connection. Reconnect and try again.</span>
-        </div>
-      )}
+    <div className="login-page">
+      <div className="login-shell">
+        <header className="login-brand">
+          <BrandMark size="xl" />
+          <div className="login-brand__text">
+            <span className="login-brand__name">{BRAND.short}</span>
+            <span className="login-brand__product">{BRAND.product}</span>
+          </div>
+        </header>
 
-      <div className="login-layout">
-        <div className="login-brand-panel">
-          <div className="login-brand">
-            <div className="login-brand-logo">
-              <Building2 size={24} color="var(--on-brand)" />
-            </div>
-            <div className="login-brand-name">Chapman Prestige Limited</div>
+        <main className="login-card">
+          <div className="login-card__head">
+            <h1 className="login-title">Sign in</h1>
+            <p className="login-subtitle">Staff access only</p>
           </div>
 
-          <h1 className="login-headline">
-            Centralized<br />
-            <span className="login-headline-accent">Operations Hub</span>
-          </h1>
-
-          <p className="login-sub">
-            Unified platform for order management, staff coordination, and real-time performance tracking.
-          </p>
-
-          <div className="login-features">
-            {[
-              { icon: Shield, text: "Secure Authentication" },
-              { icon: Package, text: "Real-Time Order Tracking" },
-              { icon: Users, text: "Role-Based Access Control" },
-            ].map((feature, i) => (
-              <div
-                key={feature.text}
-                className="login-feature"
-                style={{ animationDelay: `${0.2 + i * 0.08}s` }}
-              >
-                <feature.icon
-                  size={18}
-                  color="var(--ok-500)"
-                  className="login-feature-icon"
-                />
-                {feature.text}
-              </div>
-            ))}
-          </div>
-
-          <div className="login-footer">
-            <div className="login-status">
-              <div className="login-status-dot-wrap">
-                <div
-                  className="login-ping online"
-                  style={{ background: statusGlow, opacity: 0.4 }}
-                />
-                <span
-                  className={`login-status-dot ${isOnline ? "online" : "offline"}`}
-                />
-              </div>
-              <span className="login-status-text">
-                {isOnline ? "Systems online" : "Offline"}
+          {!isOnline && (
+            <div className="login-notice login-notice--offline" role="status">
+              <WifiOff size={15} aria-hidden="true" />
+              <span>
+                This device is offline. Sign-in needs a connection, so it is
+                disabled until the system is reachable.
               </span>
             </div>
-            <span className="login-copyright">
-              &copy; Chapman Prestige Limited &middot; Authorized Personnel Only
-            </span>
-          </div>
-        </div>
-
-        <div className="login-card">
-          <div className="login-card-title">System Access</div>
-          <div className="login-card-subtitle">Authorized credentials required</div>
+          )}
 
           {error && (
-            <div
-              className="login-error"
-              role="alert"
-              aria-live="assertive"
-              id={errorId.current}
-            >
-              <AlertCircle size={16} />
-              {error}
+            <div className="login-notice login-notice--error" role="alert" aria-live="assertive" id={errorId.current}>
+              <AlertCircle size={15} aria-hidden="true" />
+              <span>{error}</span>
             </div>
           )}
 
@@ -215,17 +167,19 @@ export const Login = () => {
             onSubmit={handleLogin}
             aria-describedby={error ? errorId.current : undefined}
           >
-            <div>
-              <label className="login-label" htmlFor="login-email">
-                Email Address
-              </label>
-              <div className="login-field">
-                <Mail size={18} className="login-input-icon" />
+            <div className="login-field">
+              <label className="login-label" htmlFor="login-email">Email address</label>
+              <div className="login-input">
+                <Mail size={16} className="login-input__icon" aria-hidden="true" />
                 <input
                   id="login-email"
-                  className="login-input"
+                  ref={emailRef}
                   type="email"
-                  autoComplete="email"
+                  name="email"
+                  autoComplete="username"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   placeholder="name@chapmanprestigelimited.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -235,18 +189,16 @@ export const Login = () => {
               </div>
             </div>
 
-            <div>
-              <label className="login-label" htmlFor="login-password">
-                Password
-              </label>
-              <div className="login-field">
-                <Lock size={18} className="login-input-icon" />
+            <div className="login-field">
+              <label className="login-label" htmlFor="login-password">Password</label>
+              <div className="login-input">
+                <Lock size={16} className="login-input__icon" aria-hidden="true" />
                 <input
                   id="login-password"
-                  className="login-input login-input-password"
                   type={showPass ? "text" : "password"}
+                  name="password"
                   autoComplete="current-password"
-                  placeholder="Enter your password"
+                  placeholder="Your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -254,36 +206,39 @@ export const Login = () => {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="login-eye-btn"
+                  onClick={() => setShowPass((v) => !v)}
+                  className="login-input__reveal"
                   aria-label={showPass ? "Hide password" : "Show password"}
+                  aria-pressed={showPass}
+                  tabIndex={-1}
                 >
-                  {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
             <button
               type="submit"
+              className="login-submit"
               disabled={loading || !isOnline}
-              className={`login-submit ${!isOnline && !loading ? "offline" : ""}`}
+              aria-busy={loading}
             >
-              {loading && <Loader2 size={16} className="login-spin" />}
-              {loading
-                ? "Authenticating..."
-                : !isOnline
-                  ? "Offline"
-                  : "Authenticate"}
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="login-spin" aria-hidden="true" />
+                  Signing in
+                </>
+              ) : !isOnline ? "Offline" : "Sign in"}
             </button>
           </form>
+        </main>
 
-          <div className="login-help">
-            Contact administration for access provisioning
-          </div>
-        </div>
+        <footer className="login-foot">
+          <span>{BRAND.name}</span>
+          <span aria-hidden="true">·</span>
+          <span>Authorized personnel only</span>
+        </footer>
       </div>
     </div>
   );
 };
-
-export default Login;

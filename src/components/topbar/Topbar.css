@@ -234,3 +234,13 @@
 @media (prefers-reduced-motion: reduce) {
   .conn-pill__dot { animation: none; }
 }
+
+/* The mark stands in for the sidebar on a phone, where the sidebar is off
+   screen: the bar then always carries the brand, and the breadcrumb follows it. */
+.topbar-brand {
+  margin-right: var(--sp-2);
+}
+
+@media (max-width: 640px) {
+  .topbar-brand { margin-right: 2px; }
+}

@@ -10,6 +10,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { useIntakeNotifications } from "../../hooks/useIntakeNotifications";
 import type { User } from "@supabase/supabase-js";
 import "./Topbar.css";
+import { BrandMark } from "../brand/BrandMark";
 
 interface TopbarProps {
   onMenuClick?: () => void;
@@ -185,6 +186,8 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
               <Menu size={20} />
             </button>
           )}
+
+          {isMobile && <BrandMark size="sm" className="topbar-brand" />}
 
           <Breadcrumbs />
         </div>

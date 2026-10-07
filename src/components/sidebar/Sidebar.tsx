@@ -9,6 +9,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { NavItem } from "./NavItem";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { useIntakeCounts } from "../../hooks/useIntakeCounts";
+import { BrandMark } from "../brand/BrandMark";
 import "./Sidebar.css";
 
 interface SidebarProps {
@@ -169,15 +170,7 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
       ].join(" ")}
     >
       <div className="sidebar-header">
-        <div className="brand">
-          <span className="brand__mark" aria-hidden="true">CP</span>
-          {!collapsed && (
-            <span className="brand__text">
-              <strong>Chapman Prestige</strong>
-              <small>Operations console</small>
-            </span>
-          )}
-        </div>
+        <BrandMark size="md" withText={!collapsed} />
 
         {!isMobile && (
           <button

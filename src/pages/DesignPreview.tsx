@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { BrandMark } from "../components/brand/BrandMark";
 import {
   AlertCircle, ArrowRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronLeft, ChevronRight,
   ClipboardList, Clock, DollarSign, FileText, Inbox, LayoutDashboard, LayoutGrid, List,
@@ -241,13 +242,7 @@ export const DesignPreview = () => {
         <div className="shell-demo">
           <aside className="sidebar expanded shell-demo__sidebar">
             <div className="sidebar-header">
-              <div className="brand">
-                <span className="brand__mark">CP</span>
-                <span className="brand__text">
-                  <strong>Chapman Prestige</strong>
-                  <small>Operations console</small>
-                </span>
-              </div>
+              <BrandMark size="md" withText />
               <span className="sidebar-icon-btn" aria-hidden="true"><ChevronLeft size={16} /></span>
             </div>
             <nav className="sidebar-nav">

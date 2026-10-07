@@ -1,543 +1,309 @@
-/* Login Styles - Chapman Prestige Limited */
-/* The typeface is loaded once, in index.html. A stylesheet-level @import here
-   used to pull a second family into the whole bundle. */
+/* Sign-in.
+ *
+ * One column, centred, on the console's own dark surface. There is no hero, no
+ * marketing copy and no decorative motion: this screen has one job, and the
+ * only thing that moves is the spinner while the credentials are checked.
+ *
+ * The previous screen put a brand panel beside the form with a headline, three
+ * feature bullets and a status light. It read like a landing page for a product
+ * nobody had opened yet, it hid the form beside it on a phone, and it claimed
+ * an "Operations Hub" the console does not call itself.
+ */
 
-.login-root {
+.login-page {
   min-height: 100vh;
-  /* The visual viewport height, so the screen stays the size of what the staff
-     member can actually see while the page is zoomed or the keyboard is up. */
-  min-height: var(--vv-h, 100dvh);
-  display: flex;
-  flex-direction: column;
-  font-family: var(--font-ui);
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--sp-6) + var(--safe-top)) var(--sp-5) calc(var(--sp-6) + var(--safe-bottom));
   background: var(--ink-base);
-  position: relative;
-  overflow: hidden;
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  /* A phone with the keyboard open has less room than this screen needs, so
+     the page scrolls rather than clipping the button. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-.login-root * {
-  box-sizing: border-box;
-}
-
-/* The ambient scene that used to live here (three floating colour orbs, a
-   drifting background wash and a dot grid) is gone. Its whole job was to make
-   a sign-in form feel like a product launch. A quiet surface does it better. */
-
-/* ── Layout ────────────────────────────────────── */
-.login-layout {
-  flex: 1;
-  display: flex;
-  position: relative;
-}
-
-/* ── Brand Panel ───────────────────────────────── */
-.login-brand-panel {
-  flex: 1;
+.login-shell {
+  width: 100%;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 60px 80px;
-  position: relative;
-  z-index: 1;
+  gap: var(--sp-5);
 }
+
+/* ── Brand ───────────────────────────────────────────────────────────────── */
 
 .login-brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 32px;
-  animation: loginFadeUp 0.5s ease both;
+  gap: var(--sp-3);
+  text-align: center;
 }
 
-.login-brand-logo {
-  position: relative;
-  width: 48px;
-  height: 48px;
-  background: var(--brand-600);
-  border-radius: 12px;
+.login-brand__text {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.login-brand-name {
-  font-size: var(--fs-3xl);
-  font-weight: 800;
-  color: var(--text-1);
-  letter-spacing: -0.03em;
-}
-
-.login-headline {
-  font-size: var(--fs-4xl);
-  font-weight: 800;
-  color: var(--text-1);
-  line-height: 1.1;
-  margin-bottom: 24px;
+.login-brand__name {
+  font-size: var(--fs-md);
+  font-weight: 650;
   letter-spacing: -0.02em;
-  animation: loginFadeUp 0.6s ease 0.08s both;
-}
-
-.login-headline-accent {
-  color: var(--brand-400);
-}
-
-.login-sub {
-  font-size: var(--fs-lg);
-  color: var(--text-2);
-  line-height: 1.6;
-  max-width: 480px;
-  margin-bottom: 40px;
-  animation: loginFadeUp 0.6s ease 0.16s both;
-}
-
-.login-features {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.login-feature {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: var(--fs-md);
-  color: var(--text-2);
-  animation: loginFadeUp 0.5s ease both;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.login-feature:hover {
-  transform: translateX(4px);
-}
-
-.login-feature-icon {
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.login-feature:hover .login-feature-icon {
-  transform: scale(1.15) rotate(-4deg);
-}
-
-.login-footer {
-  position: absolute;
-  bottom: 40px;
-  left: 80px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.login-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.login-status-dot-wrap {
-  position: relative;
-  width: 8px;
-  height: 8px;
-}
-
-.login-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  animation: loginPulseDot 2s ease-in-out infinite;
-}
-
-.login-status-dot.online {
-  background: var(--ok-500);
-}
-
-.login-status-dot.offline {
-  background: var(--bad-500);
-}
-
-.login-status-text {
-  font-size: var(--fs-2xs);
-  color: var(--text-4);
-}
-
-.login-copyright {
-  font-size: var(--fs-xs);
-  color: var(--text-4);
-}
-
-/* ── Card Panel ────────────────────────────────── */
-.login-card {
-  width: 520px;
-  background: var(--ink-raised);
-  backdrop-filter: blur(20px);
-  border-left: 1px solid var(--line-soft);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 60px;
-  position: relative;
-  z-index: 1;
-
-  animation: loginFadeRight 0.55s cubic-bezier(0.2, 0.75, 0.3, 1) both;
-}
-
-.login-card-title {
-  font-size: var(--fs-3xl);
-  font-weight: 700;
   color: var(--text-1);
-  margin-bottom: 8px;
 }
 
-.login-card-subtitle {
-  font-size: var(--fs-md);
-  color: var(--text-4);
-  margin-bottom: 40px;
+.login-brand__product {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
 }
 
-/* ── Form ──────────────────────────────────────── */
+/* ── Card ────────────────────────────────────────────────────────────────── */
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-6);
+  background: var(--ink-card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.login-card__head {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.login-title {
+  margin: 0;
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-1);
+}
+
+.login-subtitle {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+}
+
+/* ── Notices ─────────────────────────────────────────────────────────────── */
+
+.login-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+.login-notice svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.login-notice--offline {
+  background: var(--warn-soft);
+  border-color: var(--warn-border);
+  color: var(--text-2);
+}
+
+.login-notice--offline svg { color: var(--warn-500); }
+
+.login-notice--error {
+  background: var(--bad-soft);
+  border-color: var(--bad-border);
+  color: var(--text-2);
+}
+
+.login-notice--error svg { color: var(--bad-500); }
+
+/* ── Form ────────────────────────────────────────────────────────────────── */
+
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--sp-4);
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .login-label {
   font-size: var(--fs-xs);
-  color: var(--text-4);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   font-weight: 600;
-  margin-bottom: 8px;
-  display: block;
-}
-
-.login-field {
-  position: relative;
+  letter-spacing: 0.02em;
+  color: var(--text-2);
 }
 
 .login-input {
-  width: 100%;
-  padding: 14px 16px 14px 46px;
-  background: var(--ink-shell);
-  border: 1px solid var(--line-soft);
-  border-radius: 10px;
-  color: var(--text-1);
-  font-size: var(--fs-md);
-  font-family: var(--font-mono);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-}
-
-.login-input:hover {
-  border-color: var(--line-strong);
-}
-
-.login-input:focus {
-  outline: none;
-  border-color: var(--brand-500);
-  box-shadow: var(--focus-ring);
-  background: var(--ink-active);
-}
-
-.login-input::placeholder {
-  color: var(--text-disabled);
-}
-
-.login-input-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: var(--text-4);
-  transition: color 0.2s ease;
-}
-
-.login-field:focus-within .login-input-icon {
-  color: var(--brand-500);
-}
-
-.login-input-password {
-  padding-right: 48px;
-}
-
-.login-eye-btn {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  color: var(--text-2);
-  cursor: pointer;
-  padding: 4px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: color 0.18s ease, transform 0.18s ease;
-}
-
-.login-eye-btn:hover {
-  color: var(--text-1);
-  transform: translateY(-50%) scale(1.08);
-}
-
-.login-submit {
-  margin-top: 8px;
-  padding: 14px 20px;
-  border: none;
-  border-radius: 10px;
-  color: var(--on-brand);
-  font-size: var(--fs-md);
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font-ui);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: transform 0.18s ease, box-shadow 0.25s ease, filter 0.18s ease;
-}
-
-.login-submit:not(:disabled) {
-  background: var(--brand-600);
-}
-
-.login-submit:not(:disabled):hover {
-  background: var(--brand-500);
-  filter: brightness(1.04);
-}
-
-.login-submit:not(:disabled):active {
-  filter: brightness(1.12);
-}
-
-.login-submit:disabled {
-  background: var(--ink-active);
-  color: var(--text-disabled);
-  cursor: not-allowed;
-}
-
-.login-submit.offline {
+  gap: var(--sp-2);
+  height: var(--tap-min);
+  padding: 0 12px;
   background: var(--ink-raised);
   border: 1px solid var(--line-soft);
-  color: var(--text-disabled);
-  cursor: not-allowed;
+  border-radius: var(--r-sm);
+  transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 
-.login-help {
-  margin-top: 32px;
-  text-align: center;
-  font-size: var(--fs-sm);
-  color: var(--text-4);
+.login-input:focus-within {
+  border-color: var(--brand-500);
+  background: var(--ink-card);
+  box-shadow: 0 0 0 3px var(--brand-soft);
 }
 
-/* ── Error ─────────────────────────────────────── */
-.login-error {
-  padding: 14px;
-  background: var(--bad-soft);
-  border: 1px solid var(--bad-border);
-  border-radius: 10px;
-  color: var(--bad-500);
-  font-size: var(--fs-sm);
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 10;
-  animation: loginShake 0.5s ease both, loginFadeUp 0.3s ease both;
+.login-input__icon {
+  flex-shrink: 0;
+  color: var(--text-3);
 }
 
-/* ── Offline Banner ────────────────────────────── */
-.login-banner {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--bad-soft);
-  border-bottom: 1px solid var(--bad-border);
-  padding: 10px 24px;
-  display: flex;
-  align-items: center;
-  gap: 10;
-  backdrop-filter: blur(6px);
-  animation: loginBannerIn 0.35s cubic-bezier(0.2, 0.8, 0.3, 1) both;
-}
+.login-input:focus-within .login-input__icon { color: var(--brand-400); }
 
-.login-banner-text {
-  font-size: var(--fs-sm);
+.login-input input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  background: none;
+  outline: none;
   color: var(--text-1);
-  font-weight: 600;
+  font-family: var(--font-ui);
+  font-size: var(--fs-md);
 }
 
-.login-banner-sub {
-  font-size: var(--fs-sm);
-  color: var(--text-2);
+.login-input input::placeholder { color: var(--text-4); }
+
+.login-input__reveal {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  margin-right: -4px;
+  border: none;
+  border-radius: var(--r-xs);
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 
-/* ── Session Authenticated Screen ──────────────── */
-.login-session {
-  background: var(--ink-base);
-  min-height: 100vh;
-  min-height: var(--vv-h, 100dvh);
+.login-input__reveal:hover { color: var(--text-1); background: var(--ink-active); }
+
+.login-submit {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: var(--sp-1);
+  padding: 0 var(--sp-5);
+  border: 1px solid var(--brand-600);
+  border-radius: var(--r-sm);
+  background: var(--brand-700);
+  color: var(--on-brand);
+  font-family: var(--font-ui);
+  font-size: var(--fs-md);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
 }
 
-.login-session-inner {
+.login-submit:hover:not(:disabled) { background: var(--brand-600); }
+.login-submit:active:not(:disabled) { background: var(--brand-700); border-color: var(--brand-500); }
+
+.login-submit:disabled {
+  background: var(--ink-raised);
+  border-color: var(--line-soft);
+  color: var(--text-4);
+  cursor: not-allowed;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+
+.login-foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: var(--fs-xs);
+  color: var(--text-4);
   text-align: center;
 }
 
-.login-session-icon-wrap {
-  position: relative;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 16px;
+/* ── Handing off an existing session ─────────────────────────────────────── */
+
+.login-page--handoff { place-items: center; }
+
+.login-handoff {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
 }
 
-.login-session-title {
-  font-size: var(--fs-xl);
-  font-weight: 700;
-  color: var(--text-1);
+.login-handoff__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--text-3);
 }
 
-.login-session-sub {
+.login-handoff__text {
   font-size: var(--fs-sm);
-  color: var(--text-4);
-  margin-top: 8px;
+  font-weight: 550;
 }
 
-/* ── Ping Ring ─────────────────────────────────── */
-.login-ping {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  animation: loginPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.login-ping.online {
-  background: var(--ok-border);
-}
-
-.login-ping.offline {
-  background: var(--bad-border);
-}
-
-/* ── Spin ──────────────────────────────────────── */
 .login-spin {
-  animation: loginSpin 0.8s linear infinite;
-}
-
-/* ── Animations ────────────────────────────────── */
-@keyframes loginFadeUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes loginFadeRight {
-  from { opacity: 0; transform: translateX(24px); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes loginPing {
-  0% { transform: scale(0.9); opacity: 0.6; }
-  70% { transform: scale(2); opacity: 0; }
-  100% { opacity: 0; }
-}
-
-@keyframes loginPulseDot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-
-@keyframes loginShake {
-  10%, 90% { transform: translateX(-1px); }
-  20%, 80% { transform: translateX(2px); }
-  30%, 50%, 70% { transform: translateX(-4px); }
-  40%, 60% { transform: translateX(4px); }
+  animation: loginSpin 0.9s linear infinite;
 }
 
 @keyframes loginSpin {
   to { transform: rotate(360deg); }
 }
 
-@keyframes loginBannerIn {
-  from { transform: translateY(-100%); }
-  to { transform: none; }
-}
-
-/* ── Reduced Motion ────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  .login-root *,
-  .login-root *::before,
-  .login-root *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
-}
-
-/* ── Mobile ────────────────────────────────────── */
-@media (max-width: 980px) {
-  .login-layout {
-    flex-direction: column;
-  }
-
-  .login-brand-panel {
-    padding: 44px 28px 32px;
-    text-align: center;
-  }
-
-  .login-headline {
-    font-size: var(--fs-4xl);
-  }
-
-  .login-sub {
-    margin: 0 auto 32px;
-  }
-
-  .login-features {
-    display: none;
-  }
-
-  .login-card {
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid var(--line-soft);
-    padding: 40px 28px;
-    box-shadow: none;
-  }
-
-  .login-footer {
-    position: static;
-    margin-top: 32px;
-    justify-content: center;
-  }
-}
-
-/* 16px fields from 900px down, not 480px: iOS zooms the page in whenever a
-   field under 16px is focused, at any width, and this is the first screen
-   staff touch on a phone. */
-@media (max-width: 900px) {
-  /* The sign-in screen is outside the shell, so it handles the home indicator
-     itself. */
-  .login-root { padding-bottom: var(--safe-bottom); }
-  .login-input { font-size: var(--fs-lg); }
-  .login-submit, .login-forgot, .login-alt button { min-height: var(--tap-min); }
-}
+/* ── Small phones ────────────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
-  .login-brand-panel {
-    padding: 32px 16px 24px;
+  .login-page {
+    /* Sits lower on a phone, so the field and the button are inside the reach
+       of a thumb rather than at the top of the glass. */
+    place-items: end center;
+    padding: calc(var(--sp-5) + var(--safe-top)) var(--sp-4) calc(var(--sp-5) + var(--safe-bottom));
   }
 
-  .login-headline {
-    font-size: var(--fs-3xl);
-  }
+  .login-page--handoff { place-items: center; }
 
-  .login-card {
-    padding: 32px 16px;
-  }
+  .login-shell { gap: var(--sp-4); }
+  .login-card { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-md); }
+}
 
-  .login-submit {
-    min-height: 48px;
-  }
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .login-spin { animation: none; }
+  .login-input,
+  .login-submit,
+  .login-input__reveal { transition: none; }
 }

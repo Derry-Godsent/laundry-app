@@ -33,51 +33,6 @@
 
 .sidebar.collapsed .sidebar-header { justify-content: center; padding: var(--sp-4) var(--sp-2); }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  min-width: 0;
-}
-
-.brand__mark {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
-  border-radius: var(--r-md);
-  background: var(--brand-500);
-  color: var(--on-warn);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  box-shadow: 0 6px 16px -8px transparent;
-}
-
-.brand__text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.brand__text strong {
-  font-size: 14px;
-  font-weight: 650;
-  letter-spacing: -0.015em;
-  color: var(--text-1);
-  white-space: nowrap;
-}
-
-.brand__text small {
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-4);
-  margin-top: 2px;
-}
-
 .sidebar-icon-btn {
   display: grid;
   place-items: center;
