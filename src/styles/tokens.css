@@ -1,8 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    CHAPMAN PRESTIGE · STAFF CONSOLE DESIGN TOKENS
    ───────────────────────────────────────────────────────────────────────────
-   One file, one vocabulary. Every surface, line, colour and radius used by the
-   staff console is declared here and nothing else may hard-code a hex value.
+   One file, one vocabulary. Every surface, line, colour, radius, type size and
+   duration used by the staff console is declared here and nothing else may
+   hard-code one. Three rules the guard script enforces:
+
+     no colour literals outside this file
+     no font size outside the --fs-* scale
+     no gradient anywhere: the look is flat surfaces, hairlines and type
 
    Naming
      --ink-*     layered page/surface backgrounds, darkest → lightest
@@ -31,11 +36,23 @@
   --line: rgba(255, 255, 255, 0.11);
   --line-strong: rgba(255, 255, 255, 0.18);
 
-  /* ── Text ramp ────────────────────────────────────────────────────────── */
+  /* ── Text ramp ──────────────────────────────────────────────────────────
+     Four steps, each with a job, each readable on every surface above. The
+     ratios are against --ink-raised, the lightest surface text normally sits
+     on, and every step carrying text clears WCAG AA (4.5:1). A label is meant
+     to recede, not to disappear: the old bottom two steps were 2.9:1 and
+     2.4:1, which is unreadable on a phone outdoors.
+
+       --text-1  primary           16.5:1
+       --text-2  secondary          8.4:1
+       --text-3  tertiary, meta     6.0:1
+       --text-4  muted labels       4.6:1
+       --text-disabled  disabled controls only, never text; 3.0:1  */
   --text-1: #f3f6fc;
   --text-2: #a8b2c7;
-  --text-3: #737e96;
-  --text-4: #4a5470;
+  --text-3: #8b96b0;
+  --text-4: #75809e;
+  --text-disabled: #5a6480;
 
   /* ── Brand ────────────────────────────────────────────────────────────── */
   --brand-700: #3b41b8;
@@ -103,19 +120,52 @@
   --shadow-lg: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
   --shadow-pop: 0 18px 48px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--line-soft);
   --ring-brand: 0 0 0 3px rgba(111, 119, 247, 0.28);
+  --focus-ring: 2px solid var(--brand-500);
+  --focus-offset: 2px;
 
-  /* ── Motion ───────────────────────────────────────────────────────────── */
+  /* ── Motion ──────────────────────────────────────────────────────────────
+     Three speeds with a job: press feedback, state change, surface entrance.
+     Nothing animates for decoration, nothing bounces, and nothing moves a
+     neighbour: entrances fade and rise at most 6px, exits are quicker than
+     entrances, and only overlays move a meaningful distance. */
+  --dur-press: 80ms;
   --dur-fast: 120ms;
   --dur-base: 180ms;
   --dur-slow: 320ms;
   --ease-out: cubic-bezier(0.22, 0.8, 0.28, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
 
-  /* ── Type ─────────────────────────────────────────────────────────────── */
-  --font-ui: "Inter", "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* ── Type ────────────────────────────────────────────────────────────────
+     One family for the interface, one for machine text (ids, money, counts,
+     timestamps, keys). Nothing else: the pages used to carry three families
+     plus a face that was never loaded at all.
+
+     Nine steps replace the twenty-eight sizes that were in use. A size that is
+     not on this scale does not go in the product; if a screen seems to need
+     one, the screen has a hierarchy problem, not a type problem. */
+  --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
+
+  --fs-2xs: 11px;  /* uppercase micro labels, table heads, keyboard hints */
+  --fs-xs: 12px;   /* meta lines, timestamps, helper text */
+  --fs-sm: 13px;   /* dense body, table cells, list meta */
+  --fs-md: 14px;   /* default body */
+  --fs-lg: 16px;   /* emphasis, fields (also the iOS no-zoom floor) */
+  --fs-xl: 18px;   /* card and section titles */
+  --fs-2xl: 22px;  /* page titles */
+  --fs-3xl: 28px;  /* hero numbers */
+  --fs-4xl: 34px;  /* sign-in headline, one per app */
+
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-body: 1.55;
+  --lh-loose: 1.72;
+
+  --track-tight: -0.011em;   /* large text and numbers */
+  --track-caps: 0.09em;      /* uppercase micro labels */
 
   /* ── Shell metrics: the sidebar and topbar agree on these ────────────── */
   --sidebar-w: 268px;

@@ -6,7 +6,7 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const CSS = `
 
-.pd-wrap { position: relative; font-family: 'Outfit', system-ui, sans-serif; }
+.pd-wrap { position: relative; font-family: var(--font-ui); }
 
 /* Trigger button */
 .pd-trigger {
@@ -93,7 +93,7 @@ const CSS = `
   font-size: 11px; color: #3a4460;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-top: 2px;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-mono);
 }
 
 /* Menu items */
@@ -103,7 +103,7 @@ const CSS = `
   padding: 9px 10px; border-radius: 8px; width: 100%;
   background: transparent; border: none;
   color: #8892a4; font-size: 13px; font-weight: 500;
-  cursor: pointer; font-family: 'Outfit', sans-serif;
+  cursor: pointer; font-family: var(--font-ui);
   text-align: left; text-transform: capitalize;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -127,7 +127,7 @@ const CSS = `
   padding: 9px 10px; border-radius: 8px; width: 100%;
   background: transparent; border: none;
   color: #556070; font-size: 13px; font-weight: 500;
-  cursor: pointer; font-family: 'Outfit', sans-serif;
+  cursor: pointer; font-family: var(--font-ui);
   text-align: left;
   transition: background-color 0.15s ease, color 0.15s ease;
 }

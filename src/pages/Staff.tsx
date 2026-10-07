@@ -534,7 +534,7 @@ export const Staff = () => {
           --sf-text-primary: #edf0f8; --sf-text-sec: #9aa3b5; --sf-text-tert: #556070; --sf-text-hint: #2e3a4e;
           --sf-accent: #6c72f3; --sf-accent-dim: rgba(108,114,243,0.13); --sf-accent-bord: rgba(108,114,243,0.28); --sf-accent-glow: rgba(108,114,243,0.35);
           --sf-gold: #dba96a; --sf-emerald: #34d399; --sf-danger: #f87171;
-          --sf-font: 'DM Sans','Inter',system-ui,sans-serif; --sf-mono: 'DM Mono','Fira Mono',ui-monospace,monospace;
+          --sf-font: var(--font-ui); --sf-mono: var(--font-mono);
         }
         @keyframes sfFadeUp { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: none;} }
         @keyframes sfFadeIn { from { opacity:0;} to { opacity:1;} }

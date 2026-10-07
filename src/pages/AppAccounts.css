@@ -9,7 +9,7 @@
   min-height: 100%;
   padding: var(--page-pad-y) var(--page-pad-x) var(--page-pad-bottom);
   color: #e6e9f2;
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: var(--font-ui);
 }
 
 .aa-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }

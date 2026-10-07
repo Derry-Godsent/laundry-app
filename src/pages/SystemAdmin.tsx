@@ -69,8 +69,8 @@ const T = {
   ember: "#f87171", emberDim: "rgba(248,113,113,0.1)", emberBord: "rgba(248,113,113,0.32)",
 };
 
-const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
-const MONO = "'DM Mono', 'Fira Mono', ui-monospace, monospace";
+const FONT = "var(--font-ui)";
+const MONO = "var(--font-mono)";
 
 const Toast = ({ msg, type, onClose }: any) => {
   useEffect(() => { const t = setTimeout(onClose, 4000); return () => clearTimeout(t); }, [onClose]);

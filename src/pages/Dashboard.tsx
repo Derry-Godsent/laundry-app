@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "./Dashboard.css";
 
-/* ✅ Added permission imports */
+/* Added permission imports */
 import { usePermission } from "../hooks/usePermission";
 import { PermissionGuard } from "../components/PermissionGuard";
 import {
@@ -335,7 +335,7 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ Get permission state for this specific page
+  // Get permission state for this specific page
   const { canEdit } = usePermission(location.pathname);
 
   const [loading, setLoading] = useState(true);
@@ -626,7 +626,7 @@ export const Dashboard = () => {
                 { value: "year", label: "1Y" },
               ]}
             />
-            {/* ✅ Only show "New Order" if the role may create records */}
+            {/* Only show "New Order" if the role may create records */}
             {canEdit && (
               <Button variant="primary" leadingIcon={<Plus size={16} />} onClick={() => navigate("/new-order")}>
                 New Order
@@ -636,7 +636,7 @@ export const Dashboard = () => {
         }
       />
 
-      {/* ✅ View-only banner comes from the guard, the cards below stay readable */}
+      {/* View-only banner comes from the guard, the cards below stay readable */}
       <PermissionGuard>
         <section className="stat-grid" aria-label="Key figures">
           {statCards.map((card) => (

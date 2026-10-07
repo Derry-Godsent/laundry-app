@@ -19,7 +19,7 @@
   height: 52px;
   border-radius: var(--r-lg);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(160deg, var(--brand-500), var(--brand-700));
+  background: var(--brand-600);
   color: #fff;
   box-shadow: 0 14px 34px -14px var(--brand-glow), var(--shadow-md);
   transition: transform var(--dur-base) var(--ease-out),

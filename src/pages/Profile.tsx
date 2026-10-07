@@ -12,7 +12,7 @@ const T = {
   danger: "#f87171", dangerDim: "rgba(248,113,113,0.1)", dangerBord: "rgba(248,113,113,0.25)",
 };
 
-const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
+const FONT = "var(--font-ui)";
 
 export const Profile = () => {
   const [user, setUser] = useState<any>(null);

@@ -6,7 +6,7 @@ import { useOverlay } from "@/components/ui/useOverlay";
 
 const CSS = `
 
-.nd-wrap { position: relative; font-family: 'Outfit', system-ui, sans-serif; }
+.nd-wrap { position: relative; font-family: var(--font-ui); }
 
 /* Bell button */
 .nd-bell {
@@ -81,7 +81,7 @@ const CSS = `
 .nd-mark-all {
   font-size: 11.5px; font-weight: 600; color: #3a4460;
   background: none; border: none; cursor: pointer;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-ui);
   transition: color 0.15s; padding: 0;
 }
 .nd-mark-all:hover { color: #9aa3b5; }
@@ -109,7 +109,7 @@ const CSS = `
   font-size: 13px;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
-.nd-empty-ico { font-size: 28px; opacity: 0.5; }
+.nd-empty-ico { display: inline-flex; color: var(--text-4); }
 
 /* Item */
 .nd-item {
@@ -194,7 +194,7 @@ const CSS = `
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 8px;
   color: #556070; font-size: 12.5px; font-weight: 600;
-  cursor: pointer; font-family: 'Outfit', sans-serif;
+  cursor: pointer; font-family: var(--font-ui);
   transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 .nd-view-all:hover { background: rgba(255,255,255,0.06); color: #9aa3b5; }
@@ -491,7 +491,7 @@ export const NotificationDropdown = ({
           <div className="nd-list" role="list">
             {notifications.length === 0 ? (
               <div className="nd-empty">
-                <span className="nd-empty-ico">🔔</span>
+                <span className="nd-empty-ico"><Bell size={22} /></span>
                 No new notifications
               </div>
             ) : (

@@ -1,5 +1,6 @@
 /* Login Styles - Chapman Prestige Limited */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap');
+/* The typeface is loaded once, in index.html. A stylesheet-level @import here
+   used to pull a second family into the whole bundle. */
 
 .login-root {
   min-height: 100vh;
@@ -8,7 +9,7 @@
   min-height: var(--vv-h, 100dvh);
   display: flex;
   flex-direction: column;
-  font-family: 'DM Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-ui);
   background: #05070b;
   position: relative;
   overflow: hidden;
@@ -274,7 +275,7 @@
   border-radius: 10px;
   color: #edf0f8;
   font-size: 14px;
-  font-family: 'DM Mono', 'Fira Mono', ui-monospace, monospace;
+  font-family: var(--font-mono);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
@@ -341,7 +342,7 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+  font-family: var(--font-ui);
   display: flex;
   align-items: center;
   justify-content: center;

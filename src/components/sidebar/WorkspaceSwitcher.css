@@ -56,13 +56,8 @@
   height: 12px;
   width: 80%;
   border-radius: var(--r-pill);
-  background: linear-gradient(90deg, var(--ink-hover), var(--ink-active), var(--ink-hover));
-  background-size: 200% 100%;
-  animation: wsShimmer 1.6s infinite linear;
-}
-
-@keyframes wsShimmer {
-  to { background-position: -200% 0; }
+  background: var(--ink-hover);
+  animation: skeletonPulse 1.8s var(--ease-in-out) infinite;
 }
 
 .ws-chevron {

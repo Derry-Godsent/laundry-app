@@ -9,7 +9,7 @@
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-3);
 }
 
@@ -51,7 +51,7 @@
 @media (max-width: 768px) {
   .breadcrumb-link { display: none; }
   .breadcrumb-separator { display: none; }
-  .breadcrumb-current { font-size: 14px; }
+  .breadcrumb-current { font-size: var(--fs-md); }
 }
 
 @media (prefers-reduced-motion: reduce) {

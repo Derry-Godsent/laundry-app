@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useLocation } from "react-router-dom"; // ✅ Added
+import { useLocation } from "react-router-dom"; // Added
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
 import {
@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import "./OrderBuilder.css";
 
-// ✅ Added permission imports
+// Added permission imports
 import { usePermission } from "../hooks/usePermission";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { ActionBar } from "../components/ui";
@@ -104,7 +104,7 @@ const parseDateInput = (input: string): string | null => {
 
 export const OrderBuilder = () => {
   const location = useLocation();
-  // ✅ Get permission state for this specific page
+  // Get permission state for this specific page
   const { canEdit } = usePermission(location.pathname);
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -417,7 +417,7 @@ export const OrderBuilder = () => {
           <div className="ob-header-title">New Order</div>
           <div className="ob-header-sub">Build unlimited-item orders instantly</div>
         </div>
-        {/* ✅ Disabled if user lacks edit access */}
+        {/* Disabled if user lacks edit access */}
         <button
           className="ob-submit-btn"
           onClick={handleSubmit}
@@ -429,7 +429,7 @@ export const OrderBuilder = () => {
         </button>
       </div>
 
-      {/* ✅ Wrapped in PermissionGuard to show "View-only" banner if needed */}
+      {/* Wrapped in PermissionGuard to show "View-only" banner if needed */}
       <PermissionGuard>
         <div className="ob-layout" onKeyDown={handleFormKeyDown} role="form" aria-label="Order form">
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>

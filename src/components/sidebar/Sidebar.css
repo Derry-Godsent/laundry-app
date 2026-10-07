@@ -10,7 +10,7 @@
   flex-shrink: 0;
   /* Notched phones in standalone mode: the brand block clears the inset. */
   padding-top: var(--safe-top);
-  background: linear-gradient(180deg, var(--ink-shell), #06080e 85%);
+  background: var(--ink-shell);
   border-right: 1px solid var(--line-faint);
   overflow: hidden;
   z-index: 40;
@@ -47,7 +47,7 @@
   height: 34px;
   flex-shrink: 0;
   border-radius: var(--r-md);
-  background: linear-gradient(160deg, var(--gold-400), var(--gold-600));
+  background: var(--gold-500);
   color: #251a06;
   font-size: 12px;
   font-weight: 800;

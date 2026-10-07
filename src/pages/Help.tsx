@@ -9,7 +9,7 @@ const T = {
   emerald: "#34d399", emeraldDim: "rgba(52,211,153,0.1)",
 };
 
-const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
+const FONT = "var(--font-ui)";
 
 const faqs = [
   { q: "How do I create a new order?", a: "Navigate to the 'New Order' page from the sidebar. Select a client, add services, and click 'Create Order'." },

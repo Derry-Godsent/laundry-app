@@ -87,11 +87,6 @@
 .card {
   position: relative;
   background: var(--ink-card);
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.022),
-    rgba(255, 255, 255, 0) 42%
-  );
   border: 1px solid var(--line-soft);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-md);
@@ -347,24 +342,20 @@
 
 .btn--primary {
   color: #fff;
-  background: linear-gradient(180deg, var(--brand-500), var(--brand-600));
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 6px 18px -8px var(--brand-glow);
+  background: var(--brand-600);
+  border-color: var(--brand-500);
 }
 .btn--primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, var(--brand-400), var(--brand-500));
-  box-shadow: 0 10px 24px -8px var(--brand-glow);
+  background: var(--brand-500);
+  border-color: var(--brand-400);
 }
 
 .btn--gold {
   color: #241a08;
-  background: linear-gradient(180deg, var(--gold-400), var(--gold-500));
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 6px 18px -8px var(--gold-glow);
+  background: var(--gold-500);
+  border-color: var(--gold-400);
 }
-.btn--gold:hover:not(:disabled) {
-  background: linear-gradient(180deg, #f8dcb2, var(--gold-400));
-}
+.btn--gold:hover:not(:disabled) { background: var(--gold-400); }
 
 .btn--secondary {
   color: var(--text-1);
@@ -397,10 +388,10 @@
 
 .btn--ok {
   color: #062316;
-  background: linear-gradient(180deg, #56e6a8, var(--ok-500));
+  background: var(--ok-500);
   border-color: rgba(255, 255, 255, 0.14);
 }
-.btn--ok:hover:not(:disabled) { background: linear-gradient(180deg, #6cf0b8, #47e5a1); }
+.btn--ok:hover:not(:disabled) { background: #56e6a8; }
 
 /* ───────────────────────────────────────────────────────────────────────────
    SEGMENTED CONTROL (view switches, range pickers)

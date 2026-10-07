@@ -47,8 +47,8 @@ const T = {
   emberBord:   "rgba(251,118,118,0.24)",
 };
 
-const FONT    = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
-const MONO    = "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace";
+const FONT    = "var(--font-ui)";
+const MONO    = "var(--font-mono)";
 const DISPLAY = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
 
 const GlobalStyle = () => (
@@ -295,7 +295,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
       style={{
         position: "fixed", inset: 0, zIndex: 99999,
         background: "rgba(4,6,12,0.85)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-        display: "flex", alignItems: "center", justifyContent: "center", // ✅ Centered perfectly
+        display: "flex", alignItems: "center", justifyContent: "center", // Centered perfectly
         animation: "fadeIn 0.2s ease both",
         overscrollBehavior: "none",
       }}

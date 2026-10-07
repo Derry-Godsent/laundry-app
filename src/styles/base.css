@@ -19,8 +19,8 @@ body {
   font-family: var(--font-ui);
   background: var(--ink-base);
   color: var(--text-1);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--fs-md);
+  line-height: var(--lh-body);
   letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -82,7 +82,7 @@ table { border-collapse: collapse; width: 100%; }
 /* ── Selection ──────────────────────────────────────────────────────────── */
 ::selection {
   background: var(--brand-glow);
-  color: #fff;
+  color: var(--text-1);
 }
 
 /* ── Scrollbars ─────────────────────────────────────────────────────────── */
@@ -168,18 +168,15 @@ textarea,
   content: "";
   position: absolute;
   inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.045),
-    transparent
-  );
-  animation: skeletonSweep 1.4s infinite;
+  background: rgba(255, 255, 255, 0.022);
+  animation: skeletonPulse 1.8s var(--ease-in-out) infinite;
 }
 
-@keyframes skeletonSweep {
-  100% { transform: translateX(100%); }
+/* A settled pulse, not a travelling sheen: the sheen needed a gradient and it
+   read as a progress bar rather than as a placeholder. */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
 }
 
 @keyframes spin {
@@ -252,7 +249,7 @@ body[data-scroll-locked="true"] .main-body {
   input,
   select,
   textarea {
-    font-size: 16px !important;
+    font-size: var(--fs-lg) !important;
   }
 
   /* A phone shows its own scroll indicators. */

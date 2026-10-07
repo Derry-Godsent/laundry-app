@@ -417,6 +417,63 @@ or pinned surface must not be a transform, filter or containment ancestor of it.
 A retained identity transform silently moves every `position: fixed` element
 inside it, which is how a takeover ends up scrolling with the page.
 
+### Phase E: overall appearance
+
+Phase E refines the dark operational style. It does not replace it: the
+surfaces, the workflow colours and the density stay, and what changes is the
+craft. The direction below was agreed before any of it was written.
+
+**The nine rules.**
+
+1. **One typeface system.** Inter for the interface, one mono for machine text
+   (ids, money, counts, timestamps, keyboard keys). Nothing else. Before this,
+   three families were in use and one of them, `'Outfit'`, was never loaded at
+   all: the notification panel and the account menu silently rendered in the
+   browser's fallback font.
+2. **Nine type sizes.** `--fs-2xs` to `--fs-4xl`, replacing the twenty-eight
+   sizes between 9px and 30px, half of them half-pixel steps.
+3. **One palette.** Tokens only; no colour literal outside `tokens.css`, which
+   removes the two-palette split (token pages versus the pages carrying their
+   own `T` object) and the 25 hexes that four state meanings had accumulated.
+4. **A readable floor.** Every step that carries text clears WCAG AA on the
+   lightest surface it sits on. The old ramp's bottom two steps were 2.9:1 and
+   2.4:1, which is unreadable on a phone outdoors. Disabled controls get their
+   own step, because a disabled control is not text.
+5. **No gradients.** Flat surfaces, hairline borders and type carry the design.
+   The rule covers button fills, page backdrops, the drifting glow blobs behind
+   the shell, the skeleton sheen (now a settled pulse) and the SVG area fills.
+6. **No emoji, no glyph stand-ins.** Icons come from the icon set at four
+   sizes, never from a character: the bell, the loyalty tiers, the trend
+   arrows and the ticks that were standing in for icons are all real icons now.
+7. **Nothing floats by default.** Elevation is reserved for surfaces that are
+   genuinely above the page: modal, sheet, dropdown, command palette, toast.
+   Cards sit on hairlines, and hover changes colour rather than lifting an
+   element off the page.
+8. **Motion with a job.** Three durations: press, state change, entrance.
+   Entrances fade and rise at most 6px and leave no transform behind, exits are
+   faster than entrances, and nothing animates for decoration.
+9. **Tiles have variety, trends have sparklines.** One tile primitive with
+   roles (hero, standard, compact, split, progress) instead of every page
+   hand-rolling four identical boxes; a trend shows as a sparkline rather than
+   a badge. A badge is kept only where state itself is the information.
+
+**Slices, one commit each.**
+
+| Slice | What it lands |
+| --- | --- |
+| E1 | This foundation: the type scale, the readable ramp, one font pipeline, the gradient sweep through the chrome and the shared sheet, the AI illustration assets and the emoji removed, and `npm run check:visual` to hold all of it. |
+| E2 | The primitives: button hierarchy, fields, cards and section headers, pills, the tile family and the sparkline, icon sizes, states, motion. The `/preview` gallery shows every primitive in every state. |
+| E3 | Operations pages: Requests, Service Requests, Orders, Order Builder, Clients, Dashboard. |
+| E4 | Management and settings pages: Staff, System Admin, Reports, Services, Payments, Receipt, Security, Settings, App Ideas, App Accounts, Help, Profile, Login. |
+| E5 | Copy and formats: one money helper (`GH₵420.00`), one date and time set, one locale, sentence case, and the customer/client wording rule. Then the guards go strict and the final report. |
+
+**Wording rule.** Anyone who books through the customer app is a **customer**,
+in copy and in the queue. **Client** is the console's own record: the Clients
+page, the order's billing party, the client id. A sentence does not mix them.
+
+**Money rule.** `GH\u20b5420.00`: the cedi sign, no space, always two decimals
+in tables and totals, whole figures allowed in large hero numbers.
+
 **Copy rules (repo-wide).** No em dashes. `npm run check:copy` fails on U+2014
 anywhere in the repo; use a full stop, a colon, a comma or a middot separator
 instead, and a plain hyphen for "no value" cells. En dashes survive only in

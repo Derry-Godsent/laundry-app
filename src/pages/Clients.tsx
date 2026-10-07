@@ -21,19 +21,19 @@ function formatPhoneInput(value: string): string {
 
 /* ─── STYLES ─────────────────────────────────────────────────────────────── */
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+/* One typeface for the whole app, loaded once in index.html. */
 
 .cl-shell *{box-sizing:border-box;margin:0;padding:0}
 /* Fills the shell frame: .main-body owns the page scroll, .cl-tbl-wrap owns the
    list scroll. Never 100vh inside the shell; that is what cut the list off. */
-.cl-shell{display:flex;flex-direction:column;height:100%;min-height:0;background:#07090e;color:#edf0f8;font-family:'Outfit',system-ui,sans-serif;overflow:hidden}
+.cl-shell{display:flex;flex-direction:column;height:100%;min-height:0;background:#07090e;color:#edf0f8;font-family:var(--font-ui);overflow:hidden}
 
 .cl-top{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 0;flex-shrink:0;animation:clDown .4s cubic-bezier(.4,0,.2,1) both}
 .cl-h2{font-size:22px;font-weight:700;color:#edf0f8;letter-spacing:-.4px;margin-bottom:4px}
 .cl-sub{font-size:13px;color:#556070;display:flex;align-items:center;gap:6px}
 .cl-dsep{color:#2e3a4e}
 .cl-acts{display:flex;align-items:center;gap:8px}
-.cl-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'Outfit',sans-serif;transition:all .18s}
+.cl-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-ui);transition:all .18s}
 .cl-btn.ghost{background:rgba(255,255,255,.04);color:#9aa3b5;border:1px solid rgba(255,255,255,.07);padding:8px 10px}
 .cl-btn.ghost:hover{background:rgba(255,255,255,.08);color:#edf0f8}
 .cl-btn.primary{background:#34d399;color:#03261a;box-shadow:0 0 18px rgba(52,211,153,.25)}
@@ -57,28 +57,28 @@ const CSS = `
 .cl-filters{display:flex;align-items:center;gap:10px;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0;flex-wrap:wrap;animation:clDown .4s .08s cubic-bezier(.4,0,.2,1) both}
 .cl-srch{position:relative;display:flex;align-items:center;flex:1;min-width:180px;max-width:260px}
 .cl-srch-ico{position:absolute;left:11px;color:#3a4460;pointer-events:none}
-.cl-srch-inp{width:100%;padding:8px 36px 8px 34px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:#edf0f8;font-size:13px;font-family:'Outfit',sans-serif;outline:none;transition:border-color .18s,background .18s}
+.cl-srch-inp{width:100%;padding:8px 36px 8px 34px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:#edf0f8;font-size:13px;font-family:var(--font-ui);outline:none;transition:border-color .18s,background .18s}
 .cl-srch-inp::placeholder{color:#3a4460}
 .cl-srch-inp:focus{border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.04)}
 .cl-srch-x{position:absolute;right:10px;background:none;border:none;cursor:pointer;color:#3a4460;display:flex;align-items:center;transition:color .15s}
 .cl-srch-x:hover{color:#9aa3b5}
-.cl-fp{padding:7px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:#9aa3b5;font-size:13px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer;transition:all .18s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23556070'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.cl-fp{padding:7px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:#9aa3b5;font-size:13px;font-family:var(--font-ui);outline:none;cursor:pointer;transition:all .18s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23556070'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .cl-fp:focus,.cl-fp:hover{border-color:rgba(52,211,153,.35);color:#edf0f8}
 .cl-fp option{background:#0c0f18;color:#edf0f8}
-.cl-pill{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.07);background:transparent;color:#556070;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s;white-space:nowrap}
+.cl-pill{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.07);background:transparent;color:#556070;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-ui);transition:all .18s;white-space:nowrap}
 .cl-pill:hover{border-color:rgba(255,255,255,.12);color:#9aa3b5}
 .cl-pill.on{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:#34d399}
 .cl-pill.arch.on{background:rgba(108,114,243,.1);border-color:rgba(108,114,243,.3);color:#6c72f3}
-.cl-clr{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:9px;color:#f87171;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s}
+.cl-clr{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:9px;color:#f87171;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-ui);transition:all .18s}
 .cl-clr:hover{background:rgba(248,113,113,.18)}
 
 .tier-pills{display:flex;gap:5px;flex-wrap:wrap}
-.tier-p{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;border:1px solid rgba(255,255,255,.07);background:transparent;color:#556070;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s;white-space:nowrap}
+.tier-p{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;border:1px solid rgba(255,255,255,.07);background:transparent;color:#556070;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-ui);transition:all .18s;white-space:nowrap}
 .tier-p:hover{color:#9aa3b5;border-color:rgba(255,255,255,.12)}
 .tier-p.on{border-color:currentColor;opacity:1}
 
 .cl-bulk{display:flex;align-items:center;gap:10px;padding:10px 28px;background:rgba(52,211,153,.06);border-bottom:1px solid rgba(52,211,153,.15);font-size:13px;font-weight:500;color:#9aa3b5;animation:clSlideIn .2s ease;flex-shrink:0}
-.cl-bulk-b{padding:6px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:#edf0f8;font-size:12px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s;display:inline-flex;align-items:center;gap:6px}
+.cl-bulk-b{padding:6px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:7px;color:#edf0f8;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-ui);transition:all .18s;display:inline-flex;align-items:center;gap:6px}
 .cl-bulk-b:hover{background:rgba(255,255,255,.1)}
 .cl-bulk-b.red{color:#f87171;border-color:rgba(248,113,113,.25);background:rgba(248,113,113,.08)}
 .cl-bulk-b.red:hover{background:rgba(248,113,113,.15)}
@@ -122,11 +122,11 @@ const CSS = `
 .cl-pag{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-top:1px solid rgba(255,255,255,.05);background:#0c0f18;flex-shrink:0}
 .cl-pag-info{font-size:12.5px;color:#3a4460}
 .cl-pag-r{display:flex;align-items:center;gap:6px}
-.cl-pag-pp{padding:5px 9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;color:#9aa3b5;font-size:12px;font-family:'Outfit',sans-serif;outline:none;cursor:pointer}
+.cl-pag-pp{padding:5px 9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;color:#9aa3b5;font-size:12px;font-family:var(--font-ui);outline:none;cursor:pointer}
 .cl-pag-b{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;color:#9aa3b5;cursor:pointer;transition:all .18s}
 .cl-pag-b:hover:not(:disabled){background:rgba(255,255,255,.08);color:#edf0f8}
 .cl-pag-b:disabled{opacity:.3;cursor:not-allowed}
-.cl-pag-n{min-width:28px;height:28px;padding:0 5px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;border-radius:7px;color:#556070;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s}
+.cl-pag-n{min-width:28px;height:28px;padding:0 5px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;border-radius:7px;color:#556070;font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--font-ui);transition:all .18s}
 .cl-pag-n:hover{color:#edf0f8;border-color:rgba(255,255,255,.08)}
 .cl-pag-n.on{background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3)}
 
@@ -143,16 +143,16 @@ const CSS = `
 .cl-m-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .cl-m-fg{display:flex;flex-direction:column;gap:6px}
 .cl-m-lbl{font-size:11px;font-weight:700;color:#3a4460;text-transform:uppercase;letter-spacing:.08em}
-.cl-m-inp,.cl-m-sel{padding:10px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;color:#edf0f8;font-size:13.5px;font-family:'Outfit',sans-serif;outline:none;transition:border-color .18s,background .18s;width:100%}
+.cl-m-inp,.cl-m-sel{padding:10px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;color:#edf0f8;font-size:13.5px;font-family:var(--font-ui);outline:none;transition:border-color .18s,background .18s;width:100%}
 .cl-m-inp::placeholder{color:#2e3a4e}
 .cl-m-inp:focus,.cl-m-sel:focus{border-color:rgba(52,211,153,.45);background:rgba(52,211,153,.04)}
 .cl-m-inp.err{border-color:rgba(248,113,113,.5)}
 .cl-m-err{font-size:11.5px;color:#f87171}
 .cl-m-sel option{background:#0c0f18;color:#edf0f8}
 .cl-m-foot{display:flex;gap:10px;padding:16px 24px;border-top:1px solid rgba(255,255,255,.06)}
-.cl-mf-s{flex:1;padding:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;color:#9aa3b5;font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .18s}
+.cl-mf-s{flex:1;padding:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;color:#9aa3b5;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-ui);transition:all .18s}
 .cl-mf-s:hover{background:rgba(255,255,255,.08);color:#edf0f8}
-.cl-mf-p{flex:2;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:8px;background:#34d399;border:none;border-radius:9px;color:#03261a;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;box-shadow:0 0 16px rgba(52,211,153,.25);transition:all .18s}
+.cl-mf-p{flex:2;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:8px;background:#34d399;border:none;border-radius:9px;color:#03261a;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-ui);box-shadow:0 0 16px rgba(52,211,153,.25);transition:all .18s}
 .cl-mf-p:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
 .cl-mf-p:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
@@ -456,7 +456,7 @@ function ConfirmModal({ count, type, onClose, onConfirm }: {
         <div className="cl-m-foot" style={{ marginTop: 22 }}>
           <button className="cl-mf-s" onClick={onClose}>Cancel</button>
           <button
-            style={{ flex: 2, padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: isDel ? "#f87171" : "#6c72f3", border: "none", borderRadius: 9, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "'Outfit',sans-serif", transition: "all .18s" }}
+            style={{ flex: 2, padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: isDel ? "#f87171" : "#6c72f3", border: "none", borderRadius: 9, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-ui)", transition: "all .18s" }}
             onClick={onConfirm}>
             {isDel ? <><Trash2 size={14} /> Delete Permanently</> : <><Archive size={14} /> Archive</>}
           </button>
@@ -801,7 +801,7 @@ export const Clients = () => {
                     </div>
                   </td>
                   <td data-label="Tier"><TierBadge tier={c.tier} /></td>
-                  <td data-label="Phone" style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, color: "#9aa3b5" }}>{c.phone}</td>
+                  <td data-label="Phone" style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#9aa3b5" }}>{c.phone}</td>
                   <td data-label="Actions">
                     <div className="cl-row-acts">
                       {canEdit && (

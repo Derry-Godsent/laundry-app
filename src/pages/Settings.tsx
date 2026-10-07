@@ -3,8 +3,9 @@ import { useLocation } from "react-router-dom";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
 import {
-  Building2, Shield, Database, Save, Upload, Download, 
-  AlertCircle, Check, Globe, Lock, Eye, EyeOff, WifiOff, RefreshCw, X
+  Building2, Shield, Database, Save, Upload, Download,
+  AlertCircle, Check, Globe, Lock, Eye, EyeOff, WifiOff, RefreshCw, X,
+  Circle, Crown, Medal, Trophy,
 } from "lucide-react";
 import { usePermission } from "../hooks/usePermission";
 import { PermissionGuard } from "../components/PermissionGuard";
@@ -20,8 +21,8 @@ const T = {
   danger: "#f87171", dangerDim: "rgba(248,113,113,0.1)", dangerBord: "rgba(248,113,113,0.25)",
 };
 
-const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
-const MONO = "'DM Mono', 'Fira Mono', ui-monospace, monospace";
+const FONT = "var(--font-ui)";
+const MONO = "var(--font-mono)";
 
 /* ─── SUB-COMPONENTS ────────────────────────────────────────── */
 function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error"; onClose: () => void }) {
@@ -487,18 +488,18 @@ export const Settings = () => {
                   Tier Assignment by Visit Count
                 </div>
                 {[
-                  { tier: "Standard", visits: "< 5 visits", discount: "0%", color: T.textTert, icon: "○" },
-                  { tier: "Bronze", visits: "5 – 14 visits", discount: "5% Off", color: "#cd8a44", icon: "🥉" },
-                  { tier: "Silver", visits: "15 – 29 visits", discount: "10% Off", color: "#94a3b8", icon: "🥈" },
-                  { tier: "Gold", visits: "30+ visits", discount: "15% Off + Free Delivery", color: T.gold, icon: "🥇" },
-                  { tier: "VIP", visits: "Management Designated", discount: "20% Off + Door-to-Door", color: "#a78bfa", icon: "👑" },
+                  { tier: "Standard", visits: "Under 5 visits", discount: "0%", color: T.textTert, icon: Circle },
+                  { tier: "Bronze", visits: "5 to 14 visits", discount: "5% Off", color: "#cd8a44", icon: Medal },
+                  { tier: "Silver", visits: "15 to 29 visits", discount: "10% Off", color: "#94a3b8", icon: Medal },
+                  { tier: "Gold", visits: "30 or more visits", discount: "15% Off + Free Delivery", color: T.gold, icon: Trophy },
+                  { tier: "VIP", visits: "Management Designated", discount: "20% Off + Door-to-Door", color: "#a78bfa", icon: Crown },
                 ].map((l, i) => (
                   <div key={l.tier} className="cs-loyalty-row" style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center",
                     padding: "12px 16px", borderBottom: i < 4 ? `1px solid ${T.borderFaint}` : "none", borderRadius: 8,
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <span style={{ fontSize: 18 }}>{l.icon}</span>
+                      <l.icon size={18} color={l.color} strokeWidth={1.9} aria-hidden />
                       <div>
                         <div style={{ fontSize: 14, fontWeight: 600, color: l.color, fontFamily: FONT }}>{l.tier}</div>
                         <div style={{ fontSize: 12, color: T.textTert, marginTop: 2, fontFamily: FONT }}>{l.visits}</div>

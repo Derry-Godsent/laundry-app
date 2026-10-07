@@ -1,4 +1,4 @@
-// ✅ Fixed: Replaced broken import with local type definition
+// Local type definition: the shared one was removed.
 export type BadgeColorScheme = "red" | "orange" | "green" | "blue" | "grey";
 
 const mapColorToStatus = {

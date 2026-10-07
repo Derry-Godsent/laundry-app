@@ -12,7 +12,7 @@
   min-height: 100%;
   padding: var(--page-pad-y) var(--page-pad-x) var(--page-pad-bottom);
   color: #e6e9f2;
-  font-family: "DM Sans", system-ui, sans-serif;
+  font-family: var(--font-ui);
 }
 
 .sr-spin { animation: sr-rotate 900ms linear infinite; }

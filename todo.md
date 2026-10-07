@@ -107,9 +107,33 @@ the five-screen correctness pass and the definition of done live in
       customer through `customer_accounts` and, failing that, the linked `clients` row, showing
       the name and number in the queue, the header and the detail; the placeholders that claimed
       "Verified customer" are gone.
-- [ ] Phase E, overall appearance: palette, type, surfaces, border contrast, spacing,
-      button hierarchy, status colours, icons, states, motion, wording. Refine the dark
-      operational style rather than replacing it.
+- [ ] Phase E, overall appearance: refine the dark operational style, do not replace it.
+      Nine agreed rules, five slices, one commit each, all on PR #7. Full plan and the
+      wording and money rules: `docs/staff-console-redesign.md`, "Phase E: overall appearance".
+  - [x] E1, foundation. One type family (Inter) loaded once in `index.html` and one mono;
+        the phantom `'Outfit'` (19 declarations, never loaded, so the notification panel and
+        the account menu rendered in the browser fallback) is gone, and so is the second
+        stylesheet `@import` that pulled DM Sans into the whole bundle. A nine-step type
+        scale replaces the 28 sizes in use. The text ramp is rebuilt so every step that
+        carries text clears WCAG AA on the lightest surface (the old bottom two were 2.9:1
+        and 2.4:1, unreadable outdoors on a phone) with a separate disabled step. Every
+        gradient is out of the chrome and the shared sheet: button fills, card overlay, the
+        shell's drifting glow blobs, the sidebar and nav rails, the avatar, the dividers and
+        the skeleton sheen, which is now a settled pulse. The 14 unused AI illustration SVGs
+        in `src/assets` (1.2 MB, zero references) are deleted, the emoji that stood in for
+        icons are real icons (bell, loyalty tiers, trend arrows, comment ticks), and
+        `npm run check:visual` now fails on a gradient, an emoji, a colour literal, a stray
+        font family or a size off the scale, with a PENDING list that can only shrink.
+  - [ ] E2, primitives: button hierarchy, fields, cards and section headers, pills, the tile
+        family (hero, standard, compact, split, progress) with sparklines instead of badges,
+        icon sizes, states and motion. The `/preview` gallery shows every one in every state.
+  - [ ] E3, operations pages: Requests, Service Requests, Orders, Order Builder, Clients,
+        Dashboard.
+  - [ ] E4, management and settings pages: Staff, System Admin, Reports, Services, Payments,
+        Receipt, Security, Settings, App Ideas, App Accounts, Help, Profile, Login.
+  - [ ] E5, copy and formats: one money helper (`GH₵420.00`), one date and time set, one
+        locale, sentence case, the customer/client wording rule; then the guards go strict
+        (PENDING empty) and the final report is written.
 - [ ] Phase F, mobile app integration: Mobile Requests, Service Requests, customer
       replies, App Ideas, App Accounts, realtime alerts, staff actions from the app.
 - [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.

@@ -41,8 +41,14 @@ export const StatTile = ({
       <div className="stat__top">
         {icon ? <span className="stat__icon">{icon}</span> : <span />}
         {delta ? (
+          /* No arrow glyphs: a triangle character is not an icon, it renders
+             differently on every platform, and a tile reads its trend from the
+             sparkline beside it. The number keeps the direction in words for
+             screen readers. */
           <span className={cn("delta", trendClass(delta.value))}>
-            {delta.value > 0 ? "▲" : delta.value < 0 ? "▼" : "■"}
+            <span className="sr-only">
+              {delta.value > 0 ? "Up" : delta.value < 0 ? "Down" : "Flat"}
+            </span>
             {Math.abs(delta.value)}%
           </span>
         ) : null}

@@ -47,7 +47,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return (
       <div style={{ 
         display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", 
-        color: "#9aa3b5", fontFamily: "'DM Sans', sans-serif", background: "#07090e" 
+        color: "var(--text-2)", fontFamily: "var(--font-ui)", background: "var(--ink-base)" 
       }}>
         Loading...
       </div>

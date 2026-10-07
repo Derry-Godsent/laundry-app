@@ -25,7 +25,7 @@
 
 .nav-item.active {
   color: var(--text-1);
-  background: linear-gradient(90deg, var(--brand-soft), rgba(111, 119, 247, 0.02));
+  background: var(--brand-soft);
 }
 
 .nav-item.active::before {
@@ -37,7 +37,7 @@
   width: 2px;
   height: 18px;
   border-radius: 0 3px 3px 0;
-  background: linear-gradient(180deg, var(--gold-400), var(--brand-500));
+  background: var(--brand-500);
 }
 
 .nav-icon {

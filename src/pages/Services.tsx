@@ -56,11 +56,11 @@ const T = {
   violetBord:  "rgba(192,132,255,0.32)",
 };
 
-const FONT = "'DM Sans','Inter',system-ui,sans-serif";
-const MONO = "'DM Mono','Fira Mono',ui-monospace,monospace";
+const FONT = "var(--font-ui)";
+const MONO = "var(--font-mono)";
 
 const GLOBAL_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap');
+/* One typeface for the whole app, loaded once in index.html. */
 
 *, *::before, *::after { box-sizing: border-box; }
 

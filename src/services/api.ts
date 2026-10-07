@@ -7,7 +7,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
-  console.log("TOKEN:", token); // 👈 ADD THIS FOR DEBUG
+  /* A token is present; nothing is logged: staff consoles run on shared devices. */
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

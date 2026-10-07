@@ -31,29 +31,9 @@
   animation: shellDrift 26s var(--ease-in-out) infinite;
 }
 
-.layout-container::before {
-  top: -18%;
-  right: 4%;
-  width: 560px;
-  height: 560px;
-  background: radial-gradient(circle, var(--brand-glow) 0%, transparent 68%);
-  opacity: 0.16;
-}
-
-.layout-container::after {
-  bottom: -22%;
-  left: -4%;
-  width: 620px;
-  height: 620px;
-  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 68%);
-  opacity: 0.1;
-  animation-delay: 7s;
-}
-
-@keyframes shellDrift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(-2%, 3%, 0) scale(1.05); }
-}
+/* The two drifting glow blobs that used to sit behind the content are gone.
+   They were gradients, they moved on a 26 second loop nobody asked for, and
+   the backdrop reads calmer and more precise as one flat surface. */
 
 .main-content {
   flex: 1;

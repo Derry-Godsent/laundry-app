@@ -25,8 +25,8 @@ const T = {
   danger: "#f87171", dangerDim: "rgba(248,113,113,0.1)", dangerBord: "rgba(248,113,113,0.25)",
 };
 
-const FONT = "'DM Sans', 'Inter', system-ui, sans-serif";
-const MONO = "'DM Mono', 'Fira Mono', ui-monospace, monospace";
+const FONT = "var(--font-ui)";
+const MONO = "var(--font-mono)";
 const CHART_COLORS = [T.accent, T.emerald, T.gold, "#22d3ee", "#a78bfa", "#f87171"];
 
 /* ─── MAIN COMPONENT ────────────────────────────────────────── */
