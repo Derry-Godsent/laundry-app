@@ -21,7 +21,7 @@
 }
 
 .pg-banner {
-  border-color: rgba(224, 180, 115, 0.24);
+  border-color: var(--warn-border);
   background: var(--warn-soft);
   color: var(--warn-500);
 }
@@ -31,13 +31,13 @@
 .pg-access-denied svg { flex-shrink: 0; }
 
 .pg-error {
-  border-color: rgba(251, 125, 125, 0.24);
+  border-color: var(--bad-border);
   background: var(--bad-soft);
   color: var(--bad-500);
 }
 
 .pg-access-denied {
-  border-color: rgba(240, 192, 94, 0.24);
+  border-color: var(--warn-border);
   background: var(--warn-soft);
   color: var(--warn-500);
 }

@@ -124,8 +124,8 @@
 .notification-badge.pulse { animation: badgePulse 2.4s var(--ease-in-out) infinite; }
 
 @keyframes badgePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 125, 125, 0.4); }
-  50% { box-shadow: 0 0 0 5px rgba(251, 125, 125, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 var(--bad-border); }
+  50% { box-shadow: 0 0 0 5px transparent; }
 }
 
 /* ── Mobile menu button ─────────────────────────────────────────────────── */

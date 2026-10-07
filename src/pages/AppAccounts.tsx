@@ -44,7 +44,7 @@ interface SecurityEvent {
 const KIND_META: Record<EventKind, { label: string; sentence: string; color: string; background: string }> = {
   sign_in: { label: "Signed in", sentence: "Opened their account with a code sent to their phone", color: "var(--brand-400)", background: "var(--brand-soft)" },
   pin_set: { label: "PIN set", sentence: "Added a 4 digit PIN to their phone", color: "var(--ok-500)", background: "var(--ok-soft)" },
-  pin_removed: { label: "PIN removed", sentence: "Gave up the PIN, or asked to forget it", color: "var(--warn-500)", background: "rgba(246,199,105,0.14)" },
+  pin_removed: { label: "PIN removed", sentence: "Gave up the PIN, or asked to forget it", color: "var(--warn-500)", background: "var(--warn-soft)" },
   pin_used_up: { label: "PIN used up", sentence: "Five wrong tries, so the PIN was deleted", color: "var(--bad-500)", background: "var(--bad-soft)" },
 };
 
@@ -163,10 +163,10 @@ function AppAccountsContent() {
 
   const pinState = (person: AppCustomer) => {
     const latestPin = (byCustomer.get(person.auth_user_id) ?? []).find((note) => note.kind !== "sign_in");
-    if (!latestPin) return { label: "No PIN", color: "var(--text-3)", background: "rgba(154,163,181,0.13)" };
+    if (!latestPin) return { label: "No PIN", color: "var(--text-3)", background: "var(--ink-raised)" };
     if (latestPin.kind === "pin_set") return { label: "PIN in use", color: "var(--ok-500)", background: "var(--ok-soft)" };
     if (latestPin.kind === "pin_used_up") return { label: "PIN used up", color: "var(--bad-500)", background: "var(--bad-soft)" };
-    return { label: "PIN removed", color: "var(--warn-500)", background: "rgba(246,199,105,0.14)" };
+    return { label: "PIN removed", color: "var(--warn-500)", background: "var(--warn-soft)" };
   };
 
   return (
@@ -301,7 +301,7 @@ function AppAccountsContent() {
                   />
                 ) : (
                   selectedHistory.map((note) => {
-                    const meta = KIND_META[note.kind] ?? { label: note.kind, sentence: "", color: "var(--text-2)", background: "rgba(154,163,181,0.13)" };
+                    const meta = KIND_META[note.kind] ?? { label: note.kind, sentence: "", color: "var(--text-2)", background: "var(--ink-raised)" };
                     return (
                       <div key={note.id} className="aa-moment">
                         <span className="aa-moment-kind" style={{ color: meta.color, background: meta.background }}>{meta.label}</span>

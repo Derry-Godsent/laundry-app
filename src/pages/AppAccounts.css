@@ -27,7 +27,7 @@
 .aa-summary-card strong { font-size: 24px; font-weight: 800; color: #ffffff; }
 
 .aa-error { padding: 11px; border-radius: 11px; background: var(--bad-soft); color: var(--bad-500); font-size: 12px; }
-.aa-notready { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; padding: 20px; border: 1px solid rgba(246,199,105,0.35); border-radius: 18px; background: rgba(246,199,105,0.08); color: var(--warn-500); }
+.aa-notready { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; padding: 20px; border: 1px solid var(--warn-border); border-radius: 18px; background: var(--warn-soft); color: var(--warn-500); }
 .aa-notready h2 { margin: 0; font-size: 15.5px; font-weight: 800; color: var(--warn-500); }
 .aa-notready p { margin: 0; max-width: 700px; color: var(--warn-500); font-size: 12.5px; line-height: 19px; }
 .aa-notready strong { color: #ffffff; }
@@ -52,14 +52,14 @@
   .aa-detail { max-height: calc(100dvh - 260px); }
 }
 .aa-person { display: flex; flex-direction: column; gap: 7px; padding: 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; background: rgba(255,255,255,0.03); color: inherit; text-align: left; cursor: pointer; }
-.aa-person:hover { border-color: rgba(97,215,188,0.4); }
-.aa-person.selected { border-color: rgba(97,215,188,0.7); background: rgba(97,215,188,0.08); }
+.aa-person:hover { border-color: var(--ok-border); }
+.aa-person.selected { border-color: var(--ok-border); background: var(--ok-soft); }
 .aa-person-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .aa-person-top strong { font-size: 13px; font-weight: 800; }
 .aa-pin { padding: 4px 9px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.4px; }
 .aa-person-meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--text-2); font-size: 11px; }
 
-.aa-honest { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid rgba(97,215,188,0.28); border-radius: 13px; background: rgba(97,215,188,0.08); color: var(--ok-500); font-size: 12px; line-height: 18px; }
+.aa-honest { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid var(--ok-border); border-radius: 13px; background: var(--ok-soft); color: var(--ok-500); font-size: 12px; line-height: 18px; }
 
 .aa-history { display: flex; flex-direction: column; gap: 9px; }
 .aa-moment { display: flex; align-items: flex-start; gap: 11px; padding: 12px; border: 1px solid rgba(255,255,255,0.08); border-radius: 13px; background: rgba(255,255,255,0.025); }

@@ -71,7 +71,7 @@ export const Settings = () => {
     autoBackup: true
   });
 
-  const { permission, loading: permLoading, canEdit } = usePermission(location.pathname);
+  const { permission, loading: permLoading, canEdit, error: permError } = usePermission(location.pathname);
 
     const fetchSettings = useCallback(async () => {
     setLoading(true);
@@ -340,6 +340,26 @@ export const Settings = () => {
           </button>
         </div>
       </div>
+
+      {!canEdit && !permLoading && (
+        <div className="cs-readonly" style={{ background: "var(--tint-warn)", borderBottom: "1px solid var(--warn-border)", padding: "10px 32px", display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
+          <Lock size={14} style={{ color: "var(--warn-500)", flexShrink: 0 }} />
+          <span style={{ fontSize: 12.5, color: "var(--text-2)", fontFamily: FONT }}>
+            {permError
+              ? "Your permissions could not be checked, so changes are held back."
+              : "Your role does not allow changes to settings."}
+          </span>
+          {!permError && <span style={{ fontSize: 12.5, color: T.textTert, fontFamily: FONT }}>Ask an administrator to grant edit access on the System Admin page.</span>}
+          {permError && (
+            <button
+              onClick={() => window.dispatchEvent(new Event("permissions-updated"))}
+              style={{ padding: "5px 12px", background: "var(--warn-700)", border: "none", borderRadius: 7, color: "var(--on-brand)", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}
+            >
+              Check again
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="cs-tabs" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "0 32px", display: "flex", gap: 4 }}>
         {tabs.map(tab => (

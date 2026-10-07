@@ -189,7 +189,7 @@
 .logout-btn:hover {
   color: var(--bad-500);
   background: var(--bad-soft);
-  border-color: rgba(251, 125, 125, 0.2);
+  border-color: var(--bad-border);
 }
 
 .sidebar.collapsed .logout-btn { justify-content: center; padding-inline: 0; }

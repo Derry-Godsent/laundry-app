@@ -75,9 +75,9 @@
 }
 
 .nav-item.active .nav-badge {
-  background: rgba(224, 180, 115, 0.16);
-  border-color: rgba(224, 180, 115, 0.3);
-  color: var(--warn-500);
+  background: var(--ink-active);
+  border-color: var(--line-soft);
+  color: var(--text-1);
 }
 
 /* Collapsed rail: keep the row square and float the count as a dot. */

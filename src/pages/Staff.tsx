@@ -63,8 +63,8 @@ const ROLE_META: Record<StaffRole, { label: string; color: string; bg: string }>
   admin:      { label: "Admin",      color: "var(--brand-500)", bg: "var(--brand-soft)" },
   staff:      { label: "Staff",      color: "var(--ok-500)", bg: "var(--ok-soft)"  },
   courier:    { label: "Courier",    color: "var(--warn-500)", bg: "var(--warn-soft)" },
-  manager:    { label: "Manager",    color: "var(--brand-400)", bg: "rgba(167,139,250,0.12)" },
-  strategist: { label: "Strategist", color: "var(--info-500)", bg: "rgba(34,211,238,0.12)"  },
+  manager:    { label: "Manager",    color: "var(--brand-400)", bg: "var(--brand-soft)" },
+  strategist: { label: "Strategist", color: "var(--info-500)", bg: "var(--info-soft)"  },
 };
 
 const STATUS_META: Record<StaffStatus, { label: string; color: string; next: StaffStatus }> = {
@@ -142,7 +142,7 @@ function Avatar({ name, size = 36, ring }: { name: string; size?: number; ring?:
 }
 
 function RoleBadge({ role }: { role: StaffRole }) {
-  const m = ROLE_META[role] || { label: role || "Staff", color: "var(--text-2)", bg: "rgba(154,163,181,0.12)" };
+  const m = ROLE_META[role] || { label: role || "Staff", color: "var(--text-2)", bg: "var(--ink-raised)" };
   return <span className="role-badge" style={{ color: m.color, background: m.bg, borderColor: m.color + "35" }}>{m.label}</span>;
 }
 

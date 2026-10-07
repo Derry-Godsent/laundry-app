@@ -1292,7 +1292,7 @@ export const Services = () => {
                         style={{ padding:"4px 13px", borderRadius:100,
                           fontSize:11.5, fontWeight:600, border:"none",
                           cursor:"pointer", fontFamily:FONT,
-                          background: client.active ? T.emeraldDim : "rgba(90,102,131,0.15)",
+                          background: client.active ? T.emeraldDim : "var(--tint-neutral)",
                           color: client.active ? T.emerald : T.textTert,
                           boxShadow: client.active ? `0 0 14px -4px ${T.emeraldGlow}` : "none" }}>
                         {client.active ? "Active" : "Inactive"}
@@ -1300,7 +1300,7 @@ export const Services = () => {
                     ) : (
                       <span style={{ padding:"4px 13px", borderRadius:100,
                         fontSize:11.5, fontWeight:600, 
-                        background: client.active ? T.emeraldDim : "rgba(90,102,131,0.15)",
+                        background: client.active ? T.emeraldDim : "var(--tint-neutral)",
                         color: client.active ? T.emerald : T.textTert,
                         fontFamily:FONT }}>
                         {client.active ? "Active" : "Inactive"}

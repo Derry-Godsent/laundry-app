@@ -254,7 +254,7 @@ type SortDir = "asc" | "desc";
 
 /* ─── CONSTANTS ──────────────────────────────────────────────────────────── */
 const TIER_META: Record<string, { color: string; bg: string; border: string; icon: JSX.Element; label: string }> = {
-  Standard:  { color: "var(--text-4)", bg: "rgba(85,96,112,.12)",   border: "rgba(85,96,112,.2)",   icon: <User size={10} />,   label: "Standard"   },
+  Standard:  { color: "var(--text-4)", bg: "var(--tint-neutral)",   border: "var(--line-soft)",   icon: <User size={10} />,   label: "Standard"   },
   Bronze:    { color: "var(--warn-500)", bg: "var(--warn-soft)", border: "var(--warn-border)", icon: <Medal size={10} />,  label: "Bronze"     },
   Silver:    { color: "var(--text-2)",   bg: "var(--line-soft)", border: "var(--line)",        icon: <Medal size={10} />,  label: "Silver"     },
   Gold:      { color: "var(--text-1)",   bg: "var(--line)",      border: "var(--line-strong)", icon: <Trophy size={10} />, label: "Gold"       },

@@ -213,7 +213,7 @@
 
 .probe__warn {
   padding: var(--sp-3) var(--sp-4);
-  border: 1px solid rgba(240, 192, 94, 0.24);
+  border: 1px solid var(--warn-border);
   background: var(--warn-soft);
   border-radius: var(--r-md);
   font-size: 12.5px;
