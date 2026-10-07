@@ -113,9 +113,18 @@ for (const full of files) {
     if (EMOJI.test(line)) {
       add(file, n, "emoji: use an icon from the icon set");
     }
-    /* Pure black and white are not palette members: they are ink and paper,
-       and the print rules on the receipt and order sheets need them. */
-    const colourCode = code.replace(/#(?:000|000000|fff|ffffff)\b/gi, "");
+    /* Black, white and grey are not palette members: they are ink and paper,
+       and the print rules on the receipt and order sheets need them. A hex
+       whose colour channels are equal is a neutral, whether it is written with
+       three digits, six, or with an alpha suffix. */
+    const colourCode = code.replace(HEX, (literal) => {
+      const digits = literal.slice(1);
+      const channels = digits.length >= 6
+        ? [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 6)]
+        : [digits[0], digits[1], digits[2]];
+      const neutral = channels.every((c) => c === channels[0]);
+      return neutral ? "" : literal;
+    });
     if (HEX.test(colourCode) && !file.endsWith("tokens.css")) {
       add(file, n, `colour literal ${colourCode.match(HEX)[0]}: use a token`);
     }

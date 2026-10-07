@@ -234,7 +234,7 @@ export const Receipt = () => {
           >
             <option value="">Select an order to print...</option>
             {orders.map(o => (
-              <option key={o.id} value={o.id}>{o.order_id} • ₵{Number(o.total_due || 0).toFixed(2)} • {o.status}</option>
+              <option key={o.id} value={o.id}>{o.order_id} • GH₵{Number(o.total_due || 0).toFixed(2)} • {o.status}</option>
             ))}
           </select>
           
@@ -334,8 +334,8 @@ export const Receipt = () => {
                     <div key={i} style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr", gap: 12, padding: "10px 0", borderBottom: `1px solid ${T.borderFaint}`, fontSize: 14 }}>
                       <div style={{ fontWeight: 500 }}>{item.services?.name || "Service"}</div>
                       <div style={{ textAlign: "center", color: T.textSec }}>{item.quantity}</div>
-                      <div style={{ textAlign: "right", color: T.textSec, fontFamily: MONO }}>₵{Number(item.unit_price || 0).toFixed(2)}</div>
-                      <div style={{ textAlign: "right", fontWeight: 600, fontFamily: MONO }}>₵{lineTotal.toFixed(2)}</div>
+                      <div style={{ textAlign: "right", color: T.textSec, fontFamily: MONO }}>GH₵{Number(item.unit_price || 0).toFixed(2)}</div>
+                      <div style={{ textAlign: "right", fontWeight: 600, fontFamily: MONO }}>GH₵{lineTotal.toFixed(2)}</div>
                     </div>
                   );
                 })}
@@ -344,32 +344,32 @@ export const Receipt = () => {
               <div className="receipt-summary" style={{ padding: "24px 32px", background: T.bgSurface, borderTop: `1px solid ${T.borderFaint}` }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.textSec }}>
-                    <span>Subtotal</span><span style={{ fontFamily: MONO }}>₵{Number(subtotal).toFixed(2)}</span>
+                    <span>Subtotal</span><span style={{ fontFamily: MONO }}>GH₵{Number(subtotal).toFixed(2)}</span>
                   </div>
                   {expressSurcharge > 0 && (
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.gold }}>
-                      <span>Express Surcharge</span><span style={{ fontFamily: MONO }}>+₵{Number(expressSurcharge).toFixed(2)}</span>
+                      <span>Express Surcharge</span><span style={{ fontFamily: MONO }}>+GH₵{Number(expressSurcharge).toFixed(2)}</span>
                     </div>
                   )}
                   {Number(receipt?.delivery_fee || 0) > 0 && (
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.textSec }}>
-                      <span>Delivery</span><span style={{ fontFamily: MONO }}>+₵{Number(receipt.delivery_fee || 0).toFixed(2)}</span>
+                      <span>Delivery</span><span style={{ fontFamily: MONO }}>+GH₵{Number(receipt.delivery_fee || 0).toFixed(2)}</span>
                     </div>
                   )}
                   {discountAmount > 0 && (
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.emerald }}>
-                      <span>Discount ({Number(receipt?.discount_percent || 0)}%)</span><span style={{ fontFamily: MONO }}>-₵{Number(discountAmount).toFixed(2)}</span>
+                      <span>Discount ({Number(receipt?.discount_percent || 0)}%)</span><span style={{ fontFamily: MONO }}>-GH₵{Number(discountAmount).toFixed(2)}</span>
                     </div>
                   )}
                   <div style={{ height: 1, background: T.borderSoft, margin: "6px 0" }} />
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 18, fontWeight: 700 }}>
-                    <span>TOTAL DUE</span><span style={{ fontFamily: MONO }}>₵{Number(totalDue).toFixed(2)}</span>
+                    <span>TOTAL DUE</span><span style={{ fontFamily: MONO }}>GH₵{Number(totalDue).toFixed(2)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: T.textSec }}>
-                    <span>Paid</span><span style={{ fontFamily: MONO }}>₵{Number(receipt?.amount_paid || 0).toFixed(2)}</span>
+                    <span>Paid</span><span style={{ fontFamily: MONO }}>GH₵{Number(receipt?.amount_paid || 0).toFixed(2)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, color: balance > 0 ? T.ember : T.emerald, fontWeight: 600 }}>
-                    <span>BALANCE</span><span style={{ fontFamily: MONO }}>₵{Number(balance).toFixed(2)}</span>
+                    <span>BALANCE</span><span style={{ fontFamily: MONO }}>GH₵{Number(balance).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

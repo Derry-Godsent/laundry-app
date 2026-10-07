@@ -257,9 +257,9 @@ export const Reports = () => {
           <>
             {/* KPI GRID */}
             <div className="rp-kpis" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: 16, marginBottom: 28 }}>
-              <KPICard title="Total Revenue" value={`₵${data.totalRevenue.toLocaleString()}`} icon={<DollarSign size={18} />} color={T.emerald} growth={data.revenueGrowth} />
-              <KPICard title="Net Profit" value={`₵${data.netProfit.toLocaleString()}`} icon={<Target size={18} />} color={T.accent} sub={`Expenses: ₵${data.totalExpenses.toLocaleString()}`} />
-              <KPICard title="Total Orders" value={data.totalOrders.toLocaleString()} icon={<Package size={18} />} color={T.gold} sub={`AOV: ₵${data.totalOrders > 0 ? Math.round(data.totalRevenue / data.totalOrders) : 0}`} />
+              <KPICard title="Total Revenue" value={`GH₵${data.totalRevenue.toLocaleString()}`} icon={<DollarSign size={18} />} color={T.emerald} growth={data.revenueGrowth} />
+              <KPICard title="Net Profit" value={`GH₵${data.netProfit.toLocaleString()}`} icon={<Target size={18} />} color={T.accent} sub={`Expenses: GH₵${data.totalExpenses.toLocaleString()}`} />
+              <KPICard title="Total Orders" value={data.totalOrders.toLocaleString()} icon={<Package size={18} />} color={T.gold} sub={`AOV: GH₵${data.totalOrders > 0 ? Math.round(data.totalRevenue / data.totalOrders) : 0}`} />
               <KPICard title="Clientele" value={data.totalClients.toLocaleString()} icon={<Users size={18} />} color="var(--info-500)" sub={`${data.newClients} new this period`} />
               <KPICard title="Outstanding Balance" value={`${data.outstandingBalance.toLocaleString()}`} icon={<AlertCircle size={18} />} color={T.danger} />
             </div>
@@ -306,7 +306,7 @@ export const Reports = () => {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontFamily: FONT }} formatter={(value: any) => `₵${Number(value).toLocaleString()}`} />
+                    <Tooltip contentStyle={{ background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontFamily: FONT }} formatter={(value: any) => `GH₵${Number(value).toLocaleString()}`} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 8 }}>

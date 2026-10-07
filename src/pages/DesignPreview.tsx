@@ -61,10 +61,10 @@ const SAMPLE_WORKFLOW = [
 ];
 
 const SAMPLE_QUEUE = [
-  { id: "8f21c4a0", name: "Akosua Mensah", status: "New", tone: "brand" as PillTone, date: "Fri, Oct 9", items: 12, total: "₵420.00", express: true },
-  { id: "1c90be73", name: "Kwame Boateng", status: "Reviewing", tone: "warn" as PillTone, date: "Sat, Oct 10", items: 6, total: "₵185.00", express: false },
-  { id: "44d7a192", name: "Efua Sarpong", status: "Waiting for client", tone: "info" as PillTone, date: "Mon, Oct 12", items: 21, total: "₵780.00", express: false },
-  { id: "92be05f1", name: "Yaw Adjei", status: "Approved", tone: "ok" as PillTone, date: "Tue, Oct 13", items: 4, total: "₵96.00", express: false },
+  { id: "8f21c4a0", name: "Akosua Mensah", status: "New", tone: "brand" as PillTone, date: "Fri, Oct 9", items: 12, total: "GH₵420.00", express: true },
+  { id: "1c90be73", name: "Kwame Boateng", status: "Reviewing", tone: "warn" as PillTone, date: "Sat, Oct 10", items: 6, total: "GH₵185.00", express: false },
+  { id: "44d7a192", name: "Efua Sarpong", status: "Waiting for client", tone: "info" as PillTone, date: "Mon, Oct 12", items: 21, total: "GH₵780.00", express: false },
+  { id: "92be05f1", name: "Yaw Adjei", status: "Approved", tone: "ok" as PillTone, date: "Tue, Oct 13", items: 4, total: "GH₵96.00", express: false },
 ];
 
 /* The order book sample: enough rows to show the frame, the stage ramp and the
@@ -468,7 +468,7 @@ export const DesignPreview = () => {
                   {[
                     { label: "Client's preferred date", value: "Fri, Oct 9", icon: <CalendarDays size={15} /> },
                     { label: "Collection area", value: "East Legon, Accra", icon: <Package size={15} /> },
-                    { label: "Estimated total", value: "₵420.00", icon: <ClipboardList size={15} /> },
+                    { label: "Estimated total", value: "GH₵420.00", icon: <ClipboardList size={15} /> },
                     { label: "Pickup window", value: "08:00 – 11:00", icon: <Clock size={15} /> },
                   ].map((item) => (
                     <div className="meta-item" key={item.label}>
@@ -611,7 +611,7 @@ export const DesignPreview = () => {
                         </td>
                         <td data-label="Service"><StatusPill tone="brand">{row.service}</StatusPill></td>
                         <td data-label="Items" className="ord-num">{row.items}</td>
-                        <td data-label="Amount" className="ord-amount">₵{row.amount.toLocaleString()}</td>
+                        <td data-label="Amount" className="ord-amount">GH₵{row.amount.toLocaleString()}</td>
                         <td data-label="Stage">
                           <span className="ord-stage">
                             <span className="ord-stage__dot" style={{ background: stage.color }} />
@@ -778,9 +778,9 @@ export const DesignPreview = () => {
                   </thead>
                   <tbody>
                     {[
-                      { id: "CH-10482", client: "Akosua Mensah", status: "Washing", tone: "info" as PillTone, total: "₵420.00" },
-                      { id: "CH-10481", client: "Yaw Adjei", status: "Delivered", tone: "ok" as PillTone, total: "₵96.00" },
-                      { id: "CH-10480", client: "Walk-in", status: "Pending", tone: "brand" as PillTone, total: "₵185.00" },
+                      { id: "CH-10482", client: "Akosua Mensah", status: "Washing", tone: "info" as PillTone, total: "GH₵420.00" },
+                      { id: "CH-10481", client: "Yaw Adjei", status: "Delivered", tone: "ok" as PillTone, total: "GH₵96.00" },
+                      { id: "CH-10480", client: "Walk-in", status: "Pending", tone: "brand" as PillTone, total: "GH₵185.00" },
                     ].map((row) => (
                       <tr key={row.id}>
                         <td><strong>{row.id}</strong></td>
@@ -883,7 +883,7 @@ export const DesignPreview = () => {
                 </div>
                 <div className="meta-item">
                   <div className="meta-item__icon"><DollarSign size={15} /></div>
-                  <div><small>Estimate</small><strong>₵420.00</strong></div>
+                  <div><small>Estimate</small><strong>GH₵420.00</strong></div>
                 </div>
               </div>
             </DetailView>

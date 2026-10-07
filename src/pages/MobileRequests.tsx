@@ -99,7 +99,7 @@ const formatCreated = (value: string) =>
   new Date(value).toLocaleString("en-GH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
 const money = (value: number | string | null) =>
-  value === null ? "Estimate pending" : `₵${Number(value).toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  value === null ? "Estimate pending" : `GH₵${Number(value).toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const isActiveWork = (status: RequestStatus) => status === "pending" || status === "under_review";
 

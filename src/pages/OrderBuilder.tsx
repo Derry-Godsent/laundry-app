@@ -527,7 +527,7 @@ export const OrderBuilder = () => {
                           <div className="ob-service-name">{s.name}</div>
                           <div className="ob-service-category">{s.category}</div>
                         </div>
-                        <div className="ob-service-price">₵{s.price_wash}</div>
+                        <div className="ob-service-price">GH₵{s.price_wash}</div>
                       </div>
                     ))
                   )}
@@ -609,10 +609,10 @@ export const OrderBuilder = () => {
                                 disabled={!canEdit}
                               />
                             ) : (
-                              `₵${item.unitPrice}`
+                              `GH₵${item.unitPrice}`
                             )}
                           </td>
-                          <td data-label="Total" className="ob-cart-total">₵{item.total}</td>
+                          <td data-label="Total" className="ob-cart-total">GH₵{item.total}</td>
                           <td style={{ textAlign: "center" }}>
                             <button
                               className="ob-cart-remove"
@@ -688,7 +688,7 @@ export const OrderBuilder = () => {
 
               <label className="ob-option-row" style={{ opacity: !canEdit ? 0.6 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}>
                 <span className="ob-option-label">
-                  Express Service (+₵10/item)
+                  Express Service (+GH₵10/item)
                 </span>
                 <input
                   type="checkbox"
@@ -762,13 +762,13 @@ export const OrderBuilder = () => {
             <div className="ob-totals">
               <div className="ob-total-row secondary">
                 <span>Subtotal</span>
-                <span className="ob-total-mono">₵{subtotal.toFixed(2)}</span>
+                <span className="ob-total-mono">GH₵{subtotal.toFixed(2)}</span>
               </div>
               {expressSurcharge > 0 && (
                 <div className="ob-total-row gold">
                   <span>Express Surcharge</span>
                   <span className="ob-total-mono">
-                    +₵{expressSurcharge.toFixed(2)}
+                    +GH₵{expressSurcharge.toFixed(2)}
                   </span>
                 </div>
               )}
@@ -776,7 +776,7 @@ export const OrderBuilder = () => {
                 <div className="ob-total-row secondary">
                   <span>Delivery</span>
                   <span className="ob-total-mono">
-                    +₵{deliveryFee.toFixed(2)}
+                    +GH₵{deliveryFee.toFixed(2)}
                   </span>
                 </div>
               )}
@@ -784,18 +784,18 @@ export const OrderBuilder = () => {
                 <div className="ob-total-row emerald">
                   <span>Discount ({discountPercent}%)</span>
                   <span className="ob-total-mono">
-                    -₵{discountAmount.toFixed(2)}
+                    -GH₵{discountAmount.toFixed(2)}
                   </span>
                 </div>
               )}
               <div className="ob-total-divider" />
               <div className="ob-total-final">
                 <span>TOTAL DUE</span>
-                <span className="ob-total-mono">₵{totalDue.toFixed(2)}</span>
+                <span className="ob-total-mono">GH₵{totalDue.toFixed(2)}</span>
               </div>
               <div className={`ob-total-balance ${balance > 0 ? "ember" : "emerald"}`}>
                 <span>BALANCE</span>
-                <span className="ob-total-mono">₵{balance.toFixed(2)}</span>
+                <span className="ob-total-mono">GH₵{balance.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -810,7 +810,7 @@ export const OrderBuilder = () => {
         note={
           <span className="ob-phone-bar__note">
             Total due
-            <strong>₵{totalDue.toFixed(2)}</strong>
+            <strong>GH₵{totalDue.toFixed(2)}</strong>
           </span>
         }
       >

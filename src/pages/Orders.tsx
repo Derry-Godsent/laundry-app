@@ -200,7 +200,7 @@ function PipelineCard({ order, onClick }: { order: Order; onClick: () => void })
         <div>
           <div className="ord-card__name">{order.customer}</div>
           <div className="ord-card__sub">
-            {order.items} items · ₵{order.amount.toLocaleString()}
+            {order.items} items · GH₵{order.amount.toLocaleString()}
           </div>
         </div>
       </div>
@@ -525,10 +525,10 @@ export const Orders = () => {
                         <td style={{ padding: 8 }}>{order.customer}</td>
                         <td style={{ padding: 8 }}>{order.date}</td>
                         <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace" }}>{order.items}</td>
-                        <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace" }}>₵{amount.toFixed(2)}</td>
-                        <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace" }}>₵{paid.toFixed(2)}</td>
+                        <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace" }}>GH₵{amount.toFixed(2)}</td>
+                        <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace" }}>GH₵{paid.toFixed(2)}</td>
                         <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>
-                          ₵{balance.toFixed(2)}
+                          GH₵{balance.toFixed(2)}
                         </td>
                       </tr>
                     );
@@ -539,9 +539,9 @@ export const Orders = () => {
                     <td colSpan={4} style={{ padding: 8, textAlign: "right", fontWeight: 700 }}>
                       Month Total ({rows.length} orders)
                     </td>
-                    <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>₵{monthAmount.toFixed(2)}</td>
-                    <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>₵{monthPaid.toFixed(2)}</td>
-                    <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>₵{monthBalance.toFixed(2)}</td>
+                    <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>GH₵{monthAmount.toFixed(2)}</td>
+                    <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>GH₵{monthPaid.toFixed(2)}</td>
+                    <td style={{ padding: 8, textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>GH₵{monthBalance.toFixed(2)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -554,13 +554,13 @@ export const Orders = () => {
             <strong>Total Orders:</strong> {bulkOrders.length}
           </p>
           <p style={{ margin: "4px 0", fontSize: 14 }}>
-            <strong>Grand Total:</strong> ₵{bulkOrders.reduce((sum, o) => sum + o.amount, 0).toFixed(2)}
+            <strong>Grand Total:</strong> GH₵{bulkOrders.reduce((sum, o) => sum + o.amount, 0).toFixed(2)}
           </p>
           <p style={{ margin: "4px 0", fontSize: 14 }}>
-            <strong>Total Paid:</strong> ₵{bulkOrders.reduce((sum, o) => sum + (o.amount_paid || 0), 0).toFixed(2)}
+            <strong>Total Paid:</strong> GH₵{bulkOrders.reduce((sum, o) => sum + (o.amount_paid || 0), 0).toFixed(2)}
           </p>
           <p style={{ margin: "4px 0", fontSize: 14, fontWeight: 700 }}>
-            <strong>Outstanding Balance:</strong> ₵
+            <strong>Outstanding Balance:</strong> GH₵
             {bulkOrders.reduce((sum, o) => sum + (o.amount - (o.amount_paid || 0)), 0).toFixed(2)}
           </p>
         </div>
@@ -899,7 +899,7 @@ export const Orders = () => {
                         </td>
                         <td data-label="Service"><ServiceTag s={o.service} /></td>
                         <td data-label="Items" className="ord-num">{o.items}</td>
-                        <td data-label="Amount" className="ord-amount">₵{o.amount.toLocaleString()}</td>
+                        <td data-label="Amount" className="ord-amount">GH₵{o.amount.toLocaleString()}</td>
                         <td data-label="Stage"><StageTag s={o.status} /></td>
                         <td data-label="Payment"><PayTag p={o.payment} /></td>
                         <td data-label="Worker" className="ord-dim">{o.worker}</td>
@@ -1044,7 +1044,7 @@ export const Orders = () => {
                     <div><small>Items</small><strong>{open.items}</strong></div>
                   </div>
                   <div className="meta-item">
-                    <div><small>Amount</small><strong>₵{open.amount.toLocaleString()}</strong></div>
+                    <div><small>Amount</small><strong>GH₵{open.amount.toLocaleString()}</strong></div>
                   </div>
                   <div className="meta-item">
                     <div><small>Payment</small><PayTag p={open.payment} /></div>
@@ -1053,7 +1053,7 @@ export const Orders = () => {
                     <div><small>Worker</small><strong>{open.worker}</strong></div>
                   </div>
                   <div className="meta-item">
-                    <div><small>Paid to date</small><strong>₵{(open.amount_paid || 0).toLocaleString()}</strong></div>
+                    <div><small>Paid to date</small><strong>GH₵{(open.amount_paid || 0).toLocaleString()}</strong></div>
                   </div>
                 </div>
                 {open.notes ? <p className="ord-notes">{open.notes}</p> : null}

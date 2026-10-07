@@ -328,7 +328,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
               <option value="">Choose an order with a balance...</option>
               {outstandingOrders.map(o => (
                 <option key={o.orderId} value={o.orderId}>
-                  {o.orderId} · {o.client} (Balance: ₵{o.balance})
+                  {o.orderId} · {o.client} (Balance: GH₵{o.balance})
                 </option>
               ))}
             </select>
@@ -345,13 +345,13 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
               <div>
                 <div style={{ fontSize: 10, color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Total Due</div>
                 <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textPrimary, fontSize: 14, fontFamily: MONO, fontWeight: 600 }}>
-                  ₵{selectedOrder.total}
+                  GH₵{selectedOrder.total}
                 </div>
               </div>
               <div>
                 <div style={{ fontSize: 10, color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Remaining</div>
                 <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.emberBord}`, borderRadius: 9, color: T.ember, fontSize: 14, fontFamily: MONO, fontWeight: 600 }}>
-                  ₵{selectedOrder.balance}
+                  GH₵{selectedOrder.balance}
                 </div>
               </div>
             </div>
@@ -680,8 +680,8 @@ export const Payments = () => {
                               <td data-label="Order" style={{ padding: "16px 20px", fontFamily: MONO, color: T.textSec }}>{t.orderId}</td>
                               <td data-label="Client" style={{ padding: "16px 20px", fontWeight: 500 }}>{t.client}</td>
                               <td data-label="Total" style={{ padding: "16px 20px", fontFamily: MONO }}>{t.total}</td>
-                              <td data-label="Paid" style={{ padding: "16px 20px", fontFamily: MONO, color: T.emerald }}>₵{t.paid}</td>
-                              <td data-label="Balance" style={{ padding: "16px 20px", fontFamily: MONO, color: t.balance > 0 ? T.ember : T.textTert }}>₵{t.balance}</td>
+                              <td data-label="Paid" style={{ padding: "16px 20px", fontFamily: MONO, color: T.emerald }}>GH₵{t.paid}</td>
+                              <td data-label="Balance" style={{ padding: "16px 20px", fontFamily: MONO, color: t.balance > 0 ? T.ember : T.textTert }}>GH₵{t.balance}</td>
                               <td data-label="Status" style={{ padding: "16px 20px" }}>
                                 <span style={{ padding: "4px 10px", borderRadius: 100, fontSize: 11.5, fontWeight: 600, background: s.bg, color: s.color, border: `1px solid ${s.border}`, display: "inline-flex", alignItems: "center", gap: 6 }}>
                                   {t.status === "Pending" && <span style={{ width: 5, height: 5, borderRadius: "50%", background: s.color, animation: "pulseDot 1.3s infinite" }} />}
@@ -718,11 +718,11 @@ export const Payments = () => {
                           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 14, paddingTop: 14, borderTop: `1px solid ${T.borderFaint}` }}>
                             <div>
                               <div style={{ fontSize: 10.5, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.06em" }}>Paid / Total</div>
-                              <div style={{ fontFamily: MONO, fontSize: 14, marginTop: 3 }}><span style={{ color: T.emerald }}>₵{t.paid}</span> <span style={{ color: T.textHint }}>/ ₵{t.total}</span></div>
+                              <div style={{ fontFamily: MONO, fontSize: 14, marginTop: 3 }}><span style={{ color: T.emerald }}>GH₵{t.paid}</span> <span style={{ color: T.textHint }}>/ GH₵{t.total}</span></div>
                             </div>
                             <div style={{ textAlign: "right" }}>
                               <div style={{ fontSize: 10.5, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.06em" }}>Balance</div>
-                              <div style={{ fontFamily: MONO, fontSize: 14, marginTop: 3, color: t.balance > 0 ? T.ember : T.textTert }}>₵{t.balance}</div>
+                              <div style={{ fontFamily: MONO, fontSize: 14, marginTop: 3, color: t.balance > 0 ? T.ember : T.textTert }}>GH₵{t.balance}</div>
                             </div>
                           </div>
                           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 12, color: T.textSec }}>

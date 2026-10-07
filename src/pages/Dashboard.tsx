@@ -487,7 +487,7 @@ export const Dashboard = () => {
   }, [fetchData]);
 
   const fmt = useCallback((v: number) => {
-    return `₵${v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    return `GH₵${v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   }, []);
 
   const delta = useCallback((a: number, b: number) => {
@@ -538,7 +538,7 @@ export const Dashboard = () => {
     },
     {
       label: "Revenue Today",
-      value: `₵${countedRevenue.toLocaleString()}`,
+      value: `GH₵${countedRevenue.toLocaleString()}`,
       icon: <DollarSign size={19} />,
       accent: "var(--warn-500)",
       delta: { value: delta(metrics.revenueToday, metrics.revenueYesterday), label: `${fmt(metrics.revenueToday - metrics.revenueYesterday)} against yesterday` },

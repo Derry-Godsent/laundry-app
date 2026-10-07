@@ -297,7 +297,7 @@ const Chip = ({ label, value, accent }: { label:string; value:number; accent?:st
     <span style={{ fontSize:16, fontWeight:500,
       color: value ? (accent || T.textPrimary) : T.textHint,
       fontFamily:MONO, letterSpacing:"-0.02em", lineHeight:1 }}>
-      {value ? `₵${value}` : <span style={{fontSize:13,color:T.textHint}}>-</span>}
+      {value ? `GH₵${value}` : <span style={{fontSize:13,color:T.textHint}}>-</span>}
     </span>
   </div>
 );
@@ -368,11 +368,11 @@ const ServiceCard = ({ item, onEdit, superConf, index }: {
             <span style={{ fontSize:10.5, color:T.textTert, fontFamily:FONT }}>
               Express{" "}
               <span style={{ color:T.gold, fontFamily:MONO, fontWeight:500 }}>
-                +₵{EXPRESS}
+                +GH₵{EXPRESS}
               </span>
             </span>
             <span style={{ fontSize:10.5, color:T.textHint, fontFamily:MONO }}>
-              min ₵{item.prices.wash + EXPRESS}
+              min GH₵{item.prices.wash + EXPRESS}
             </span>
           </>
         ) : (
@@ -475,7 +475,7 @@ const EditModal = ({ item, onSave, onClose, saving }: {
                       {label.slice(0,4)}
                     </div>
                     <div style={{ fontSize:15, fontWeight:500, color:T.gold, fontFamily:MONO }}>
-                      ₵{p[key]+EXPRESS}
+                      GH₵{p[key]+EXPRESS}
                     </div>
                   </div>
                 ))}
