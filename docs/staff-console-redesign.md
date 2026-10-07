@@ -475,6 +475,43 @@ every page is in scope.
 - The `/preview` gallery shows the primitives, the tile family and the button
   hierarchy in every state.
 
+**Connection status (one source of truth).**
+
+Every page used to decide for itself whether the system was up. Some watched
+`navigator.onLine`, some treated any failed request as an outage, and Settings
+marked itself offline when a *save* was refused, so an online user without write
+access was told "the system is offline, changes will not be saved".
+
+There is now one store (`src/hooks/useConnection.ts`) that asks the backend
+directly (an unauthenticated health endpoint), and everything reads it:
+
+- The **top bar** shows a live indicator on every page: a dot and a word, with
+  the word dropped on narrow phones where the dot and its accessible name carry
+  it.
+- The **shell** shows one banner under the top bar when the backend cannot be
+  reached, and says which side is down: this device has no connection, or the
+  device is online and the server is not answering. It is outside the route
+  container, so it does not re-mount or re-animate on navigation.
+- **Pages** no longer carry their own offline banners. They read the same state
+  to explain an empty table or to hold a write back, which is the honest
+  response: this app is used by staff standing in a laundry, and "Saved"
+  followed by "Save Failed" is worse than "not now".
+- A **refused request is not an outage.** A missing row, a policy or a missing
+  permission all fail over a working connection, so a failure only counts as
+  offline when it looks like one (no HTTP status and no PostgREST code).
+
+**Colour.** Hue says what a thing is for, and the level says how loud it is:
+
+- **Buttons** come in two levels per meaning. Solid fills (primary, ok, warn,
+  destructive) commit something and use the deep step of their hue so the label
+  keeps its contrast. Tinted fills (accent, confirm, caution, info, decline) are
+  a flat wash of the same hue, for actions that do not need to shout.
+- **Tiles** carry a flat wash of their own accent, a 3px accent rail and a
+  tinted icon chip, so a row of figures reads as a set of different measures
+  rather than a row of identical boxes. A chart card stays neutral.
+- Every one of these is a flat colour mixed from the accent and the surface.
+  None of it is a gradient.
+
 **Wording rule.** Anyone who books through the customer app is a **customer**,
 in copy and in the queue. **Client** is the console's own record: the Clients
 page, the order's billing party, the client id. A sentence does not mix them.

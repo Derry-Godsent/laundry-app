@@ -260,7 +260,7 @@ export const Reports = () => {
               <KPICard title="Total Revenue" value={`₵${data.totalRevenue.toLocaleString()}`} icon={<DollarSign size={18} />} color={T.emerald} growth={data.revenueGrowth} />
               <KPICard title="Net Profit" value={`₵${data.netProfit.toLocaleString()}`} icon={<Target size={18} />} color={T.accent} sub={`Expenses: ₵${data.totalExpenses.toLocaleString()}`} />
               <KPICard title="Total Orders" value={data.totalOrders.toLocaleString()} icon={<Package size={18} />} color={T.gold} sub={`AOV: ₵${data.totalOrders > 0 ? Math.round(data.totalRevenue / data.totalOrders) : 0}`} />
-              <KPICard title="Clientele" value={data.totalClients.toLocaleString()} icon={<Users size={18} />} color="#22d3ee" sub={`${data.newClients} new this period`} />
+              <KPICard title="Clientele" value={data.totalClients.toLocaleString()} icon={<Users size={18} />} color="var(--info-500)" sub={`${data.newClients} new this period`} />
               <KPICard title="Outstanding Balance" value={`${data.outstandingBalance.toLocaleString()}`} icon={<AlertCircle size={18} />} color={T.danger} />
             </div>
 
@@ -352,6 +352,12 @@ export const Reports = () => {
       </div>
       <style>{`
         .report-card { background: ${T.bgRaised}; border: 1px solid ${T.borderSoft}; border-radius: 14px; padding: 20px; transition: border-color 0.2s; }
+        /* A summary tile carries a flat wash of its own accent; a chart card
+           under it stays neutral so the figures stand out. */
+        .rp-kpi { background: color-mix(in srgb, var(--kpi-accent, var(--brand-500)) 6%, ${T.bgRaised});
+          border-color: color-mix(in srgb, var(--kpi-accent, var(--brand-500)) 18%, ${T.borderSoft}); position: relative; overflow: hidden; }
+        .rp-kpi::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--kpi-accent, var(--brand-500)); }
+        .rp-kpi:hover { border-color: color-mix(in srgb, var(--kpi-accent, var(--brand-500)) 45%, ${T.borderMid}); }
         .report-card:hover { border-color: ${T.borderMid}; }
       `}</style>
     </PermissionGuard>
@@ -361,9 +367,9 @@ export const Reports = () => {
 /* ─── SUB-COMPONENTS ────────────────────────────────────────── */
 function KPICard({ title, value, icon, color, sub, growth }: { title: string; value: string | number; icon: React.ReactNode; color: string; sub?: string; growth?: number }) {
   return (
-    <div className="report-card" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div className="report-card rp-kpi" style={{ display: "flex", flexDirection: "column", gap: 12, "--kpi-accent": color } as React.CSSProperties}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div style={{ width: 40, height: 40, borderRadius: 10, background: `${color}15`, color: color, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 40, height: 40, borderRadius: 10, background: `color-mix(in srgb, ${color} 20%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 32%, transparent)`, color: color, display: "flex", alignItems: "center", justifyContent: "center" }}>
           {icon}
         </div>
         {growth !== undefined && (

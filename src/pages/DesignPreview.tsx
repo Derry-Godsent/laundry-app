@@ -3,8 +3,9 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle, ArrowRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronLeft, ChevronRight,
-  ClipboardList, Clock, DollarSign, Inbox, LayoutDashboard, LayoutGrid, List, MessageSquareText,
-  Package, Plus, RefreshCw, Search, Shield, Settings, Smartphone, Users, X,
+  ClipboardList, Clock, DollarSign, FileText, Inbox, LayoutDashboard, LayoutGrid, List,
+  MessageSquareText, Package, Phone, Plus, RefreshCw, Search, Shield, Settings, Smartphone,
+  Trash2, Users, X,
 } from "lucide-react";
 import {
   ActionBar,
@@ -453,7 +454,7 @@ export const DesignPreview = () => {
             <Card className="mr-detail-card">
               <div className="mr-detail-head">
                 <div>
-                  <span className="mr-detail-eyebrow">Laundry request · #8f21c4a0</span>
+                  <span className="mr-detail-eyebrow">Laundry request · MR-4C1A08</span>
                   <h2>Akosua Mensah</h2>
                   <p>Received 6 Oct, 08:14</p>
                 </div>
@@ -680,6 +681,27 @@ export const DesignPreview = () => {
 
           <Card>
             <CardHeader
+              title="Button colour"
+              subtitle="Hue says what the button is for, and the level says how loud it is: solid commits, tinted acts. Both are flat colours"
+            />
+            <CardBody className="preview-row">
+              <Button variant="primary" leadingIcon={<Plus size={16} />}>Solid accent</Button>
+              <Button variant="ok">Solid confirm</Button>
+              <Button variant="warn">Solid caution</Button>
+              <Button variant="danger-strong" leadingIcon={<Trash2 size={16} />}>Solid destructive</Button>
+            </CardBody>
+            <CardBody className="preview-row">
+              <Button variant="accent" leadingIcon={<FileText size={16} />}>Accent</Button>
+              <Button variant="ok-tint" leadingIcon={<Check size={16} />}>Confirm</Button>
+              <Button variant="warn-tint" leadingIcon={<Clock size={16} />}>Needs a date</Button>
+              <Button variant="info" leadingIcon={<Phone size={16} />}>Info</Button>
+              <Button variant="danger" leadingIcon={<X size={16} />}>Decline</Button>
+              <Button variant="secondary">Neutral</Button>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader
               title="The tile family"
               subtitle="hero, standard, split, progress, compact. A row says which figure matters most instead of repeating one box"
             />
@@ -841,7 +863,7 @@ export const DesignPreview = () => {
               variant="overlay"
               onClose={() => setSelectedRecord(null)}
               title="Akosua Mensah"
-              subtitle="Request #8f21c4a0 · Laundry"
+              subtitle="Request MR-4C1A08 · Laundry"
               actions={<StatusPill tone="brand">New</StatusPill>}
               footer={
                 <>

@@ -9,6 +9,7 @@ import {
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
+import { useConnection, isNetworkError } from "../hooks/useConnection";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { LoadingRows } from "../components/ui";
 
@@ -28,6 +29,7 @@ const T = {
   textHint:    "var(--text-4)",
 
   accent:      "var(--brand-500)",
+  accentStrong:"var(--brand-700)",
   accentSoft:  "var(--brand-soft)",
   accentDim:   "var(--brand-soft)",
   accentBord:  "var(--brand-border)",
@@ -92,7 +94,7 @@ const GLOBAL_CSS = `
 }
 .svc-card:hover {
   transform: translateY(-4px);
-  background: #12152a !important;
+  background: var(--ink-shell) !important;
 }
 .svc-card:hover .edit-reveal { opacity: 1 !important; transform: scale(1) !important; }
 .edit-reveal { opacity: 0; transform: scale(0.85); transition: opacity 0.15s ease, transform 0.15s ease; }
@@ -103,7 +105,7 @@ const GLOBAL_CSS = `
 }
 .corp-card:hover {
   transform: translateY(-3px);
-  background: #12152a !important;
+  background: var(--ink-shell) !important;
   box-shadow: var(--shadow-modal);
 }
 
@@ -115,14 +117,14 @@ const GLOBAL_CSS = `
 .sub-tab { transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease; }
 
 .stat-cell { transition: background 0.2s ease, transform 0.2s ease; position: relative; overflow: hidden; }
-.stat-cell:hover { background: #10131f !important; }
+.stat-cell:hover { background: var(--ink-hover) !important; }
 
 .btn-accent { transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.2s ease; }
 .btn-accent:hover { opacity: 0.9; transform: translateY(-1.5px); }
 .btn-accent:active { transform: translateY(0); opacity: 1; }
 
 .btn-ghost { transition: background 0.13s ease, color 0.13s ease, border-color 0.13s ease; }
-.btn-ghost:hover { background: #1c2140 !important; color: #f4f6fc !important; border-color: rgba(255,255,255,0.15) !important; }
+.btn-ghost:hover { background: var(--ink-hover) !important; color: var(--text-1) !important; border-color: rgba(255,255,255,0.15) !important; }
 
 .icon-btn { transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1); }
 .icon-btn:hover { transform: translateY(-1px) scale(1.06); }
@@ -297,31 +299,6 @@ const Chip = ({ label, value, accent }: { label:string; value:number; accent?:st
       fontFamily:MONO, letterSpacing:"-0.02em", lineHeight:1 }}>
       {value ? `₵${value}` : <span style={{fontSize:13,color:T.textHint}}>-</span>}
     </span>
-  </div>
-);
-
-const OfflineBanner = ({ onRetry, retrying, lastSynced }: { onRetry:()=>void; retrying:boolean; lastSynced: Date | null }) => (
-  <div className="svc-offline-bar" style={{
-    background: "var(--bad-soft)",
-    borderBottom: `1px solid ${T.emberBord}`,
-    padding: "10px 32px", display: "flex", alignItems: "center", gap: 12,
-  }}>
-    <WifiOff size={15} color={T.ember} style={{ flexShrink: 0 }} />
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: T.ember, fontFamily: FONT }}>
-        Can't reach the server. You're offline.
-      </span>
-      <span style={{ fontSize: 12.5, color: "#ffb3b3", fontFamily: FONT, marginLeft: 8 }}>
-        Showing local reference data{lastSynced ? `, last synced ${lastSynced.toLocaleTimeString()}` : ""}. Changes here won't be saved until you're back online.
-      </span>
-    </div>
-    <button className="btn-ghost" onClick={onRetry} disabled={retrying}
-      style={{ padding: "6px 14px", background: "transparent", border: `1px solid ${T.emberBord}`,
-        borderRadius: 7, color: T.ember, fontSize: 12.5, fontWeight: 600, cursor: retrying ? "default" : "pointer",
-        display: "flex", alignItems: "center", gap: 6, fontFamily: FONT, flexShrink: 0 }}>
-      {retrying ? <Loader2 size={13} className="svc-spinner" /> : <RefreshCw size={13} />}
-      {retrying ? "Retrying…" : "Retry"}
-    </button>
   </div>
 );
 
@@ -544,11 +521,10 @@ const EditModal = ({ item, onSave, onClose, saving }: {
           </button>
           <button className="btn-accent" disabled={saving}
             onClick={()=>onSave(p)}
-            style={{ padding:"9px 22px", background:T.emerald, border:"none",
-              borderRadius:8, color:"#03261a", fontSize:13.5, fontWeight:700,
+            style={{ padding:"9px 22px", background:"var(--ok-700)", border:"none",
+              borderRadius:8, color:"var(--on-ok)", fontSize:13.5, fontWeight:700,
               cursor: saving ? "default" : "pointer", display:"flex", alignItems:"center",
-              gap:7, fontFamily:FONT, opacity: saving ? 0.7 : 1,
-              boxShadow:`0 8px 22px ${T.emeraldGlow}` }}>
+              gap:7, fontFamily:FONT, opacity: saving ? 0.7 : 1 }}>
             {saving ? <Loader2 size={14} className="svc-spinner" /> : <Check size={14}/>}
             {saving ? "Saving…" : "Save Changes"}
           </button>
@@ -694,11 +670,10 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
               if(!name.trim()) return;
               onAdd({id:`new-${Date.now()}`,name:name.trim(),category:cat,superCat,prices});
             }}
-            style={{ padding:"9px 22px", background:T.accent, border:"none",
+            style={{ padding:"9px 22px", background:T.accentStrong, border:"none",
               borderRadius:8, color:"#fff", fontSize:13.5, fontWeight:700,
               cursor: adding ? "default" : "pointer", display:"flex", alignItems:"center",
-              gap:7, fontFamily:FONT, opacity: adding ? 0.7 : 1,
-              boxShadow:`0 8px 22px ${T.accentGlow}` }}>
+              gap:7, fontFamily:FONT, opacity: adding ? 0.7 : 1 }}>
             {adding ? <Loader2 size={14} className="svc-spinner" /> : <Check size={14}/>}
             {adding ? "Adding…" : "Add Item"}
           </button>
@@ -736,7 +711,7 @@ const AddCorporateClientModal = ({ onClose, onAdd, adding }: {
         </div>
         <div style={{ padding:"14px 24px", borderTop:`1px solid ${T.borderFaint}`, display:"flex", justifyContent:"flex-end", gap:10 }}>
           <button className="btn-ghost" onClick={onClose} style={{ padding:"9px 20px", background:"transparent", border:`1px solid ${T.borderSoft}`, borderRadius:8, color:T.textSec, fontSize:13.5, fontWeight:500, cursor:"pointer", fontFamily:FONT }}>Cancel</button>
-          <button className="btn-accent" disabled={adding} onClick={()=>{ if(!name.trim()) return; onAdd({name:name.trim(), notes}); }} style={{ padding:"9px 22px", background:T.accent, border:"none", borderRadius:8, color:"#fff", fontSize:13.5, fontWeight:700, cursor: adding ? "default" : "pointer", display:"flex", alignItems:"center", gap:7, fontFamily:FONT, opacity: adding ? 0.7 : 1, boxShadow:`0 8px 22px ${T.accentGlow}` }}>
+          <button className="btn-accent" disabled={adding} onClick={()=>{ if(!name.trim()) return; onAdd({name:name.trim(), notes}); }} style={{ padding:"9px 22px", background:T.accentStrong, border:"none", borderRadius:8, color:"#fff", fontSize:13.5, fontWeight:700, cursor: adding ? "default" : "pointer", display:"flex", alignItems:"center", gap:7, fontFamily:FONT, opacity: adding ? 0.7 : 1 }}>
             {adding ? <Loader2 size={14} className="svc-spinner" /> : <Check size={14}/>}
             {adding ? "Adding…" : "Add Client"}
           </button>
@@ -758,7 +733,9 @@ export const Services = () => {
   const [showAddClient, setShowAddClient] = useState(false);
   const [addingClient, setAddingClient] = useState(false);
 
-  const [isOffline, setIsOffline] = useState(false);
+  /* The connection is the shell's. `reloading` is this page's own state: it
+     only says a reload is in flight. */
+  const { isOffline, retry: retryConnection } = useConnection();
   const [retrying,  setRetrying]  = useState(false);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -833,15 +810,14 @@ export const Services = () => {
         setClients([]);
       }
 
-      setIsOffline(false);
       setLastSynced(new Date());
     } catch (err) {
       console.error('Services fetch error:', err);
-      setIsOffline(true);
+      if (isNetworkError(err)) retryConnection();
     } finally {
       setRetrying(false);
     }
-  }, []);
+  }, [retryConnection]);
 
   useEffect(() => {
     fetchFromSupabase();
@@ -849,7 +825,8 @@ export const Services = () => {
 
   const handleRetry = () => {
     setRetrying(true);
-    fetchFromSupabase();
+    retryConnection();
+    void fetchFromSupabase();
   };
 
   const activeSuperConf = SUPER_CATS.find(s=>s.key===superCat) || SUPER_CATS[0];
@@ -1035,8 +1012,6 @@ export const Services = () => {
       <div style={{ background:T.bgBase, minHeight:"100%",
         fontFamily:FONT, color:T.textPrimary, animation:"svcFadeIn 0.3s ease" }}>
 
-        {isOffline && <OfflineBanner onRetry={handleRetry} retrying={retrying} lastSynced={lastSynced} />}
-
         <div className="svc-header-row" style={{ background:T.bgSurface,
           borderBottom:`1px solid ${T.borderFaint}`,
           padding:"22px 32px", position:"relative", overflow:"hidden",
@@ -1060,8 +1035,7 @@ export const Services = () => {
             <div className="svc-badge-pill" style={{ display:"flex", alignItems:"center", gap:7,
               padding:"7px 14px", background:T.goldDim,
               border:`1px solid ${T.goldBord}`, borderRadius:100,
-              color:T.gold, fontSize:12.5, fontWeight:600, fontFamily:FONT,
-              boxShadow:`0 0 22px -8px ${T.goldGlow}` }}>
+              color:T.gold, fontSize:12.5, fontWeight:600, fontFamily:FONT }}>
               <AlertCircle size={13}/> Express +GH₵{EXPRESS} / laundry item
             </div>
             <button 
@@ -1099,8 +1073,7 @@ export const Services = () => {
                 display:"flex", 
                 alignItems:"center",
                 gap:7, 
-                fontFamily:FONT, 
-                boxShadow: canEdit ? `0 8px 24px -6px ${T.accentGlow}` : "none",
+                fontFamily:FONT,
                 opacity: canEdit ? 1 : 0.7
               }}>
               <Plus size={15}/> {canEdit ? "Add Item" : "View Only"}
@@ -1225,7 +1198,7 @@ export const Services = () => {
                 {canEdit && (
                   <button className="btn-accent"
                     onClick={()=>setShowAdd(true)}
-                    style={{ padding:"9px 20px", background:T.accent,
+                    style={{ padding:"9px 20px", background:T.accentStrong,
                       border:"none", borderRadius:8, color:"#fff",
                       fontSize:13.5, fontWeight:600, cursor:"pointer",
                       display:"flex", alignItems:"center", gap:7, fontFamily:FONT }}>
@@ -1287,10 +1260,10 @@ export const Services = () => {
               </div>
               {canEdit && (
                 <button className="btn-accent" onClick={() => setShowAddClient(true)}
-                  style={{ padding:"9px 18px", background:T.accent, border:"none",
+                  style={{ padding:"9px 18px", background:T.accentStrong, border:"none",
                     borderRadius:9, color:"#fff", fontSize:13.5, fontWeight:600,
                     cursor:"pointer", display:"flex", alignItems:"center",
-                    gap:7, fontFamily:FONT, boxShadow:`0 8px 22px -6px ${T.accentGlow}` }}>
+                    gap:7, fontFamily:FONT }}>
                   <Plus size={14}/> Add Client
                 </button>
               )}

@@ -7,6 +7,7 @@ import {
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
+import { useConnection, isNetworkError } from "../hooks/useConnection";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { LoadingRows } from "../components/ui";
 
@@ -57,14 +58,14 @@ const PAGES_MATRIX = [
 const STATUS_COLORS: Record<string, string> = { 
   active: "var(--ok-500)", 
   onduty: "var(--warn-500)", 
-  offline: "#3a4460" 
+  offline: "var(--text-4)" 
 };
 
 const T = {
   bgBase: "var(--ink-base)", bgSurface: "var(--ink-shell)", bgRaised: "var(--ink-card)", bgElevated: "var(--ink-raised)",
   borderFaint: "var(--line-faint)", borderSoft: "var(--line-soft)", borderMid: "var(--line)",
   textPrimary: "var(--text-1)", textSec: "var(--text-2)", textTert: "var(--text-3)", textHint: "var(--text-4)",
-  accent: "var(--brand-500)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)",
+  accent: "var(--brand-500)", accentStrong: "var(--brand-700)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)",
   emerald: "var(--ok-500)", emeraldDim: "var(--ok-soft)", emeraldBord: "var(--ok-border)",
   ember: "var(--bad-500)", emberDim: "var(--bad-soft)", emberBord: "var(--bad-border)",
 };
@@ -93,7 +94,9 @@ export const SystemAdmin = () => {
   const [settings, setSettings] = useState<Record<string, boolean>>({});
   const [permissions, setPermissions] = useState<Record<string, { can_view: boolean; can_edit: boolean }>>({});
   const [loading, setLoading] = useState(true);
-  const [isOffline, setIsOffline] = useState(false);
+  /* The shell reports the connection on every page; this page only needs to
+     know whether it can write. */
+  const { isOffline, retry: retryConnection } = useConnection();
   const [search, setSearch] = useState("");
   const [updating, setUpdating] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -149,11 +152,9 @@ export const SystemAdmin = () => {
       const permsMap: Record<string, { can_view: boolean; can_edit: boolean }> = {};
       (permsRes.data || []).forEach((p: any) => { permsMap[`${p.role}_${p.page}`] = { can_view: p.can_view, can_edit: p.can_edit }; });
       setPermissions(permsMap);
-      
-      setIsOffline(false);
+
     } catch (err) { 
       console.error("System admin fetch error:", err); 
-      setIsOffline(true); 
       showToast("Failed to load system data", 'error'); 
     } finally { 
       setLoading(false); 
@@ -212,7 +213,6 @@ export const SystemAdmin = () => {
       showToast("Role updated successfully", 'success');
       broadcastPermissionUpdate();
     } catch (err) { 
-      setIsOffline(true); 
       showToast("Failed to update role", 'error'); 
     } finally { 
       setUpdating(null); 
@@ -230,7 +230,6 @@ export const SystemAdmin = () => {
       showToast(currentBanned ? "User unbanned" : "User banned", 'success');
       broadcastPermissionUpdate();
     } catch (err) { 
-      setIsOffline(true); 
       showToast("Failed to update ban status", 'error'); 
     } finally { 
       setUpdating(null); 
@@ -249,7 +248,6 @@ export const SystemAdmin = () => {
       showToast("Staff member deleted", 'success');
       broadcastPermissionUpdate();
     } catch (err) { 
-      setIsOffline(true); 
       showToast("Failed to delete staff member", 'error'); 
     } finally { 
       setUpdating(null); 
@@ -312,7 +310,7 @@ export const SystemAdmin = () => {
           .sys-tabs { display: flex; gap: 4px; background: ${T.bgRaised}; padding: 4px; border-radius: 10px; border: 1px solid ${T.borderSoft}; flex-wrap: wrap; }
           .sys-tab { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; color: ${T.textSec}; cursor: pointer; transition: all 0.18s ease; display: flex; align-items: center; gap: 8px; border: none; background: transparent; font-family: ${FONT}; }
           .sys-tab:hover { color: ${T.textPrimary}; background: rgba(255,255,255,0.05); }
-          .sys-tab.active { background: ${T.accent}; color: #fff; }
+          .sys-tab.active { background: ${T.accentStrong}; color: var(--on-brand); }
           .sys-table { width: 100%; border-collapse: collapse; min-width: 760px; }
           .sys-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: ${T.textTert}; padding: 13px 18px; border-bottom: 1px solid ${T.borderFaint}; background: rgba(255,255,255,0.015); }
           .sys-table td { padding: 12px 18px; vertical-align: middle; border-bottom: 1px solid ${T.borderFaint}; font-size: 13.5px; }
@@ -427,22 +425,11 @@ export const SystemAdmin = () => {
               <button onClick={() => fetchAllData()} className="action-btn" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, color: T.textSec }}>
                 <RefreshCw size={14} className={loading ? "spin" : ""} /> Refresh
               </button>
-              <button onClick={() => navigate("/staff")} className="action-btn" style={{ background: T.accent, color: "#fff" }}>
+              <button onClick={() => navigate("/staff")} className="action-btn" style={{ background: T.accentStrong, color: "var(--on-brand)" }}>
                 <User size={14} /> Back to Staff
               </button>
             </div>
           </div>
-
-          {isOffline && (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", background: T.emberDim, border: `1px solid ${T.emberBord}`, borderRadius: "10px", padding: "10px 16px", marginBottom: "18px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px", color: "#fca5a5" }}>
-                <WifiOff size={15} color={T.ember} /><span>System is offline. Showing cached data. Changes may not save.</span>
-              </div>
-              <button onClick={() => fetchAllData()} className="action-btn" style={{ background: "var(--bad-soft)", border: `1px solid ${T.emberBord}`, color: T.ember }}>
-                <RefreshCw size={13} /> Retry
-              </button>
-            </div>
-          )}
 
           <div className="sys-tabs" style={{ marginBottom: "20px" }}>
             <button className={`sys-tab ${activeTab === 'staff' ? 'active' : ''}`} onClick={() => setActiveTab('staff')}><User size={14} /> Staff Access</button>
@@ -459,7 +446,7 @@ export const SystemAdmin = () => {
                   <input className="sys-search-inp" placeholder="Search staff..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: T.textPrimary, padding: "10px 0", fontFamily: FONT }} />
                   {search && <button className="sys-search-x" onClick={() => setSearch("")} style={{ background: T.bgElevated, border: "none", borderRadius: "5px", color: T.textTert, padding: "4px", cursor: "pointer", display: "flex" }}><X size={11} /></button>}
                 </div>
-                {canEdit && <button onClick={() => setShowAddModal(true)} className="action-btn" style={{ background: T.emerald, color: "#03261a", fontWeight: 700 }}><Plus size={14} /> Add Staff Member</button>}
+                {canEdit && <button onClick={() => setShowAddModal(true)} className="action-btn" style={{ background: T.emerald, color: "var(--on-ok)", fontWeight: 700 }}><Plus size={14} /> Add Staff Member</button>}
               </div>
               <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: "14px", overflow: "hidden" }}>
                 <div style={{ overflowX: "auto" }}>
@@ -591,7 +578,7 @@ export const SystemAdmin = () => {
               <div style={{ marginBottom: 20 }}><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Temporary Password</label><div style={{ position: 'relative' }}><input className="modal-input" type={showPass ? "text" : "password"} value={newStaff.password} onChange={e => setNewStaff({...newStaff, password: e.target.value})} placeholder="Min 6 characters" style={{ paddingRight: 40 }} /><button onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: T.textSec, cursor: 'pointer' }}>{showPass ? <EyeOff size={14} /> : <Eye size={14} />}</button></div></div>
               <div className="sys-modal-actions" style={{ display: 'flex', gap: 10 }}>
                 <button onClick={() => setShowAddModal(false)} style={{ flex: 1, padding: 10, background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textSec, fontWeight: 600, cursor: 'pointer', fontFamily: FONT }}>Cancel</button>
-                <button onClick={handleAddStaff} disabled={addingStaff} style={{ flex: 1.5, padding: 10, background: T.emerald, border: 'none', borderRadius: 8, color: '#03261a', fontWeight: 700, cursor: addingStaff ? 'not-allowed' : 'pointer', opacity: addingStaff ? 0.6 : 1, fontFamily: FONT, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>{addingStaff ? <Loader2 size={14} className="spin" /> : <Check size={14} />} {addingStaff ? "Creating..." : "Create Account"}</button>
+                <button onClick={handleAddStaff} disabled={addingStaff} style={{ flex: 1.5, padding: 10, background: T.emerald, border: 'none', borderRadius: 8, color: 'var(--on-ok)', fontWeight: 700, cursor: addingStaff ? 'not-allowed' : 'pointer', opacity: addingStaff ? 0.6 : 1, fontFamily: FONT, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>{addingStaff ? <Loader2 size={14} className="spin" /> : <Check size={14} />} {addingStaff ? "Creating..." : "Create Account"}</button>
               </div>
             </div>
           </div>

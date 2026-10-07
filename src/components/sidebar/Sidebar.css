@@ -48,7 +48,7 @@
   flex-shrink: 0;
   border-radius: var(--r-md);
   background: var(--brand-500);
-  color: #251a06;
+  color: var(--on-warn);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.04em;

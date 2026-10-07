@@ -20,7 +20,7 @@ const CSS = `
 }
 .pd-trigger:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.11); }
 .pd-trigger.open  { background: var(--brand-soft); border-color: var(--brand-border); }
-.pd-trigger:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+.pd-trigger:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
 
 /* Avatar */
 .pd-av {
@@ -37,7 +37,7 @@ const CSS = `
 /* Name/role */
 .pd-info { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 .pd-name {
-  font-size: 12.5px; font-weight: 600; color: #c8d0e0;
+  font-size: 12.5px; font-weight: 600; color: var(--text-2);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-width: 110px; line-height: 1;
 }
@@ -49,7 +49,7 @@ const CSS = `
 
 /* Chevron */
 .pd-chev {
-  color: #3a4460; flex-shrink: 0;
+  color: var(--text-4); flex-shrink: 0;
   transition: transform 0.2s ease, color 0.18s ease;
 }
 .pd-trigger.open .pd-chev { transform: rotate(180deg); color: var(--brand-500); }
@@ -90,7 +90,7 @@ const CSS = `
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pd-card-email {
-  font-size: 11px; color: #3a4460;
+  font-size: 11px; color: var(--text-4);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-top: 2px;
   font-family: var(--font-mono);
@@ -102,13 +102,13 @@ const CSS = `
   display: flex; align-items: center; gap: 10px;
   padding: 9px 10px; border-radius: 8px; width: 100%;
   background: transparent; border: none;
-  color: #8892a4; font-size: 13px; font-weight: 500;
+  color: var(--text-3); font-size: 13px; font-weight: 500;
   cursor: pointer; font-family: var(--font-ui);
   text-align: left; text-transform: capitalize;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 .pd-item:hover { background: rgba(255,255,255,0.05); color: var(--text-1); }
-.pd-item:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+.pd-item:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
 
 .pd-item-ico {
   width: 28px; height: 28px; border-radius: 7px;
@@ -194,7 +194,7 @@ const CSS = `
 
 const ROLE_META: Record<string, { color: string }> = {
   admin:      { color: "var(--brand-500)" },
-  manager:    { color: "#22d3ee" },
+  manager:    { color: "var(--info-500)" },
   strategist: { color: "var(--brand-400)" },
   staff:      { color: "var(--ok-500)" },
   courier:    { color: "var(--warn-500)" },

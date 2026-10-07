@@ -644,8 +644,8 @@
   animation: fadeUp var(--dur-base) var(--ease-out) both;
 }
 
-.ord-toast--ok { border-color: var(--ok-border); color: #c8f6e2; }
-.ord-toast--bad { border-color: rgba(251, 125, 125, 0.28); color: #ffd9d9; }
+.ord-toast--ok { border-color: var(--ok-border); color: var(--ok-500); }
+.ord-toast--bad { border-color: rgba(251, 125, 125, 0.28); color: var(--bad-500); }
 
 .ord-toast__close {
   display: grid;

@@ -5,6 +5,7 @@ import {
   Building2, Shield, Package, Users, Mail, Lock,
   Eye, EyeOff, AlertCircle, CheckCircle, WifiOff, Loader2
 } from "lucide-react";
+import { useConnection } from "../hooks/useConnection";
 import "./Login.css";
 
 import type { Session, User } from "@supabase/supabase-js";
@@ -17,9 +18,11 @@ export const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
-  const [isOnline, setIsOnline] = useState(
-    typeof navigator !== "undefined" ? navigator.onLine : true
-  );
+  /* The sign-in screen sits outside the shell, so it reads the same shared
+     connection state the shell uses: the two can never disagree about whether
+     the system is up. */
+  const { isOffline } = useConnection();
+  const isOnline = !isOffline;
   const errorId = useRef(`login-error-${Math.random().toString(36).slice(2, 9)}`);
 
   const handleRoleRedirect = useCallback(async (user: User) => {
@@ -46,11 +49,6 @@ export const Login = () => {
   useEffect(() => {
     let mounted = true;
 
-    const goOnline = () => setIsOnline(true);
-    const goOffline = () => setIsOnline(false);
-    window.addEventListener("online", goOnline);
-    window.addEventListener("offline", goOffline);
-
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (!mounted) return;
       setSession(session);
@@ -67,8 +65,6 @@ export const Login = () => {
 
     return () => {
       mounted = false;
-      window.removeEventListener("online", goOnline);
-      window.removeEventListener("offline", goOffline);
       subscription.unsubscribe();
     };
   }, [handleRoleRedirect]);

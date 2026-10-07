@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
+import { useConnection, isNetworkError } from "../hooks/useConnection";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { 
   Printer, ArrowLeft, Package, AlertCircle, 
@@ -22,30 +23,6 @@ const T = {
 const FONT = "var(--font-ui)";
 const MONO = "var(--font-mono)";
 
-const OfflineBanner = ({ onRetry, retrying, lastSynced }: { onRetry:()=>void; retrying:boolean; lastSynced: Date | null }) => (
-  <div className="no-print" style={{
-    background: "var(--bad-soft)",
-    borderBottom: `1px solid ${T.emberBord}`,
-    padding: "10px 32px", display: "flex", alignItems: "center", gap: 12,
-  }}>
-    <WifiOff size={15} color={T.ember} style={{ flexShrink: 0 }} />
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: T.ember, fontFamily: FONT }}>
-        Can't reach the server.
-      </span>
-      <span style={{ fontSize: 12.5, color: "#ffb3b3", fontFamily: FONT, marginLeft: 8 }}>
-        Showing cached data{lastSynced ? `, last synced ${lastSynced.toLocaleTimeString()}` : ""}.
-      </span>
-    </div>
-    <button onClick={onRetry} disabled={retrying}
-      style={{ padding: "6px 14px", background: "transparent", border: `1px solid ${T.emberBord}`,
-        borderRadius: 7, color: T.ember, fontSize: 12.5, fontWeight: 600, cursor: retrying ? "default" : "pointer",
-        display: "flex", alignItems: "center", gap: 6, fontFamily: FONT, flexShrink: 0 }}>
-      {retrying ? <Loader2 size={13} className="spinner" /> : <RefreshCw size={13} />}
-      {retrying ? "Retrying…" : "Retry"}
-    </button>
-  </div>
-);
 
 const Toast = ({ msg, type, onClose }: { msg: string; type: 'success' | 'error'; onClose: () => void }) => {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
@@ -70,7 +47,8 @@ export const Receipt = () => {
   const [receipt, setReceipt] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   
-  const [isOffline, setIsOffline] = useState(false);
+  /* The shell reports the connection on every page. */
+  const { isOffline } = useConnection();
   const [retrying, setRetrying] = useState(false);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -89,11 +67,9 @@ export const Receipt = () => {
       if (error) throw error;
       
       setOrders(data || []);
-      setIsOffline(false);
       setLastSynced(new Date());
     } catch (err: any) {
       console.error("Supabase fetch error:", err);
-      setIsOffline(true);
       setToast({ msg: `Failed to load orders: ${err.message}`, type: 'error' });
       setTimeout(() => setToast(null), 3500);
     } finally {
@@ -238,7 +214,6 @@ export const Receipt = () => {
       `}</style>
 
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
-      {isOffline && <OfflineBanner onRetry={fetchRecentOrders} retrying={retrying} lastSynced={lastSynced} />}
 
       <div className="no-print top-bar" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "16px 32px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>

@@ -157,13 +157,17 @@
   }
 }
 
+/* The tile is a flat accent wash: the surface itself carries a little of the
+   figure's colour, so a row of tiles reads as a set of different measures
+   rather than a row of identical boxes. It is one flat colour, mixed from the
+   accent and the card, not a gradient. */
 .stat {
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   padding: var(--sp-5);
-  background: var(--ink-card);
+  background: color-mix(in srgb, var(--accent, var(--brand-500)) 6%, var(--ink-card));
   border: 1px solid var(--line-soft);
   border-radius: var(--r-lg);
   text-align: left;
@@ -171,7 +175,10 @@
     border-color var(--dur-base) var(--ease-out);
 }
 
-.stat:hover { border-color: var(--line); background: var(--ink-hover); }
+.stat:hover {
+  border-color: color-mix(in srgb, var(--accent, var(--brand-500)) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent, var(--brand-500)) 10%, var(--ink-hover));
+}
 
 /* The accent is a rail on the left edge. No glow, no blurred orb: the tile is
    a flat surface and the colour says which figure this is. */
@@ -179,9 +186,8 @@
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 2px;
+  width: 3px;
   background: var(--accent, var(--brand-500));
-  opacity: 0.8;
 }
 
 /* The figure the page is about. One per row, noticeably larger, and it takes
@@ -189,7 +195,7 @@
 .stat--hero {
   grid-column: span 2;
   padding: var(--sp-6);
-  background: var(--ink-raised);
+  background: color-mix(in srgb, var(--accent, var(--brand-500)) 8%, var(--ink-raised));
 }
 .stat--hero .stat__value { font-size: var(--fs-3xl); }
 .stat--hero .stat__label { font-size: var(--fs-xs); }
@@ -228,7 +234,8 @@
   width: 30px;
   height: 30px;
   border-radius: var(--r-sm);
-  background: color-mix(in srgb, var(--accent, var(--brand-500)) 12%, transparent);
+  background: color-mix(in srgb, var(--accent, var(--brand-500)) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, var(--brand-500)) 32%, transparent);
   color: var(--accent, var(--brand-500));
 }
 
@@ -430,17 +437,30 @@
 .btn--icon.btn--sm { width: 32px; }
 .btn--block { width: 100%; }
 
+/* ───────────────────────────────────────────────────────────────────────────
+   BUTTON COLOUR
+   Two levels per meaning, and the level says how loud the action is:
+
+     solid   the one action that commits something (primary, ok, warn, danger)
+     tinted  a real action that does not need to shout (accent, ok, warn,
+             info, danger): a flat colour wash with the same hue as its text
+
+   A tint is a single flat colour mixed from the accent and the surface, not a
+   gradient. Hue carries the meaning, so a row of buttons reads as a set of
+   different jobs rather than a set of different greys.
+   ─────────────────────────────────────────────────────────────────────────── */
+
 /* A disabled primary keeps its shape but stops shouting. */
 .btn--primary:disabled { background: var(--ink-raised); border-color: var(--line-soft); }
 
 .btn--primary {
   color: var(--on-brand);
-  background: var(--brand-600);
-  border-color: var(--brand-500);
+  background: var(--brand-700);
+  border-color: var(--brand-600);
 }
 .btn--primary:hover:not(:disabled) {
-  background: var(--brand-500);
-  border-color: var(--brand-400);
+  background: var(--brand-600);
+  border-color: var(--brand-500);
 }
 
 /* Was --gold; the fill is the warning colour now, so the name follows. */
@@ -449,7 +469,23 @@
   background: var(--warn-500);
   border-color: var(--warn-500);
 }
-.btn--warn:hover:not(:disabled) { filter: brightness(1.06); }
+.btn--warn:hover:not(:disabled) { background: var(--warn-700); border-color: var(--warn-700); }
+
+.btn--ok {
+  color: var(--on-ok);
+  background: var(--ok-500);
+  border-color: var(--ok-500);
+}
+.btn--ok:hover:not(:disabled) { background: var(--ok-700); border-color: var(--ok-700); }
+
+/* The strong danger fill is for the last step of something destructive:
+   a confirm inside a dialog, never a row action. */
+.btn--danger-strong {
+  color: var(--on-brand);
+  background: var(--bad-700);
+  border-color: var(--bad-700);
+}
+.btn--danger-strong:hover:not(:disabled) { filter: brightness(1.1); }
 
 .btn--secondary {
   color: var(--text-1);
@@ -470,22 +506,57 @@
   background: var(--ink-raised);
 }
 
+/* ── Tinted level: flat wash, hue-matched text and hairline ─────────────── */
+
+.btn--accent {
+  color: var(--brand-400);
+  background: var(--tint-accent);
+  border-color: var(--brand-border);
+}
+.btn--accent:hover:not(:disabled) {
+  color: var(--text-1);
+  background: color-mix(in srgb, var(--brand-500) 24%, var(--ink-card));
+}
+
+.btn--ok-tint {
+  color: var(--ok-500);
+  background: var(--tint-ok);
+  border-color: var(--ok-border);
+}
+.btn--ok-tint:hover:not(:disabled) {
+  color: var(--text-1);
+  background: color-mix(in srgb, var(--ok-500) 24%, var(--ink-card));
+}
+
+.btn--warn-tint {
+  color: var(--warn-500);
+  background: var(--tint-warn);
+  border-color: var(--warn-border);
+}
+.btn--warn-tint:hover:not(:disabled) {
+  color: var(--text-1);
+  background: color-mix(in srgb, var(--warn-500) 24%, var(--ink-card));
+}
+
+.btn--info {
+  color: var(--info-500);
+  background: var(--tint-info);
+  border-color: var(--info-border);
+}
+.btn--info:hover:not(:disabled) {
+  color: var(--text-1);
+  background: color-mix(in srgb, var(--info-500) 24%, var(--ink-card));
+}
+
 .btn--danger {
   color: var(--bad-500);
-  background: var(--bad-soft);
+  background: var(--tint-bad);
   border-color: var(--bad-border);
 }
 .btn--danger:hover:not(:disabled) {
   color: var(--text-1);
-  background: color-mix(in srgb, var(--bad-500) 22%, transparent);
+  background: color-mix(in srgb, var(--bad-500) 24%, var(--ink-card));
 }
-
-.btn--ok {
-  color: var(--on-ok);
-  background: var(--ok-500);
-  border-color: var(--ok-border);
-}
-.btn--ok:hover:not(:disabled) { background: #56e6a8; }
 
 /* ───────────────────────────────────────────────────────────────────────────
    SEGMENTED CONTROL (view switches, range pickers)

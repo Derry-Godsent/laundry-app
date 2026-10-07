@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
+import { useConnection, isNetworkError } from "../hooks/useConnection";
 import { PermissionGuard } from "../components/PermissionGuard";
 import {
   Avatar,
@@ -226,7 +227,9 @@ export const Orders = () => {
   const [open, setOpen] = useState<Order | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isOffline, setIsOffline] = useState(false);
+  /* The connection is owned by the shell; this page only needs it to explain
+     an empty table honestly. */
+  const { isOffline, retry: retryConnection } = useConnection();
   const searchRef = useRef<HTMLInputElement>(null);
 
   const [startDate, setStartDate] = useState<string>("");
@@ -247,7 +250,6 @@ export const Orders = () => {
 
   const fetchFromSupabase = useCallback(async (customStart?: string, customEnd?: string) => {
     setLoading(true);
-    setIsOffline(false);
     try {
       let query = supabase.from("orders").select(`
         id,
@@ -297,12 +299,12 @@ export const Orders = () => {
       }
     } catch (err) {
       console.error("Orders fetch failed:", err);
-      setIsOffline(true);
+      if (isNetworkError(err)) retryConnection();
       setOrders([]);
     } finally {
       setLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, retryConnection]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -861,7 +863,7 @@ export const Orders = () => {
                           }
                           action={
                             isOffline ? (
-                              <Button variant="secondary" onClick={() => void fetchFromSupabase()}>Try again</Button>
+                              <Button variant="secondary" onClick={() => { retryConnection(); void fetchFromSupabase(); }}>Try again</Button>
                             ) : hasFilters ? (
                               <Button variant="secondary" onClick={clearFilters}>Clear filters</Button>
                             ) : null

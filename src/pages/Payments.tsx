@@ -8,6 +8,7 @@ import {
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
+import { useConnection, isNetworkError } from "../hooks/useConnection";
 import { PermissionGuard } from "../components/PermissionGuard";
 
 const T = {
@@ -27,6 +28,7 @@ const T = {
   textHint:    "var(--text-4)",
 
   accent:      "var(--brand-500)",
+  accentStrong:"var(--brand-700)",
   accentSoft:  "var(--brand-soft)",
   accentDim:   "var(--brand-soft)",
   accentBord:  "var(--brand-border)",
@@ -85,7 +87,7 @@ const GlobalStyle = () => (
 
     .pay-table-row { transition:background .16s ease; }
     .pay-table-row:hover { background:rgba(255,255,255,0.022); }
-    .pay-table-row:hover .pay-receipt-btn { background:${T.accentDim}; border-color:${T.accentBord}; color:#c7c9fc; }
+    .pay-table-row:hover .pay-receipt-btn { background:${T.accentDim}; border-color:${T.accentBord}; color:var(--brand-400); }
 
     .pay-receipt-btn { transition:all .16s ease; }
     .pay-receipt-btn:hover { transform:translateX(1px); }
@@ -214,20 +216,6 @@ const useCountUp = (target: number, duration = 700) => {
   return value;
 };
 
-const useOnlineStatus = () => {
-  const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
-  useEffect(() => {
-    const goOnline = () => setIsOnline(true);
-    const goOffline = () => setIsOnline(false);
-    window.addEventListener("online", goOnline);
-    window.addEventListener("offline", goOffline);
-    return () => {
-      window.removeEventListener("online", goOnline);
-      window.removeEventListener("offline", goOffline);
-    };
-  }, []);
-  return isOnline;
-};
 
 const Toast = ({ msg, type, onClose }: { msg: string; type: 'success' | 'error'; onClose: () => void }) => {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
@@ -422,7 +410,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
             className="pay-primary-btn"
             disabled={saving || !selectedOrderId || !amount}
             style={{
-              padding: "9px 22px", background: T.emerald, border: "none", borderRadius: 9, color: "#03261a",
+              padding: "9px 22px", background: "var(--ok-700)", border: "none", borderRadius: 9, color: "var(--on-ok)",
               fontSize: 13.5, fontWeight: 700, cursor: saving || !selectedOrderId || !amount ? "default" : "pointer", display: "flex", alignItems: "center", gap: 8,
               fontFamily: FONT, opacity: saving || !selectedOrderId || !amount ? 0.75 : 1,
             }}
@@ -454,25 +442,6 @@ const StatCard = ({ label, value, prefix = "", icon, delay, isCurrency = true }:
   );
 };
 
-const ConnectivityBanner = ({ isOnline, syncError, onRetry }: { isOnline: boolean; syncError: string | null; onRetry: () => void }) => {
-  if (isOnline && !syncError) return null;
-  const offline = !isOnline;
-  return (
-    <div style={{ margin: "0 32px", marginTop: 16, padding: "12px 16px", borderRadius: 10, background: offline ? T.emberDim : T.goldDim, border: `1px solid ${offline ? T.emberBord : T.goldBord}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, animation: "slideBanner 0.3s ease both", fontFamily: FONT }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {offline ? <WifiOff size={16} color={T.ember} /> : <CloudOff size={16} color={T.gold} />}
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: offline ? T.ember : T.gold }}>{offline ? "You're offline" : "Couldn't reach the server"}</div>
-          <div style={{ fontSize: 12, color: T.textSec, marginTop: 1 }}>{offline ? "Showing cached data from this session." : "Showing cached data. The list may not reflect latest payments."}</div>
-        </div>
-      </div>
-      <button onClick={onRetry} className="pay-ghost-btn" style={{ padding: "7px 14px", background: "transparent", border: `1px solid ${offline ? T.emberBord : T.goldBord}`, borderRadius: 8, color: offline ? T.ember : T.gold, fontSize: 12.5, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0, fontFamily: FONT }}>
-        <RefreshCw size={12.5} /> Retry
-      </button>
-    </div>
-  );
-};
-
 export const Payments = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -485,7 +454,10 @@ export const Payments = () => {
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   
-  const isOnline = useOnlineStatus();
+  /* The shell reports the connection on every page. What is left here is the
+     page's own sync state: a failed read over a working connection is a sync
+     problem, not an outage. */
+  const { isOffline, retry: retryConnection } = useConnection();
   const { permission, loading: permLoading, canEdit } = usePermission(location.pathname);
 
   const showToast = (msg: string, type: 'success' | 'error') => {
@@ -494,7 +466,7 @@ export const Payments = () => {
   };
 
   const fetchFromSupabase = useCallback(async () => {
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
+    if (isOffline) {
       setIsLoading(false);
       return;
     }
@@ -540,10 +512,10 @@ export const Payments = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isOffline]);
 
   useEffect(() => { fetchFromSupabase(); }, [fetchFromSupabase]);
-  useEffect(() => { if (isOnline) fetchFromSupabase(); }, [isOnline, fetchFromSupabase]);
+  useEffect(() => { if (!isOffline) fetchFromSupabase(); }, [isOffline, fetchFromSupabase]);
 
   const filtered = useMemo(() => {
     return transactions.filter(t => {
@@ -616,7 +588,7 @@ export const Payments = () => {
         <div style={{ width: 44, height: 44, borderRadius: 12, background: T.bgElevated, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <CreditCard size={22} color={T.accent} className="pay-orb" style={{ animation: "spin 0.8s linear infinite" }} />
         </div>
-        <div style={{ color: T.textTert, fontSize: 13, fontFamily: FONT }}>{isOnline ? "Loading payments…" : "Waiting for connection…"}</div>
+        <div style={{ color: T.textTert, fontSize: 13, fontFamily: FONT }}>{isOffline ? "Waiting for connection…" : "Loading payments…"}</div>
       </div>
     </div>
   );
@@ -636,8 +608,8 @@ export const Payments = () => {
               <div style={{ fontSize: 12.5, color: T.textTert, marginTop: 5, fontFamily: FONT, display: "flex", alignItems: "center", gap: 8 }}>
                 Track collections, outstanding balances, and payment history
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 5, marginLeft: 4 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: isOnline && !syncError ? T.emerald : isOnline ? T.gold : T.ember, animation: isOnline && !syncError ? "ringPulse 2s infinite" : "pulseDot 1.4s infinite", color: isOnline && !syncError ? T.emerald : isOnline ? T.gold : T.ember }} />
-                  <span style={{ fontSize: 11, color: T.textHint, fontFamily: MONO }}>{isOnline && !syncError ? "live" : isOnline ? "sync issue" : "offline"}</span>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: !isOffline && !syncError ? T.emerald : !isOffline ? T.gold : T.ember, animation: !isOffline && !syncError ? "ringPulse 2s infinite" : "pulseDot 1.4s infinite", color: !isOffline && !syncError ? T.emerald : !isOffline ? T.gold : T.ember }} />
+                  <span style={{ fontSize: 11, color: T.textHint, fontFamily: MONO }}>{!isOffline && !syncError ? "live" : !isOffline ? "sync issue" : "offline"}</span>
                 </span>
               </div>
             </div>
@@ -645,13 +617,13 @@ export const Payments = () => {
               onClick={() => canEdit && setShowModal(true)} 
               disabled={!canEdit}
               className="pay-primary-btn" 
-              style={{ padding: "11px 22px", background: canEdit ? T.emerald : T.bgElevated, border: canEdit ? "none" : `1px solid ${T.borderSoft}`, borderRadius: 10, color: canEdit ? "#03261a" : T.textTert, fontSize: 14, fontWeight: 600, cursor: canEdit ? "pointer" : "not-allowed", display: "flex", alignItems: "center", gap: 8, fontFamily: FONT, opacity: canEdit ? 1 : 0.7 }}
+              style={{ padding: "11px 22px", background: canEdit ? T.emerald : T.bgElevated, border: canEdit ? "none" : `1px solid ${T.borderSoft}`, borderRadius: 10, color: canEdit ? "var(--on-ok)" : T.textTert, fontSize: 14, fontWeight: 600, cursor: canEdit ? "pointer" : "not-allowed", display: "flex", alignItems: "center", gap: 8, fontFamily: FONT, opacity: canEdit ? 1 : 0.7 }}
             >
               <Plus size={16} /> {canEdit ? "Record Payment" : "View Only"}
             </button>
           </div>
 
-          <ConnectivityBanner isOnline={isOnline} syncError={syncError} onRetry={fetchFromSupabase} />
+    
 
           <div className="pay-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, marginTop: 16 }}>
             {statCards.map((st, i) => (
@@ -664,7 +636,7 @@ export const Payments = () => {
           <div className="pay-controls-row" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20 }}>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {["All", "Paid", "Partial", "Pending"].map(st => (
-                <button key={st} className="pay-filter-btn" onClick={() => setStatusFilter(st)} style={{ padding: "7px 15px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: FONT, border: `1px solid ${statusFilter === st ? T.accentBord : "transparent"}`, background: statusFilter === st ? T.accentDim : "transparent", color: statusFilter === st ? "#b3b6fa" : T.textTert, boxShadow: statusFilter === st ? `0 0 0 1px ${T.accentBord} inset` : "none" }}>
+                <button key={st} className="pay-filter-btn" onClick={() => setStatusFilter(st)} style={{ padding: "7px 15px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: FONT, border: `1px solid ${statusFilter === st ? T.accentBord : "transparent"}`, background: statusFilter === st ? T.accentDim : "transparent", color: statusFilter === st ? "var(--brand-400)" : T.textTert, boxShadow: statusFilter === st ? `0 0 0 1px ${T.accentBord} inset` : "none" }}>
                   {st}
                 </button>
               ))}

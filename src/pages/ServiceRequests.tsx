@@ -75,11 +75,11 @@ interface CustomerIdentity {
 }
 
 const STATE_META: Record<AppointmentResponse, { label: string; color: string; background: string }> = {
-  "awaiting-chapman": { label: "Needs a date", color: "#aab4ff", background: "var(--brand-soft)" },
-  "awaiting-customer": { label: "With the customer", color: "#f6c769", background: "rgba(246,199,105,0.14)" },
-  accepted: { label: "Accepted", color: "#62dd93", background: "var(--ok-soft)" },
-  rejected: { label: "Wants another date", color: "#fb9494", background: "var(--bad-soft)" },
-  declined: { label: "Not taken", color: "#e08b8b", background: "rgba(224,139,139,0.14)" },
+  "awaiting-chapman": { label: "Needs a date", color: "var(--brand-400)", background: "var(--brand-soft)" },
+  "awaiting-customer": { label: "With the customer", color: "var(--warn-500)", background: "rgba(246,199,105,0.14)" },
+  accepted: { label: "Accepted", color: "var(--ok-500)", background: "var(--ok-soft)" },
+  rejected: { label: "Wants another date", color: "var(--bad-500)", background: "var(--bad-soft)" },
+  declined: { label: "Not taken", color: "var(--bad-500)", background: "rgba(224,139,139,0.14)" },
 };
 
 /**

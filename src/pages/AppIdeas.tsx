@@ -35,16 +35,16 @@ interface AppIdea {
 }
 
 const KIND_META: Record<IdeaKind, { label: string; color: string; background: string }> = {
-  add: { label: "Add", color: "#aab4ff", background: "var(--brand-soft)" },
-  remove: { label: "Remove", color: "#fb9494", background: "var(--bad-soft)" },
-  change: { label: "Change", color: "#f6c769", background: "rgba(246,199,105,0.14)" },
+  add: { label: "Add", color: "var(--brand-400)", background: "var(--brand-soft)" },
+  remove: { label: "Remove", color: "var(--bad-500)", background: "var(--bad-soft)" },
+  change: { label: "Change", color: "var(--warn-500)", background: "rgba(246,199,105,0.14)" },
 };
 
 const STATUS_META: Record<IdeaStatus, { label: string; hint: string; color: string; background: string }> = {
-  new: { label: "New", hint: "Nobody has read it yet", color: "#aab4ff", background: "var(--brand-soft)" },
-  reading: { label: "Reading", hint: "Being looked at now", color: "#f6c769", background: "rgba(246,199,105,0.14)" },
-  planned: { label: "Planned", hint: "Agreed, waiting its turn", color: "#61d7bc", background: "rgba(97,215,188,0.14)" },
-  done: { label: "Done", hint: "Built and in the app", color: "#62dd93", background: "var(--ok-soft)" },
+  new: { label: "New", hint: "Nobody has read it yet", color: "var(--brand-400)", background: "var(--brand-soft)" },
+  reading: { label: "Reading", hint: "Being looked at now", color: "var(--warn-500)", background: "rgba(246,199,105,0.14)" },
+  planned: { label: "Planned", hint: "Agreed, waiting its turn", color: "var(--ok-500)", background: "rgba(97,215,188,0.14)" },
+  done: { label: "Done", hint: "Built and in the app", color: "var(--ok-500)", background: "var(--ok-soft)" },
   declined: { label: "Not doing", hint: "Explained to the customer", color: "var(--text-2)", background: "rgba(154,163,181,0.13)" },
 };
 

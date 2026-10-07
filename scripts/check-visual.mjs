@@ -113,8 +113,11 @@ for (const full of files) {
     if (EMOJI.test(line)) {
       add(file, n, "emoji: use an icon from the icon set");
     }
-    if (HEX.test(code) && !file.endsWith("tokens.css")) {
-      add(file, n, `colour literal ${code.match(HEX)[0]}: use a token`);
+    /* Pure black and white are not palette members: they are ink and paper,
+       and the print rules on the receipt and order sheets need them. */
+    const colourCode = code.replace(/#(?:000|000000|fff|ffffff)\b/gi, "");
+    if (HEX.test(colourCode) && !file.endsWith("tokens.css")) {
+      add(file, n, `colour literal ${colourCode.match(HEX)[0]}: use a token`);
     }
     if (/font-family\s*:/.test(code) && !/var\(--font-/.test(code)) {
       add(file, n, "font-family: use var(--font-ui) or var(--font-mono)");

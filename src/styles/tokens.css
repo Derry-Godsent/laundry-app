@@ -62,47 +62,62 @@
      faded denim and tap water. Indigo and violet are gone, and so is the
      gold: a metallic accent on a screen reads as decoration, and this console
      is a work surface. */
-  --brand-700: #244f6b;
-  --brand-600: #2f6488;
-  --brand-500: #3d7ba6;
-  --brand-400: #5f9dc4;
-  --brand-100: rgba(61, 123, 166, 0.16);
-  --brand-soft: rgba(61, 123, 166, 0.12);
-  --brand-glow: rgba(61, 123, 166, 0.3);
+  --brand-700: #24506e;   /* solid fills that carry white text           */
+  --brand-600: #2c6f9c;   /* hover on those fills                        */
+  --brand-500: #5290bd;   /* rails, borders, accent text on any surface  */
+  --brand-400: #76aed6;   /* accent text and icons, brighter step        */
+  --brand-100: rgba(82, 144, 189, 0.18);
+  --brand-soft: rgba(82, 144, 189, 0.14);
+  --brand-glow: rgba(82, 144, 189, 0.32);
 
   /* ── Semantic states ─────────────────────────────────────────────────────
      Earthen, desaturated, all the same value weight so no single state
      shouts. Violet is gone: it carried no meaning that blue does not. */
-  --brand-border: rgba(61, 123, 166, 0.26);
-  --ok-500: #5f9a72;
-  --ok-soft: rgba(95, 154, 114, 0.14);
-  --ok-border: rgba(95, 154, 114, 0.26);
-  --warn-500: #c39154;
-  --warn-soft: rgba(195, 145, 84, 0.14);
-  --warn-border: rgba(195, 145, 84, 0.26);
-  --bad-500: #c06a5c;
-  --bad-soft: rgba(192, 106, 92, 0.14);
-  --bad-border: rgba(192, 106, 92, 0.26);
-  --info-500: #6a94a8;
-  --info-soft: rgba(106, 148, 168, 0.14);
-  --info-border: rgba(106, 148, 168, 0.26);
+  --brand-border: rgba(82, 144, 189, 0.3);
+  --ok-700: #3f7f5c;      /* solid fills that carry dark or white text    */
+  --ok-500: #57a97a;
+  --ok-soft: rgba(87, 169, 122, 0.15);
+  --ok-border: rgba(87, 169, 122, 0.3);
+  --warn-700: #a9743a;
+  --warn-500: #d09a52;
+  --warn-soft: rgba(208, 154, 82, 0.15);
+  --warn-border: rgba(208, 154, 82, 0.3);
+  --bad-700: #b84f43;
+  --bad-500: #cf6f60;
+  --bad-soft: rgba(207, 111, 96, 0.15);
+  --bad-border: rgba(207, 111, 96, 0.3);
+  --info-700: #3f7288;
+  --info-500: #6fa3bd;
+  --info-soft: rgba(111, 163, 189, 0.15);
+  --info-border: rgba(111, 163, 189, 0.3);
+  /* Flat tints. On a dark theme a tint of the accent is what gives a surface
+     its colour, and it is a single flat colour: no gradient is involved. */
+  --tint-accent: color-mix(in srgb, var(--brand-500) 14%, var(--ink-card));
+  --tint-ok: color-mix(in srgb, var(--ok-500) 14%, var(--ink-card));
+  --tint-warn: color-mix(in srgb, var(--warn-500) 14%, var(--ink-card));
+  --tint-bad: color-mix(in srgb, var(--bad-500) 14%, var(--ink-card));
+  --tint-info: color-mix(in srgb, var(--info-500) 14%, var(--ink-card));
+  --tint-neutral: var(--ink-card);
+
   --on-brand: #ffffff;
+  --on-ok: #08160e;
   --on-ok: #0d1a12;
   --on-warn: #241a0c;
-  --on-bad: #ffffff;
+  --on-bad: #2a0d09;
+  --on-bad-strong: #ffffff;
 
   /* ── Workflow ramp ─────────────────────────────────────────────────────
      One colour per production stage, in the same earthen range as the
      states, so the pipeline reads as a progression rather than a spectrum. */
-  --stage-received: #4a7fa0;
-  --stage-queued: #3d7ba6;
-  --stage-washing: #7a9bb0;
-  --stage-drying: #c39154;
-  --stage-ironing: #a97e94;
-  --stage-packaging: #8c8fa8;
-  --stage-ready: #5f9a72;
-  --stage-delivery: #6a94a8;
-  --stage-completed: #4f8563;
+  --stage-received: #5b93b6;
+  --stage-queued: #5290bd;
+  --stage-washing: #8aa9bd;
+  --stage-drying: #d09a52;
+  --stage-ironing: #b08099;
+  --stage-packaging: #9a9ec0;
+  --stage-ready: #57a97a;
+  --stage-delivery: #6fa3bd;
+  --stage-completed: #4f9a6f;
 
   /* ── Spacing rhythm (4px base) ────────────────────────────────────────── */
   --sp-1: 4px;

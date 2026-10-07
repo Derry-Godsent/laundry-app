@@ -7,7 +7,8 @@ import {
 } from "lucide-react";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
-import { usePermission } from "../hooks/usePermission"; 
+import { usePermission } from "../hooks/usePermission";
+import { useConnection, isNetworkError } from "../hooks/useConnection"; 
 import { PermissionGuard } from "../components/PermissionGuard";
 import { LoadingRows } from "../components/ui";
 
@@ -63,13 +64,13 @@ const ROLE_META: Record<StaffRole, { label: string; color: string; bg: string }>
   staff:      { label: "Staff",      color: "var(--ok-500)", bg: "var(--ok-soft)"  },
   courier:    { label: "Courier",    color: "var(--warn-500)", bg: "var(--warn-soft)" },
   manager:    { label: "Manager",    color: "var(--brand-400)", bg: "rgba(167,139,250,0.12)" },
-  strategist: { label: "Strategist", color: "#22d3ee", bg: "rgba(34,211,238,0.12)"  },
+  strategist: { label: "Strategist", color: "var(--info-500)", bg: "rgba(34,211,238,0.12)"  },
 };
 
 const STATUS_META: Record<StaffStatus, { label: string; color: string; next: StaffStatus }> = {
   active:  { label: "Active",   color: "var(--ok-500)", next: "onduty"  },
   onduty:  { label: "On Duty",  color: "var(--warn-500)", next: "offline" },
-  offline: { label: "Offline",  color: "#3a4460", next: "active"  },
+  offline: { label: "Offline",  color: "var(--text-4)", next: "active"  },
 };
 
 const STATUS_CYCLE: StaffStatus[] = ["active", "onduty", "offline"];
@@ -239,7 +240,9 @@ export const Staff = () => {
   const location = useLocation();
   const [staff, setStaff]         = useState<StaffMember[]>([]);
   const [loading, setLoading]     = useState(true);
-  const [isOffline, setIsOffline] = useState(false);
+  /* The shell reports the connection on every page; this page no longer
+     carries its own banner for it. */
+  const { isOffline, retry: retryConnection } = useConnection();
   const [retrying, setRetrying]   = useState(false);
   const [roleFilter, setRoleFilter]     = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -262,7 +265,7 @@ export const Staff = () => {
 
   const fetchStaff = useCallback(async () => {
     setLoading(true);
-    setIsOffline(false);
+
     try {
       const { data, error } = await supabase
         .from("staff")
@@ -293,13 +296,13 @@ export const Staff = () => {
       }
     } catch (err) {
       console.error('Staff fetch error:', err);
-      setIsOffline(true);
+      if (isNetworkError(err)) retryConnection();
       setStaff([]);
     } finally {
       setLoading(false);
       setRetrying(false);
     }
-  }, []);
+  }, [retryConnection]);
 
   useEffect(() => { fetchStaff(); }, [fetchStaff]);
 
@@ -354,15 +357,15 @@ export const Staff = () => {
     try {
       const { error } = await supabase.from('staff').update({ status: newStatus }).eq('id', id);
       if (error) throw error;
-      setIsOffline(false);
+
     } catch (err) {
       console.error('Status update error:', err);
-      setIsOffline(true);
+      if (isNetworkError(err)) retryConnection();
     }
 
     setStaff(prev => prev.map(s => s.id === id ? { ...s, status: newStatus } : s));
     setOpenStaff(prev => prev?.id === id ? { ...prev, status: newStatus } : prev);
-  }, [staff, canEdit]);
+  }, [staff, canEdit, retryConnection]);
 
   const unassignOrder = useCallback(async (staffId: string, orderId: string) => {
     if (!canEdit) return;
@@ -376,10 +379,10 @@ export const Staff = () => {
         active_orders: newAssigned.length
       }).eq('id', staffId);
       if (error) throw error;
-      setIsOffline(false);
+
     } catch (err) {
       console.error('Unassign error:', err);
-      setIsOffline(true);
+      if (isNetworkError(err)) retryConnection();
     }
 
     setStaff(prev => prev.map(s => s.id === staffId
@@ -390,7 +393,7 @@ export const Staff = () => {
       ? { ...prev, assignedOrderIds: newAssigned, activeOrders: newAssigned.length }
       : prev
     );
-  }, [staff, canEdit]);
+  }, [staff, canEdit, retryConnection]);
 
   const validateForm = (): boolean => {
     const errs: Partial<NewStaffForm> = {};
@@ -489,11 +492,11 @@ export const Staff = () => {
         firstName: "", lastName: "", phone: "", role: "staff", branch: "Chapman Prestige Limited - Kumasi",
         email: "", password: "" 
       });
-      setIsOffline(false);
+
       setToast({ msg: "Staff member created successfully", type: "success" });
     } catch (err: any) {
       console.error('Create staff error:', err);
-      setIsOffline(true);
+      if (isNetworkError(err)) retryConnection();
       setToast({ msg: err.message || "Failed to create staff", type: "error" });
     } finally {
       setSaving(false);
@@ -561,7 +564,7 @@ export const Staff = () => {
         .sf-offline { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
           background: var(--bad-soft); border: 1px solid var(--bad-border); border-radius: 10px;
           padding: 10px 16px; margin-bottom: 18px; animation: sfFadeUp .3s ease; }
-        .sf-offline-l { display:flex; align-items:center; gap:10px; font-size:13px; color:#fca5a5; }
+        .sf-offline-l { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--bad-500); }
         .sf-offline-dot { width:8px; height:8px; border-radius:50%; background: var(--sf-danger); animation: sfPulse 1.6s ease-in-out infinite; }
         .sf-offline-retry { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:7px;
           background: var(--bad-soft); border:1px solid var(--bad-border); color: var(--sf-danger);
@@ -581,20 +584,25 @@ export const Staff = () => {
           font-family: var(--sf-font); transition: border-color .16s ease, color .16s ease, background-color .16s ease; }
         .sf-btn.ghost:hover { border-color: var(--sf-border-mid); color: var(--sf-text-primary); }
         .sf-btn.primary { background: var(--brand-600); border-color: var(--brand-500); color: var(--on-brand); padding: 9px 16px; }
-        .sf-btn.primary:hover { background: var(--brand-500); }
+        .sf-btn.primary:hover { background: var(--brand-600); }
         .sf-btn.primary:active, .sf-btn.ghost:active { filter: brightness(1.06); }
         .spin { animation: sfSpin .8s linear infinite; }
 
         .kpi-row { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 22px; }
-        .kpi { position:relative; overflow:hidden; background: var(--sf-bg-raised); border:1px solid var(--sf-border-soft); border-radius: 14px;
+        .kpi { position:relative; overflow:hidden;
+          background: color-mix(in srgb, var(--kpi-accent, var(--brand-500)) 6%, var(--ink-card));
+          border:1px solid color-mix(in srgb, var(--kpi-accent, var(--brand-500)) 18%, var(--line-soft));
+          border-radius: 14px;
           padding: 16px 16px 14px; animation: sfFadeUp .5s cubic-bezier(.16,1,.3,1) both; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
-        .kpi:hover { border-color: var(--kpi-accent, var(--sf-border-mid)); }
+        .kpi:hover { border-color: color-mix(in srgb, var(--kpi-accent, var(--brand-500)) 45%, var(--line)); }
+        .kpi::before { content:""; position:absolute; inset: 0 auto 0 0; width: 3px; background: var(--kpi-accent, var(--brand-500)); }
         .kpi-top { display:flex; justify-content:flex-end; margin-bottom: 2px; }
-        .kpi-ico { width: 30px; height: 30px; border-radius: 8px; display:flex; align-items:center; justify-content:center; }
+        .kpi-ico { width: 30px; height: 30px; border-radius: 8px; display:flex; align-items:center; justify-content:center;
+          border: 1px solid color-mix(in srgb, var(--kpi-accent, var(--brand-500)) 30%, transparent); }
         .kpi-lbl { font-size: 11px; color: var(--sf-text-tert); text-transform: uppercase; letter-spacing: .07em; font-weight: 700; margin-top: -22px; }
         .kpi-val { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; font-family: var(--sf-mono); margin-top: 6px; }
         .kpi-sub { font-size: 11.5px; color: var(--sf-text-hint); margin-top: 2px; }
-        .kpi-bar { height: 3px; border-radius: 3px; background: rgba(255,255,255,.05); margin-top: 12px; overflow:hidden; }
+        .kpi-bar { height: 3px; border-radius: 3px; background: var(--ink-active); margin-top: 12px; overflow:hidden; }
         .kpi-bar-fill { height: 100%; border-radius: 3px; opacity: .8; transition: width var(--dur-slow) var(--ease-out); }
 
         .sf-filters { display:flex; align-items:center; gap:10px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -718,7 +726,7 @@ export const Staff = () => {
         .spf-p { flex: 1.4; display:flex; align-items:center; justify-content:center; gap: 7px; background: var(--brand-600);
           border: 1px solid var(--brand-500); color: var(--on-brand); border-radius: 9px; padding: 10px; font-size: 13.5px; font-weight: 700; cursor:pointer;
           font-family: var(--sf-font); transition: background-color .15s ease; }
-        .spf-p:hover { background: var(--brand-500); }
+        .spf-p:hover { background: var(--brand-600); }
 
         .sf-modal-ov { position: fixed; inset:0; background: rgba(4,5,9,0.66); backdrop-filter: blur(3px); opacity:0; pointer-events:none;
           display:flex; align-items:center; justify-content:center; transition: opacity .22s ease; z-index: 70; padding: 20px; }
@@ -752,7 +760,7 @@ export const Staff = () => {
         .smf-p { flex: 1.4; display:flex; align-items:center; justify-content:center; gap: 7px; background: var(--brand-600);
           border: 1px solid var(--brand-500); color: var(--on-brand); border-radius: 9px; padding: 10px; font-size: 13.5px; font-weight: 700; cursor:pointer;
           font-family: var(--sf-font); transition: background-color .15s ease, opacity .15s ease; }
-        .smf-p:hover:not(:disabled) { background: var(--brand-500); }
+        .smf-p:hover:not(:disabled) { background: var(--brand-600); }
         .smf-p:disabled { opacity: .6; cursor: not-allowed; }
 
         @media (max-width: 1180px) {
@@ -874,19 +882,6 @@ export const Staff = () => {
 
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
-      {isOffline && (
-        <div className="sf-offline">
-          <div className="sf-offline-l">
-            <span className="sf-offline-dot" />
-            <WifiOff size={15} color="var(--bad-500)" />
-            <span>System is offline. Showing local cached data. Changes may not be saved.</span>
-          </div>
-          <button className="sf-offline-retry" onClick={handleRetry}>
-            <RefreshCw size={13} className={retrying ? "sf-spin-icon" : ""} /> Retry
-          </button>
-        </div>
-      )}
-
       <div className="sf-top">
         <div>
           <h2 className="sf-title">Staff and Workers</h2>
@@ -895,7 +890,7 @@ export const Staff = () => {
             <span className="dsep">·</span>
             <span style={{ color: "var(--ok-500)" }}>{stats.onDuty} on duty</span>
             <span className="dsep">·</span>
-            <span style={{ color: "#3a4460" }}>{stats.offline} offline</span>
+            <span style={{ color: "var(--text-4)" }}>{stats.offline} offline</span>
           </p>
         </div>
         <div className="sf-acts">
@@ -976,7 +971,7 @@ export const Staff = () => {
                       onClick={() => setOpenStaff(s)}>
                       <td data-label="Staff Member">
                         <div className="sf-member">
-                          <Avatar name={s.name} ring={STATUS_META[s.status]?.color || "#3a4460"} />
+                          <Avatar name={s.name} ring={STATUS_META[s.status]?.color || "var(--text-4)"} />
                           <div>
                             <div className="sf-nm">{s.name || "Unnamed Staff"}</div>
                             <div className="sf-ph">{formatPhoneInput((s.phone || "").replace('+233', ''))}</div>
@@ -1125,7 +1120,7 @@ export const Staff = () => {
                   </div>
                   {openStaff.assignedOrderIds.length === 0 ? (
                     <div className="sp-no-assign">
-                      <Package size={22} color="#2e3a4e" />
+                      <Package size={22} color="var(--text-4)" />
                       <span>No active assignments</span>
                     </div>
                   ) : (

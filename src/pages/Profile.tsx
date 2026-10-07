@@ -7,7 +7,7 @@ const T = {
   bgBase: "var(--ink-base)", bgSurface: "var(--ink-shell)", bgRaised: "var(--ink-card)", bgElevated: "var(--ink-raised)",
   borderFaint: "var(--line-faint)", borderSoft: "var(--line-soft)", borderMid: "var(--line)",
   textPrimary: "var(--text-1)", textSec: "var(--text-2)", textTert: "var(--text-3)", textHint: "var(--text-4)",
-  accent: "var(--brand-500)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)",
+  accent: "var(--brand-500)", accentStrong: "var(--brand-700)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)",
   emerald: "var(--ok-500)", emeraldDim: "var(--ok-soft)", emeraldBord: "var(--ok-border)",
   danger: "var(--bad-500)", dangerDim: "var(--bad-soft)", dangerBord: "var(--bad-border)",
 };
@@ -56,7 +56,7 @@ export const Profile = () => {
 
   if (loading) return <div style={{ padding: 40, color: T.textTert, fontFamily: FONT }}>Loading profile...</div>;
 
-  const roleColor = staff?.role === "admin" ? T.accent : staff?.role === "manager" ? "#22d3ee" : T.emerald;
+  const roleColor = staff?.role === "admin" ? T.accent : staff?.role === "manager" ? "var(--info-500)" : T.emerald;
 
   return (
     <>
@@ -136,7 +136,7 @@ export const Profile = () => {
               type="submit"
               disabled={saving || !newPassword}
               style={{
-                padding: "10px 16px", background: T.accent, border: "none", borderRadius: 8,
+                padding: "10px 16px", background: T.accentStrong, border: "none", borderRadius: 8,
                 color: "#fff", fontSize: 13.5, fontWeight: 600, cursor: saving || !newPassword ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: FONT,
                 opacity: saving || !newPassword ? 0.6 : 1, transition: "opacity 0.15s"

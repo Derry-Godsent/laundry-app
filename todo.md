@@ -132,6 +132,23 @@ the five-screen correctness pass and the definition of done live in
         how a renamed token silently draws nothing. Two files (Login.css, Login.tsx) have
         left the PENDING list entirely; the rest are the pages still carrying raw literals
         and off-scale sizes in their own CSS.
+- [x] Connection status, and the Settings page bugs that came with it.
+  - [x] One store (`useConnection`) asks the backend itself, so the app can say
+        whether it is live on every page. Top bar: a dot and a word, word hidden on
+        narrow phones. Shell: one banner under the top bar, naming which side is down.
+  - [x] Settings no longer claims to be offline: the false banner came from a refused
+        write and a refused read both being treated as network failures, and from the
+        page keeping its own copy of the connection. A refusal is now reported as a
+        refusal, and Settings, Staff, Security, Services, Payments, Receipt, Orders,
+        System Admin and Login all read the shared state instead of guessing.
+  - [x] "Configuration applies to Main Branch. Additional branches inherit these
+        settings." is removed: there are no branches in the data model, so the line was
+        inventing a product.
+  - [x] Colour pass: buttons gain a tinted level per meaning (accent, confirm, caution,
+        info, decline) beside the solid ones; summary tiles on Staff, Clients and
+        Reports carry a flat wash of their own accent plus a rail and a tinted icon
+        chip; every remaining old-palette literal in the pages (indigo, gold, navy,
+        cyan, neon green) is on tokens, and the last coloured button glows are gone.
 - [ ] Phase F, mobile app integration: Mobile Requests, Service Requests, customer
       replies, App Ideas, App Accounts, realtime alerts, staff actions from the app.
 - [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.

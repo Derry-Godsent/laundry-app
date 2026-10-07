@@ -22,7 +22,7 @@ const CSS = `
 }
 .nd-bell:hover { background: rgba(255,255,255,0.07); color: var(--text-2); border-color: rgba(255,255,255,0.11); }
 .nd-bell.open  { background: var(--brand-soft); color: var(--brand-500); border-color: var(--brand-border); }
-.nd-bell:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+.nd-bell:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
 
 /* Unread badge */
 .nd-badge {
@@ -32,7 +32,7 @@ const CSS = `
   background: var(--bad-500); color: #fff;
   font-size: 9.5px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  border: 2px solid #07090e;
+  border: 2px solid var(--ink-base);
   animation: ndPop 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -79,13 +79,13 @@ const CSS = `
   background: var(--brand-soft); color: var(--brand-500);
 }
 .nd-mark-all {
-  font-size: 11.5px; font-weight: 600; color: #3a4460;
+  font-size: 11.5px; font-weight: 600; color: var(--text-4);
   background: none; border: none; cursor: pointer;
   font-family: var(--font-ui);
   transition: color 0.15s; padding: 0;
 }
 .nd-mark-all:hover { color: var(--text-2); }
-.nd-mark-all:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+.nd-mark-all:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
 
 /* List. It is the scroller of the panel's flex column, so a long list scrolls
    inside the panel instead of being clipped at the panel's edge, and reaching
@@ -105,7 +105,7 @@ const CSS = `
 .nd-empty {
   padding: 36px 20px;
   text-align: center;
-  color: #3a4460;
+  color: var(--text-4);
   font-size: 13px;
   display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
@@ -140,7 +140,7 @@ const CSS = `
 
 .nd-content { flex: 1; min-width: 0; }
 .nd-item-title {
-  font-size: 12.5px; font-weight: 600; color: #c8d0e0;
+  font-size: 12.5px; font-weight: 600; color: var(--text-2);
   margin-bottom: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -150,7 +150,7 @@ const CSS = `
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.nd-item-time { font-size: 10.5px; color: #2e3a4e; margin-top: 4px; }
+.nd-item-time { font-size: 10.5px; color: var(--text-4); margin-top: 4px; }
 
 /* Item actions */
 .nd-item-acts {
@@ -175,7 +175,7 @@ const CSS = `
 }
 .nd-act-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-1); }
 .nd-act-btn.dismiss:hover { background: var(--bad-soft); color: var(--bad-500); border-color: var(--bad-soft); }
-.nd-act-btn:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+.nd-act-btn:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
 
 /* Unread dot */
 .nd-unread-dot {
@@ -198,7 +198,7 @@ const CSS = `
   transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 .nd-view-all:hover { background: rgba(255,255,255,0.06); color: var(--text-2); }
-.nd-view-all:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+.nd-view-all:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
 
 @keyframes ndSlideIn { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: none; } }
 @keyframes ndPop     { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -276,7 +276,7 @@ const CSS = `
   cursor: pointer;
 }
 .nd-close:hover { color: var(--text-1); background: var(--ink-active); }
-.nd-close:focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+.nd-close:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
 
 /* ── Console alignment ───────────────────────────────────────────────────
    Alerts sit in the topbar next to the account menu, so they use the same
@@ -291,7 +291,7 @@ const CSS = `
 }
 .nd-bell:hover { background: var(--ink-hover); border-color: var(--line); color: var(--text-1); }
 .nd-bell.open { background: var(--brand-soft); border-color: var(--brand-border); color: var(--brand-400); }
-.nd-badge { background: var(--bad-500); color: #2b0505; border-color: var(--ink-shell); }
+.nd-badge { background: var(--bad-500); color: var(--on-bad); border-color: var(--ink-shell); }
 .nd-panel {
   background: var(--ink-hover);
   border-color: var(--line-soft);

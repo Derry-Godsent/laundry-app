@@ -27,12 +27,12 @@ const CSS = `
 .cl-shell *{box-sizing:border-box;margin:0;padding:0}
 /* Fills the shell frame: .main-body owns the page scroll, .cl-tbl-wrap owns the
    list scroll. Never 100vh inside the shell; that is what cut the list off. */
-.cl-shell{display:flex;flex-direction:column;height:100%;min-height:0;background:#07090e;color:var(--text-1);font-family:var(--font-ui);overflow:hidden}
+.cl-shell{display:flex;flex-direction:column;height:100%;min-height:0;background:var(--ink-base);color:var(--text-1);font-family:var(--font-ui);overflow:hidden}
 
 .cl-top{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 0;flex-shrink:0;animation:clDown .4s cubic-bezier(.4,0,.2,1) both}
 .cl-h2{font-size:22px;font-weight:700;color:var(--text-1);letter-spacing:-.4px;margin-bottom:4px}
 .cl-sub{font-size:13px;color:var(--text-4);display:flex;align-items:center;gap:6px}
-.cl-dsep{color:#2e3a4e}
+.cl-dsep{color:var(--text-4)}
 .cl-acts{display:flex;align-items:center;gap:8px}
 .cl-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-ui);transition:all .18s}
 .cl-btn.ghost{background:rgba(255,255,255,.04);color:var(--text-2);border:1px solid rgba(255,255,255,.07);padding:8px 10px}
@@ -44,27 +44,28 @@ const CSS = `
 .cl-view-banner{display:flex;align-items:center;gap:10px;padding:10px 28px;background:var(--brand-soft);border-bottom:1px solid var(--brand-soft);font-size:13px;font-weight:500;color:var(--text-2);flex-shrink:0}
 
 .cl-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:18px 28px 0;flex-shrink:0;animation:clDown .4s .04s cubic-bezier(.4,0,.2,1) both}
-.cl-kpi{position:relative;background:var(--ink-card);border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:16px 18px;overflow:hidden;transition:transform .22s,box-shadow .22s,border-color .22s;cursor:default;animation:clUp .5s cubic-bezier(.4,0,.2,1) both}
-.cl-kpi:hover{border-color:var(--line)}
+.cl-kpi{position:relative;background:color-mix(in srgb,var(--kpi-accent,var(--brand-500)) 6%,var(--ink-card));border:1px solid color-mix(in srgb,var(--kpi-accent,var(--brand-500)) 18%,var(--line-soft));border-radius:16px;padding:16px 18px;overflow:hidden;transition:border-color .22s;cursor:default;animation:clUp .5s cubic-bezier(.4,0,.2,1) both}
+.cl-kpi::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--kpi-accent,var(--brand-500))}
+.cl-kpi:hover{border-color:color-mix(in srgb,var(--kpi-accent,var(--brand-500)) 45%,var(--line))}
 
 .cl-kpi-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
-.cl-kpi-lbl{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#3a4460;margin-bottom:5px}
+.cl-kpi-lbl{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-4);margin-bottom:5px}
 .cl-kpi-val{font-size:26px;font-weight:800;color:var(--text-1);letter-spacing:-.04em;line-height:1;margin-bottom:4px}
-.cl-kpi-sub{font-size:11px;color:#2e3a4e}
-.cl-kpi-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(255,255,255,.03)}
+.cl-kpi-sub{font-size:11px;color:var(--text-4)}
+.cl-kpi-bar{position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ink-active)}
 .cl-kpi-fill{height:100%;opacity:.5;transition:width var(--dur-slow) var(--ease-out)}
 
 .cl-filters{display:flex;align-items:center;gap:10px;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0;flex-wrap:wrap;animation:clDown .4s .08s cubic-bezier(.4,0,.2,1) both}
 .cl-srch{position:relative;display:flex;align-items:center;flex:1;min-width:180px;max-width:260px}
-.cl-srch-ico{position:absolute;left:11px;color:#3a4460;pointer-events:none}
+.cl-srch-ico{position:absolute;left:11px;color:var(--text-4);pointer-events:none}
 .cl-srch-inp{width:100%;padding:8px 36px 8px 34px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:var(--text-1);font-size:13px;font-family:var(--font-ui);outline:none;transition:border-color .18s,background .18s}
-.cl-srch-inp::placeholder{color:#3a4460}
+.cl-srch-inp::placeholder{color:var(--text-4)}
 .cl-srch-inp:focus{border-color:var(--ok-border);background:var(--ok-soft)}
-.cl-srch-x{position:absolute;right:10px;background:none;border:none;cursor:pointer;color:#3a4460;display:flex;align-items:center;transition:color .15s}
+.cl-srch-x{position:absolute;right:10px;background:none;border:none;cursor:pointer;color:var(--text-4);display:flex;align-items:center;transition:color .15s}
 .cl-srch-x:hover{color:var(--text-2)}
 .cl-fp{padding:7px 11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;color:var(--text-2);font-size:13px;font-family:var(--font-ui);outline:none;cursor:pointer;transition:all .18s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23556070'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .cl-fp:focus,.cl-fp:hover{border-color:var(--ok-border);color:var(--text-1)}
-.cl-fp option{background:#0c0f18;color:var(--text-1)}
+.cl-fp option{background:var(--ink-shell);color:var(--text-1)}
 .cl-pill{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1px solid rgba(255,255,255,.07);background:transparent;color:var(--text-4);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-ui);transition:all .18s;white-space:nowrap}
 .cl-pill:hover{border-color:rgba(255,255,255,.12);color:var(--text-2)}
 .cl-pill.on{background:var(--ok-soft);border-color:var(--ok-border);color:var(--ok-500)}
@@ -92,10 +93,10 @@ const CSS = `
 .cl-tbl-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:99px}
 .cl-tbl{width:100%;min-width:780px;border-collapse:collapse}
 .cl-tbl thead tr{position:sticky;top:0;z-index:10}
-.cl-tbl th{padding:11px 16px;background:#0c0f18;text-align:left;font-size:11px;font-weight:700;color:#3a4460;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap;user-select:none}
+.cl-tbl th{padding:11px 16px;background:var(--ink-shell);text-align:left;font-size:11px;font-weight:700;color:var(--text-4);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap;user-select:none}
 .cl-th-sort{display:flex;align-items:center;gap:6px;cursor:pointer;transition:color .15s}
 .cl-th-sort:hover{color:var(--text-2)}
-.cl-tbl td{padding:13px 16px;font-size:13.5px;color:#c8d0e0;border-bottom:1px solid rgba(255,255,255,.035);vertical-align:middle}
+.cl-tbl td{padding:13px 16px;font-size:13.5px;color:var(--text-2);border-bottom:1px solid rgba(255,255,255,.035);vertical-align:middle}
 .cl-row{cursor:pointer;animation:clRowIn .3s cubic-bezier(.4,0,.2,1) both;transition:background .15s}
 .cl-row:hover td{background:rgba(255,255,255,.022)}
 .cl-row.sel td{background:var(--ok-soft)}
@@ -105,7 +106,7 @@ const CSS = `
 .cl-cell{display:flex;align-items:center;gap:10px}
 .cl-av{width:34px;height:34px;min-width:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cl-nm{font-size:13.5px;font-weight:600;color:var(--text-1)}
-.cl-arch-tag{font-size:10px;color:#3a4460;font-weight:500;background:rgba(255,255,255,.05);padding:1px 6px;border-radius:4px;margin-left:4px}
+.cl-arch-tag{font-size:10px;color:var(--text-4);font-weight:500;background:rgba(255,255,255,.05);padding:1px 6px;border-radius:4px;margin-left:4px}
 
 .cl-tier{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
 .cl-type{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:500;color:var(--text-2)}
@@ -117,10 +118,10 @@ const CSS = `
 .cl-ra.red:hover{background:var(--bad-soft)}
 
 .cl-chk{width:15px;height:15px;border-radius:4px;cursor:pointer;accent-color:var(--ok-500)}
-.cl-empty{padding:64px!important;text-align:center;color:#2e3a4e;font-size:14px}
+.cl-empty{padding:64px!important;text-align:center;color:var(--text-4);font-size:14px}
 
-.cl-pag{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-top:1px solid rgba(255,255,255,.05);background:#0c0f18;flex-shrink:0}
-.cl-pag-info{font-size:12.5px;color:#3a4460}
+.cl-pag{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-top:1px solid rgba(255,255,255,.05);background:var(--ink-shell);flex-shrink:0}
+.cl-pag-info{font-size:12.5px;color:var(--text-4)}
 .cl-pag-r{display:flex;align-items:center;gap:6px}
 .cl-pag-pp{padding:5px 9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;color:var(--text-2);font-size:12px;font-family:var(--font-ui);outline:none;cursor:pointer}
 .cl-pag-b{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:7px;color:var(--text-2);cursor:pointer;transition:all .18s}
@@ -136,23 +137,23 @@ const CSS = `
 .cl-mo.on .cl-mc{transform:scale(1) translateY(0)}
 .cl-m-head{display:flex;align-items:flex-start;justify-content:space-between;padding:22px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
 .cl-m-title{font-size:17px;font-weight:700;color:var(--text-1);margin-bottom:3px}
-.cl-m-sub{font-size:12.5px;color:#3a4460}
+.cl-m-sub{font-size:12.5px;color:var(--text-4)}
 .cl-m-cl{width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:transparent;color:var(--text-4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
 .cl-m-cl:hover{background:rgba(255,255,255,.06);color:var(--text-1)}
 .cl-m-body{padding:22px 24px;display:flex;flex-direction:column;gap:16px}
 .cl-m-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .cl-m-fg{display:flex;flex-direction:column;gap:6px}
-.cl-m-lbl{font-size:11px;font-weight:700;color:#3a4460;text-transform:uppercase;letter-spacing:.08em}
+.cl-m-lbl{font-size:11px;font-weight:700;color:var(--text-4);text-transform:uppercase;letter-spacing:.08em}
 .cl-m-inp,.cl-m-sel{padding:10px 13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;color:var(--text-1);font-size:13.5px;font-family:var(--font-ui);outline:none;transition:border-color .18s,background .18s;width:100%}
-.cl-m-inp::placeholder{color:#2e3a4e}
+.cl-m-inp::placeholder{color:var(--text-4)}
 .cl-m-inp:focus,.cl-m-sel:focus{border-color:var(--ok-border);background:var(--ok-soft)}
 .cl-m-inp.err{border-color:var(--bad-border)}
 .cl-m-err{font-size:11.5px;color:var(--bad-500)}
-.cl-m-sel option{background:#0c0f18;color:var(--text-1)}
+.cl-m-sel option{background:var(--ink-shell);color:var(--text-1)}
 .cl-m-foot{display:flex;gap:10px;padding:16px 24px;border-top:1px solid rgba(255,255,255,.06)}
 .cl-mf-s{flex:1;padding:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:9px;color:var(--text-2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-ui);transition:all .18s}
 .cl-mf-s:hover{background:rgba(255,255,255,.08);color:var(--text-1)}
-.cl-mf-p{flex:2;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ok-500);border:none;border-radius:9px;color:#03261a;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-ui);box-shadow:0 0 16px var(--ok-border);transition:all .18s}
+.cl-mf-p{flex:2;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--ok-500);border:none;border-radius:9px;color:var(--on-ok);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-ui);box-shadow:0 0 16px var(--ok-border);transition:all .18s}
 .cl-mf-p:hover:not(:disabled){filter:brightness(1.08);transform:translateY(-1px)}
 .cl-mf-p:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
@@ -267,7 +268,7 @@ const TIERS = ["All", "Standard", "Bronze", "Silver", "Gold", "VIP", "Corporate"
 const TIER_PILL_COLORS: Record<string, { active: string }> = {
   All:       { active: "var(--ok-500)" },
   Standard:  { active: "var(--text-4)" },
-  Bronze:    { active: "#cd8a44" },
+  Bronze:    { active: "var(--warn-500)" },
   Silver:    { active: "var(--text-2)" },
   Gold:      { active: "var(--warn-500)" },
   VIP:       { active: "var(--brand-400)" },
@@ -304,8 +305,8 @@ function KpiCard({ label, value, of, unit, icon, accent, sub, delay = 0 }: {
   const counted = useCountUp(value, delay);
   const share = typeof of === "number" && of > 0 ? Math.min(1, value / of) : null;
   return (
-    <div className="cl-kpi" style={{ animationDelay: `${delay}ms` }}>
-      <div className="cl-kpi-ico" style={{ background: accent + "18", color: accent }}>{icon}</div>
+    <div className="cl-kpi" style={{ animationDelay: `${delay}ms`, "--kpi-accent": accent } as React.CSSProperties}>
+      <div className="cl-kpi-ico" style={{ background: `color-mix(in srgb, ${accent} 20%, transparent)`, border: `1px solid color-mix(in srgb, ${accent} 32%, transparent)`, color: accent }}>{icon}</div>
       <div className="cl-kpi-lbl">{label}</div>
       <div className="cl-kpi-val">{counted}</div>
       {sub && <div className="cl-kpi-sub">{sub}</div>}
@@ -420,7 +421,7 @@ function ClientModal({ client, onClose, onSave, saving, canEdit }: {
             {errs.phone && <span className="cl-m-err">{errs.phone}</span>}
           </div>
           <div className="cl-m-fg">
-            <label className="cl-m-lbl">Notes <span style={{ color: "#2e3a4e", fontWeight: 400 }}>(optional)</span></label>
+            <label className="cl-m-lbl">Notes <span style={{ color: "var(--text-4)", fontWeight: 400 }}>(optional)</span></label>
             <input className="cl-m-inp"
               placeholder="Any important notes..."
               value={form.notes} onChange={e => set("notes", e.target.value)} disabled={!canEdit} />
@@ -466,7 +467,7 @@ function ConfirmModal({ count, type, onClose, onConfirm }: {
         <div className="cl-m-foot" style={{ marginTop: 22 }}>
           <button className="cl-mf-s" onClick={onClose}>Cancel</button>
           <button
-            style={{ flex: 2, padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: isDel ? "var(--bad-500)" : "var(--brand-500)", border: "none", borderRadius: 9, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-ui)", transition: "all .18s" }}
+            style={{ flex: 2, padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: isDel ? "var(--bad-700)" : "var(--brand-700)", border: "none", borderRadius: 9, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-ui)", transition: "all .18s" }}
             onClick={onConfirm}>
             {isDel ? <><Trash2 size={14} /> Delete Permanently</> : <><Archive size={14} /> Archive</>}
           </button>
@@ -660,7 +661,7 @@ export const Clients = () => {
 
   if (loading || permLoading) return (
     <div className="cl-shell" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ color: "#3a4460", fontSize: 14, display: "flex", alignItems: "center" }}>
+      <div style={{ color: "var(--text-4)", fontSize: 14, display: "flex", alignItems: "center" }}>
         <RefreshCw size={18} className="cl-spin" style={{ marginRight: 10 }} /> Loading clients...
       </div>
     </div>

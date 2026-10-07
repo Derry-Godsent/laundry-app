@@ -14,15 +14,15 @@
 }
 
 .profile-trigger:hover {
-  background: #12141c;
-  border-color: #1e212b;
+  background: var(--ink-card);
+  border-color: var(--ink-raised);
   transform: translateY(-1px);
 }
 
 .profile-trigger:active { transform: translateY(0); }
 
 .profile-trigger:focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid var(--brand-500);
   outline-offset: 2px;
 }
 
@@ -64,7 +64,7 @@
 
 .profile-role {
   font-size: 11px;
-  color: #8b8f99;
+  color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
@@ -86,8 +86,8 @@
   top: calc(100% + 8px);
   right: 0;
   width: 200px;
-  background: #12141c;
-  border: 1px solid #1e212b;
+  background: var(--ink-card);
+  border: 1px solid var(--ink-raised);
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
   padding: 6px;
@@ -110,7 +110,7 @@
   background: transparent;
   border: none;
   border-radius: 8px;
-  color: #8b8f99;
+  color: var(--text-3);
   font-size: 13px;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
@@ -118,12 +118,12 @@
 }
 
 .profile-menu-item:hover {
-  background: #1a1d26;
+  background: var(--ink-card);
   color: #ffffff;
 }
 
 .profile-menu-item:focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid var(--brand-500);
   outline-offset: 2px;
 }
 

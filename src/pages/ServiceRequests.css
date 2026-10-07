@@ -11,7 +11,7 @@
      the shared tokens so this page lines up with every other one. */
   min-height: 100%;
   padding: var(--page-pad-y) var(--page-pad-x) var(--page-pad-bottom);
-  color: #e6e9f2;
+  color: var(--text-1);
   font-family: var(--font-ui);
 }
 
@@ -63,7 +63,7 @@
 
 /* The database note under an empty queue: a different colour, because it is a
    precondition, not an instruction. */
-.sr-hint { max-width: 420px; margin: 0; color: #d9c9a4; font-size: 12px; line-height: 18px; }
+.sr-hint { max-width: 420px; margin: 0; color: var(--warn-500); font-size: 12px; line-height: 18px; }
 .sr-hint strong { color: #ffffff; }
 
 @media (min-width: 901px) {
@@ -104,49 +104,49 @@
   padding: 4px 9px;
   border-radius: 999px;
   background: rgba(255,255,255,0.08);
-  color: #cfd6e6;
+  color: var(--text-2);
   font-size: 10px;
   font-weight: 700;
 }
 
 .sr-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .sr-detail-item { display: flex; gap: 9px; padding: 11px; border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; background: rgba(255,255,255,0.03); }
-.sr-detail-item > span { color: #61d7bc; }
-.sr-detail-item small { display: block; color: #8b94a7; font-size: 10px; }
+.sr-detail-item > span { color: var(--ok-500); }
+.sr-detail-item small { display: block; color: var(--text-3); font-size: 10px; }
 .sr-detail-item strong { display: block; margin-top: 3px; font-size: 12px; font-weight: 700; }
 
 .sr-section { display: flex; flex-direction: column; gap: 7px; }
 .sr-section h3 { margin: 0; font-size: 13px; font-weight: 800; }
-.sr-note { margin: 0; color: #b9c0cf; font-size: 12px; line-height: 18px; }
+.sr-note { margin: 0; color: var(--text-2); font-size: 12px; line-height: 18px; }
 .sr-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.sr-chips span { padding: 5px 10px; border-radius: 999px; background: rgba(97,215,188,0.12); color: #61d7bc; font-size: 11px; font-weight: 700; }
+.sr-chips span { padding: 5px 10px; border-radius: 999px; background: rgba(97,215,188,0.12); color: var(--ok-500); font-size: 11px; font-weight: 700; }
 
 .sr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .sr-grid-item { padding: 10px; border-radius: 11px; background: rgba(255,255,255,0.04); }
-.sr-grid-item small { display: block; color: #8b94a7; font-size: 10px; }
+.sr-grid-item small { display: block; color: var(--text-3); font-size: 10px; }
 .sr-grid-item strong { display: block; margin-top: 3px; font-size: 12px; }
 
 /* ── Decisions ─────────────────────────────────────────────────────────── */
 
 .sr-decision { display: flex; flex-direction: column; gap: 11px; padding: 14px; border: 1px solid rgba(97,215,188,0.35); border-radius: 15px; background: rgba(97,215,188,0.07); }
 .sr-decision h3 { margin: 0 0 4px; font-size: 14px; font-weight: 800; }
-.sr-decision p { margin: 0; color: #b9c0cf; font-size: 11px; line-height: 17px; }
+.sr-decision p { margin: 0; color: var(--text-2); font-size: 11px; line-height: 17px; }
 .sr-decision label { display: flex; flex-direction: column; gap: 6px; color: var(--text-2); font-size: 11px; font-weight: 700; }
-.sr-decision input { height: 40px; padding: 0 11px; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; background: rgba(255,255,255,0.05); color: #e6e9f2; font-size: 13px; }
-.sr-view-only { margin: 0; color: #f6c769; font-size: 11px; }
+.sr-decision input { height: 40px; padding: 0 11px; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-1); font-size: 13px; }
+.sr-view-only { margin: 0; color: var(--warn-500); font-size: 11px; }
 
 .sr-decision-decline { border-color: rgba(224,139,139,0.4); background: rgba(224,139,139,0.06); }
-.sr-decision-decline textarea { padding: 10px 11px; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; background: rgba(255,255,255,0.05); color: #e6e9f2; font-size: 13px; font-family: inherit; resize: vertical; }
+.sr-decision-decline textarea { padding: 10px 11px; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; background: rgba(255,255,255,0.05); color: var(--text-1); font-size: 13px; font-family: inherit; resize: vertical; }
 .sr-reasons { display: flex; flex-wrap: wrap; gap: 6px; }
-.sr-reason-chip { padding: 6px 11px; border: 1px solid rgba(255,255,255,0.14); border-radius: 999px; background: rgba(255,255,255,0.04); color: #b9c0cf; font-size: 11px; cursor: pointer; }
-.sr-reason-chip.active { border-color: rgba(224,139,139,0.6); background: rgba(224,139,139,0.16); color: #f3c9c9; }
+.sr-reason-chip { padding: 6px 11px; border: 1px solid rgba(255,255,255,0.14); border-radius: 999px; background: rgba(255,255,255,0.04); color: var(--text-2); font-size: 11px; cursor: pointer; }
+.sr-reason-chip.active { border-color: rgba(224,139,139,0.6); background: rgba(224,139,139,0.16); color: var(--bad-500); }
 .sr-declined-box { display: flex; flex-direction: column; gap: 7px; padding: 14px; border: 1px solid rgba(224,139,139,0.4); border-radius: 15px; background: rgba(224,139,139,0.08); }
-.sr-declined-box h3 { margin: 0; font-size: 14px; font-weight: 800; color: #f3c9c9; }
-.sr-muted-small { margin: 0; color: #8b94a7; font-size: 11px; line-height: 17px; }
+.sr-declined-box h3 { margin: 0; font-size: 14px; font-weight: 800; color: var(--bad-500); }
+.sr-muted-small { margin: 0; color: var(--text-3); font-size: 11px; line-height: 17px; }
 
 /* The actions live in the pinned bar, so on a desk say where to find them.
    On a phone the bar is pinned to the bottom and needs no pointing at. */
-.sr-bar-hint { margin: 0; color: #8b94a7; font-size: 11.5px; }
+.sr-bar-hint { margin: 0; color: var(--text-3); font-size: 11.5px; }
 
 /* ── Phone ─────────────────────────────────────────────────────────────── */
 

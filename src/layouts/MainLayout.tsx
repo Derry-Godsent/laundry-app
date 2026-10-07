@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/sidebar/Sidebar";
 import { Topbar } from "@/components/topbar/Topbar";
 import { FAB } from "@/components/FAB/FAB";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
+import { ConnectionBanner } from "@/components/connection/ConnectionBanner";
 import "./MainLayout.css";
 
 const MOBILE_BREAKPOINT = 1024;
@@ -88,6 +89,10 @@ export default function MainLayout() {
           onMenuClick={() => setSidebarOpen(true)}
           isMobile={isMobile}
         />
+
+        {/* Outside the route container on purpose: it must not re-mount, or
+           re-animate, every time the user changes page. */}
+        <ConnectionBanner />
 
         <main className="main-body">
           <div className="route-transition" key={location.pathname}>

@@ -4,10 +4,11 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import {
   Building2, Shield, Database, Save, Upload, Download,
-  AlertCircle, Check, Globe, Lock, Eye, EyeOff, WifiOff, RefreshCw, X,
+  AlertCircle, Check, Globe, Lock, Eye, EyeOff, X,
   Circle, Crown, Medal, Trophy,
 } from "lucide-react";
 import { usePermission } from "../hooks/usePermission";
+import { useConnection, isNetworkError } from "../hooks/useConnection";
 import { PermissionGuard } from "../components/PermissionGuard";
 
 /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
@@ -15,7 +16,7 @@ const T = {
   bgBase:      "var(--ink-base)", bgSurface: "var(--ink-shell)", bgRaised: "var(--ink-card)", bgElevated: "var(--ink-raised)",
   borderFaint: "var(--line-faint)", borderSoft: "var(--line-soft)", borderMid: "var(--line)",
   textPrimary: "var(--text-1)", textSec: "var(--text-2)", textTert: "var(--text-3)", textHint: "var(--text-4)",
-  accent: "var(--brand-500)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)", accentGlow: "var(--brand-glow)",
+  accent: "var(--brand-500)", accentStrong: "var(--brand-700)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)", accentGlow: "var(--brand-glow)",
   gold: "var(--warn-500)", goldDim: "var(--warn-soft)", goldBord: "var(--warn-border)",
   emerald: "var(--ok-500)", emeraldDim: "var(--ok-soft)", emeraldBord: "var(--ok-border)",
   danger: "var(--bad-500)", dangerDim: "var(--bad-soft)", dangerBord: "var(--bad-border)",
@@ -50,9 +51,13 @@ export const Settings = () => {
   const [saved, setSaved] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isOffline, setIsOffline] = useState(false);
-  const [saveError, setSaveError] = useState(false);
-  const [retrying, setRetrying] = useState(false);
+  /* The connection itself is owned by the shell: this page only asks whether
+     the last save was refused, so a permission error is never reported as an
+     outage. That mistake is why this page used to announce an offline system
+     to somebody who was online and simply not allowed to write. */
+  const { status: connectionStatus, retry: retryConnection } = useConnection();
+  const isOffline = connectionStatus === "offline";
+  const [saveFailed, setSaveFailed] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const [config, setConfig] = useState({
@@ -74,12 +79,13 @@ export const Settings = () => {
       const { data, error } = await supabase.from('settings').select('*').maybeSingle();
       
       if (error) {
-        // Only mark as offline if it's a genuine network failure
-        if (error.message.includes('Failed to fetch') || !navigator.onLine) {
-          setIsOffline(true);
+        /* A refused read is not an outage: a missing row, a policy or a
+           permission all come back as errors over a working connection. Only a
+           genuine network failure asks the shared store to re-check. */
+        if (isNetworkError(error)) {
+          void retryConnection();
         } else {
-          console.warn('Settings fetch error (likely missing table or permissions):', error);
-          setIsOffline(false); 
+          console.warn('Settings read refused (table, row or policy):', error);
         }
         return;
       }
@@ -97,26 +103,23 @@ export const Settings = () => {
           autoBackup: data.auto_backup ?? prev.autoBackup,
         }));
       }
-      setIsOffline(false);
     } catch (err: any) {
       console.error('Settings fetch error:', err);
-      // Fallback network check for unexpected errors
-      if (err.message?.includes('Failed to fetch') || !navigator.onLine) {
-        setIsOffline(true);
-      } else {
-        setIsOffline(false);
-      }
+      if (isNetworkError(err)) void retryConnection();
     } finally {
       setLoading(false);
-      setRetrying(false);
     }
-  }, []);
+  }, [retryConnection]);
 
   useEffect(() => { fetchSettings(); }, [fetchSettings]);
 
   const handleSave = async () => {
+    if (isOffline) {
+      setToast({ msg: "Not saved: the system is offline.", type: "error" });
+      return;
+    }
     setSaved(true);
-    setSaveError(false);
+    setSaveFailed(false);
     try {
       const { error } = await supabase.from('settings').upsert({
         id: 1,
@@ -132,13 +135,16 @@ export const Settings = () => {
       }, { onConflict: 'id' });
 
       if (error) throw error;
-      setIsOffline(false);
       setToast({ msg: "Settings saved successfully", type: "success" });
     } catch (err) {
       console.error('Settings save error:', err);
-      setIsOffline(true);
-      setSaveError(true);
-      setToast({ msg: "Failed to save settings", type: "error" });
+      if (isNetworkError(err)) {
+        void retryConnection();
+        setToast({ msg: "Not saved: the connection dropped.", type: "error" });
+      } else {
+        setSaveFailed(true);
+        setToast({ msg: "The system refused that save. Check your access.", type: "error" });
+      }
     } finally {
       setTimeout(() => setSaved(false), 2500);
     }
@@ -166,7 +172,7 @@ export const Settings = () => {
       setToast({ msg: "Data exported successfully", type: "success" });
     } catch (err) {
       console.error('Export error:', err);
-      setIsOffline(true);
+      if (isNetworkError(err)) void retryConnection();
       setToast({ msg: "Failed to export data", type: "error" });
     }
   };
@@ -183,10 +189,6 @@ export const Settings = () => {
     }
   };
 
-  const handleRetry = () => {
-    setRetrying(true);
-    fetchSettings();
-  };
 
   const toggleStyle = (active: boolean): React.CSSProperties => ({
     position: "relative", display: "inline-block", width: 40, height: 22,
@@ -267,18 +269,12 @@ export const Settings = () => {
         .cs-iconbtn { transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease; }
         .cs-iconbtn:hover { background: ${T.bgElevated}; color: ${T.textPrimary}; transform: translateY(-1px); }
 
-        .cs-exportbtn:hover { border-color: ${T.accentBord} !important; }
-        .cs-importbtn:hover { filter: brightness(1.1); }
+        .cs-exportbtn:hover { border-color: var(--brand-500) !important; }
+        .cs-importbtn:hover { border-color: var(--ok-500) !important; }
 
         .cs-loyalty-row { transition: background 0.18s ease, padding-left 0.18s ease; }
         .cs-loyalty-row:hover { background: rgba(255,255,255,0.025); padding-left: 20px; }
 
-        .cs-offline-banner { animation: csFadeUp 0.3s ease; }
-        .cs-offline-dot { animation: csPulse 1.6s ease-in-out infinite; }
-        .cs-retrybtn { transition: transform 0.18s ease, background 0.18s ease; }
-        .cs-retrybtn:hover { background: var(--bad-soft); }
-        .cs-retrybtn:active { transform: scale(0.96); }
-        .cs-retry-spin { animation: csSpin 0.8s linear infinite; }
 
         @media (max-width: 900px) {
           .cs-grid-2 { grid-template-columns: minmax(0, 1fr) !important; }
@@ -294,7 +290,7 @@ export const Settings = () => {
              covers the classed fields and any field inside a settings card. */
           .cs-input, .cs-panel input, .cs-panel select, .cs-panel textarea { font-size: 16px !important; }
           .cs-input { min-height: var(--tap-min); }
-          .cs-retrybtn, .cs-iconbtn { min-height: var(--tap-min); }
+          .cs-iconbtn { min-height: var(--tap-min); }
           .cs-card button { min-height: var(--tap-min); }
 
           /* The loyalty rows were label and control side by side: on a phone a
@@ -312,8 +308,6 @@ export const Settings = () => {
         }
 
         @media (max-width: 480px) {
-          .cs-offline-banner { padding: 8px var(--page-pad-x) !important; flex-direction: column; align-items: flex-start !important; gap: 8px; }
-          .cs-retrybtn { width: 100%; justify-content: center; }
         }
       `}</style>
 
@@ -329,45 +323,23 @@ export const Settings = () => {
           <button
             onClick={() => canEdit && handleSave()}
             disabled={!canEdit}
-            className={`cs-savebtn ${saveError ? "err" : ""}`}
+            className={`cs-savebtn ${saveFailed ? "err" : ""}`}
             style={{
               padding: "10px 20px",
-              background: saveError ? T.danger : saved ? T.emerald : (canEdit ? T.accent : T.bgElevated),
-              border: canEdit ? "none" : `1px solid ${T.borderSoft}`,
+              background: saveFailed ? T.danger : saved ? "var(--ok-700)" : (canEdit ? T.accentStrong : T.bgElevated),
+              border: `1px solid ${saveFailed ? "var(--bad-border)" : saved ? "var(--ok-border)" : canEdit ? "var(--brand-600)" : T.borderSoft}`,
               borderRadius: 9,
-              color: saveError ? "#2b0d0d" : saved ? "#03261a" : (canEdit ? "#fff" : T.textTert),
+              color: saveFailed ? "var(--on-bad)" : saved ? "var(--on-brand)" : (canEdit ? "var(--on-brand)" : "var(--text-disabled)"),
               fontSize: 14, fontWeight: 600, cursor: canEdit ? "pointer" : "not-allowed",
               display: "flex", alignItems: "center", gap: 7, fontFamily: FONT,
               opacity: canEdit ? 1 : 0.7
             }}
           >
-            {saveError ? <AlertCircle size={16} /> : saved ? <Check size={16} /> : <Save size={16} />}
-            {saveError ? "Save Failed" : saved ? "Saved" : (canEdit ? "Save Changes" : "View Only")}
+            {saveFailed ? <AlertCircle size={16} /> : saved ? <Check size={16} /> : <Save size={16} />}
+            {saveFailed ? "Save Failed" : saved ? "Saved" : (canEdit ? "Save Changes" : "View Only")}
           </button>
         </div>
       </div>
-
-      {isOffline && (
-        <div className="cs-offline-banner" style={{
-          background: T.dangerDim, borderBottom: `1px solid ${T.dangerBord}`,
-          padding: "10px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span className="cs-offline-dot" style={{ width: 8, height: 8, borderRadius: "50%", background: T.danger, display: "inline-block" }} />
-            <WifiOff size={15} color={T.danger} />
-            <span style={{ fontSize: 13, color: "#fca5a5", fontFamily: FONT }}>
-              System is offline. This page is showing local, unsynced values. Changes will not be saved until the connection is restored.
-            </span>
-          </div>
-          <button onClick={handleRetry} className="cs-retrybtn" style={{
-            display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 7,
-            background: "var(--bad-soft)", border: `1px solid ${T.dangerBord}`, color: T.danger,
-            fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: FONT, whiteSpace: "nowrap",
-          }}>
-            <RefreshCw size={13} className={retrying ? "cs-retry-spin" : ""} /> Retry
-          </button>
-        </div>
-      )}
 
       <div className="cs-tabs" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "0 32px", display: "flex", gap: 4 }}>
         {tabs.map(tab => (
@@ -435,12 +407,6 @@ export const Settings = () => {
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <div className="cs-card" style={{ padding: 16, background: T.goldDim, border: `1px solid ${T.goldBord}`, borderRadius: 10, display: "flex", alignItems: "center", gap: 12 }}>
-                <Globe size={18} color={T.gold} />
-                <div style={{ fontSize: 13, color: T.textSec, fontFamily: FONT }}>
-                  Configuration applies to Main Branch. Additional branches inherit these settings.
-                </div>
-              </div>
             </div>
           )}
 
@@ -484,7 +450,7 @@ export const Settings = () => {
                 </div>
                 {[
                   { tier: "Standard", visits: "Under 5 visits", discount: "0%", color: T.textTert, icon: Circle },
-                  { tier: "Bronze", visits: "5 to 14 visits", discount: "5% Off", color: "#cd8a44", icon: Medal },
+                  { tier: "Bronze", visits: "5 to 14 visits", discount: "5% Off", color: "var(--warn-500)", icon: Medal },
                   { tier: "Silver", visits: "15 to 29 visits", discount: "10% Off", color: "var(--text-2)", icon: Medal },
                   { tier: "Gold", visits: "30 or more visits", discount: "15% Off + Free Delivery", color: T.gold, icon: Trophy },
                   { tier: "VIP", visits: "Management Designated", discount: "20% Off + Door-to-Door", color: "var(--brand-400)", icon: Crown },
@@ -515,7 +481,7 @@ export const Settings = () => {
           {activeTab === "data" && (
             <div key="data" className="cs-panel" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div className="cs-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <div className="cs-card cs-exportbtn" style={{ padding: 20, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12 }}>
+                <div className="cs-card cs-exportbtn" style={{ padding: 20, background: "var(--tint-accent)", border: "1px solid var(--brand-border)", borderRadius: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                     <Download size={18} color={T.accent} />
                     <div style={{ fontSize: 15, fontWeight: 600, fontFamily: FONT }}>Export Data</div>
@@ -560,7 +526,7 @@ export const Settings = () => {
                     </button>
                   </div>
                 </div>
-                <div className="cs-card cs-importbtn" style={{ padding: 20, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12 }}>
+                <div className="cs-card cs-importbtn" style={{ padding: 20, background: "var(--tint-ok)", border: "1px solid var(--ok-border)", borderRadius: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                     <Upload size={18} color={T.emerald} />
                     <div style={{ fontSize: 15, fontWeight: 600, fontFamily: FONT }}>Import Data</div>

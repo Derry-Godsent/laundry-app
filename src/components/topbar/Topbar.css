@@ -114,7 +114,7 @@
   display: grid;
   place-items: center;
   background: var(--bad-500);
-  color: #2b0505;
+  color: var(--on-bad);
   font-size: 10px;
   font-weight: 800;
   border-radius: var(--r-pill);
@@ -175,4 +175,62 @@
   .sidebar-toggle-mobile,
   .command-trigger,
   .topbar-action { width: 36px; height: 36px; }
+}
+
+/* ── Connection status ──────────────────────────────────────────────────────
+   One dot and one word, on every page. It replaces the per-page guesses: the
+   console used to tell staff it was offline from whatever the last failed
+   request happened to be. */
+.conn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-soft);
+  background: var(--ink-card);
+  color: var(--text-2);
+  font-family: var(--font-ui);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.conn-pill__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-4);
+  flex-shrink: 0;
+}
+
+.conn-pill--live { border-color: var(--ok-border); color: var(--ok-500); }
+.conn-pill--live .conn-pill__dot { background: var(--ok-500); }
+
+.conn-pill--checking { color: var(--text-3); }
+.conn-pill--checking .conn-pill__dot { animation: conn-pill-pulse 1.4s var(--ease-in-out) infinite; }
+
+.conn-pill--offline { border-color: var(--bad-border); color: var(--bad-500); }
+.conn-pill--offline .conn-pill__dot {
+  background: var(--bad-500);
+  animation: conn-pill-pulse 1.6s var(--ease-in-out) infinite;
+}
+
+@keyframes conn-pill-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* Phones: the dot alone, with its accessible name. The banner under the bar
+   carries the words when it matters. */
+@media (max-width: 640px) {
+  .conn-pill { padding: 0 8px; }
+  .conn-pill__text { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conn-pill__dot { animation: none; }
 }

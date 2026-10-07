@@ -353,16 +353,16 @@ export const Dashboard = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [workflow, setWorkflow] = useState<WorkflowStage[]>([
     { label: "Received & Sorted", key: "Pending", value: 0, count: 0, color: "var(--brand-500)" },
-    { label: "Washing", key: "Washing", value: 0, count: 0, color: "#62cdff" },
-    { label: "Ironing", key: "Ironing", value: 0, count: 0, color: "#e0b473" },
-    { label: "Ready for Delivery", key: "Ready", value: 0, count: 0, color: "#3ddc97" },
-    { label: "Delivered", key: "Delivered", value: 0, count: 0, color: "#b18cff" },
+    { label: "Washing", key: "Washing", value: 0, count: 0, color: "var(--info-500)" },
+    { label: "Ironing", key: "Ironing", value: 0, count: 0, color: "var(--warn-500)" },
+    { label: "Ready for Delivery", key: "Ready", value: 0, count: 0, color: "var(--ok-500)" },
+    { label: "Delivered", key: "Delivered", value: 0, count: 0, color: "var(--brand-400)" },
   ]);
   const [services, setServices] = useState<ServiceSegment[]>([
     { label: "Laundry", value: 42, color: "var(--brand-500)" },
-    { label: "Cleaning", value: 28, color: "#62cdff" },
-    { label: "Fumigation", value: 18, color: "#e0b473" },
-    { label: "Car Detail", value: 12, color: "#3ddc97" },
+    { label: "Cleaning", value: 28, color: "var(--info-500)" },
+    { label: "Fumigation", value: 18, color: "var(--warn-500)" },
+    { label: "Car Detail", value: 12, color: "var(--ok-500)" },
   ]);
   const [sparklines, setSparklines] = useState<Record<string, number[]>>({});
 
@@ -456,7 +456,7 @@ export const Dashboard = () => {
           const cat = item.services?.category || "Other";
           serviceCounts[cat] = (serviceCounts[cat] || 0) + (item.quantity || 1);
         });
-        const colors = ["var(--brand-500)", "#62cdff", "#e0b473", "#3ddc97", "#b18cff"];
+        const colors = ["var(--brand-500)", "var(--info-500)", "var(--warn-500)", "var(--ok-500)", "var(--brand-400)"];
         const totalSvc = Object.values(serviceCounts).reduce((a, b) => a + b, 0) || 1;
         setServices(Object.entries(serviceCounts).slice(0, 4).map(([label, value], i) => ({
           label,

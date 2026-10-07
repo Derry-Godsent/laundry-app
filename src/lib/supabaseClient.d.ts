@@ -1,2 +1,4 @@
 declare const supabase: any;
-export { supabase };
+declare const supabaseUrl: string;
+declare const supabaseAnonKey: string;
+export { supabase, supabaseUrl, supabaseAnonKey };

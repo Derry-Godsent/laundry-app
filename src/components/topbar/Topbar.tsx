@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useConnection } from "@/hooks/useConnection";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Search, Plus, Menu } from "lucide-react";
 import { Breadcrumbs } from "./Breadcrumbs";
@@ -189,6 +190,8 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
         </div>
 
         <div className="topbar-right">
+          <ConnectionPill />
+
           <button
             className="command-trigger"
             onClick={() => setIsCommandOpen(true)}
@@ -234,6 +237,36 @@ export const Topbar = ({ onMenuClick, isMobile = false }: TopbarProps) => {
         userRole={userRole}
       />
     </>
+  );
+};
+
+/**
+ * Whether the console is talking to the backend, on every page.
+ *
+ * It reads the shared connection store rather than watching `navigator.onLine`
+ * itself, so this indicator, the banner under the bar and every page agree.
+ * The word is hidden on narrow phones, where the dot and its accessible name
+ * carry it.
+ */
+const ConnectionPill = () => {
+  const { status, reason } = useConnection();
+
+  const label =
+    status === "live"
+      ? "Live. Connected to the system."
+      : status === "checking"
+        ? "Checking the connection."
+        : reason === "server"
+          ? "Offline. The server is not responding."
+          : "Offline. This device has no connection.";
+
+  return (
+    <span className={`conn-pill conn-pill--${status}`} title={label} aria-label={label} role="status">
+      <span className="conn-pill__dot" aria-hidden="true" />
+      <span className="conn-pill__text">
+        {status === "live" ? "Live" : status === "checking" ? "Checking" : "Offline"}
+      </span>
+    </span>
   );
 };
 

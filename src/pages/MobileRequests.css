@@ -138,7 +138,7 @@
   transition: color var(--dur-base) var(--ease-out);
 }
 
-.mr-map-link:hover { color: #9fe0ff; }
+.mr-map-link:hover { color: var(--info-500); }
 
 .mr-items {
   display: flex;

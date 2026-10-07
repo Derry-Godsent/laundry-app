@@ -1,7 +1,7 @@
 /* OrderBuilder Styles - Chapman Prestige Limited */
 
 .ob-root {
-  background: #07090e;
+  background: var(--ink-base);
   /* Fills the shell frame; .main-body owns the page scroll. */
   min-height: 100%;
   font-family: var(--font-ui);
@@ -10,7 +10,7 @@
 
 /* ── Header ────────────────────────────────────── */
 .ob-header {
-  background: #0c0f18;
+  background: var(--ink-shell);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   padding: 20px 32px;
   display: flex;
@@ -48,7 +48,7 @@
 }
 
 .ob-submit-btn:disabled {
-  background: #2e3a4e;
+  background: var(--text-4);
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -83,7 +83,7 @@
 .ob-input {
   width: 100%;
   padding: 10px 12px;
-  background: #0c0f18;
+  background: var(--ink-shell);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 8px;
   color: var(--text-1);
@@ -99,7 +99,7 @@
 }
 
 .ob-input::placeholder {
-  color: #2e3a4e;
+  color: var(--text-4);
 }
 
 .ob-input-search {
@@ -189,7 +189,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-select {
-  background: #0c0f18;
+  background: var(--ink-shell);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 6px;
   padding: 4px 8px;
@@ -209,7 +209,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #2e3a4e;
+  color: var(--text-4);
   pointer-events: none;
 }
 
@@ -220,7 +220,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   left: 0;
   right: 0;
   margin-top: 4px;
-  background: #161c2c;
+  background: var(--ink-raised);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 8px;
   max-height: 200px;
@@ -265,7 +265,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .ob-client-info {
   margin-top: 12px;
   padding: 10px;
-  background: #0c0f18;
+  background: var(--ink-shell);
   border-radius: 8px;
   display: flex;
   justify-content: space-between;
@@ -292,7 +292,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 /* ── Service List ──────────────────────────────── */
 .ob-service-list {
   margin-top: 8px;
-  background: #161c2c;
+  background: var(--ink-raised);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 8px;
   max-height: 240px;
@@ -363,7 +363,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  background: #0c0f18;
+  background: var(--ink-shell);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   white-space: nowrap;
 }
@@ -393,7 +393,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   width: 24px;
   height: 24px;
   border-radius: 4px;
-  background: #161c2c;
+  background: var(--ink-raised);
   border: none;
   color: var(--text-2);
   cursor: pointer;
@@ -427,7 +427,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .ob-cart-remove {
   background: transparent;
   border: none;
-  color: #2e3a4e;
+  color: var(--text-4);
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -446,7 +446,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  background: #0c0f18;
+  background: var(--ink-shell);
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -479,7 +479,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 
 /* ── Totals ────────────────────────────────────── */
 .ob-totals {
-  background: #0c0f18;
+  background: var(--ink-shell);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 12px;
   padding: 20px;
@@ -709,7 +709,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
     align-items: center;
     gap: var(--sp-3);
     padding: 10px var(--page-pad-x) calc(10px + var(--safe-bottom));
-    background: #0c0f18;
+    background: var(--ink-shell);
   }
 
   .ob-phone-bar__note {

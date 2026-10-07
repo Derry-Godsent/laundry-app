@@ -217,7 +217,7 @@
   background: var(--warn-soft);
   border-radius: var(--r-md);
   font-size: 12.5px;
-  color: #f7e7c4;
+  color: var(--warn-500);
 }
 
 /* The tile gallery: each row is a real .stat-grid, spaced so the roles can be

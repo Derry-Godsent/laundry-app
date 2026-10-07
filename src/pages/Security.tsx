@@ -6,6 +6,7 @@ import {
   RefreshCw, FileText, WifiOff, X
 } from "lucide-react";
 import { usePermission } from "../hooks/usePermission";
+import { useConnection, isNetworkError } from "../hooks/useConnection";
 import { useLocation } from "react-router-dom";
 import { PermissionGuard } from "../components/PermissionGuard";
 
@@ -31,7 +32,7 @@ const T = {
   bgBase: "var(--ink-base)", bgSurface: "var(--ink-shell)", bgRaised: "var(--ink-card)", bgElevated: "var(--ink-raised)",
   borderFaint: "var(--line-faint)", borderSoft: "var(--line-soft)", borderMid: "var(--line)",
   textPrimary: "var(--text-1)", textSec: "var(--text-2)", textTert: "var(--text-3)", textHint: "var(--text-4)",
-  accent: "var(--brand-500)", accentBright: "var(--brand-400)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)", accentGlow: "var(--brand-glow)",
+  accent: "var(--brand-500)", accentStrong: "var(--brand-700)", accentBright: "var(--brand-400)", accentDim: "var(--brand-soft)", accentBord: "var(--brand-border)", accentGlow: "var(--brand-glow)",
   emerald: "var(--ok-500)", emeraldDim: "var(--ok-soft)", emeraldBord: "var(--ok-border)", emeraldGlow: "var(--ok-soft)",
   ember: "var(--bad-500)", emberDim: "var(--bad-soft)", emberBord: "var(--bad-border)", emberGlow: "var(--bad-soft)",
 };
@@ -191,7 +192,9 @@ export const Security = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [rolePermissions, setRolePermissions] = useState<string[]>([]);
-  const [isOnline, setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  /* The connection belongs to the shell. What is left here is whether the last
+     read of the security tables went through. */
+  const { isOffline, retry: retryConnection } = useConnection();
   const [syncFailed, setSyncFailed] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
@@ -213,20 +216,8 @@ export const Security = () => {
 
   const showToast = (msg: string, type: 'success' | 'error') => setToast({ msg, type });
 
-  useEffect(() => {
-    const goOnline = () => setIsOnline(true);
-    const goOffline = () => setIsOnline(false);
-    window.addEventListener("online", goOnline);
-    window.addEventListener("offline", goOffline);
-    return () => {
-      window.removeEventListener("online", goOnline);
-      window.removeEventListener("offline", goOffline);
-    };
-  }, []);
-
   const fetchSecurity = useCallback(async () => {
-    if (!navigator.onLine) {
-      setIsOnline(false);
+    if (isOffline) {
       setSyncFailed(true);
       setLoading(false);
       setRefreshing(false);
@@ -310,7 +301,7 @@ export const Security = () => {
       }
       
       setSyncFailed(false);
-      setIsOnline(true);
+
     } catch (err: any) {
       console.error('Security fetch error:', err);
       if (err?.message?.includes('network') || err?.message?.includes('Failed to fetch')) setSyncFailed(true);
@@ -318,12 +309,12 @@ export const Security = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [isOffline]);
 
   useEffect(() => { fetchSecurity(); }, [fetchSecurity]);
 
   const handleSaveConfig = async () => {
-    if (!isOnline) {
+    if (isOffline) {
       setSaveBlocked(true);
       setTimeout(() => setSaveBlocked(false), 2500);
       return;
@@ -381,11 +372,11 @@ export const Security = () => {
   };
 
   const toggleStyle = (active: boolean): React.CSSProperties => ({
-    cursor: isOnline ? "pointer" : "not-allowed",
+    cursor: !isOffline ? "pointer" : "not-allowed",
     background: active ? T.emerald : T.bgElevated,
     border: `1px solid ${active ? T.emeraldBord : T.borderSoft}`,
     boxShadow: active ? `0 0 12px ${T.emeraldDim}` : "none",
-    opacity: isOnline ? 1 : 0.5,
+    opacity: !isOffline ? 1 : 0.5,
   });
 
   const thumbStyle = (active: boolean): React.CSSProperties => ({
@@ -399,8 +390,8 @@ export const Security = () => {
     { id: "session", label: "Session Settings", icon: Clock },
   ];
 
-  const statusColor = isOnline ? T.emerald : T.ember;
-  const statusGlow = isOnline ? T.emeraldGlow : T.emberGlow;
+  const statusColor = !isOffline ? T.emerald : T.ember;
+  const statusGlow = !isOffline ? T.emeraldGlow : T.emberGlow;
 
   if (loading || permLoading) return (
     <div className="sec-root" style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT }}>
@@ -410,7 +401,7 @@ export const Security = () => {
           <Shield size={44} color={T.accent} className="sec-spin" style={{ opacity: 0.85 }} />
         </div>
         <div style={{ color: T.textTert, fontSize: 13, letterSpacing: "0.04em", fontFamily: FONT }}>
-          {isOnline ? "Loading security configuration…" : "Waiting for connection…"}
+          {!isOffline ? "Loading security configuration…" : "Waiting for connection…"}
         </div>
       </div>
     </div>
@@ -421,11 +412,14 @@ export const Security = () => {
       <StyleSheet />
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
-      {(!isOnline || syncFailed) && (
+      {/* The outage itself is the shell's banner on every page. This one is
+         about the security tables specifically, and only appears when the
+         connection is fine and the read still failed. */}
+      {!isOffline && syncFailed && (
         <div className="sec-banner" style={{ position: "sticky", top: 0, zIndex: 50, background: T.emberDim, borderBottom: `1px solid ${T.emberBord}`, padding: "10px 32px", display: "flex", alignItems: "center", gap: 10 }}>
           <WifiOff size={15} color={T.ember} />
-          <span style={{ fontSize: 13, color: T.textPrimary, fontFamily: FONT, fontWeight: 600 }}>{!isOnline ? "You're offline." : "Couldn't reach the security service."}</span>
-          <span style={{ fontSize: 13, color: T.textSec, fontFamily: FONT }}>Showing the last data loaded this session. Changes won't save until the connection is back.</span>
+          <span style={{ fontSize: 13, color: T.textPrimary, fontFamily: FONT, fontWeight: 600 }}>Couldn't reach the security service.</span>
+          <span style={{ fontSize: 13, color: T.textSec, fontFamily: FONT }}>Showing the last data loaded this session.</span>
         </div>
       )}
 
@@ -441,13 +435,13 @@ export const Security = () => {
             <div style={{ fontSize: 20, fontWeight: 700, color: T.textPrimary, letterSpacing: "-0.03em", fontFamily: FONT }}>Security</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
               <span className="sec-status-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, display: "inline-block" }} />
-              <span style={{ fontSize: 11.5, color: T.textTert, fontFamily: FONT, letterSpacing: "0.03em" }}>{isOnline ? (syncFailed ? "Connected, last sync failed" : "System online") : "System offline"}</span>
+              <span style={{ fontSize: 11.5, color: T.textTert, fontFamily: FONT, letterSpacing: "0.03em" }}>{!isOffline ? (syncFailed ? "Connected, last sync failed" : "System online") : "System offline"}</span>
             </div>
           </div>
         </div>
-        <button onClick={handleSaveConfig} disabled={!isOnline} className="sec-btn-primary" style={{ background: saved ? T.emerald : (isOnline ? T.accent : T.bgElevated), color: saved ? "#03261a" : (isOnline ? "#fff" : T.textTert), cursor: isOnline ? "pointer" : "not-allowed" }}>
+        <button onClick={handleSaveConfig} disabled={isOffline} className="sec-btn-primary" style={{ background: saved ? T.emerald : (!isOffline ? T.accent : T.bgElevated), color: saved ? "var(--on-ok)" : (!isOffline ? "var(--on-brand)" : T.textTert), cursor: !isOffline ? "pointer" : "not-allowed" }}>
           {saved ? <Check size={16} className="sec-check-pop" /> : <Save size={16} />}
-          {saved ? "Saved" : (isOnline ? "Save Changes" : "Offline")}
+          {saved ? "Saved" : (!isOffline ? "Save Changes" : "Offline")}
         </button>
       </div>
 
@@ -530,7 +524,7 @@ export const Security = () => {
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, fontFamily: FONT }}>Remote Access</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${T.borderFaint}` }}>
                   <div style={{ fontSize: 14, fontWeight: 500, fontFamily: FONT }}>Allow Remote Login</div>
-                  <div className="sec-toggle" style={toggleStyle(config.allowRemote)} onClick={() => isOnline && setConfig(p => ({...p, allowRemote: !p.allowRemote}))}>
+                  <div className="sec-toggle" style={toggleStyle(config.allowRemote)} onClick={() => !isOffline && setConfig(p => ({...p, allowRemote: !p.allowRemote}))}>
                     <div className="sec-toggle-thumb" style={thumbStyle(config.allowRemote)} />
                   </div>
                 </div>
@@ -551,7 +545,7 @@ export const Security = () => {
                   </thead>
                   <tbody>
                     {auditLog.length === 0 ? (
-                      <tr><td colSpan={4} style={{ padding: 28, textAlign: "center", color: T.textTert, fontFamily: FONT }}>{!isOnline || syncFailed ? "Audit history can't be reached right now. Reconnect to load it." : "No records yet."}</td></tr>
+                      <tr><td colSpan={4} style={{ padding: 28, textAlign: "center", color: T.textTert, fontFamily: FONT }}>{isOffline || syncFailed ? "Audit history can't be reached right now. Reconnect to load it." : "No records yet."}</td></tr>
                     ) : (
                       auditLog.map((log, i) => (
                         <tr key={log.id} className="sec-row" style={{ borderBottom: `1px solid ${T.borderFaint}`, animationDelay: `${Math.min(i, 12) * 35}ms` }}>
@@ -566,8 +560,8 @@ export const Security = () => {
                 </table>
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <button onClick={() => { setRefreshing(true); fetchSecurity(); }} disabled={!isOnline} className="sec-btn-ghost" style={{ color: isOnline ? T.textSec : T.textHint, cursor: isOnline ? "pointer" : "not-allowed" }}>
-                  <RefreshCw size={14} className={refreshing ? "sec-spin" : ""} /> {isOnline ? "Refresh" : "Offline"}
+                <button onClick={() => { setRefreshing(true); fetchSecurity(); }} disabled={isOffline} className="sec-btn-ghost" style={{ color: !isOffline ? T.textSec : T.textHint, cursor: !isOffline ? "pointer" : "not-allowed" }}>
+                  <RefreshCw size={14} className={refreshing ? "sec-spin" : ""} /> {!isOffline ? "Refresh" : "Offline"}
                 </button>
               </div>
             </div>
@@ -589,7 +583,7 @@ export const Security = () => {
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, fontFamily: FONT }}>Two-Factor Authentication</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0" }}>
                   <div style={{ fontSize: 14, fontWeight: 500, fontFamily: FONT }}>Require 2FA for Remote Access</div>
-                  <div className="sec-toggle" style={toggleStyle(config.require2FA)} onClick={() => isOnline && setConfig(p => ({...p, require2FA: !p.require2FA}))}>
+                  <div className="sec-toggle" style={toggleStyle(config.require2FA)} onClick={() => !isOffline && setConfig(p => ({...p, require2FA: !p.require2FA}))}>
                     <div className="sec-toggle-thumb" style={thumbStyle(config.require2FA)} />
                   </div>
                 </div>
@@ -619,7 +613,7 @@ export const Security = () => {
 
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={() => setEditingRole(null)} style={{ flex: 1, padding: 10, background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textSec, fontWeight: 600, cursor: 'pointer', fontFamily: FONT }}>Cancel</button>
-                <button onClick={handleSaveRolePermissions} style={{ flex: 1.5, padding: 10, background: T.accent, border: 'none', borderRadius: 8, color: '#fff', fontWeight: 700, cursor: 'pointer', fontFamily: FONT }}>Save Changes</button>
+                <button onClick={handleSaveRolePermissions} style={{ flex: 1.5, padding: 10, background: T.accentStrong, border: 'none', borderRadius: 8, color: '#fff', fontWeight: 700, cursor: 'pointer', fontFamily: FONT }}>Save Changes</button>
               </div>
             </div>
           </div>

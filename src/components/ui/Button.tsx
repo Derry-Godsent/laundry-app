@@ -1,7 +1,23 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "secondary" | "ghost" | "warn" | "danger" | "ok";
+/**
+ * Two levels per meaning. A solid variant commits something; a tinted variant
+ * is a real action that does not need to shout. Both are flat colours, and the
+ * hue says what the button is for.
+ */
+type Variant =
+  | "primary"    /* solid accent: the one action that moves the record on   */
+  | "secondary"  /* neutral surface, the default                            */
+  | "ghost"      /* label only, for the least important action              */
+  | "accent"     /* tinted accent                                           */
+  | "ok"         /* solid confirm                                           */
+  | "ok-tint"    /* tinted confirm                                          */
+  | "warn"       /* solid caution                                           */
+  | "warn-tint"  /* tinted caution                                          */
+  | "info"       /* tinted information                                      */
+  | "danger"     /* tinted decline; the row-level destructive action        */
+  | "danger-strong"; /* solid destructive; the confirm inside a dialog      */
 type Size = "sm" | "md" | "lg";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
