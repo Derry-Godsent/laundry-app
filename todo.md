@@ -185,6 +185,18 @@ the five-screen correctness pass and the definition of done live in
         permission table: admins, or any role whose Settings permission allows
         editing. The page also names which of the five causes it hit and prints
         the server's own words beside it.
+- [x] Reports: the chart lines spilled out of their cards, most visibly on a
+      phone. Two causes, both mine, both structural rather than data:
+  - [x] the phone media query set the chart container's height in CSS while
+        recharts draws at the height it is given as a prop, so the box shrank
+        and the chart did not: 100px of chart below the Revenue and Busiest Days
+        cards, 60px below Service Mix. Heights are now chosen in JS from the same
+        breakpoint, and the CSS override is gone.
+  - [x] the chart cards are grid items, and grid items default to `min-width:
+        auto`, so a chart that measured itself wide kept the track wide and
+        painted past the card. Tracks are `minmax(0, ...)`, cards carry
+        `min-width: 0`, and every chart sits in a `.rp-chart` box that clips.
+  - [x] Chart heights: 320/280 on tablet and desktop, 210/200 on a phone.
 - [ ] Next, in order:
   - [ ] Type, on the scale. The palette rule is met everywhere now; with the
         guard's pending list emptied it reports 624 font-size declarations and 34

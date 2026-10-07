@@ -35,9 +35,37 @@ const CHART_COLORS = [
   "var(--info-500)", "var(--brand-400)", "var(--bad-500)",
 ];
 
+/* Recharts sizes a chart from the props it is given, not from the container's
+   CSS: it measures the box, then draws at the width and height it was told. A
+   media query that changes only the container's height therefore leaves the
+   chart drawn at the taller size, and it paints past the bottom of its card.
+   The height is chosen here instead, from the same breakpoint the layout uses,
+   so the box and the drawing are always the same size. */
+function useNarrowChart(maxWidth = 640) {
+  const query = `(max-width: ${maxWidth}px)`;
+  const [narrow, setNarrow] = useState(
+    () => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(query).matches
+  );
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia(query);
+    const onChange = () => setNarrow(mq.matches);
+    onChange();
+    /* Safari before 14 only carries the older listener API. */
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    }
+    mq.addListener(onChange);
+    return () => mq.removeListener(onChange);
+  }, [query]);
+  return narrow;
+}
+
 /* ─── MAIN COMPONENT ────────────────────────────────────────── */
 export const Reports = () => {
   const location = useLocation();
+  const narrowChart = useNarrowChart();
   const { canView, loading: permLoading } = usePermission(location.pathname);
   
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "month" | "year">("30d");
@@ -199,6 +227,9 @@ export const Reports = () => {
     );
   }
 
+  const chartHeight = narrowChart ? 210 : 320;
+  const pieHeight = narrowChart ? 200 : 280;
+
   return (
     <PermissionGuard>
       <style>{`
@@ -225,8 +256,10 @@ export const Reports = () => {
 
           .rp-kpis { gap: 10px !important; margin-bottom: 18px !important; }
           .report-card { padding: 15px; border-radius: var(--r-md); }
-          /* A 320px-tall chart on a 320px-wide phone is mostly empty space. */
-          .report-card .recharts-responsive-container { height: 220px !important; }
+          /* A 320px-tall chart on a 320px-wide phone is mostly empty space, so
+             the height is reduced. It is reduced in JS, by useNarrowChart, and
+             not here: a CSS height shrinks the container while the chart inside
+             stays drawn at the taller size and paints past the card. */
         }
       `}</style>
       <div className="rp-page" style={{ maxWidth: 1600, margin: "0 auto", fontFamily: FONT, color: T.textPrimary, background: T.bgBase }}>
@@ -265,10 +298,11 @@ export const Reports = () => {
             </div>
 
             {/* CHARTS ROW 1 */}
-            <div className="rp-split" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div className="rp-split" style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
               <div className="report-card">
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Revenue vs Expenses (Daily)</h3>
-                <ResponsiveContainer width="100%" height={320}>
+                <div className="rp-chart">
+                <ResponsiveContainer width="100%" height={chartHeight}>
                   <ComposedChart data={data.chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke={T.borderFaint} vertical={false} />
                     <XAxis dataKey="date" stroke={T.textTert} fontSize={11} tickFormatter={(str) => str.slice(5)} />
@@ -279,11 +313,13 @@ export const Reports = () => {
                     <Line type="monotone" dataKey="orders" stroke={T.accent} strokeWidth={2} dot={false} name="Orders" yAxisId="right" />
                   </ComposedChart>
                 </ResponsiveContainer>
+                </div>
               </div>
 
               <div className="report-card">
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Busiest Days</h3>
-                <ResponsiveContainer width="100%" height={320}>
+                <div className="rp-chart">
+                <ResponsiveContainer width="100%" height={chartHeight}>
                   <BarChart data={data.dowData}>
                     <CartesianGrid strokeDasharray="3 3" stroke={T.borderFaint} vertical={false} />
                     <XAxis dataKey="name" stroke={T.textTert} fontSize={11} />
@@ -292,14 +328,16 @@ export const Reports = () => {
                     <Bar dataKey="revenue" fill={T.gold} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+                </div>
               </div>
             </div>
 
             {/* CHARTS ROW 2 */}
-            <div className="rp-half" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <div className="rp-half" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
               <div className="report-card">
                 <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Service Revenue Mix</h3>
-                <ResponsiveContainer width="100%" height={280}>
+                <div className="rp-chart">
+                <ResponsiveContainer width="100%" height={pieHeight}>
                   <PieChart>
                     <Pie data={data.pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value">
                       {data.pieData.map((entry: any, index: number) => (
@@ -309,6 +347,7 @@ export const Reports = () => {
                     <Tooltip contentStyle={{ background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontFamily: FONT }} formatter={(value: any) => `GH₵${Number(value).toLocaleString()}`} />
                   </PieChart>
                 </ResponsiveContainer>
+                </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 8 }}>
                   {data.pieData.map((entry: any, index: number) => (
                     <div key={index} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: T.textSec }}>
@@ -351,7 +390,12 @@ export const Reports = () => {
         )}
       </div>
       <style>{`
-        .report-card { background: ${T.bgRaised}; border: 1px solid ${T.borderSoft}; border-radius: 14px; padding: 20px; transition: border-color 0.2s; }
+        .report-card { background: ${T.bgRaised}; border: 1px solid ${T.borderSoft}; border-radius: 14px; padding: 20px; transition: border-color 0.2s; min-width: 0; }
+        /* A chart measures its box in pixels, so the card has to be allowed to
+           be narrower than that measurement, and the box must clip whatever
+           the chart draws in the moment before it re-measures. Nothing a chart
+           draws is allowed to reach the card's edge. */
+        .rp-chart { min-width: 0; overflow: hidden; }
         /* A summary tile carries a flat wash of its own accent; a chart card
            under it stays neutral so the figures stand out. */
         .rp-kpi { background: color-mix(in srgb, var(--kpi-accent, var(--brand-500)) 6%, ${T.bgRaised});

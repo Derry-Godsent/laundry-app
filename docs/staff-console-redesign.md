@@ -535,6 +535,22 @@ directly (an unauthenticated health endpoint), and everything reads it:
   System Admin screen grants edit rights to can actually save, instead of the
   UI promising an action the database refuses.
 
+**A chart's size is a prop, not a style.**
+
+Recharts measures the box it is given and then draws at the width and height it
+was told. A media query that changes only the container's height therefore
+shrinks the box and leaves the drawing at the taller size, and the chart paints
+past its card. On phones that was 100px of chart below the Revenue and Busiest
+Days cards and 60px below the Service Mix card, which is what "the lines spill
+off their boxes" looked like.
+
+Chart heights are chosen in JS from the same breakpoint the layout uses
+(`useNarrowChart`), never in CSS. The same measurement is why a chart also needs
+a card that can be narrower than the chart last measured itself: grid tracks are
+written `minmax(0, …)`, cards carry `min-width: 0`, and each chart sits in a
+`.rp-chart` box that clips, so nothing a chart draws can reach the card's edge
+between a resize and the next measurement.
+
 **Wording rule.** Anyone who books through the customer app is a **customer**,
 in copy and in the queue. **Client** is the console's own record: the Clients
 page, the order's billing party, the client id. A sentence does not mix them.
