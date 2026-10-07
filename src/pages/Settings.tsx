@@ -62,50 +62,94 @@ const STORE_SQL = `create table if not exists public.business_settings (
 
 alter table public.business_settings enable row level security;
 
+-- Table privileges. Row level security decides which rows a role may read or
+-- write, but the role needs the table privilege first, or the database refuses
+-- the request before any policy is consulted.
+grant select, insert, update, delete on public.business_settings to authenticated;
+grant all on public.business_settings to service_role;
+revoke all on public.business_settings from anon;
+
 drop policy if exists "staff reads business settings" on public.business_settings;
 drop policy if exists "admin manages business settings" on public.business_settings;
+drop policy if exists "staff with edit rights manage business settings" on public.business_settings;
 
 create policy "staff reads business settings"
   on public.business_settings for select to authenticated
   using (public.is_chapman_staff());
 
-create policy "admin manages business settings"
+-- Admins, and any role the console's own permissions let edit Settings. The
+-- database now enforces the same rule the page shows.
+create policy "staff with edit rights manage business settings"
   on public.business_settings for all to authenticated
-  using (public.is_chapman_admin())
-  with check (public.is_chapman_admin());
+  using (
+    public.is_chapman_admin()
+    or exists (
+      select 1
+      from public.role_permissions p
+      join public.staff s on s.id = auth.uid()
+      where p.role = lower(coalesce(s.role, ''))
+        and p.page = 'settings'
+        and coalesce(p.can_edit, false)
+    )
+  )
+  with check (
+    public.is_chapman_admin()
+    or exists (
+      select 1
+      from public.role_permissions p
+      join public.staff s on s.id = auth.uid()
+      where p.role = lower(coalesce(s.role, ''))
+        and p.page = 'settings'
+        and coalesce(p.can_edit, false)
+    )
+  );
 
 insert into public.business_settings (id, profile)
 values (1, '{}'::jsonb)
 on conflict (id) do nothing;`;
 
-/* PostgREST answers with the reason a write was refused, and the reason
-   matters: a missing table is a job for whoever owns the database, a policy
-   refusal is a job for an administrator, and a mismatched column is a schema
-   problem. Reporting all three as "check your access" sent the reader looking
-   in the wrong place. */
-function isPermissionRefusal(err: any): boolean {
-  const code: string = err?.code || err?.status || "";
-  return code === "42501";
+/* PostgREST answers with the reason a request was refused, and the reason
+   matters: a table that does not exist is a job for whoever owns the database,
+   a missing privilege is a grant, an RLS refusal is a policy, and a rejected
+   value is a schema problem. They are four different repairs, so the page
+   names the one that applies and keeps the server's own words beside it.
+
+   42501 covers both a missing privilege ("permission denied for table") and a
+   policy refusal ("new row violates row-level security policy"), so the
+   message decides which one it was, never the code alone. */
+type DbCause = "missing" | "privilege" | "policy" | "function" | "type" | "other";
+
+function dbErrorCause(err: any): DbCause {
+  const code = String(err?.code || err?.status || "");
+  const message = String(err?.message || err?.error_description || "");
+  if (code === "42P01" || code === "PGRST205" || code === "42703" || code === "PGRST204"
+      || /does not exist|not find the table|schema cache/i.test(message)) return "missing";
+  if (/permission denied for (table|relation)/i.test(message)) return "privilege";
+  if (/row-level security policy/i.test(message)) return "policy";
+  if (/permission denied for function/i.test(message)) return "function";
+  if (code === "42501") return "privilege";
+  if (code === "22P02" || code === "42804") return "type";
+  return "other";
 }
 
-function isMissingStore(err: any): boolean {
-  const code: string = err?.code || err?.status || "";
-  const message: string = err?.message || "";
-  return code === "42P01" || code === "PGRST205"
-    || code === "42703" || code === "PGRST204"
-    || /does not exist|not find the table|schema cache/i.test(message);
+/* The exact sentence the server used, for whoever fixes the database. */
+function rawDbError(err: any): string {
+  const code = err?.code || err?.status || "";
+  const message = String(err?.message || err?.error_description || err || "").replace(/\s+/g, " ").trim();
+  const text = `${message}${code ? ` (${code})` : ""}`;
+  return text.length > 220 ? `${text.slice(0, 217)}...` : text;
 }
 
-/* Name the store, always, so a failure points at the thing to fix rather than
-   at the reader's access. */
-function explainDbError(err: any): string {
-  const code: string = err?.code || err?.status || "";
-  const message: string = err?.message || err?.error_description || String(err);
-  if (isMissingStore(err)) return "the business_settings table is not in the database yet";
-  if (code === "42501") return "the database refused the write: this role has no write policy on business_settings";
-  if (code === "23503") return "the write referenced a store row that does not exist";
-  if (code === "22P02" || code === "42804") return `the business_settings column rejected the value (${code})`;
-  return `${message}${code ? ` (${code})` : ""}`;
+function explainDbError(err: any, direction: "read" | "write"): string {
+  const job = direction === "read" ? "the database would not return the saved settings" : "the database refused the save";
+  switch (dbErrorCause(err)) {
+    case "missing":    return "the business_settings table is not in the database yet";
+    case "privilege":  return "this role has no privilege on business_settings";
+    case "policy":     return "the row policies on business_settings do not allow this role to write";
+    case "function":   return "this role may not call the permission function the table policies use";
+    case "type":       return "the business_settings column rejected the value";
+    default:           return job;
+  }
 }
 
 /* The stored profile is read defensively: the column may hand back an object
@@ -157,6 +201,10 @@ export const Settings = () => {
   /* True when the database has no business_settings table: the page then shows
      the SQL that creates it, because it cannot create it itself. */
   const [storeMissing, setStoreMissing] = useState(false);
+  /* True when the table is there but this role is not allowed to use it, which
+     needs a grant rather than a table. */
+  const [storeBlocked, setStoreBlocked] = useState(false);
+  const [rawError, setRawError] = useState<string | null>(null);
   const [sqlCopied, setSqlCopied] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
@@ -189,13 +237,16 @@ export const Settings = () => {
         if (isNetworkError(error)) {
           void retryConnection();
         } else {
-          /* A refused read is not an outage: a missing row, a policy or a
-             permission all come back as errors over a working connection.
-             The page says so rather than showing its own defaults, because
-             the reader cannot tell the two apart otherwise. */
-          setLoadError(explainDbError(error));
-          setStoreMissing(isMissingStore(error));
-          console.warn('Settings read refused (table, row or policy):', error);
+          /* A refused read is not an outage: a missing table, a missing
+             privilege or a policy all come back as errors over a working
+             connection. The page says which, and what the server said, rather
+             than showing its own defaults as if they were stored settings. */
+          const cause = dbErrorCause(error);
+          setLoadError(explainDbError(error, "read"));
+          setRawError(rawDbError(error));
+          setStoreMissing(cause === "missing");
+          setStoreBlocked(cause === "privilege" || cause === "policy" || cause === "function");
+          console.warn('Settings read refused (table, privilege or policy):', error);
         }
         return;
       }
@@ -203,6 +254,12 @@ export const Settings = () => {
       const stored = parseProfile(data?.profile);
       if (stored) setConfig(prev => ({ ...prev, ...stored }));
       setHasStored(Boolean(stored));
+      /* A read that worked clears whatever the last failure left on screen,
+         or a fixed database would keep showing the old complaint. */
+      setLoadError(null);
+      setRawError(null);
+      setStoreMissing(false);
+      setStoreBlocked(false);
     } catch (err: any) {
       console.error('Settings fetch error:', err);
       if (isNetworkError(err)) void retryConnection();
@@ -260,11 +317,14 @@ export const Settings = () => {
         void retryConnection();
         setToast({ msg: "Not saved: the connection dropped.", type: "error" });
       } else {
-        const reason = explainDbError(err);
-        setStoreMissing(isMissingStore(err));
+        const cause = dbErrorCause(err);
+        const reason = explainDbError(err, "write");
+        setRawError(rawDbError(err));
+        setStoreMissing(cause === "missing");
+        setStoreBlocked(cause === "privilege" || cause === "policy" || cause === "function");
         setSaveFailed(true);
         setToast({
-          msg: `Not saved: ${isPermissionRefusal(err) ? "this role cannot write settings" : reason}.`,
+          msg: `Not saved: ${cause === "other" ? reason : `${reason}.`}`,
           type: "error",
         });
       }
@@ -467,23 +527,31 @@ export const Settings = () => {
         </div>
       )}
 
-      {storeMissing && (
+      {(storeMissing || storeBlocked) && (
         <div style={{ background: "var(--tint-warn)", borderBottom: "1px solid var(--warn-border)", padding: "16px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
             <Database size={15} style={{ color: "var(--warn-500)", flexShrink: 0 }} />
             <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-1)", fontFamily: FONT }}>
-              Settings need one table in the database
+              {storeMissing ? "Settings need one table in the database" : "Settings need access to that table"}
             </span>
           </div>
           <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.55, color: "var(--text-2)", fontFamily: FONT, maxWidth: "78ch" }}>
-            The profile is stored as one row of a table called business_settings, and that table is not in your database yet,
-            so this page is showing its built-in values and cannot save. Run the SQL below once in the Supabase SQL editor,
+            {storeMissing
+              ? "The profile is stored as one row of a table called business_settings, and that table is not in your database yet, so this page is showing its built-in values and cannot save."
+              : "The table is there, but this role has not been granted access to it, so the database refuses both reading and saving."}
+            {" "}Run the SQL below once in the Supabase SQL editor (it creates the table if it is missing, grants
+            the privileges, and sets the policies that let admins and anyone with edit rights on Settings write it),
             then press Try again. It is safe to run twice.
           </p>
+          {loadError && (
+            <p style={{ margin: 0, fontSize: 12, color: "var(--text-3)", fontFamily: FONT }}>
+              The database said: {loadError}.{rawError ? ` Its words: ${rawError}` : ""}
+            </p>
+          )}
           <pre style={{
             margin: 0, padding: "12px 14px", background: T.bgBase, border: `1px solid ${T.borderSoft}`, borderRadius: 9,
             fontSize: 11.5, lineHeight: 1.5, color: "var(--text-2)", fontFamily: MONO,
-            overflowX: "auto", whiteSpace: "pre", maxHeight: 210, WebkitOverflowScrolling: "touch",
+            overflowX: "auto", whiteSpace: "pre", maxHeight: 230, WebkitOverflowScrolling: "touch",
           }}>
             {STORE_SQL}
           </pre>
@@ -504,7 +572,7 @@ export const Settings = () => {
         </div>
       )}
 
-      {loadError && !storeMissing && (
+      {loadError && !storeMissing && !storeBlocked && (
         <div className="cs-readonly cs-readonly--bad" style={{ background: "var(--tint-bad)", borderBottom: "1px solid var(--bad-border)", padding: "10px 32px", display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
           <AlertCircle size={14} style={{ color: "var(--bad-500)", flexShrink: 0 }} />
           <span style={{ fontSize: 12.5, color: "var(--text-2)", fontFamily: FONT }}>

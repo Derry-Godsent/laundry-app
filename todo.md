@@ -176,6 +176,15 @@ the five-screen correctness pass and the definition of done live in
         button. The page reads the profile from row 1, writes it with one upsert
         and confirms the row came back, so a save that matched nothing can no
         longer report success.
+  - [x] The second follow-up: the table existed but the role had no privilege
+        on it (a SELECT refused with 42501, which RLS alone never does). A table
+        created through raw SQL does not necessarily inherit the privileges
+        Supabase's tooling grants to authenticated, so migration 010 and the SQL
+        the page offers now include the grants, revoke anon, and replace the
+        admins-only write policy with one that mirrors the console's own
+        permission table: admins, or any role whose Settings permission allows
+        editing. The page also names which of the five causes it hit and prints
+        the server's own words beside it.
 - [ ] Next, in order:
   - [ ] Type, on the scale. The palette rule is met everywhere now; with the
         guard's pending list emptied it reports 624 font-size declarations and 34

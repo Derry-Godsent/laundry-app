@@ -524,10 +524,16 @@ directly (an unauthenticated health endpoint), and everything reads it:
   reported the refusal as a possible access problem. The profile now lives in
   its own single-row table, `business_settings` (migration 010), because the
   console's other settings table holds booleans and has no room for a profile.
-  A refused write prints the database's code and reason; a refused read says
-  that the values on screen are the built-in ones; a store that has never been
-  written says so quietly; and a store that does not exist yet hands the reader
-  the SQL that creates it, because the page cannot create it itself.
+  A refusal names which of five things it was, prints the server's own words
+  beside it, and hands the reader the SQL that fixes it, because the page cannot
+  create a table or grant itself a privilege. Blanket advice is not advice: the
+  first version of this told an owner to check their access when the table
+  simply had no privileges, and the second told them the database was misconfigured
+  when the policy was admins-only. Both were guesses. What replaced them is the
+  cause, the server's sentence, and the one script that resolves it. The write
+  policy also follows the console's own permission table now, so a role the
+  System Admin screen grants edit rights to can actually save, instead of the
+  UI promising an action the database refuses.
 
 **Wording rule.** Anyone who books through the customer app is a **customer**,
 in copy and in the queue. **Client** is the console's own record: the Clients
