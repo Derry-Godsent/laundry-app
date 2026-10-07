@@ -157,7 +157,7 @@ roadmap: 1 to 5 are done and are not repeated; A to F are what remains.
 | --- | --- | --- |
 | A | **Responsive foundation** · shell, `100dvh`, safe areas, one scroll area per page, compact top bar, drawer, notification panel, shared breakpoints and padding tokens | ✅ done |
 | B | **Shared mobile patterns** · page header, summary cards, filter/search bar, list row, detail view, bottom actions, full-screen modal, confirm dialog, empty/error/loading states | ✅ done |
-| C | **Daily operations** · Mobile Requests, Service Requests, Orders QA, New Order, Clients | ⬜ |
+| C | **Daily operations** · Mobile Requests, Service Requests, Orders QA, New Order, Clients | ✅ done |
 | D | **Rest of the app** · Dashboard, App Ideas, App Accounts, Staff, Services, Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile | ⬜ |
 | E | **Overall appearance** · palette, type, surfaces, border contrast, spacing, button hierarchy, status colours, icons, states, motion, wording (refine the dark operational style, do not replace it) | ⬜ |
 | F | **Mobile app integration** · Mobile Requests, Service Requests, customer replies, App Ideas, App Accounts, realtime alerts, staff actions that start in the customer app | ⬜ |
@@ -278,6 +278,29 @@ Kept for the record: the original page is at `5512924` and the rejected rebuild
 at `22f31ed` on this branch. `/preview` section 3 shows the frame with sample
 orders.
 
+**Phase C (daily operations) · the intake queues and the two busiest screens.**
+Mobile Requests and Service Requests now compose from the phase B patterns
+instead of their own copies. The two queues were near-identical in structure and
+completely different in code, which is exactly the drift the shared patterns
+exist to stop.
+
+| Screen | What changed |
+| --- | --- |
+| Mobile Requests | Queue is `RecordList`/`RecordRow` with an avatar lead, `#id · phone` subtitle, date, item count and total, plus the status badge and express tag in the trail; the skeleton is `LoadingRows`; the detail is `DetailView variant="overlay"` at ≤900px (a `useMediaQuery` switch, because the phone version is a different element, not a different style) with the decision in the pinned footer and a Back button. |
+| Service Requests | Same treatment, plus `SegmentedControl` for the five views with their counts, `EmptyState` for the empty queue, `Banner` for the saved and error lines, and `PageHeader`. The two decision panels stay as the inputs they always were; `Send this date` and `Decline` moved into the pinned footer, and the panel says where they are on a desk. |
+| Orders | Audited at 320 to 430px, no change: the 1060px table floor is already released at ≤640px by the frame, every cell carries `data-label`, and the pipeline stays a deliberate sideways board inside the named scroller. |
+| New Order | Audited, then given the one thing it lacked on a phone: `ActionBar` pins `Create Order`, with the amount due, to the bottom of the screen, where the header button was out of thumb reach once the cart was full. The button is the page's own, disabled by the same `submitting \|\| !canEdit` guard, so it cannot double-submit. |
+| Clients | The phone list is now document flow: the shell stops being a fixed frame and `.main-body` becomes the single scroller, so 127 clients are no longer squeezed into the sliver of height the tiles and filters left behind. Rows were already labelled cards. |
+
+Verification for this phase: `npx tsc -b`, `npx vite build` and
+`npm run check:copy` green; a 25-point structural check over the five screens
+(record rows, labelled cells, released width floors, breakpoints matching the
+CSS, the pinned action bar and the guard on the second submit); an SSR smoke of
+the shared pieces; and a grep audit for fixed widths that are not released and
+for new `100vh`. The pages themselves sit behind `PermissionGuard`, so there is
+no server-rendered markup to assert against: the width-by-width eyeball stays
+with the reviewer on a preview.
+
 **Copy rules (repo-wide).** No em dashes. `npm run check:copy` fails on U+2014
 anywhere in the repo; use a full stop, a colon, a comma or a middot separator
 instead, and a plain hyphen for "no value" cells. En dashes survive only in
@@ -329,7 +352,11 @@ pick the work up without any chat history:
    > `arena/03b7f65b-laundry-app` (PR #7 open against master). Work on the next
    > unchecked phase: presentation only, no data-logic changes. Verify with
    > `npx tsc -b`, `npm run build` and `npm run check:copy`, then commit and
-   > push to the same branch. The current phase is C: apply the phase B patterns
-   > (see "Mobile patterns" above) to the daily-operation screens.
+   > push to the same branch. Phase C is done and committed: the daily-operation
+   > screens (Mobile Requests, Service Requests, Orders, New Order, Clients) now
+   > use the phase B patterns. The current phase is D: work through the rest of
+   > the app (Dashboard, App Ideas, App Accounts, Staff, Services, Payments,
+   > Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile),
+   > same rules, same verification.
 
 4. **Review without credentials** at any point: `/preview` (sample data only).

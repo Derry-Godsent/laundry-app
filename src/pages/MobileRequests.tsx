@@ -6,14 +6,20 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { usePermission } from "../hooks/usePermission";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 import {
+  Avatar,
   Banner,
   Button,
   Card,
   CardBody,
   CardHeader,
+  DetailView,
   EmptyState,
+  LoadingRows,
   PageHeader,
+  RecordList,
+  RecordRow,
   SegmentedControl,
   StatusPill,
 } from "../components/ui";
@@ -111,6 +117,11 @@ const customerPhoneOf = (request: MobileRequest) =>
 
 function MobileRequestsContent() {
   const { canEdit, loading: permissionLoading } = usePermission("/mobile-requests");
+
+  /* Under this width the queue and the record cannot share the screen: the
+     record takes over with its own Back button. Same breakpoint as the
+     .detail-view overlay rule, so the behaviour and the style agree. */
+  const isNarrow = useMediaQuery("(max-width: 900px)");
   const [requests, setRequests] = useState<MobileRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -304,56 +315,46 @@ function MobileRequestsContent() {
 
           <CardBody tight className="mr-list-body">
             {loading || permissionLoading ? (
-              <div className="mr-skeleton-list" aria-busy="true">
-                {[0, 1, 2].map((i) => <div key={i} className="skeleton" style={{ height: 92, borderRadius: "var(--r-md)" }} />)}
-              </div>
+              <LoadingRows rows={4} label="Loading requests" />
             ) : filtered.length === 0 ? (
               <EmptyState icon={<ClipboardList size={20} />} title="No requests in this view" message={copy.empty} />
             ) : (
-              <div className="mr-list">
+              <RecordList label={copy.title} className="mr-list">
                 {filtered.map((request) => {
                   const status = requestMeta(request);
                   const items = itemCountOf(request);
                   const active = selectedId === request.id;
 
                   return (
-                    <button
+                    <RecordRow
                       key={request.id}
-                      type="button"
-                      className={`mr-request ${active ? "is-selected" : ""}`}
+                      className="mr-record"
+                      selected={active}
                       onClick={() => setSelectedId(request.id)}
-                      aria-current={active ? "true" : undefined}
                       aria-label={`Open request ${request.id.slice(0, 8)} for ${customerNameOf(request)}`}
-                    >
-                      <div className="mr-request__top">
-                        <span className="mr-request__id">#{request.id.slice(0, 8)}</span>
-                        <StatusPill tone={status.tone} dot>{status.label}</StatusPill>
-                        {request.express ? <StatusPill tone="gold">Express</StatusPill> : null}
-                      </div>
-
-                      <div className="mr-request__customer">
-                        <span className="mr-avatar" aria-hidden="true">{customerNameOf(request).charAt(0)}</span>
-                        <span className="mr-request__who">
-                          <strong>{customerNameOf(request)}</strong>
-                          <small>{customerPhoneOf(request)}</small>
-                        </span>
-                        <ChevronRight size={16} className="mr-request__chevron" />
-                      </div>
-
-                      <div className="mr-request__meta">
-                        <span><CalendarDays size={13} /> {formatDay(request.requested_for)}</span>
-                        <span><ClipboardList size={13} /> {items ? `${items} items` : "Items to review"}</span>
-                        <strong>{money(request.estimated_total)}</strong>
-                      </div>
-                    </button>
+                      lead={<Avatar name={customerNameOf(request)} size="md" />}
+                      title={customerNameOf(request)}
+                      subtitle={`#${request.id.slice(0, 8)} · ${customerPhoneOf(request)}`}
+                      meta={[
+                        <><CalendarDays size={12} /> {formatDay(request.requested_for)}</>,
+                        <><ClipboardList size={12} /> {items ? `${items} items` : "Items to review"}</>,
+                        <strong key="total" className="mr-record__total">{money(request.estimated_total)}</strong>,
+                      ]}
+                      trail={
+                        <>
+                          {request.express ? <StatusPill tone="gold">Express</StatusPill> : null}
+                          <StatusPill tone={status.tone} dot>{status.label}</StatusPill>
+                        </>
+                      }
+                    />
                   );
                 })}
-              </div>
+              </RecordList>
             )}
           </CardBody>
         </Card>
 
-        <aside className="mr-detail" aria-live="polite">
+        <div className="mr-detail" aria-live="polite">
           {!selected ? (
             <Card className="mr-detail-empty">
               <EmptyState
@@ -363,22 +364,47 @@ function MobileRequestsContent() {
               />
             </Card>
           ) : (
-            <>
-              <Card className="mr-detail-card">
-                <div className="mr-detail-head">
-                  <div>
-                    <span className="mr-detail-eyebrow">Laundry request · #{selected.id.slice(0, 8)}</span>
-                    <h2>{customerNameOf(selected)}</h2>
-                    <p>Received {formatCreated(selected.created_at)}</p>
-                  </div>
-                  <div className="mr-detail-head__actions">
-                    <StatusPill tone={requestMeta(selected).tone} dot>{requestMeta(selected).label}</StatusPill>
+            <DetailView
+              key={selected.id}
+              className="mr-detail-card"
+              variant={isNarrow ? "overlay" : "inline"}
+              onClose={() => setSelectedId(null)}
+              title={customerNameOf(selected)}
+              subtitle={`Laundry request · #${selected.id.slice(0, 8)} · received ${formatCreated(selected.created_at)}`}
+              actions={
+                <>
+                  <StatusPill tone={requestMeta(selected).tone} dot>{requestMeta(selected).label}</StatusPill>
+                  {isNarrow ? null : (
                     <Button variant="ghost" size="sm" iconOnly onClick={() => setSelectedId(null)} aria-label="Close request details">
                       <X size={16} />
                     </Button>
-                  </div>
-                </div>
-
+                  )}
+                </>
+              }
+              footer={
+                isActiveWork(selected.request_status) ? (
+                  <>
+                    <span className="mr-action-note">
+                      {decision === "confirmed"
+                        ? "Approves the client's own date"
+                        : decision === "declined"
+                          ? "Closes the request"
+                          : "Sends the date you choose"}
+                    </span>
+                    <Button
+                      variant="primary"
+                      block
+                      onClick={() => void saveDecision()}
+                      disabled={!canEdit || saving}
+                      leadingIcon={<Check size={16} />}
+                    >
+                      {saving ? "Saving…" : decision === "confirmed" ? "Confirm date" : decision === "declined" ? "Decline request" : "Send date"}
+                    </Button>
+                  </>
+                ) : undefined
+              }
+            >
+              <div className="mr-detail-body">
                 <CardBody>
                   <div className="meta-grid">
                     <DetailItem icon={<CalendarDays size={15} />} label="Client's preferred date" value={formatDay(selected.requested_for)} />
@@ -389,7 +415,6 @@ function MobileRequestsContent() {
                     <DetailItem icon={<Smartphone size={15} />} label="Client response" value={selected.customer_response ? (selected.customer_response === "accepted" ? "Accepted the date" : "Rejected the date") : "Not answered yet"} />
                   </div>
                 </CardBody>
-              </Card>
 
               <Card>
                 <CardHeader title="Pickup location" subtitle="Only shared by the client for this request" />
@@ -490,16 +515,6 @@ function MobileRequestsContent() {
                       />
                     </label>
 
-                    <Button
-                      variant="primary"
-                      block
-                      onClick={() => void saveDecision()}
-                      disabled={!canEdit || saving}
-                      leadingIcon={<Check size={16} />}
-                    >
-                      {saving ? "Saving…" : "Send update"}
-                    </Button>
-
                     {!canEdit ? (
                       <p className="mr-view-only">You can review this request, but only an authorised manager can change it.</p>
                     ) : null}
@@ -529,9 +544,10 @@ function MobileRequestsContent() {
                   </CardBody>
                 </Card>
               )}
-            </>
+              </div>
+            </DetailView>
           )}
-        </aside>
+        </div>
       </section>
 
       <p className="mr-footnote">

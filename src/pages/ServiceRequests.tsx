@@ -1,8 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, ClipboardList, Inbox, Ruler, RefreshCw, ShieldCheck, Sparkles, X } from "lucide-react";
+import { CalendarDays, ClipboardList, Inbox, Ruler, RefreshCw, ShieldCheck, Sparkles } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { usePermission } from "../hooks/usePermission";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import {
+  Avatar,
+  Banner,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  DetailView,
+  EmptyState,
+  LoadingRows,
+  PageHeader,
+  RecordList,
+  RecordRow,
+  SegmentedControl,
+} from "../components/ui";
 import "./ServiceRequests.css";
 
 /**
@@ -190,6 +206,10 @@ function ServiceRequestsContent() {
     return () => { void supabase.removeChannel(channel); };
   }, [loadRequests]);
 
+  /* Under 900px the record takes over the screen: the queue and the detail
+     cannot share a phone. Same breakpoint as .detail-view.is-overlay. */
+  const isNarrow = useMediaQuery("(max-width: 900px)");
+
   const selected = requests.find((request) => request.id === selectedId) ?? null;
 
   const counts = useMemo(() => ({
@@ -301,86 +321,136 @@ function ServiceRequestsContent() {
           : ["Not taken", "Chapman could not take these requests. The customer has been told why"];
 
   return <div className="sr-page">
-    <header className="sr-header">
-      <div>
-        <div className="sr-eyebrow"><Inbox size={14} /> APP INTAKE</div>
-        <h1>Service Requests</h1>
-        <p>Cleaning, fumigation, detailing, polytank and contract requests sent from the Chapman app. Offer a date and the customer accepts or rejects it in the app.</p>
-      </div>
-      <button className="sr-refresh" onClick={() => void loadRequests()} disabled={loading} aria-label="Refresh service requests">
-        <RefreshCw size={16} className={loading ? "sr-spin" : ""} /> Refresh
-      </button>
-    </header>
+    <PageHeader
+      eyebrow={<><Inbox size={13} /> App intake</>}
+      title="Service Requests"
+      subtitle="Cleaning, fumigation, detailing, polytank and contract requests sent from the Chapman app."
+      actions={
+        <Button
+          variant="secondary"
+          leadingIcon={<RefreshCw size={15} className={loading ? "sr-spin" : ""} />}
+          onClick={() => void loadRequests()}
+          disabled={loading}
+        >
+          Refresh
+        </Button>
+      }
+    />
 
-    <section className="sr-summary" aria-label="Service request views">
-      <button className={filter === "action" ? "sr-summary-card active" : "sr-summary-card"} onClick={() => setFilter("action")}><span>Needs a date</span><strong>{counts.action}</strong></button>
-      <button className={filter === "waiting" ? "sr-summary-card active amber" : "sr-summary-card amber"} onClick={() => setFilter("waiting")}><span>With the customer</span><strong>{counts.waiting}</strong></button>
-      <button className={filter === "accepted" ? "sr-summary-card active green" : "sr-summary-card green"} onClick={() => setFilter("accepted")}><span>Accepted</span><strong>{counts.accepted}</strong></button>
-      <button className={filter === "another" ? "sr-summary-card active red" : "sr-summary-card red"} onClick={() => setFilter("another")}><span>Wants another date</span><strong>{counts.another}</strong></button>
-      <button className={filter === "declined" ? "sr-summary-card active rose" : "sr-summary-card rose"} onClick={() => setFilter("declined")}><span>Not taken</span><strong>{counts.declined}</strong></button>
-    </section>
+    <SegmentedControl<RequestView>
+      ariaLabel="Service request views"
+      value={filter}
+      onChange={setFilter}
+      options={[
+        { value: "action", label: "Needs a date", count: counts.action },
+        { value: "waiting", label: "With the customer", count: counts.waiting },
+        { value: "accepted", label: "Accepted", count: counts.accepted },
+        { value: "another", label: "Wants another date", count: counts.another },
+        { value: "declined", label: "Not taken", count: counts.declined },
+      ]}
+      className="sr-views"
+    />
+
+    {savedMessage ? (
+      <Banner tone="ok" role="status" className="sr-feedback">{savedMessage}</Banner>
+    ) : null}
+    {error ? (
+      <Banner tone="bad" role="alert" className="sr-feedback">{error}</Banner>
+    ) : null}
 
     <section className="sr-workspace">
-      <div className="sr-list-panel">
-        <div className="sr-list-heading">
-          <div><h2>{heading[0]}</h2><p>{heading[1]}</p></div>
-          <span>{filtered.length}</span>
-        </div>
-        {error ? <div className="sr-error">{error}</div> : null}
-        {savedMessage ? <div className="sr-saved">{savedMessage}</div> : null}
-        {loading || permissionLoading
-          ? <div className="sr-empty"><RefreshCw size={18} className="sr-spin" /><p>Loading service requests...</p></div>
-          : filtered.length === 0
-            ? <div className="sr-empty">
-              <ClipboardList size={24} />
-              <h3>No requests in this view</h3>
-              <p>New app requests appear here the moment a customer sends one.</p>
-              {requests.length === 0 && (
+      <Card className="sr-list-panel">
+        <CardHeader
+          title={heading[0]}
+          subtitle={heading[1]}
+          actions={<span className="tag-count">{filtered.length}</span>}
+        />
+
+        <CardBody tight className="sr-list-body">
+          {loading || permissionLoading ? (
+            <LoadingRows rows={4} label="Loading service requests" />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={<ClipboardList size={20} />}
+              title="No requests in this view"
+              message="New app requests appear here the moment a customer sends one."
+              action={requests.length === 0 ? (
                 <p className="sr-hint">
                   If a customer has already sent one and it is not here, the database may not be
                   letting staff read these records yet. Running the statement file
                   {" "}<strong>docs/security-fix.sql</strong>, section 4, switches that on.
                 </p>
-              )}
-            </div>
-            : <div className="sr-list">
+              ) : undefined}
+            />
+          ) : (
+            <RecordList label={heading[0]} className="sr-list">
               {filtered.map((request) => {
                 const state = requestState(request);
                 const area = request.details?.estimatedAreaM2;
-                return <button key={request.id} className={selectedId === request.id ? "sr-request selected" : "sr-request"} onClick={() => setSelectedId(request.id)}>
-                  <div className="sr-request-top">
-                    <span className="sr-request-id">#{request.id.slice(0, 8)}</span>
-                    <span className="sr-status" style={{ color: state.color, background: state.background }}>{state.label}</span>
-                  </div>
-                  <div className="sr-request-title">
-                    <strong>{request.service_title || SERVICE_NAMES[request.service_id ?? ""] || "Service request"}</strong>
-                    <span>{customerName(request)}</span>
-                  </div>
-                  <div className="sr-request-meta">
-                    <span><CalendarDays size={13} /> {formatDay(request.details?.requestedDate?.slice(0, 10))}</span>
-                    {area ? <span>{area} m2 measured</span> : <span>No measurement</span>}
-                  </div>
-                  {request.appointment_response === "declined" && request.declined_reason ? (
-                    <p className="sr-decline-line">Told the customer: {request.declined_reason}</p>
-                  ) : null}
-                </button>;
+                return (
+                  <RecordRow
+                    key={request.id}
+                    className="sr-record"
+                    selected={selectedId === request.id}
+                    onClick={() => setSelectedId(request.id)}
+                    aria-label={`Open request ${request.id.slice(0, 8)} from ${customerName(request)}`}
+                    lead={<Avatar name={customerName(request)} size="md" />}
+                    title={request.service_title || SERVICE_NAMES[request.service_id ?? ""] || "Service request"}
+                    subtitle={`#${request.id.slice(0, 8)} · ${customerName(request)}`}
+                    meta={[
+                      <><CalendarDays size={12} /> {formatDay(request.details?.requestedDate?.slice(0, 10))}</>,
+                      <>{area ? `${area} m2 measured` : "No measurement"}</>,
+                    ]}
+                    trail={<span className="sr-status" style={{ color: state.color, background: state.background }}>{state.label}</span>}
+                  />
+                );
               })}
-            </div>}
-      </div>
+            </RecordList>
+          )}
+        </CardBody>
+      </Card>
 
-      <aside className="sr-detail-panel" aria-live="polite">
-        {!selected
-          ? <div className="sr-detail-empty"><ShieldCheck size={26} /><h2>Select a request</h2><p>Review what the customer asked for, then offer a date. The customer accepts or rejects it in the app, and the answer appears here.</p></div>
-          : <>
-            <div className="sr-detail-header">
-              <div>
-                <span className="sr-detail-label">SERVICE REQUEST</span>
-                <h2>{selected.service_title || SERVICE_NAMES[selected.service_id ?? ""] || "Service request"}</h2>
-                <p>Received {formatReceived(selected.created_at)}</p>
-              </div>
-              <button onClick={() => setSelectedId(null)} aria-label="Close request details"><X size={18} /></button>
-            </div>
-
+      <div className="sr-detail-wrap" aria-live="polite">
+        {!selected ? (
+          <Card className="sr-detail-empty-card">
+            <EmptyState
+              icon={<ShieldCheck size={22} />}
+              title="Select a request"
+              message="Review what the customer asked for, then offer a date. The customer accepts or rejects it in the app, and the answer appears here."
+            />
+          </Card>
+        ) : (
+          <DetailView
+            key={selected.id}
+            className="sr-detail"
+            variant={isNarrow ? "overlay" : "inline"}
+            onClose={() => setSelectedId(null)}
+            title={selected.service_title || SERVICE_NAMES[selected.service_id ?? ""] || "Service request"}
+            subtitle={`Received ${formatReceived(selected.created_at)}`}
+            footer={
+              isActionable(selected.appointment_response) ? (
+                <>
+                  {selected.appointment_response === "declined" ? null : (
+                    <Button
+                      variant="danger"
+                      onClick={() => void sendDecline()}
+                      disabled={!canEdit || saving}
+                    >
+                      {saving ? "Saving..." : "Decline"}
+                    </Button>
+                  )}
+                  <Button
+                    variant="primary"
+                    block
+                    onClick={() => void sendDate()}
+                    disabled={!canEdit || saving}
+                  >
+                    {saving ? "Sending..." : "Send this date"}
+                  </Button>
+                </>
+              ) : undefined
+            }
+          >
             <div className="sr-detail-status">
               <span className="sr-status" style={{ color: requestState(selected).color, background: requestState(selected).background }}>{requestState(selected).label}</span>
               {selected.details?.cameraGuided ? <span className="sr-tag">Camera guided</span> : null}
@@ -435,27 +505,25 @@ function ServiceRequestsContent() {
                     <p>The customer sees this date in the app and accepts or rejects it. {selected.appointment_response === "rejected" ? "They already asked for a different date." : "Starting from their preferred date is usually fastest."}</p>
                   </div>
                   <label>Date to offer<input type="date" value={date} onChange={(event) => setDate(event.target.value)} disabled={!canEdit || saving} /></label>
-                  <button className="sr-save" onClick={() => void sendDate()} disabled={!canEdit || saving}>
-                    {saving ? "Sending..." : "Send this date to the customer"}
-                  </button>
+                  <p className="sr-bar-hint">Send this date is at the foot of this panel.</p>
                 </div>
 
-                <div className="sr-decision sr-decision-decline">
-                  <div>
-                    <h3>Or decline it, with a reason</h3>
-                    <p>The customer reads your reason in the app, so write it the way you would say it to them. One line is enough.</p>
+                {selected.appointment_response === "declined" ? null : (
+                  <div className="sr-decision sr-decision-decline">
+                    <div>
+                      <h3>Or decline it, with a reason</h3>
+                      <p>The customer reads your reason in the app, so write it the way you would say it to them. One line is enough.</p>
+                    </div>
+                    <div className="sr-reasons">
+                      {QUICK_REASONS.map((quick) => (
+                        <button key={quick} type="button" className={declineReason === quick ? "sr-reason-chip active" : "sr-reason-chip"} onClick={() => setDeclineReason(quick)} disabled={!canEdit || saving}>{quick}</button>
+                      ))}
+                    </div>
+                    <label>Reason the customer will read<textarea value={declineReason} onChange={(event) => setDeclineReason(event.target.value)} placeholder="For example: We are fully booked on the dates you chose. Send a request for the following week and we will take it." disabled={!canEdit || saving} rows={3} /></label>
+                    <p className="sr-bar-hint">Decline is at the foot of this panel.</p>
+                    {!canEdit ? <p className="sr-view-only">You can review this request, but only an authorised manager can decline it.</p> : null}
                   </div>
-                  <div className="sr-reasons">
-                    {QUICK_REASONS.map((quick) => (
-                      <button key={quick} type="button" className={declineReason === quick ? "sr-reason-chip active" : "sr-reason-chip"} onClick={() => setDeclineReason(quick)} disabled={!canEdit || saving}>{quick}</button>
-                    ))}
-                  </div>
-                  <label>Reason the customer will read<textarea value={declineReason} onChange={(event) => setDeclineReason(event.target.value)} placeholder="For example: We are fully booked on the dates you chose. Send a request for the following week and we will take it." disabled={!canEdit || saving} rows={3} /></label>
-                  <button className="sr-decline" onClick={() => void sendDecline()} disabled={!canEdit || saving}>
-                    {saving ? "Saving..." : "Decline this request"}
-                  </button>
-                  {!canEdit ? <p className="sr-view-only">You can review this request, but only an authorised manager can decline it.</p> : null}
-                </div>
+                )}
               </>
             ) : (
               <div className="sr-section">
@@ -467,12 +535,12 @@ function ServiceRequestsContent() {
                 </p>
               </div>
             )}
-          </>}
-      </aside>
+          </DetailView>
+        )}
+      </div>
     </section>
   </div>;
 }
-
 function DetailItem({ icon, label, value }: { icon: JSX.Element; label: string; value: string }) {
   return <div className="sr-detail-item"><span>{icon}</span><div><small>{label}</small><strong>{value}</strong></div></div>;
 }

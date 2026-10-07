@@ -12,6 +12,7 @@ import "./OrderBuilder.css";
 // ✅ Added permission imports
 import { usePermission } from "../hooks/usePermission";
 import { PermissionGuard } from "../components/PermissionGuard";
+import { ActionBar } from "../components/ui";
 
 interface Service {
   id: string;
@@ -800,6 +801,29 @@ export const OrderBuilder = () => {
           </div>
         </div>
       </PermissionGuard>
+
+      {/* The submit sits at the top of a long form, out of thumb reach once the
+          cart is full. On a phone the shared action bar pins the same action,
+          with the amount, to the bottom of the screen. */}
+      <ActionBar
+        className="ob-phone-bar"
+        note={
+          <span className="ob-phone-bar__note">
+            Total due
+            <strong>₵{totalDue.toFixed(2)}</strong>
+          </span>
+        }
+      >
+        <button
+          className="ob-submit-btn"
+          onClick={handleSubmit}
+          disabled={submitting || !canEdit}
+          style={{ opacity: !canEdit ? 0.6 : 1, cursor: !canEdit ? "not-allowed" : "pointer" }}
+        >
+          <Save size={16} />
+          {submitting ? "Saving..." : "Create Order"}
+        </button>
+      </ActionBar>
     </div>
   );
 };

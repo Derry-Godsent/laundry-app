@@ -699,6 +699,45 @@ input[type="date"]::-moz-calendar-picker-indicator {
   }
 }
 
+/* The submit lives at the top of the form. On a phone the shared action bar
+   pins the same action to the bottom of the screen, one-handed. */
+.ob-phone-bar { display: none; }
+
+@media (max-width: 640px) {
+  .ob-phone-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: 10px var(--page-pad-x) calc(10px + var(--safe-bottom));
+    background: #0c0f18;
+  }
+
+  .ob-phone-bar__note {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--text-3);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .ob-phone-bar__note strong {
+    display: block;
+    margin-top: 2px;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-1);
+  }
+
+  .ob-phone-bar .ob-submit-btn {
+    flex: 0 0 auto;
+    min-height: var(--tap-min);
+    padding: 0 18px;
+  }
+}
+
 @media (max-width: 480px) {
   .ob-header {
     flex-direction: column;

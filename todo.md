@@ -49,8 +49,13 @@ the five-screen correctness pass and the definition of done live in
       `ActionBar`, `Modal`, `ConfirmDialog`, `LoadingRows`, `ErrorState`, plus the phone
       treatment of the page header and summary tiles. Demonstrated in `/preview`
       section 5 inside the width probe.
-- [ ] Phase C, daily operations: Mobile Requests, Service Requests, Orders QA,
-      New Order, Clients.
+- [x] Phase C, daily operations: Mobile Requests and Service Requests migrated to the
+      shared patterns (record rows, `DetailView` takeover at 900px, decisions in the pinned
+      action bar, `SegmentedControl` views, `EmptyState`, `LoadingRows`, `Banner`). Orders
+      audited at 320 to 430px (the 1060px table floor is already released at ≤640px, cells
+      carry `data-label`). New Order: `ActionBar` pins `Create Order` with the amount due on
+      phones. Clients: the phone list is document flow, so the single scroller is `.main-body`.
+      Verified with `tsc -b`, `vite build`, `check:copy` and a 25-point structural check.
 - [ ] Phase D, the rest: Dashboard, App Ideas, App Accounts, Staff, Services,
       Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile.
 - [ ] Phase E, overall appearance: palette, type, surfaces, border contrast, spacing,

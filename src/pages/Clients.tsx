@@ -204,6 +204,12 @@ const CSS = `
 @media(max-width:700px){
   /* The card layout is a block list now, so the 780px table floor must go. */
   .cl-tbl { min-width: 0 !important; }
+  /* The list is the page on a phone: release the fixed frame so the whole page
+     scrolls once in .main-body, instead of squeezing 127 clients into the
+     sliver of height the tiles and filters leave behind. */
+  .cl-shell { height: auto; min-height: 100%; overflow: visible; }
+  .cl-body, .cl-tbl-wrap { overflow: visible; }
+  .cl-tbl-wrap { flex: none; }
   /* Two compact tiles instead of four tall ones: the list needs the height. */
   .cl-kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; padding: 12px 16px 0; }
   .cl-kpi { padding: 12px 13px; border-radius: 13px; }

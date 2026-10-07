@@ -1,67 +1,113 @@
-/* Service Requests page. Same dark workspace feel as the Mobile Requests queue. */
+/* Service Requests page. Same dark workspace feel as the Mobile Requests queue.
+   The shell, the record rows, the detail takeover and the action bar come from
+   the shared patterns in src/styles/components.css; what is left here is this
+   page's own furniture: the decision panels and the detail fields. */
 
-.sr-page { display: flex; flex-direction: column; gap: 18px; padding: 22px 24px 40px; color: #e6e9f2; font-family: "DM Sans", system-ui, sans-serif; }
+.sr-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  /* Fills the shell frame: .main-body owns the page scroll. Padding comes from
+     the shared tokens so this page lines up with every other one. */
+  min-height: 100%;
+  padding: var(--page-pad-y) var(--page-pad-x) var(--page-pad-bottom);
+  color: #e6e9f2;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
 
-.sr-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
-.sr-eyebrow { display: flex; align-items: center; gap: 7px; color: #61d7bc; font-size: 11px; font-weight: 700; letter-spacing: 1.3px; }
-.sr-header h1 { margin: 6px 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -0.4px; }
-.sr-header p { margin: 0; max-width: 640px; color: #9aa3b5; font-size: 13px; line-height: 20px; }
-.sr-refresh { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border: 1px solid rgba(255,255,255,0.13); border-radius: 11px; background: rgba(255,255,255,0.05); color: #cfd6e6; font-size: 12px; font-weight: 700; cursor: pointer; }
-.sr-refresh:disabled { opacity: 0.6; cursor: default; }
 .sr-spin { animation: sr-rotate 900ms linear infinite; }
 @keyframes sr-rotate { to { transform: rotate(360deg); } }
 
-.sr-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; }
-.sr-summary-card { display: flex; flex-direction: column; gap: 5px; padding: 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; background: rgba(255,255,255,0.04); color: #9aa3b5; text-align: left; cursor: pointer; }
-.sr-summary-card span { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
-.sr-summary-card strong { font-size: 24px; font-weight: 800; color: #ffffff; }
-.sr-summary-card.active { border-color: rgba(97,215,188,0.55); background: rgba(97,215,188,0.1); }
-.sr-summary-card.amber.active { border-color: rgba(246,199,105,0.55); background: rgba(246,199,105,0.1); }
-.sr-summary-card.green.active { border-color: rgba(98,221,147,0.55); background: rgba(98,221,147,0.1); }
-.sr-summary-card.red.active { border-color: rgba(251,148,148,0.55); background: rgba(251,148,148,0.1); }
+/* ── Views ─────────────────────────────────────────────────────────────── */
 
-.sr-summary-card.rose.active { border-color: rgba(224,139,139,0.55); background: rgba(224,139,139,0.12); }
+.sr-views { flex-wrap: wrap; max-width: 100%; }
 
-.sr-workspace { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 640px) {
+  /* A strip that slides sideways rather than stacking five tabs deep. */
+  .sr-views {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    margin-bottom: var(--sp-1);
+  }
 
-.sr-list-panel { display: flex; flex-direction: column; gap: 11px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; background: rgba(255,255,255,0.035); }
-.sr-list-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.sr-list-heading h2 { margin: 0 0 4px; font-size: 15px; font-weight: 800; }
-.sr-list-heading p { margin: 0; color: #8b94a7; font-size: 11px; line-height: 16px; }
-.sr-list-heading > span { min-width: 28px; height: 28px; border-radius: 9px; background: rgba(255,255,255,0.08); color: #e6e9f2; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .sr-views::-webkit-scrollbar { display: none; }
+  .sr-views .segmented__item { flex: 0 0 auto; }
+}
 
-.sr-list { display: flex; flex-direction: column; gap: 9px; max-height: 62vh; overflow-y: auto; }
-.sr-request { display: flex; flex-direction: column; gap: 8px; padding: 13px; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; background: rgba(255,255,255,0.03); color: inherit; text-align: left; cursor: pointer; }
-.sr-request:hover { border-color: rgba(97,215,188,0.4); }
-.sr-request.selected { border-color: rgba(97,215,188,0.7); background: rgba(97,215,188,0.08); }
-.sr-request-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.sr-request-id { color: #7f8798; font-size: 11px; font-weight: 700; letter-spacing: 0.6px; }
-.sr-status { padding: 4px 9px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.4px; }
-.sr-request-title { display: flex; flex-direction: column; gap: 3px; }
-.sr-request-title strong { font-size: 13px; font-weight: 800; }
-.sr-request-title span { color: #9aa3b5; font-size: 11px; }
-.sr-request-meta { display: flex; flex-wrap: wrap; gap: 10px; color: #9aa3b5; font-size: 11px; }
-.sr-request-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.sr-feedback { margin-bottom: var(--sp-1); }
 
-.sr-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 26px 14px; color: #8b94a7; text-align: center; }
-.sr-empty h3 { margin: 0; color: #e6e9f2; font-size: 14px; }
-.sr-empty p { margin: 0; font-size: 12px; line-height: 17px; }
-.sr-empty .sr-hint { max-width: 420px; color: #d9c9a4; }
-.sr-empty .sr-hint strong { color: #ffffff; }
-.sr-error { padding: 11px; border-radius: 11px; background: rgba(248,113,113,0.14); color: #fb9494; font-size: 12px; }
-.sr-saved { padding: 11px; border-radius: 11px; background: rgba(97,215,188,0.14); color: #61d7bc; font-size: 12px; }
+/* ── Queue ─────────────────────────────────────────────────────────────── */
 
-.sr-detail-panel { display: flex; flex-direction: column; gap: 14px; padding: 17px; border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; background: rgba(255,255,255,0.035); }
-.sr-detail-empty { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 52px 20px; color: #8b94a7; text-align: center; }
-.sr-detail-empty h2 { margin: 0; color: #e6e9f2; font-size: 16px; }
-.sr-detail-empty p { margin: 0; max-width: 380px; font-size: 12px; line-height: 18px; }
-.sr-detail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.sr-detail-label { color: #61d7bc; font-size: 10px; font-weight: 800; letter-spacing: 1.3px; }
-.sr-detail-header h2 { margin: 5px 0 4px; font-size: 19px; font-weight: 800; }
-.sr-detail-header p { margin: 0; color: #8b94a7; font-size: 11px; }
-.sr-detail-header button { width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; background: rgba(255,255,255,0.05); color: #cfd6e6; cursor: pointer; }
+.sr-workspace {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: var(--sp-4);
+  align-items: start;
+}
+
+.sr-list-panel { overflow: hidden; }
+
+.sr-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+.sr-list-body { padding: var(--sp-3); }
+
+.sr-status {
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+/* The database note under an empty queue: a different colour, because it is a
+   precondition, not an instruction. */
+.sr-hint { max-width: 420px; margin: 0; color: #d9c9a4; font-size: 12px; line-height: 18px; }
+.sr-hint strong { color: #ffffff; }
+
+@media (min-width: 901px) {
+  /* The queue owns its own scroll so a long list does not push the page and
+     the record being read stays where it was. */
+  .sr-list { max-height: 62vh; overflow-y: auto; }
+  .sr-detail { max-height: calc(100dvh - 260px); }
+}
+
+/* One record in the queue. On a desk the rows keep their own outline; on a
+   phone the shared .record rule already turns each one into a card. */
+@media (min-width: 641px) {
+  .sr-list .sr-record {
+    border: 1px solid var(--line-faint);
+    border-radius: var(--r-md);
+    background: var(--ink-raised);
+  }
+
+  .sr-list .sr-record:last-child { border-bottom: 1px solid var(--line-faint); }
+  .sr-list .sr-record:hover { border-color: var(--line); background: var(--ink-hover); }
+}
+
+/* ── Detail ────────────────────────────────────────────────────────────── */
+
+.sr-detail-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+  position: sticky;
+  top: var(--sp-4);
+}
+
+.sr-detail-empty-card { padding: var(--sp-4); }
+
 .sr-detail-status { display: flex; align-items: center; gap: 9px; }
-.sr-tag { padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,0.08); color: #cfd6e6; font-size: 10px; font-weight: 700; }
+.sr-tag {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: #cfd6e6;
+  font-size: 10px;
+  font-weight: 700;
+}
 
 .sr-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .sr-detail-item { display: flex; gap: 9px; padding: 11px; border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; background: rgba(255,255,255,0.03); }
@@ -80,13 +126,13 @@
 .sr-grid-item small { display: block; color: #8b94a7; font-size: 10px; }
 .sr-grid-item strong { display: block; margin-top: 3px; font-size: 12px; }
 
+/* ── Decisions ─────────────────────────────────────────────────────────── */
+
 .sr-decision { display: flex; flex-direction: column; gap: 11px; padding: 14px; border: 1px solid rgba(97,215,188,0.35); border-radius: 15px; background: rgba(97,215,188,0.07); }
 .sr-decision h3 { margin: 0 0 4px; font-size: 14px; font-weight: 800; }
 .sr-decision p { margin: 0; color: #b9c0cf; font-size: 11px; line-height: 17px; }
 .sr-decision label { display: flex; flex-direction: column; gap: 6px; color: #9aa3b5; font-size: 11px; font-weight: 700; }
 .sr-decision input { height: 40px; padding: 0 11px; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; background: rgba(255,255,255,0.05); color: #e6e9f2; font-size: 13px; }
-.sr-save { height: 42px; border: none; border-radius: 12px; background: linear-gradient(135deg, #059669, #10b981); color: #ffffff; font-size: 13px; font-weight: 800; cursor: pointer; }
-.sr-save:disabled { opacity: 0.6; cursor: default; }
 .sr-view-only { margin: 0; color: #f6c769; font-size: 11px; }
 
 .sr-decision-decline { border-color: rgba(224,139,139,0.4); background: rgba(224,139,139,0.06); }
@@ -94,15 +140,33 @@
 .sr-reasons { display: flex; flex-wrap: wrap; gap: 6px; }
 .sr-reason-chip { padding: 6px 11px; border: 1px solid rgba(255,255,255,0.14); border-radius: 999px; background: rgba(255,255,255,0.04); color: #b9c0cf; font-size: 11px; cursor: pointer; }
 .sr-reason-chip.active { border-color: rgba(224,139,139,0.6); background: rgba(224,139,139,0.16); color: #f3c9c9; }
-.sr-decline { height: 42px; border: 1px solid rgba(224,139,139,0.55); border-radius: 12px; background: rgba(224,139,139,0.14); color: #f3c9c9; font-size: 13px; font-weight: 800; cursor: pointer; }
-.sr-decline:disabled { opacity: 0.6; cursor: default; }
 .sr-declined-box { display: flex; flex-direction: column; gap: 7px; padding: 14px; border: 1px solid rgba(224,139,139,0.4); border-radius: 15px; background: rgba(224,139,139,0.08); }
 .sr-declined-box h3 { margin: 0; font-size: 14px; font-weight: 800; color: #f3c9c9; }
 .sr-muted-small { margin: 0; color: #8b94a7; font-size: 11px; line-height: 17px; }
-.sr-decline-line { margin: 0; color: #e08b8b; font-size: 11px; line-height: 16px; }
 
-@media (max-width: 1080px) {
+/* The actions live in the pinned bar, so on a desk say where to find them.
+   On a phone the bar is pinned to the bottom and needs no pointing at. */
+.sr-bar-hint { margin: 0; color: #8b94a7; font-size: 11.5px; }
+
+/* ── Phone ─────────────────────────────────────────────────────────────── */
+
+/* The record takes over the screen (see .detail-view.is-overlay) from 900px
+   down, so the queue sits alone: it is the page on a phone. */
+@media (max-width: 900px) {
   .sr-workspace { grid-template-columns: minmax(0, 1fr); }
-  .sr-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .sr-list { max-height: none; }
+  .sr-detail-wrap { position: static; }
+}
+
+@media (max-width: 640px) {
+  .sr-detail-grid { grid-template-columns: minmax(0, 1fr); }
+
+  .sr-decision { padding: 13px; }
+  .sr-decision input[type="date"],
+  .sr-decision textarea { width: 100%; min-height: var(--tap-min); }
+  .sr-reason-chip { min-height: 36px; }
+  .sr-bar-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sr-spin { animation: none; }
 }
