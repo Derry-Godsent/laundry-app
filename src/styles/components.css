@@ -804,6 +804,511 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .banner--bad { border-color: rgba(251, 125, 125, 0.24); background: var(--bad-soft); color: #ffd9d9; }
 
 /* ───────────────────────────────────────────────────────────────────────────
+   MOBILE PATTERNS
+   One way to do each thing on a phone, so no page invents its own again:
+
+     .page-header       title + actions, stacked on a phone
+     .stat-grid         summary tiles, two per row on a phone
+     .filter-bar        search + filters, chip strip on a phone
+     .record-list/.record  a list of records, comfortable to tap
+     .detail-view       one record in full, a takeover screen on a phone
+     .action-bar        the primary action, reachable one-handed
+     .modal             a focused task, full screen on a phone
+     .confirm           a decision, never wider than the phone
+     .loading-rows      a list that is still loading
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-5);
+  }
+
+  .page-title { font-size: 21px; }
+  .page-subtitle { font-size: 13px; }
+
+  /* Actions become a full-width row of equal buttons, thumb height. */
+  .page-header__actions { gap: var(--sp-2); }
+  .page-header__actions > .btn { flex: 1 1 auto; min-height: var(--tap-min); }
+  .page-header__actions > .btn--icon { flex: 0 0 auto; width: var(--tap-min); }
+  .page-header__actions .btn-text { display: inline; }
+}
+
+/* ── Summary tiles ──────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-3);
+  }
+
+  .stat { padding: var(--sp-4); }
+  .stat__value,
+  .stat strong { font-size: 20px; }
+}
+
+/* ── Filter bar ─────────────────────────────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.filter-bar__search { flex: 1 1 200px; min-width: 0; }
+
+/* The rest of the controls (selects, chips, view switch) sit after the search
+   and share one line, wrapping as needed. */
+.filter-bar__rest {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  flex: 3 1 320px;
+}
+
+.filter-bar__spacer { flex: 1 1 auto; }
+
+@media (max-width: 640px) {
+  .filter-bar { flex-direction: column; align-items: stretch; gap: var(--sp-3); }
+
+  /* One scrollable strip instead of several wrapped rows: wrapped filters are
+     what pushed the list off the bottom of a phone. */
+  .filter-bar__rest {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .filter-bar__rest::-webkit-scrollbar { display: none; }
+  .filter-bar__rest > * { flex: 0 0 auto; }
+
+  /* Touch targets, not mouse targets. */
+  .filter-bar .select,
+  .filter-bar .input { min-height: var(--tap-min); }
+}
+
+/* ── Record list ────────────────────────────────────────────────────────── */
+.record-list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.record {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-4);
+  text-align: left;
+  border-bottom: 1px solid var(--line-faint);
+  background: transparent;
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+
+.record:last-child { border-bottom: none; }
+
+.record:hover { background: rgba(255, 255, 255, 0.025); }
+
+.record:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: -2px;
+}
+
+.record.is-selected {
+  background: var(--brand-soft);
+  box-shadow: inset 2px 0 0 var(--brand-500);
+}
+
+.record__lead { flex-shrink: 0; display: grid; place-items: center; }
+
+.record__main { flex: 1; min-width: 0; }
+
+.record__title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.record__title > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record__sub {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--text-4);
+  flex-wrap: wrap;
+}
+
+.record__meta span { display: inline-flex; align-items: center; gap: 5px; }
+
+.record__trail {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* Phone: a record is a card with a thumb-height tap area. */
+@media (max-width: 640px) {
+  .record {
+    min-height: 68px;
+    padding: var(--sp-4);
+    border-bottom: none;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    background: var(--ink-raised);
+  }
+
+  .record-list { gap: var(--sp-2); padding: var(--sp-3); }
+
+  .record.is-selected {
+    border-color: rgba(111, 119, 247, 0.4);
+    box-shadow: none;
+  }
+
+  .record__sub,
+  .record__title > span:first-child { white-space: normal; }
+}
+
+/* ── Detail view ────────────────────────────────────────────────────────── */
+.detail-view {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--ink-card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.detail-view__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--line-faint);
+  flex-shrink: 0;
+}
+
+.detail-view__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: var(--ink-raised);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.detail-view__back:hover { color: var(--text-1); border-color: var(--line); }
+
+.detail-view__titles { flex: 1; min-width: 0; }
+
+.detail-view__title {
+  font-size: 14.5px;
+  font-weight: 650;
+  color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-view__sub { margin-top: 2px; font-size: 12px; color: var(--text-3); }
+
+.detail-view__actions { display: flex; align-items: center; gap: var(--sp-2); flex-shrink: 0; }
+
+.detail-view__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: var(--sp-4);
+}
+
+/* Phone: the record takes over the screen, with a way back that does not
+   depend on the browser's swipe. */
+@media (max-width: 900px) {
+  .detail-view.is-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    border: none;
+    border-radius: 0;
+    background: var(--ink-base);
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+
+  .detail-view.is-overlay .detail-view__bar {
+    padding: var(--sp-3) var(--page-pad-x);
+    background: var(--ink-shell);
+  }
+
+  .detail-view.is-overlay .detail-view__title { font-size: 15px; }
+
+  .detail-view.is-overlay .detail-view__body {
+    padding: var(--sp-4) var(--page-pad-x) var(--sp-7);
+  }
+
+  .detail-view.is-overlay .detail-view__actions > .btn { min-height: var(--tap-min); }
+}
+
+/* ── Action bar ─────────────────────────────────────────────────────────── */
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--line-faint);
+  background: var(--ink-card);
+}
+
+.action-bar__spacer { flex: 1 1 auto; }
+
+@media (max-width: 640px) {
+  /* Pinned to the bottom of the panel, clear of the home indicator, so the
+     main action is inside thumb reach instead of below the fold. */
+  .action-bar {
+    position: sticky;
+    bottom: 0;
+    flex-wrap: nowrap;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--page-pad-x) calc(var(--sp-3) + var(--safe-bottom));
+    background: var(--ink-hover);
+    box-shadow: 0 -8px 24px -16px rgba(0, 0, 0, 0.9);
+  }
+
+  .action-bar .btn { flex: 1 1 auto; min-height: var(--tap-min); }
+  .action-bar .btn--icon { flex: 0 0 auto; width: var(--tap-min); }
+}
+
+/* ── Modal ──────────────────────────────────────────────────────────────── */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-5);
+  background: rgba(2, 3, 7, 0.68);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fadeIn var(--dur-base) var(--ease-out) both;
+}
+
+.modal__sheet {
+  display: flex;
+  flex-direction: column;
+  width: min(560px, 100%);
+  max-height: min(86dvh, 720px);
+  background: var(--ink-card);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+  animation: fadeUp var(--dur-base) var(--ease-out) both;
+}
+
+.modal__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--line-faint);
+  flex-shrink: 0;
+}
+
+.modal__titles { flex: 1; min-width: 0; }
+
+.modal__title { font-size: 16px; font-weight: 650; color: var(--text-1); }
+.modal__sub { margin-top: 3px; font-size: 12.5px; color: var(--text-3); }
+
+.modal__close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-soft);
+  background: var(--ink-raised);
+  color: var(--text-3);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.modal__close:hover { color: var(--text-1); background: var(--ink-hover); }
+
+.modal__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: var(--sp-5);
+}
+
+.modal__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4) var(--sp-5);
+  border-top: 1px solid var(--line-faint);
+  flex-shrink: 0;
+}
+
+.modal__foot .modal__spacer { flex: 1 1 auto; }
+
+/* Phone: the task takes the whole screen. A floating dialog on a 320px screen
+   leaves no room for the form and no room for the keyboard. */
+@media (max-width: 640px) {
+  .modal { padding: 0; align-items: stretch; }
+
+  .modal__sheet {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    border: none;
+    border-radius: 0;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+
+  .modal__head { padding: var(--sp-4) var(--page-pad-x); }
+  .modal__body { padding: var(--sp-4) var(--page-pad-x); }
+
+  .modal__foot {
+    padding: var(--sp-3) var(--page-pad-x) calc(var(--sp-3) + var(--safe-bottom));
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .modal__foot .btn { min-height: var(--tap-min); width: 100%; }
+  .modal__foot .modal__spacer { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal,
+  .modal__sheet { animation: none; }
+}
+
+/* ── Confirm dialog ─────────────────────────────────────────────────────── */
+.confirm__body {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+}
+
+.confirm__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--r-md);
+  background: var(--ink-raised);
+  color: var(--text-3);
+}
+
+.confirm--danger .confirm__icon { background: var(--bad-soft); color: var(--bad-500); }
+.confirm--brand .confirm__icon { background: var(--brand-soft); color: var(--brand-400); }
+.confirm--ok .confirm__icon { background: var(--ok-soft); color: var(--ok-500); }
+
+.confirm__text { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+
+@media (max-width: 640px) {
+  /* On a phone the sheet is the screen, so a confirmation reads as a page:
+     the decision stays at the bottom where the thumb is. */
+  .modal.confirm .modal__sheet { justify-content: flex-start; }
+  .modal.confirm .modal__body { flex: 0 0 auto; }
+  .confirm__text { font-size: 14px; }
+}
+
+/* ── Loading rows ───────────────────────────────────────────────────────── */
+.loading-rows { display: flex; flex-direction: column; }
+
+.loading-rows__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--line-faint);
+}
+
+.loading-rows__row:last-child { border-bottom: none; }
+
+.loading-rows__dot { width: 34px; height: 34px; border-radius: var(--r-md); flex-shrink: 0; }
+.loading-rows__lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.loading-rows__line { height: 10px; border-radius: var(--r-xs); }
+
+@media (max-width: 640px) {
+  .loading-rows { gap: var(--sp-2); padding: var(--sp-3); }
+  .loading-rows__row {
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    background: var(--ink-raised);
+  }
+}
+
+/* ── Error state ────────────────────────────────────────────────────────── */
+.state-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-8) var(--sp-4);
+  text-align: center;
+}
+
+.state-block__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--sp-1);
+  border-radius: var(--r-md);
+  background: var(--bad-soft);
+  color: var(--bad-500);
+}
+
+.state-block h3 { font-size: 15px; font-weight: 600; }
+.state-block p { font-size: 13px; color: var(--text-3); max-width: 44ch; }
+
+/* ───────────────────────────────────────────────────────────────────────────
    GENERIC LIST ROWS
    ─────────────────────────────────────────────────────────────────────────── */
 

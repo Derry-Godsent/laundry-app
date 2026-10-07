@@ -190,3 +190,32 @@
   border-radius: var(--r-lg);
   background: var(--ink-base);
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   MOBILE PATTERN DEMO
+   Filter bar, records, detail takeover and action bar, shown inside the width
+   probe so the phone layout is what you review.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.pattern-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-height: 100%;
+  background: var(--ink-base);
+}
+
+.pattern-demo .filter-bar { padding: var(--page-pad-x) var(--page-pad-x) 0; }
+
+.pattern-demo .detail-view.is-overlay { z-index: 5; }
+
+.pattern-demo .action-bar { margin-top: auto; }
+
+.probe__warn {
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid rgba(240, 192, 94, 0.24);
+  background: var(--warn-soft);
+  border-radius: var(--r-md);
+  font-size: 12.5px;
+  color: #f7e7c4;
+}

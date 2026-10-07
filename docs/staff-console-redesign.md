@@ -155,8 +155,8 @@ roadmap: 1 to 5 are done and are not repeated; A to F are what remains.
 
 | Phase | Scope | Status |
 | --- | --- | --- |
-| A | **Responsive foundation** · shell, `100dvh`, safe areas, one scroll area per page, compact top bar, drawer, notification panel, shared breakpoints and padding tokens | ⬜ next |
-| B | **Shared mobile patterns** · page header, summary cards, filter/search bar, list row, status badge, detail view, bottom actions, full-screen modal, confirm dialog, empty/error/loading states | ⬜ |
+| A | **Responsive foundation** · shell, `100dvh`, safe areas, one scroll area per page, compact top bar, drawer, notification panel, shared breakpoints and padding tokens | ✅ done |
+| B | **Shared mobile patterns** · page header, summary cards, filter/search bar, list row, detail view, bottom actions, full-screen modal, confirm dialog, empty/error/loading states | ✅ done |
 | C | **Daily operations** · Mobile Requests, Service Requests, Orders QA, New Order, Clients | ⬜ |
 | D | **Rest of the app** · Dashboard, App Ideas, App Accounts, Staff, Services, Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile | ⬜ |
 | E | **Overall appearance** · palette, type, surfaces, border contrast, spacing, button hierarchy, status colours, icons, states, motion, wording (refine the dark operational style, do not replace it) | ⬜ |
@@ -204,6 +204,28 @@ Every layout decision is checked at these widths, smallest first:
 - Reduced motion is respected.
 - Checked on a Vercel preview at several viewport sizes.
 - Existing staff and customer app integration keeps working.
+
+### Mobile patterns (phase B)
+
+Every page composes from these, so a list, a filter row or a decision behaves
+the same on every screen. They live in `components.css` under MOBILE PATTERNS
+and export from `@/components/ui`.
+
+| Pattern | Class | Phone behaviour |
+| --- | --- | --- |
+| Page header | `.page-header` | title and actions stack; actions become a full-width, thumb-height row |
+| Summary tiles | `.stat-grid` | two compact tiles per row |
+| Filter row | `FilterBar` `.filter-bar` | search on its own line, filters become one scrollable strip instead of wrapping the list off screen |
+| A record | `RecordRow` `.record` | a card with a 68px tap area and a trail slot for status |
+| A record in full | `DetailView` `.detail-view` | `variant="overlay"` takes over the screen with a Back button; `inline` stays a column |
+| Primary actions | `ActionBar` `.action-bar` | sticks to the bottom of the viewport, clear of the home indicator |
+| A focused task | `Modal` `.modal` | full screen, form and keyboard fit; Escape closes, page behind cannot scroll, focus held inside |
+| A decision | `ConfirmDialog` `.confirm` | same dialog everywhere; the decision sits at the bottom on a phone |
+| Loading | `LoadingRows` `.loading-rows` | placeholder rows keep the page's shape |
+| Failure | `ErrorState` `.state-block` | plain words plus the one action that might fix it |
+
+Section 5 of `/preview` demonstrates all of them, inside the width probe, with
+live dialog and confirmation buttons.
 
 ### Page archetypes (the two shapes a page may have)
 
@@ -307,6 +329,7 @@ pick the work up without any chat history:
    > `arena/03b7f65b-laundry-app` (PR #7 open against master). Work on the next
    > unchecked phase: presentation only, no data-logic changes. Verify with
    > `npx tsc -b`, `npm run build` and `npm run check:copy`, then commit and
-   > push to the same branch. The current phase is A, the responsive foundation.
+   > push to the same branch. The current phase is C: apply the phase B patterns
+   > (see "Mobile patterns" above) to the daily-operation screens.
 
 4. **Review without credentials** at any point: `/preview` (sample data only).

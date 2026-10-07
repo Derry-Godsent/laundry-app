@@ -4,16 +4,25 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, BarChart3, CalendarDays, Check, CheckCircle2, ChevronLeft, ChevronRight, ClipboardList,
   Clock, DollarSign, Inbox, LayoutDashboard, LayoutGrid, List, Package, Plus, RefreshCw, Search, Shield,
-  Settings, Smartphone, Sparkles, Users, X,
+  Settings, Smartphone, Sparkles, Users, X, Zap,
 } from "lucide-react";
 import {
+  ActionBar,
   Avatar,
   Banner,
   Button,
   Card,
   CardBody,
   CardHeader,
+  ConfirmDialog,
+  DetailView,
   EmptyState,
+  ErrorState,
+  FilterBar,
+  LoadingRows,
+  Modal,
+  RecordList,
+  RecordRow,
   PageHeader,
   SegmentedControl,
   Sparkline,
@@ -97,6 +106,7 @@ const WidthProbe = ({ children }: { children: ReactNode }) => {
   const [width, setWidth] = useState(390);
   const [frame, setFrame] = useState<HTMLIFrameElement | null>(null);
   const [body, setBody] = useState<HTMLElement | null>(null);
+  const [fallback, setFallback] = useState(false);
 
   useEffect(() => {
     if (!frame) return;
@@ -115,6 +125,16 @@ const WidthProbe = ({ children }: { children: ReactNode }) => {
     doc.body.style.background = "var(--ink-base)";
     setBody(doc.body);
   }, [frame]);
+
+  /* If the frame cannot be scripted, show the sample inline rather than
+     nothing: a preview that silently renders empty is worse than a wide one. */
+  useEffect(() => {
+    if (body) return;
+    const timer = window.setTimeout(() => {
+      if (!body) setFallback(true);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [body]);
 
   return (
     <div className="probe">
@@ -145,6 +165,15 @@ const WidthProbe = ({ children }: { children: ReactNode }) => {
       />
 
       {body ? createPortal(children, body) : null}
+      {fallback && !body ? (
+        <>
+          <div className="probe__warn">
+            This browser would not let the preview script the frame, so the sample is shown at full
+            width instead. Use a device emulator to check the phone layout.
+          </div>
+          <div className="pattern-demo">{children}</div>
+        </>
+      ) : null}
     </div>
   );
 };
@@ -167,6 +196,11 @@ export const DesignPreview = () => {
   const [selected, setSelected] = useState<string | null>(SAMPLE_QUEUE[0].id);
   const [ordQuery, setOrdQuery] = useState("");
   const [ordStage, setOrdStage] = useState("all");
+  const [patternFilter, setPatternFilter] = useState("needs-action");
+  const [selectedRecord, setSelectedRecord] = useState<string | null>("8f21c4a0");
+  const [patternModal, setPatternModal] = useState(false);
+  const [patternConfirm, setPatternConfirm] = useState(false);
+  const [confirmDone, setConfirmDone] = useState(false);
 
   const visibleOrders = SAMPLE_ORDERS.filter((row) => {
     const needle = ordQuery.trim().toLowerCase();
@@ -706,6 +740,160 @@ export const DesignPreview = () => {
                 title="No requests in this view"
                 message="New client requests appear here the moment they are submitted."
                 action={<Button variant="secondary">Refresh queue</Button>}
+              />
+            </CardBody>
+          </Card>
+        </div>
+      </section>
+
+      {/* ── Mobile patterns ───────────────────────────────────────────── */}
+      <section className="preview-section">
+        <h2 className="preview-heading">5 · The mobile patterns</h2>
+        <p className="preview-lede">
+          The shapes every page composes from. Filter rows and records are shown in the width probe
+          because their phone behaviour is the point: filters become one scrollable strip and each
+          record becomes a card. The dialog and the confirmation are live buttons.
+        </p>
+
+        <WidthProbe>
+          <div className="pattern-demo">
+            <FilterBar
+              search={
+                <div className="search-input">
+                  <Search size={14} />
+                  <input className="input" placeholder="Search requests" aria-label="Search requests" />
+                </div>
+              }
+              end={<SegmentedControl<"all" | "needs"> ariaLabel="View" value="all" onChange={() => {}} options={[{ value: "all", label: "All", count: 12 }]} />}
+            >
+              {["Needs action", "Waiting for client", "Approved"].map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  className={`probe__btn ${patternFilter === label ? "is-active" : ""}`}
+                  onClick={() => setPatternFilter(label)}
+                >
+                  {label}
+                </button>
+              ))}
+            </FilterBar>
+
+            <RecordList label="Sample requests">
+              {SAMPLE_QUEUE.map((row) => (
+                <RecordRow
+                  key={row.id}
+                  lead={<Avatar name={row.name} size="md" />}
+                  title={row.name}
+                  subtitle={`#${row.id.slice(0, 8)} · ${row.items} items · ${row.total}`}
+                  meta={[
+                    <><CalendarDays size={12} /> {row.date}</>,
+                    row.express ? <><Zap size={12} /> Express</> : null,
+                  ].filter(Boolean) as React.ReactNode[]}
+                  trail={<StatusPill tone={row.tone}>{row.status}</StatusPill>}
+                  selected={selectedRecord === row.id}
+                  onClick={() => setSelectedRecord(row.id)}
+                />
+              ))}
+            </RecordList>
+
+            <DetailView
+              variant="overlay"
+              onClose={() => setSelectedRecord(null)}
+              title="Akosua Mensah"
+              subtitle="Request #8f21c4a0 · Laundry"
+              actions={<StatusPill tone="brand">New</StatusPill>}
+              footer={
+                <>
+                  <Button variant="ghost">Decline</Button>
+                  <Button variant="primary" block>Confirm date</Button>
+                </>
+              }
+            >
+              <div className="meta-grid">
+                <div className="meta-item">
+                  <div className="meta-item__icon"><CalendarDays size={15} /></div>
+                  <div><small>Preferred date</small><strong>Fri, Oct 9</strong></div>
+                </div>
+                <div className="meta-item">
+                  <div className="meta-item__icon"><Inbox size={15} /></div>
+                  <div><small>Items</small><strong>12 pieces</strong></div>
+                </div>
+                <div className="meta-item">
+                  <div className="meta-item__icon"><DollarSign size={15} /></div>
+                  <div><small>Estimate</small><strong>₵420.00</strong></div>
+                </div>
+              </div>
+            </DetailView>
+
+            <ActionBar note="4 records selected">
+              <Button variant="secondary">Export CSV</Button>
+              <Button variant="primary" block>Advance stage</Button>
+            </ActionBar>
+          </div>
+        </WidthProbe>
+
+        <div className="preview-gallery">
+          <Card>
+            <CardHeader title="The dialog" subtitle="Full screen on a phone, centred on a desk" />
+            <CardBody className="preview-stack">
+              <p className="preview-lede" style={{ margin: 0 }}>
+                Escape closes it, the page behind it cannot scroll, and focus stays inside until it
+                closes. On a phone it takes the whole screen so the form and the keyboard fit.
+              </p>
+              <div>
+                <Button variant="secondary" onClick={() => setPatternModal(true)}>Open a dialog</Button>
+              </div>
+              <Modal
+                open={patternModal}
+                onClose={() => setPatternModal(false)}
+                title="Add a client note"
+                subtitle="Visible to staff only"
+                footer={
+                  <>
+                    <Button variant="ghost" onClick={() => setPatternModal(false)}>Cancel</Button>
+                    <span className="modal__spacer" />
+                    <Button variant="primary" onClick={() => setPatternModal(false)}>Save note</Button>
+                  </>
+                }
+              >
+                <label className="field">
+                  <span className="field__label">Note</span>
+                  <textarea className="textarea" rows={4} placeholder="What should the next person know?" />
+                </label>
+              </Modal>
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader title="The confirmation" subtitle="One dialog for every decision" />
+            <CardBody className="preview-stack">
+              <p className="preview-lede" style={{ margin: 0 }}>
+                Delete, archive and stage changes all ask the same way, so staff never have to work
+                out whether a prompt is safe.
+              </p>
+              <div>
+                <Button variant="danger" onClick={() => setPatternConfirm(true)}>Delete 3 orders</Button>
+              </div>
+              <ConfirmDialog
+                open={patternConfirm}
+                onClose={() => setPatternConfirm(false)}
+                onConfirm={() => { setPatternConfirm(false); setConfirmDone(true); }}
+                tone="danger"
+                title="Delete 3 orders?"
+                message="The records leave the order book and cannot be restored from here. Print or export them first if you need a copy."
+                confirmLabel="Delete orders"
+              />
+              {confirmDone ? <Banner tone="ok" title="Confirmed">That is what the real dialog would do next.</Banner> : null}
+            </CardBody>
+          </Card>
+
+          <Card>
+            <CardHeader title="Loading and error" subtitle="The page keeps its shape" />
+            <CardBody className="preview-stack">
+              <LoadingRows rows={3} />
+              <ErrorState
+                message="The orders could not be read. Check the connection and try again."
+                onRetry={() => setConfirmDone(false)}
               />
             </CardBody>
           </Card>

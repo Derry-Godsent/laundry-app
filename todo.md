@@ -42,12 +42,13 @@ app, appearance review, then mobile app integration. Full scope, target widths,
 the five-screen correctness pass and the definition of done live in
 `docs/staff-console-redesign.md` section 6.
 
-- [ ] Phase A, responsive foundation: one shell, `100dvh`, safe areas, one scroll
+- [x] Phase A, responsive foundation: one shell, `100dvh`, safe areas, one scroll
       area per page, compact mobile top bar, stable drawer, notification panel that
       stays on screen, shared breakpoints (320/360/390/430/768/1024) and padding tokens.
-- [ ] Phase B, shared mobile patterns: page header, summary cards, filter/search bar,
-      list row, status badge, detail view, bottom actions, full-screen modal, confirm
-      dialog, empty/error/loading states.
+- [x] Phase B, shared mobile patterns: `FilterBar`, `RecordList`/`RecordRow`, `DetailView`,
+      `ActionBar`, `Modal`, `ConfirmDialog`, `LoadingRows`, `ErrorState`, plus the phone
+      treatment of the page header and summary tiles. Demonstrated in `/preview`
+      section 5 inside the width probe.
 - [ ] Phase C, daily operations: Mobile Requests, Service Requests, Orders QA,
       New Order, Clients.
 - [ ] Phase D, the rest: Dashboard, App Ideas, App Accounts, Staff, Services,
