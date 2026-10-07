@@ -168,6 +168,14 @@ the five-screen correctness pass and the definition of done live in
         there. A refused write reports the database's own reason, and a refused
         read says that what is on screen are built-in values rather than saved
         ones.
+  - [x] The follow-up on that: `system_settings.value` is a boolean column, so
+        the profile could not be stored there (the database answered 22P02).
+        Settings now uses its own single-row table, `business_settings`, created
+        by migration `20261007_010_business_settings.sql`, and the page shows the
+        SQL to run when that table is not in the database yet, with a copy
+        button. The page reads the profile from row 1, writes it with one upsert
+        and confirms the row came back, so a save that matched nothing can no
+        longer report success.
 - [ ] Next, in order:
   - [ ] Type, on the scale. The palette rule is met everywhere now; with the
         guard's pending list emptied it reports 624 font-size declarations and 34

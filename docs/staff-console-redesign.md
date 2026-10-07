@@ -521,11 +521,13 @@ directly (an unauthenticated health endpoint), and everything reads it:
   information, replaced by a line saying what is missing.
 - **A save names the store and reports the server's reason.** Settings read and
   wrote a table that no migration creates, so the page could not be edited and
-  reported the refusal as a possible access problem. Writes go to
-  `system_settings`, one row per store, with the profile as JSON; a refused
-  write prints the database's code and reason, a refused read says that the
-  values on screen are the built-in ones, and a store that has never been
-  written says so quietly until it is.
+  reported the refusal as a possible access problem. The profile now lives in
+  its own single-row table, `business_settings` (migration 010), because the
+  console's other settings table holds booleans and has no room for a profile.
+  A refused write prints the database's code and reason; a refused read says
+  that the values on screen are the built-in ones; a store that has never been
+  written says so quietly; and a store that does not exist yet hands the reader
+  the SQL that creates it, because the page cannot create it itself.
 
 **Wording rule.** Anyone who books through the customer app is a **customer**,
 in copy and in the queue. **Client** is the console's own record: the Clients

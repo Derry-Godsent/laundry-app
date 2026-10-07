@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import {
   Building2, Shield, Database, Save, Upload, Download,
-  AlertCircle, Check, Globe, Lock, Eye, EyeOff, X,
+  AlertCircle, Check, Globe, Lock, Eye, EyeOff, X, Copy, RefreshCw,
   Circle, Crown, Medal, Trophy,
 } from "lucide-react";
 import { usePermission } from "../hooks/usePermission";
@@ -44,14 +44,39 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
     </div>
   );
 }
-/* Where this page keeps its values. `system_settings` is the console's
-   key/value table, the one System Admin already reads and writes, and it is
-   the only settings store the database migrations create. This page used to
-   address a flat `settings` table with typed columns: nothing creates that
-   table, so every read came back empty and every save was refused, and the
-   page could not be edited no matter who was signed in. One row holds the
-   profile as JSON, so a save is a single write that cannot half-apply. */
-const SETTINGS_KEY = "business_profile";
+/* Where this page keeps its values: one row of `business_settings`, holding
+   the profile as JSON. The console's other settings table, `system_settings`,
+   is a column of booleans, one row per switch, so a profile cannot live there.
+   This page used to address a flat `settings` table with one column per field,
+   which no migration creates, so it showed built-in values and refused every
+   save.
+
+   The SQL in the notice below is the same as supabase/migrations/
+   20261007_010_business_settings.sql. It is repeated here so the page can hand
+   it to whoever can run it, and it is written to be safe to run twice. */
+const STORE_SQL = `create table if not exists public.business_settings (
+  id smallint primary key default 1 check (id = 1),
+  profile jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.business_settings enable row level security;
+
+drop policy if exists "staff reads business settings" on public.business_settings;
+drop policy if exists "admin manages business settings" on public.business_settings;
+
+create policy "staff reads business settings"
+  on public.business_settings for select to authenticated
+  using (public.is_chapman_staff());
+
+create policy "admin manages business settings"
+  on public.business_settings for all to authenticated
+  using (public.is_chapman_admin())
+  with check (public.is_chapman_admin());
+
+insert into public.business_settings (id, profile)
+values (1, '{}'::jsonb)
+on conflict (id) do nothing;`;
 
 /* PostgREST answers with the reason a write was refused, and the reason
    matters: a missing table is a job for whoever owns the database, a policy
@@ -63,13 +88,23 @@ function isPermissionRefusal(err: any): boolean {
   return code === "42501";
 }
 
+function isMissingStore(err: any): boolean {
+  const code: string = err?.code || err?.status || "";
+  const message: string = err?.message || "";
+  return code === "42P01" || code === "PGRST205"
+    || code === "42703" || code === "PGRST204"
+    || /does not exist|not find the table|schema cache/i.test(message);
+}
+
+/* Name the store, always, so a failure points at the thing to fix rather than
+   at the reader's access. */
 function explainDbError(err: any): string {
   const code: string = err?.code || err?.status || "";
   const message: string = err?.message || err?.error_description || String(err);
-  if (code === "42P01" || code === "PGRST205") return "the settings table is not in the database";
-  if (code === "42501") return "the database refused the write: this role has no write policy on system_settings";
+  if (isMissingStore(err)) return "the business_settings table is not in the database yet";
+  if (code === "42501") return "the database refused the write: this role has no write policy on business_settings";
   if (code === "23503") return "the write referenced a store row that does not exist";
-  if (code === "42804" || code === "22P02") return `the settings column rejected the value (${code})`;
+  if (code === "22P02" || code === "42804") return `the business_settings column rejected the value (${code})`;
   return `${message}${code ? ` (${code})` : ""}`;
 }
 
@@ -119,6 +154,10 @@ export const Settings = () => {
   /* null until the read answers, then whether a saved row came back. The
      defaults and a stored profile look identical on screen otherwise. */
   const [hasStored, setHasStored] = useState<boolean | null>(null);
+  /* True when the database has no business_settings table: the page then shows
+     the SQL that creates it, because it cannot create it itself. */
+  const [storeMissing, setStoreMissing] = useState(false);
+  const [sqlCopied, setSqlCopied] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   const [config, setConfig] = useState({
@@ -138,9 +177,9 @@ export const Settings = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('system_settings')
-        .select('value')
-        .eq('key', SETTINGS_KEY)
+        .from('business_settings')
+        .select('profile')
+        .eq('id', 1)
         .maybeSingle();
 
       if (error) {
@@ -155,12 +194,13 @@ export const Settings = () => {
              The page says so rather than showing its own defaults, because
              the reader cannot tell the two apart otherwise. */
           setLoadError(explainDbError(error));
+          setStoreMissing(isMissingStore(error));
           console.warn('Settings read refused (table, row or policy):', error);
         }
         return;
       }
 
-      const stored = parseProfile(data?.value);
+      const stored = parseProfile(data?.profile);
       if (stored) setConfig(prev => ({ ...prev, ...stored }));
       setHasStored(Boolean(stored));
     } catch (err: any) {
@@ -173,6 +213,19 @@ export const Settings = () => {
 
   useEffect(() => { fetchSettings(); }, [fetchSettings]);
 
+  /* The SQL is the app's, so the page can put it on the clipboard rather than
+     asking the reader to retype it. The clipboard API is unavailable on an
+     insecure origin, so a failure says so instead of throwing. */
+  const handleCopySql = async () => {
+    try {
+      await navigator.clipboard.writeText(STORE_SQL);
+      setSqlCopied(true);
+      setTimeout(() => setSqlCopied(false), 2500);
+    } catch {
+      setToast({ msg: "Copying is blocked here. Select the SQL and copy it.", type: "error" });
+    }
+  };
+
   const handleSave = async () => {
     if (isOffline) {
       setToast({ msg: "Not saved: the system is offline.", type: "error" });
@@ -181,28 +234,25 @@ export const Settings = () => {
     setSaved(true);
     setSaveFailed(false);
     try {
-      const payload = JSON.stringify({ ...config, updatedAt: new Date().toISOString() });
-
-      /* Update first, then insert if the row is not there: the table may not
-         carry a unique constraint on the key, and an update that matches
-         nothing returns success with no rows, which would report a save that
-         never happened. */
+      /* One row, written in one statement, and the response is asked for so a
+         write that matched nothing can never be reported as a save. */
       const { data: written, error } = await supabase
-        .from('system_settings')
-        .update({ value: payload })
-        .eq('key', SETTINGS_KEY)
-        .select('key');
+        .from('business_settings')
+        .upsert({
+          id: 1,
+          profile: { ...config, updatedAt: new Date().toISOString() },
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' })
+        .select('id');
 
       if (error) throw error;
-
       if (!written || written.length === 0) {
-        const { error: insertError } = await supabase
-          .from('system_settings')
-          .insert({ key: SETTINGS_KEY, value: payload });
-        if (insertError) throw insertError;
+        throw new Error("The database accepted the write but returned no row.");
       }
 
       setLoadError(null);
+      setStoreMissing(false);
+      setHasStored(true);
       setToast({ msg: "Settings saved", type: "success" });
     } catch (err) {
       console.error('Settings save error:', err);
@@ -211,6 +261,7 @@ export const Settings = () => {
         setToast({ msg: "Not saved: the connection dropped.", type: "error" });
       } else {
         const reason = explainDbError(err);
+        setStoreMissing(isMissingStore(err));
         setSaveFailed(true);
         setToast({
           msg: `Not saved: ${isPermissionRefusal(err) ? "this role cannot write settings" : reason}.`,
@@ -416,7 +467,44 @@ export const Settings = () => {
         </div>
       )}
 
-      {loadError && (
+      {storeMissing && (
+        <div style={{ background: "var(--tint-warn)", borderBottom: "1px solid var(--warn-border)", padding: "16px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+            <Database size={15} style={{ color: "var(--warn-500)", flexShrink: 0 }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-1)", fontFamily: FONT }}>
+              Settings need one table in the database
+            </span>
+          </div>
+          <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.55, color: "var(--text-2)", fontFamily: FONT, maxWidth: "78ch" }}>
+            The profile is stored as one row of a table called business_settings, and that table is not in your database yet,
+            so this page is showing its built-in values and cannot save. Run the SQL below once in the Supabase SQL editor,
+            then press Try again. It is safe to run twice.
+          </p>
+          <pre style={{
+            margin: 0, padding: "12px 14px", background: T.bgBase, border: `1px solid ${T.borderSoft}`, borderRadius: 9,
+            fontSize: 11.5, lineHeight: 1.5, color: "var(--text-2)", fontFamily: MONO,
+            overflowX: "auto", whiteSpace: "pre", maxHeight: 210, WebkitOverflowScrolling: "touch",
+          }}>
+            {STORE_SQL}
+          </pre>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              onClick={handleCopySql}
+              style={{ padding: "7px 14px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textSec, fontSize: 12.5, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, fontFamily: FONT }}
+            >
+              {sqlCopied ? <Check size={14} /> : <Copy size={14} />} {sqlCopied ? "Copied" : "Copy SQL"}
+            </button>
+            <button
+              onClick={() => fetchSettings()}
+              style={{ padding: "7px 14px", background: "var(--warn-700)", border: "none", borderRadius: 8, color: "var(--on-brand)", fontSize: 12.5, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, fontFamily: FONT }}
+            >
+              <RefreshCw size={14} /> Try again
+            </button>
+          </div>
+        </div>
+      )}
+
+      {loadError && !storeMissing && (
         <div className="cs-readonly cs-readonly--bad" style={{ background: "var(--tint-bad)", borderBottom: "1px solid var(--bad-border)", padding: "10px 32px", display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
           <AlertCircle size={14} style={{ color: "var(--bad-500)", flexShrink: 0 }} />
           <span style={{ fontSize: 12.5, color: "var(--text-2)", fontFamily: FONT }}>
