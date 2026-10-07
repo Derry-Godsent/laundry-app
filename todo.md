@@ -124,9 +124,20 @@ the five-screen correctness pass and the definition of done live in
         icons are real icons (bell, loyalty tiers, trend arrows, comment ticks), and
         `npm run check:visual` now fails on a gradient, an emoji, a colour literal, a stray
         font family or a size off the scale, with a PENDING list that can only shrink.
-  - [ ] E2, primitives: button hierarchy, fields, cards and section headers, pills, the tile
-        family (hero, standard, compact, split, progress) with sparklines instead of badges,
-        icon sizes, states and motion. The `/preview` gallery shows every one in every state.
+  - [x] E2, primitives. `StatTile` now declares a role: hero (once per row, larger, two
+        columns where there is room), standard, compact, split (a figure that breaks into
+        two) and progress (a figure with a bar and its caption), so a row of figures says
+        which one matters instead of repeating one box. Trends are sparklines now, not delta
+        badges: `KpiCard` draws the series and the words stay as meta. Cards lost their
+        shadow, their top sheen and their hover lift (hover changes surface and hairline);
+        the blurred accent orb on every tile became a 2px rail; elevation is kept for
+        overlays only. Buttons: shared focus ring, a disabled style that stops shouting
+        instead of fading to half opacity, and a press that is a brightness step rather than
+        a nudge. Fields: an invalid state that rings the input, a colour-based disabled step,
+        text on the type scale, and state border and on-colour tokens so the sheet stops
+        mixing hexes into rgba(). Pills take their borders from those tokens; a count is a
+        mono figure with a hairline. The `/preview` gallery gained the tile family and the
+        button hierarchy with disabled states.
   - [ ] E3, operations pages: Requests, Service Requests, Orders, Order Builder, Clients,
         Dashboard.
   - [ ] E4, management and settings pages: Staff, System Admin, Reports, Services, Payments,

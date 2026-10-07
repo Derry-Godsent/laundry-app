@@ -89,23 +89,23 @@
   background: var(--ink-card);
   border: 1px solid var(--line-soft);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-md);
+}
+
+/* Interactive surfaces are for lists and tiles, not for every card: a page
+   where everything lifts is a page with no hierarchy. Hover changes the
+   surface and the hairline, and the action stays put. */
+.card--interactive {
+  cursor: pointer;
+  transition: background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+.card--interactive:hover {
+  border-color: var(--line);
+  background: var(--ink-hover);
 }
 
 .card--flush { padding: 0; overflow: hidden; }
 .card--pad { padding: var(--sp-5); }
-.card--interactive {
-  cursor: pointer;
-  transition: border-color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
-}
-.card--interactive:hover {
-  border-color: var(--line);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
 .card-header {
   display: flex;
   align-items: flex-start;
@@ -123,7 +123,7 @@
 .card-footer {
   padding: var(--sp-4) var(--sp-5);
   border-top: 1px solid var(--line-faint);
-  background: rgba(0, 0, 0, 0.14);
+  background: var(--ink-raised);
   border-radius: 0 0 var(--r-lg) var(--r-lg);
 }
 
@@ -135,78 +135,115 @@
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
-   STATS
+   SUMMARY TILES
+   One primitive, five roles. A row of tiles is a layout, not a table: the page
+   says which figure matters most with `hero`, and the rest support it. The
+   roles are deliberately not interchangeable in size, so a page cannot flatten
+   everything back into four equal boxes.
    ─────────────────────────────────────────────────────────────────────────── */
 
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(216px, 1fr));
   gap: var(--sp-4);
+}
+
+/* Two columns on a phone: a figure per row would put the page's numbers below
+   the fold, which is the one thing a summary row may not do. */
+@media (max-width: 640px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-3);
+  }
 }
 
 .stat {
   position: relative;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   padding: var(--sp-5);
   background: var(--ink-card);
   border: 1px solid var(--line-soft);
   border-radius: var(--r-lg);
-  box-shadow: var(--shadow-md);
-  transition: border-color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+  text-align: left;
+  transition: background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
 }
 
-.stat:hover {
-  border-color: var(--line);
-  transform: translateY(-2px);
-}
+.stat:hover { border-color: var(--line); background: var(--ink-hover); }
 
+/* The accent is a rail on the left edge. No glow, no blurred orb: the tile is
+   a flat surface and the colour says which figure this is. */
 .stat::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
   width: 2px;
   background: var(--accent, var(--brand-500));
-  opacity: 0.65;
+  opacity: 0.8;
 }
 
-.stat::after {
-  content: "";
-  position: absolute;
-  top: -70px;
-  right: -50px;
-  width: 170px;
-  height: 170px;
-  border-radius: 50%;
-  background: var(--accent, var(--brand-500));
-  opacity: 0.09;
-  filter: blur(38px);
-  pointer-events: none;
+/* The figure the page is about. One per row, noticeably larger, and it takes
+   two columns when there is room. */
+.stat--hero {
+  grid-column: span 2;
+  padding: var(--sp-6);
+  background: var(--ink-raised);
 }
+.stat--hero .stat__value { font-size: var(--fs-3xl); }
+.stat--hero .stat__label { font-size: var(--fs-xs); }
+@media (max-width: 640px) {
+  .stat--hero { grid-column: span 2; padding: var(--sp-4); }
+  .stat--hero .stat__value { font-size: var(--fs-2xl); }
+}
+
+/* The default: one figure, one label, optional meta and trend. */
+.stat--standard .stat__value { font-size: var(--fs-2xl); }
+
+/* Dense rows of counts, five or six across on a desk. */
+.stat--compact { padding: var(--sp-4); }
+.stat--compact .stat__value { font-size: var(--fs-xl); }
+.stat--compact .stat__label { font-size: var(--fs-2xs); }
+.stat--compact .stat__top { margin-bottom: var(--sp-2); }
+
+/* A figure that breaks into two under it. */
+.stat--split .stat__value { font-size: var(--fs-2xl); }
+
+/* A figure with a target. */
+.stat--progress .stat__value { font-size: var(--fs-2xl); }
 
 .stat__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-3);
-  margin-bottom: var(--sp-4);
+  margin-bottom: var(--sp-3);
+  min-height: 30px;
 }
 
 .stat__icon {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--accent, var(--brand-500)) 14%, transparent);
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--accent, var(--brand-500)) 12%, transparent);
   color: var(--accent, var(--brand-500));
-  border: 1px solid color-mix(in srgb, var(--accent, var(--brand-500)) 22%, transparent);
+}
+
+.stat__overline {
+  font-size: var(--fs-2xs);
+  font-weight: 650;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--accent, var(--brand-500));
 }
 
 .stat__label {
-  font-size: 12px;
-  font-weight: 550;
-  letter-spacing: 0.04em;
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--text-3);
 }
@@ -214,12 +251,56 @@
 .stat__value {
   display: flex;
   align-items: baseline;
-  gap: 2px;
-  margin-top: 6px;
-  font-size: 30px;
+  gap: var(--sp-1);
+  margin-top: var(--sp-1);
+  font-size: var(--fs-2xl);
   font-weight: 650;
-  letter-spacing: -0.035em;
+  letter-spacing: var(--track-tight);
   color: var(--text-1);
+  line-height: var(--lh-tight);
+}
+
+.stat__split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--line-faint);
+}
+.stat__split-label {
+  display: block;
+  font-size: var(--fs-2xs);
+  color: var(--text-4);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.stat__split strong {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-md);
+  font-weight: 650;
+  color: var(--text-2);
+}
+
+.stat__progress { margin-top: var(--sp-3); }
+.stat__bar {
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--ink-active);
+  overflow: hidden;
+}
+.stat__bar span {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--accent, var(--brand-500));
+}
+.stat__progress-label {
+  display: block;
+  margin-top: var(--sp-2);
+  font-size: var(--fs-xs);
+  color: var(--text-3);
 }
 
 .stat__meta {
@@ -227,30 +308,28 @@
   align-items: center;
   gap: var(--sp-2);
   margin-top: var(--sp-3);
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   color: var(--text-3);
   flex-wrap: wrap;
 }
 
-.stat__spark {
-  margin-top: var(--sp-3);
-  opacity: 0.9;
-}
+.stat__spark { margin-top: var(--sp-3); }
+.stat--compact .stat__spark { display: none; }
 
+/* A trend badge survives where a line cannot say it: a single number that is
+   not a series. Kept quiet, since the tile's colour already carries the tone. */
 .delta {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 2px 7px;
-  border-radius: var(--r-pill);
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: var(--fs-xs);
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
 }
 
-.delta--up { color: var(--ok-500); background: var(--ok-soft); }
-.delta--down { color: var(--bad-500); background: var(--bad-soft); }
-.delta--flat { color: var(--text-3); background: var(--ink-raised); }
+.delta--up { color: var(--ok-500); }
+.delta--down { color: var(--bad-500); }
+.delta--flat { color: var(--text-3); }
 
 /* ───────────────────────────────────────────────────────────────────────────
    PILLS & TAGS
@@ -263,8 +342,9 @@
   padding: 3px 10px;
   border-radius: var(--r-pill);
   border: 1px solid transparent;
-  font-size: 11.5px;
-  font-weight: 600;
+  font-family: var(--font-ui);
+  font-size: var(--fs-2xs);
+  font-weight: 650;
   letter-spacing: 0.01em;
   white-space: nowrap;
 }
@@ -278,26 +358,29 @@
 }
 
 .pill--neutral { color: var(--text-2); background: var(--ink-raised); border-color: var(--line-soft); }
-.pill--brand { color: var(--brand-400); background: var(--brand-soft); border-color: rgba(111, 119, 247, 0.22); }
-.pill--gold { color: var(--gold-400); background: var(--gold-soft); border-color: rgba(224, 180, 115, 0.22); }
-.pill--ok { color: var(--ok-500); background: var(--ok-soft); border-color: rgba(61, 220, 151, 0.22); }
-.pill--warn { color: var(--warn-500); background: var(--warn-soft); border-color: rgba(240, 192, 94, 0.22); }
-.pill--bad { color: var(--bad-500); background: var(--bad-soft); border-color: rgba(251, 125, 125, 0.22); }
-.pill--info { color: var(--info-500); background: var(--info-soft); border-color: rgba(98, 205, 255, 0.22); }
-.pill--violet { color: var(--violet-500); background: var(--violet-soft); border-color: rgba(177, 140, 255, 0.22); }
+.pill--brand { color: var(--brand-400); background: var(--brand-soft); border-color: var(--brand-border); }
+.pill--gold { color: var(--gold-400); background: var(--gold-soft); border-color: var(--gold-border); }
+.pill--ok { color: var(--ok-500); background: var(--ok-soft); border-color: var(--ok-border); }
+.pill--warn { color: var(--warn-500); background: var(--warn-soft); border-color: var(--warn-border); }
+.pill--bad { color: var(--bad-500); background: var(--bad-soft); border-color: var(--bad-border); }
+.pill--info { color: var(--info-500); background: var(--info-soft); border-color: var(--info-border); }
+.pill--violet { color: var(--violet-500); background: var(--violet-soft); border-color: var(--violet-border); }
 
+/* A count, not a badge: a plain figure with a hairline, so it never competes
+   with the status beside it. */
 .tag-count {
   display: inline-grid;
   place-items: center;
   min-width: 22px;
   height: 22px;
   padding: 0 7px;
-  border-radius: var(--r-pill);
-  background: var(--ink-raised);
+  border-radius: var(--r-sm);
+  background: transparent;
   border: 1px solid var(--line-soft);
-  color: var(--text-2);
-  font-size: 11.5px;
-  font-weight: 650;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -314,34 +397,45 @@
   padding: 0 var(--sp-4);
   border-radius: var(--r-sm);
   border: 1px solid transparent;
-  font-size: 13px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
   font-weight: 600;
   letter-spacing: -0.005em;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color var(--dur-base) var(--ease-out),
     border-color var(--dur-base) var(--ease-out),
-    color var(--dur-base) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
+    color var(--dur-base) var(--ease-out);
 }
 
-.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn svg { flex-shrink: 0; }
+
+/* The press is a colour step, not a nudge: nothing moves under the finger. */
+.btn:active:not(:disabled) { background-image: none; filter: brightness(1.08); }
+
+.btn:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
 
 .btn:disabled {
-  opacity: 0.5;
+  color: var(--text-disabled);
+  background: var(--ink-raised);
+  border-color: var(--line-faint);
   cursor: not-allowed;
-  transform: none;
 }
 
-.btn--sm { height: 32px; padding: 0 var(--sp-3); font-size: 12.5px; }
-.btn--lg { height: 44px; padding: 0 var(--sp-5); font-size: 14px; }
+.btn--sm { height: 32px; padding: 0 var(--sp-3); font-size: var(--fs-xs); }
+.btn--lg { height: 44px; padding: 0 var(--sp-5); font-size: var(--fs-md); }
 .btn--icon { width: 38px; padding: 0; }
 .btn--icon.btn--sm { width: 32px; }
 .btn--block { width: 100%; }
 
+/* A disabled primary keeps its shape but stops shouting. */
+.btn--primary:disabled { background: var(--ink-raised); border-color: var(--line-soft); }
+
 .btn--primary {
-  color: #fff;
+  color: var(--on-brand);
   background: var(--brand-600);
   border-color: var(--brand-500);
 }
@@ -351,7 +445,7 @@
 }
 
 .btn--gold {
-  color: #241a08;
+  color: var(--on-gold);
   background: var(--gold-500);
   border-color: var(--gold-400);
 }
@@ -379,17 +473,17 @@
 .btn--danger {
   color: var(--bad-500);
   background: var(--bad-soft);
-  border-color: rgba(251, 125, 125, 0.24);
+  border-color: var(--bad-border);
 }
 .btn--danger:hover:not(:disabled) {
-  color: #fff;
-  background: rgba(251, 125, 125, 0.28);
+  color: var(--text-1);
+  background: color-mix(in srgb, var(--bad-500) 22%, transparent);
 }
 
 .btn--ok {
-  color: #062316;
+  color: var(--on-ok);
   background: var(--ok-500);
-  border-color: rgba(255, 255, 255, 0.14);
+  border-color: var(--ok-border);
 }
 .btn--ok:hover:not(:disabled) { background: #56e6a8; }
 
@@ -463,18 +557,30 @@
    FORM FIELDS
    ─────────────────────────────────────────────────────────────────────────── */
 
-.field { display: flex; flex-direction: column; gap: 6px; }
+.field { display: flex; flex-direction: column; gap: var(--sp-2); }
 
 .field__label {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+  font-size: var(--fs-2xs);
+  font-weight: 650;
+  letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--text-3);
 }
 
-.field__help { font-size: 12px; color: var(--text-4); }
-.field__error { font-size: 12px; color: var(--bad-500); }
+.field__help { font-size: var(--fs-xs); color: var(--text-4); }
+.field__error { font-size: var(--fs-xs); color: var(--bad-500); }
+
+/* A field that failed gets the same ring in the danger tone, so the state is
+   legible from the input itself and not only from the line under it. */
+.field--invalid .input,
+.field--invalid .select,
+.field--invalid .textarea,
+.input[aria-invalid="true"],
+.select[aria-invalid="true"],
+.textarea[aria-invalid="true"] {
+  border-color: var(--bad-500);
+  box-shadow: 0 0 0 3px var(--bad-soft);
+}
 
 .input,
 .select,
@@ -489,7 +595,8 @@
   border: 1px solid var(--line-soft);
   border-radius: var(--r-sm);
   color: var(--text-1);
-  font-size: 13.5px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-md);
   transition: border-color var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out),
     background-color var(--dur-base) var(--ease-out);
@@ -521,7 +628,8 @@
 .field input:disabled,
 .field select:disabled,
 .field textarea:disabled {
-  opacity: 0.55;
+  color: var(--text-disabled);
+  background: var(--ink-shell);
   cursor: not-allowed;
 }
 
@@ -815,10 +923,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .banner svg { flex-shrink: 0; margin-top: 1px; }
 .banner strong { color: var(--text-1); display: block; margin-bottom: 1px; }
-.banner--info { border-color: rgba(98, 205, 255, 0.22); background: var(--info-soft); color: #cfeaff; }
-.banner--ok { border-color: rgba(61, 220, 151, 0.22); background: var(--ok-soft); color: #c8f6e2; }
-.banner--warn { border-color: rgba(240, 192, 94, 0.24); background: var(--warn-soft); color: #f7e7c4; }
-.banner--bad { border-color: rgba(251, 125, 125, 0.24); background: var(--bad-soft); color: #ffd9d9; }
+.banner--info { border-color: var(--info-border); background: var(--info-soft); color: var(--info-500); }
+.banner--ok { border-color: var(--ok-border); background: var(--ok-soft); color: var(--ok-500); }
+.banner--warn { border-color: var(--warn-border); background: var(--warn-soft); color: var(--warn-500); }
+.banner--bad { border-color: var(--bad-border); background: var(--bad-soft); color: var(--bad-500); }
 
 /* ───────────────────────────────────────────────────────────────────────────
    MOBILE PATTERNS

@@ -503,6 +503,7 @@ export const Dashboard = () => {
 
   const statCards = useMemo<Array<{
     label: string;
+    role?: "hero" | "standard" | "compact" | "split";
     value: ReactNode;
     icon: ReactNode;
     accent: string;
@@ -515,7 +516,8 @@ export const Dashboard = () => {
       value: countedTotal.toLocaleString(),
       icon: <ClipboardList size={19} />,
       accent: "var(--brand-500)",
-      delta: { value: delta(metrics.todayOrders, metrics.yesterdayOrders), label: `${metrics.todayOrders} recorded today` },
+      role: "hero" as const,
+      meta: `${metrics.todayOrders} recorded today, ${delta(metrics.todayOrders, metrics.yesterdayOrders)}% against yesterday`,
       sparkline: <Sparkline data={sparklines.orders ?? []} color="var(--brand-500)" />,
     },
     {
@@ -531,7 +533,7 @@ export const Dashboard = () => {
       value: countedCompleted.toLocaleString(),
       icon: <CheckCircle2 size={19} />,
       accent: "var(--ok-500)",
-      delta: { value: delta(metrics.completed, metrics.completedYesterday), label: "against yesterday" },
+      meta: `${delta(metrics.completed, metrics.completedYesterday)}% against yesterday`,
       sparkline: <Sparkline data={sparklines.completed ?? []} color="var(--ok-500)" />,
     },
     {
@@ -646,7 +648,7 @@ export const Dashboard = () => {
               value={card.value}
               icon={card.icon}
               accent={card.accent}
-              delta={card.delta ?? undefined}
+              role={card.role}
               meta={card.meta}
               sparkline={card.sparkline}
             />

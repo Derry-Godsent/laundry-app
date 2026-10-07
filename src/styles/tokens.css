@@ -69,7 +69,20 @@
   --gold-soft: rgba(224, 180, 115, 0.12);
   --gold-glow: rgba(224, 180, 115, 0.28);
 
-  /* ── Semantic states ──────────────────────────────────────────────────── */
+  /* ── Semantic states ──────────────────────────────────────────────────────
+     Each state has a solid, a wash for fills and a border for outlines. The
+     washes are declared once here so a pill, a banner and a badge cannot drift
+     apart, and so the sheet never mixes a hex into an rgba() by hand. */
+  --brand-border: rgba(111, 119, 247, 0.22);
+  --gold-border: rgba(224, 180, 115, 0.22);
+  --ok-border: rgba(61, 220, 151, 0.22);
+  --warn-border: rgba(240, 192, 94, 0.22);
+  --bad-border: rgba(251, 125, 125, 0.22);
+  --info-border: rgba(98, 205, 255, 0.22);
+  --violet-border: rgba(177, 140, 255, 0.22);
+  --on-brand: #ffffff;
+  --on-gold: #241a08;
+  --on-ok: #062316;
   --ok-500: #3ddc97;
   --ok-soft: rgba(61, 220, 151, 0.13);
   --warn-500: #f0c05e;
@@ -114,14 +127,24 @@
   --r-xl: 20px;
   --r-pill: 999px;
 
+  /* Focus ring, in one place, so every control in the console lights up the
+     same way instead of each sheet inventing its own outline. */
+  --focus-ring: 2px solid var(--brand-500);
+  --focus-offset: 2px;
+
+  /* Icon sizes: four steps, one stroke weight. */
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+  --icon-stroke: 1.9;
+
   /* ── Elevation ────────────────────────────────────────────────────────── */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 8px 24px -12px rgba(0, 0, 0, 0.7);
   --shadow-lg: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
   --shadow-pop: 0 18px 48px -16px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--line-soft);
   --ring-brand: 0 0 0 3px rgba(111, 119, 247, 0.28);
-  --focus-ring: 2px solid var(--brand-500);
-  --focus-offset: 2px;
 
   /* ── Motion ──────────────────────────────────────────────────────────────
      Three speeds with a job: press feedback, state change, surface entrance.

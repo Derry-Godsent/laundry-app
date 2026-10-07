@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import {
   LayoutDashboard, Package, Users, User, Settings, FileText,
   ChevronLeft, ChevronRight, Shield, CreditCard, ShoppingCart,
-  Printer, LogOut, X, BarChart3, Inbox, Sparkles, Lightbulb, Smartphone,
+  Printer, LogOut, X, BarChart3, Inbox, Lightbulb, MessageSquareText, Smartphone,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
@@ -102,7 +102,7 @@ export const Sidebar = ({ isOpen = true, onToggle, isMobile = false }: SidebarPr
           { icon: ShoppingCart, label: "New Order", path: "/new-order", pageKey: "new-order" },
           { icon: Package, label: "Orders", path: "/orders", pageKey: "orders", badge: badge(counts.orders), badgeTitle: "orders on record" },
           { icon: Inbox, label: "Mobile Requests", path: "/mobile-requests", pageKey: "mobile-requests", badge: badge(counts.mobileRequests), badgeTitle: "waiting for Chapman to act" },
-          { icon: Sparkles, label: "Service Requests", path: "/service-requests", pageKey: "service-requests", badge: badge(counts.serviceRequests), badgeTitle: "need a date from Chapman" },
+          { icon: MessageSquareText, label: "Service Requests", path: "/service-requests", pageKey: "service-requests", badge: badge(counts.serviceRequests), badgeTitle: "need a date from Chapman" },
           { icon: Lightbulb, label: "App Ideas", path: "/app-ideas", pageKey: "app-ideas", badge: badge(counts.appIdeas), badgeTitle: "new ideas from customers" },
         ],
       },

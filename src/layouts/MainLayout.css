@@ -82,8 +82,8 @@
 
 /* Focus ring for the whole console. */
 .layout-container :focus-visible {
-  outline: 2px solid var(--brand-500);
-  outline-offset: 2px;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
   border-radius: var(--r-xs);
 }
 

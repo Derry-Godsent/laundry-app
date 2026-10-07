@@ -462,10 +462,36 @@ craft. The direction below was agreed before any of it was written.
 | Slice | What it lands |
 | --- | --- |
 | E1 | This foundation: the type scale, the readable ramp, one font pipeline, the gradient sweep through the chrome and the shared sheet, the AI illustration assets and the emoji removed, and `npm run check:visual` to hold all of it. |
-| E2 | The primitives: button hierarchy, fields, cards and section headers, pills, the tile family and the sparkline, icon sizes, states, motion. The `/preview` gallery shows every primitive in every state. |
+| E2 | The primitives: button hierarchy, fields, cards and section headers, pills, the tile family and the sparkline, icon sizes, states, motion. The `/preview` gallery shows every primitive in every state. Done: see "E2, the primitives" below. |
 | E3 | Operations pages: Requests, Service Requests, Orders, Order Builder, Clients, Dashboard. |
 | E4 | Management and settings pages: Staff, System Admin, Reports, Services, Payments, Receipt, Security, Settings, App Ideas, App Accounts, Help, Profile, Login. |
 | E5 | Copy and formats: one money helper (`GH₵420.00`), one date and time set, one locale, sentence case, and the customer/client wording rule. Then the guards go strict and the final report. |
+
+**E2, the primitives (done).**
+
+- **The tile family.** `StatTile` now declares a role instead of always drawing
+  the same box: `hero` (once per row, larger, two columns where there is room),
+  `standard`, `compact` (dense counts, five or six across), `split` (a figure
+  that breaks into two) and `progress` (a figure with a bar and its caption).
+  A trend is a **sparkline**, not a delta badge: `KpiCard` draws one from its
+  series and the words stay as meta text, because the shape of the line is the
+  information and a coloured arrow on top of it says the same thing twice. A
+  badge survives only where a line cannot draw the state.
+- **Flat by default.** Cards lost their shadow and their top sheen, and nothing
+  lifts on hover any more: hover changes the surface and the hairline. Elevation
+  is reserved for what is genuinely above the page. The blurred accent orb on
+  every tile is gone, replaced by a 2px accent rail.
+- **Buttons** keep one hierarchy with the focus ring token, a disabled style
+  that stops shouting rather than fading to 50% opacity, and a press that is a
+  brightness step instead of a nudge. Their text colours are tokens.
+- **Fields** gained an invalid state that rings the input itself, a disabled
+  step that is a colour rather than an opacity, and text on the type scale.
+- **Pills and counts**: pill borders come from the semantic border tokens, and a
+  count is a mono figure with a hairline rather than a badge competing with the
+  status beside it.
+- **The gallery** at `/preview` gained a tile-family section (all five roles,
+  several rows) and a button-hierarchy section with the disabled states, so the
+  look can be judged before it is rolled across the pages.
 
 **Wording rule.** Anyone who books through the customer app is a **customer**,
 in copy and in the queue. **Client** is the console's own record: the Clients

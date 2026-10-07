@@ -5,11 +5,18 @@ export interface SparklineProps {
   color?: string;
   width?: number;
   height?: number;
-  /** Draws the soft area under the line. */
+  /** Draws the flat band under the line. The console has no gradients. */
   area?: boolean;
 }
 
-/** Tiny trend line for stat tiles. Pure SVG: no chart library, no re-render cost. */
+/**
+ * Tiny trend line for stat tiles. Pure SVG: no chart library, no re-render cost.
+ *
+ * The band under the line is a flat wash at one opacity rather than a fade:
+ * gradients are out of the product, and a single stepped shape reads better at
+ * the size these are drawn anyway, where a fade would only ever be two or three
+ * pixels of grey.
+ */
 export const Sparkline = ({
   data,
   color = "var(--brand-500)",
@@ -17,7 +24,7 @@ export const Sparkline = ({
   height = 34,
   area = true,
 }: SparklineProps) => {
-  const gradientId = useId();
+  const bandId = useId();
   if (!data || data.length < 2) return null;
 
   const max = Math.max(...data, 1);
@@ -33,16 +40,30 @@ export const Sparkline = ({
   const last = points[points.length - 1];
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} fill="none" aria-hidden="true">
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      fill="none"
+      aria-hidden="true"
+      className="sparkline"
+    >
       {area ? (
         <>
           <defs>
-            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity="0.26" />
-              <stop offset="100%" stopColor={color} stopOpacity="0" />
-            </linearGradient>
+            <clipPath id={bandId}>
+              <path d={`${line} L${width},${height} L0,${height} Z`} />
+            </clipPath>
           </defs>
-          <path d={`${line} L${width},${height} L0,${height} Z`} fill={`url(#${gradientId})`} />
+          <rect
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            fill={color}
+            opacity="0.14"
+            clipPath={`url(#${bandId})`}
+          />
         </>
       ) : null}
       <path d={line} stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
