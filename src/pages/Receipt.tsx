@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 // @ts-ignore
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
-import { useConnection, isNetworkError } from "../hooks/useConnection";
+import { isNetworkError } from "../hooks/useConnection";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { 
   Printer, ArrowLeft, Package, AlertCircle, 
@@ -48,7 +48,6 @@ export const Receipt = () => {
   const [loading, setLoading] = useState(false);
   
   /* The shell reports the connection on every page. */
-  const { isOffline } = useConnection();
   const [retrying, setRetrying] = useState(false);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
@@ -153,8 +152,7 @@ export const Receipt = () => {
     <div style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT, color: T.textPrimary }}>
       <style>{`
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-        @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: calc(200px + 100%) 0; } }
-        @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { animation: spin 0.8s linear infinite; }
         .skeleton {
           background: var(--ink-raised);

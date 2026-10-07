@@ -63,8 +63,7 @@ const StyleSheet = () => (
     @keyframes secFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
     @keyframes secPing { 0% { transform: scale(0.9); opacity: 0.7; } 70% { transform: scale(1.9); opacity: 0; } 100% { opacity: 0; } }
     @keyframes secPulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-    @keyframes secShimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
-    @keyframes secSpin { to { transform: rotate(360deg); } }
+        @keyframes secSpin { to { transform: rotate(360deg); } }
     @keyframes secBounce { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } 100% { transform: none; } }
     @keyframes secBannerIn { from { transform: translateY(-100%); } to { transform: none; } }
 

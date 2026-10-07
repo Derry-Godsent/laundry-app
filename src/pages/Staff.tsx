@@ -243,7 +243,6 @@ export const Staff = () => {
   /* The shell reports the connection on every page; this page no longer
      carries its own banner for it. */
   const { isOffline, retry: retryConnection } = useConnection();
-  const [retrying, setRetrying]   = useState(false);
   const [roleFilter, setRoleFilter]     = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [q, setQ]                 = useState("");
@@ -300,16 +299,10 @@ export const Staff = () => {
       setStaff([]);
     } finally {
       setLoading(false);
-      setRetrying(false);
     }
   }, [retryConnection]);
 
   useEffect(() => { fetchStaff(); }, [fetchStaff]);
-
-  const handleRetry = () => {
-    setRetrying(true);
-    fetchStaff();
-  };
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -549,12 +542,10 @@ export const Staff = () => {
           --sf-font: var(--font-ui); --sf-mono: var(--font-mono);
         }
         @keyframes sfFadeUp { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: none;} }
-        @keyframes sfFadeIn { from { opacity:0;} to { opacity:1;} }
-        @keyframes sfSpin { to { transform: rotate(360deg); } }
+                @keyframes sfSpin { to { transform: rotate(360deg); } }
         @keyframes sfPulse { 0%,100% { opacity:1;} 50% { opacity:.5;} }
         @keyframes sfSlideInR { from { transform: translateX(24px); opacity:0;} to { transform: none; opacity:1;} }
-        @keyframes sfPanelIn { from { transform: translateX(100%);} to { transform: none;} }
-        @keyframes sfScaleIn { from { opacity:0; transform: scale(.96) translateY(6px);} to { opacity:1; transform: none;} }
+                @keyframes sfScaleIn { from { opacity:0; transform: scale(.96) translateY(6px);} to { opacity:1; transform: none;} }
 
         /* Fills the shell frame: the shell owns the page scroll, .sf-tbl-wrap owns the
    table scroll. min-height:100vh inside the shell is what forced the whole page

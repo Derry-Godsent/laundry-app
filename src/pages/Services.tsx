@@ -67,16 +67,10 @@ const GLOBAL_CSS = `
 
 *, *::before, *::after { box-sizing: border-box; }
 
-@keyframes svcAuroraDrift {
-  0%   { transform: translate(-4%, -2%) scale(1); }
-  50%  { transform: translate(3%, 4%) scale(1.08); }
-  100% { transform: translate(-4%, -2%) scale(1); }
-}
 @keyframes svcFadeIn { from { opacity:0 } to { opacity:1 } }
 @keyframes svcFadeUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform: none} }
 @keyframes svcScaleIn { from { opacity:0; transform:scale(0.94) translateY(8px) } to { opacity:1; transform: none} }
 @keyframes svcSlideDown { from { opacity:0; transform:translateY(-10px) } to { opacity:1; transform: none} }
-@keyframes svcShimmer { 0% { background-position:-300px 0 } 100% { background-position:300px 0 } }
 @keyframes svcSpin { to { transform: rotate(360deg) } }
 
 .svc-aurora {

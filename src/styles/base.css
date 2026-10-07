@@ -197,11 +197,6 @@ textarea,
   to { opacity: 1; transform: none; }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
 /* While an overlay is open the page behind it does not move. `useOverlay` sets
    the flag; body covers the document, .main-body is the console's own scroller
    and would otherwise keep scrolling under a sheet. */
