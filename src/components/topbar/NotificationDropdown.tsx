@@ -201,12 +201,14 @@ const CSS = `
 /* ── Phones: the panel becomes a sheet under the top bar ───────────────── */
 @media (max-width: 640px) {
   .nd-panel {
-    top: calc(var(--safe-top, 0px) + var(--topbar-h, 56px) + 8px);
+    /* The sheet hangs below the top bar inside the visible area, so it stays
+       put when the page is zoomed or the keyboard is open. */
+    top: calc(var(--vv-top, 0px) + var(--safe-top, 0px) + var(--topbar-h, 56px) + 8px);
     left: 12px;
     right: 12px;
     width: auto;
     max-width: none;
-    max-height: calc(100dvh - var(--safe-top, 0px) - var(--topbar-h, 56px) - 24px);
+    max-height: calc(var(--vv-h, 100dvh) - var(--safe-top, 0px) - var(--topbar-h, 56px) - 24px);
   }
 
   .nd-list { max-height: none; }

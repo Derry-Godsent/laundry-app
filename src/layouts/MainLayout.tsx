@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { Topbar } from "@/components/topbar/Topbar";
 import { FAB } from "@/components/FAB/FAB";
+import { useVisualViewport } from "@/hooks/useVisualViewport";
 import "./MainLayout.css";
 
 const MOBILE_BREAKPOINT = 1024;
@@ -12,6 +13,10 @@ const getIsMobile = () =>
 
 export default function MainLayout() {
   const location = useLocation();
+
+  // Publishes --vv-h / --vv-top / --vv-bottom, so full-screen surfaces and
+  // pinned bars stay inside what is on screen while the page is zoomed.
+  useVisualViewport();
 
   const [isMobile, setIsMobile] = useState(getIsMobile);
   // FIX: default depends on device. Mobile should start closed,

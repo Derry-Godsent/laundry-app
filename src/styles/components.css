@@ -556,6 +556,32 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .search-input input { padding-left: 36px; }
 
+/* A focused field under 16px makes iOS Safari zoom the page in, and it stays
+   zoomed afterwards, which is what pushes a pinned action bar out of sight. The
+   threshold is exactly 16px, so on a phone the fields are 16px and no focus
+   zoom happens. Written after the field rules above so it wins the cascade. */
+@media (max-width: 900px) {
+  .input,
+  .select,
+  .textarea,
+  .field input,
+  .field select,
+  .field textarea,
+  .search-input,
+  input[type="date"],
+  input[type="time"],
+  input[type="search"],
+  input[type="text"],
+  input[type="tel"],
+  input[type="email"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* ───────────────────────────────────────────────────────────────────────────
    TABLE PAGE FRAME
    For screens that own the viewport: the title, the filter bar and the
@@ -1060,9 +1086,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Phone: the record takes over the screen, with a way back that does not
    depend on the browser's swipe. */
 @media (max-width: 900px) {
+  /* Sized to the visual viewport: zoomed in, zoomed out, or with the on-screen
+     keyboard open, the overlay covers exactly what is on screen, which is what
+     keeps the pinned decision bar visible. --vv-* falls back to the layout
+     viewport where the browser has no visualViewport. */
   .detail-view.is-overlay {
     position: fixed;
-    inset: 0;
+    top: var(--vv-top, 0px);
+    right: 0;
+    bottom: auto;
+    left: 0;
+    height: var(--vv-h, 100dvh);
     z-index: 70;
     border: none;
     border-radius: 0;
@@ -1111,13 +1145,20 @@ input[type="date"]::-webkit-calendar-picker-indicator {
      main action is inside thumb reach instead of below the fold. */
   .action-bar {
     position: sticky;
-    bottom: 0;
+    /* Clears the strip hidden below the visible area while the page is zoomed;
+     0 when nothing is hidden. */
+    bottom: var(--vv-bottom, 0px);
     flex-wrap: nowrap;
     gap: var(--sp-2);
     padding: var(--sp-3) var(--page-pad-x) calc(var(--sp-3) + var(--safe-bottom));
     background: var(--ink-hover);
     box-shadow: 0 -8px 24px -16px rgba(0, 0, 0, 0.9);
   }
+
+  /* Inside the takeover screen the overlay is already sized to the visible
+     area, so the bar sits at its foot with no extra offset. */
+  .detail-view.is-overlay .action-bar,
+  .modal .action-bar { bottom: 0; }
 
   .action-bar .btn { flex: 1 1 auto; min-height: var(--tap-min); }
   .action-bar .btn--icon { flex: 0 0 auto; width: var(--tap-min); }
@@ -1203,7 +1244,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 /* Phone: the task takes the whole screen. A floating dialog on a 320px screen
    leaves no room for the form and no room for the keyboard. */
 @media (max-width: 640px) {
-  .modal { padding: 0; align-items: stretch; }
+  .modal {
+    top: var(--vv-top, 0px);
+    bottom: auto;
+    height: var(--vv-h, 100dvh);
+    padding: 0;
+    align-items: stretch;
+  }
 
   .modal__sheet {
     width: 100%;

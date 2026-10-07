@@ -155,6 +155,11 @@
 @media (max-width: 900px) {
   .sr-workspace { grid-template-columns: minmax(0, 1fr); }
   .sr-detail-wrap { position: static; }
+
+  /* 16px, the threshold under which iOS Safari zooms the page in on focus and
+     leaves it zoomed, which is what pushes the pinned bar out of sight. */
+  .sr-decision input,
+  .sr-decision textarea { font-size: 16px; }
 }
 
 @media (max-width: 640px) {

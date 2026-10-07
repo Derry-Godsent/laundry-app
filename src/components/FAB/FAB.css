@@ -5,7 +5,10 @@
 .fab-container {
   position: fixed;
   right: var(--sp-6);
-  bottom: calc(var(--sp-6) + env(safe-area-inset-bottom, 0px));
+  /* --vv-bottom is the strip hidden below the visible area while the page is
+     zoomed; 0 the rest of the time. Without it the button sits below the fold
+     on a zoomed phone. */
+  bottom: calc(var(--vv-bottom, 0px) + var(--sp-6) + env(safe-area-inset-bottom, 0px));
   z-index: 45;
 }
 

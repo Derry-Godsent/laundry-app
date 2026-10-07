@@ -65,6 +65,12 @@ the five-screen correctness pass and the definition of done live in
       replies, App Ideas, App Accounts, realtime alerts, staff actions from the app.
 - [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.
 
+- [x] Phase C follow-up, zoom on a phone: fields are 16px from 900px down so iOS cannot
+      zoom on focus, and the visual viewport is published as `--vv-h` / `--vv-top` /
+      `--vv-bottom` so the takeover screen, modal, drawers, notification sheet, pinned action
+      bar, pagination, floating button and toast all stay inside what is on screen at any zoom
+      level and with the keyboard open.
+
 Riding along with A and B, a minimal correctness pass for the five screens that are
 broken on phones rather than only unpolished: Clients, Staff, System Admin, Reports,
 New Order. Presentation only, no data logic.

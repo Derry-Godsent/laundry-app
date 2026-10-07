@@ -29,7 +29,10 @@ body {
 }
 
 #root {
+  /* dvh, so the page is not taller than what a phone can actually show; 100vh
+     stays as the fallback for browsers that do not know dvh. */
   min-height: 100vh;
+  min-height: 100dvh;
   isolation: isolate;
 }
 

@@ -444,7 +444,11 @@
 /* ── Detail drawer ──────────────────────────────────────────────────────── */
 .ord-overlay {
   position: fixed;
-  inset: 0;
+  top: var(--vv-top, 0px);
+  right: 0;
+  bottom: auto;
+  left: 0;
+  height: var(--vv-h, 100dvh);
   z-index: 60;
   background: rgba(2, 3, 7, 0.6);
   backdrop-filter: blur(5px);
@@ -458,13 +462,13 @@
 
 .ord-drawer {
   position: fixed;
-  top: 0;
+  top: var(--vv-top, 0px);
   right: 0;
   z-index: 65;
   display: flex;
   flex-direction: column;
   width: min(460px, 100%);
-  height: 100dvh;
+  height: var(--vv-h, 100dvh);
   background: var(--ink-card);
   border-left: 1px solid var(--line-soft);
   box-shadow: var(--shadow-lg);
@@ -692,6 +696,16 @@
   .ord-drawer { width: 100%; }
   .ord-pipeline { padding: var(--sp-4); gap: var(--sp-2); }
   .ord-col { min-width: 230px; max-width: 230px; }
+}
+
+/* The toolbar keeps its compact shape; only the field text is raised to the
+   16px threshold, so focusing a filter on a phone does not zoom the page. */
+@media (max-width: 900px) {
+  .ord-dates .input,
+  .ord-srch__inp,
+  .ord-fp { font-size: 16px; }
+
+  .ord-fp { max-width: 100%; }
 }
 
 @media (max-width: 640px) {

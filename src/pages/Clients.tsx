@@ -202,6 +202,9 @@ const CSS = `
 }
 
 @media(max-width:700px){
+  /* 16px is the threshold under which iOS Safari zooms the page in when a field
+     is focused; zoomed, the whole layout sits differently on screen. */
+  .cl-srch-inp, .cl-fp, .cl-m-inp, .cl-m-sel { font-size: 16px !important; }
   /* The card layout is a block list now, so the 780px table floor must go. */
   .cl-tbl { min-width: 0 !important; }
   /* The list is the page on a phone: release the fixed frame so the whole page

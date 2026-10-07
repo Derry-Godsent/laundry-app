@@ -301,6 +301,37 @@ for new `100vh`. The pages themselves sit behind `PermissionGuard`, so there is
 no server-rendered markup to assert against: the width-by-width eyeball stays
 with the reviewer on a preview.
 
+**Zooming on a phone (follow-up to phase C).** A report came back from a live
+phone: the decision button at the bottom of Mobile Requests could not be seen,
+because the whole console is zoomable. Two separate mechanisms were behind it,
+and both are fixed without taking pinch zoom away from anyone who needs it.
+
+1. **A focused field under 16px makes iOS Safari zoom the page in, and it stays
+   zoomed.** The Status select, the date input and the note textarea were 13 to
+   13.5px. Fields are now 16px at 900px and below, in the shared field rules and
+   in the four pages that set their own (Mobile Requests through the shared
+   classes, Service Requests, Orders, Clients). The 16px figure is the exact
+   threshold, so this is also the fix that keeps focus from moving the page.
+2. **While a page is zoomed, `position: fixed` and `position: sticky` are laid
+   out against the layout viewport, not against what is on screen.** That is why
+   the pinned bar sat below the visible area, and it is the same reason a fixed
+   overlay can sit under the browser chrome. `visualViewport` is now published as
+   three custom properties on `<html>` by `useVisualViewport` (mounted once, in
+   the shell):
+
+   | Property | Meaning | Used by |
+   | --- | --- | --- |
+   | `--vv-h` | the visible height | takeover screen, modal sheet, order drawer, phone drawer, notification sheet |
+   | `--vv-top` | where the visible area starts down the page | the same surfaces, so they sit in the visible band after panning |
+   | `--vv-bottom` | the strip hidden below the visible area | pinned action bar, table pagination, floating button, toast |
+
+   Each falls back to `100dvh` / `0` in CSS, so a browser without
+   `visualViewport` behaves exactly as before, and the keyboard opening lifts the
+   pinned bar instead of covering it. `#root` also moved to `100dvh` so the page
+   is never taller than the screen. Pinch zoom itself is left alone: iOS ignores
+   `user-scalable=no`, and blocking zoom would take magnification away from
+   staff who need it, so the layout is made zoom-proof instead.
+
 **Copy rules (repo-wide).** No em dashes. `npm run check:copy` fails on U+2014
 anywhere in the repo; use a full stop, a colon, a comma or a middot separator
 instead, and a plain hyphen for "no value" cells. En dashes survive only in
