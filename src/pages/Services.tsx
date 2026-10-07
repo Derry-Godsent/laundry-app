@@ -9,6 +9,7 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import { usePermission } from "../hooks/usePermission";
 import { PermissionGuard } from "../components/PermissionGuard";
+import { LoadingRows } from "../components/ui";
 
 const T = {
   bgBase:      "#050609",
@@ -153,18 +154,73 @@ const GLOBAL_CSS = `
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
 
 @media (max-width: 900px) {
-  .svc-header-row { flex-direction: column; align-items: flex-start !important; gap: 14px; }
-  .svc-stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+  /* Page padding and header come from the shared tokens, so this page lines up
+     with every other one and the corners stay clear on a phone. */
+  .svc-header-row {
+    flex-direction: column; align-items: stretch !important; gap: 14px;
+    padding: 18px var(--page-pad-x) !important;
+  }
+  .svc-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .svc-stats-grid > div { padding: 13px 14px !important; border-right: none !important; }
+  .svc-stats-grid > div:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.05) !important; }
+  /* The count is the third child: an accent bar, the label, then the number. */
+  .svc-stats-grid .stat-cell > div:nth-of-type(3) { font-size: 21px !important; }
   .svc-catalog-grid { grid-template-columns: 1fr !important; }
   .svc-corp-grid { grid-template-columns: 1fr !important; }
   .svc-badge-pill { display: none !important; }
+
+  /* 16px is the threshold under which iOS zooms the page in on focus and
+     leaves it zoomed, which moves everything the staff member was reading. */
+  .modal-box input, .modal-box select, .modal-box textarea,
+  .price-input, .svc-search input, .search-input { font-size: 16px; }
+  /* A 230px search box beside the tabs leaves nothing for the list. */
+  .svc-search { width: 100% !important; flex: 1 1 100% !important; }
+  .svc-search input { width: 100% !important; }
+
+  /* Buttons reach thumb height without changing their shape. */
+  .modal-box button,
+  .super-tab,
+  .svc-header-row button,
+  .svc-card button,
+  .corp-card button,
+  .stat-cell { min-height: var(--tap-min); }
+
+  /* Modals are sized to the visible area and rise from the bottom edge, so a
+     zoomed page or an open keyboard cannot push the buttons off screen. */
+  .modal-back {
+    top: var(--vv-top, 0px) !important;
+    bottom: auto !important;
+    height: var(--vv-h, 100dvh);
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+  .modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: var(--vv-h, 100dvh);
+    border-radius: 16px 16px 0 0 !important;
+    overflow-y: auto;
+    padding-bottom: var(--safe-bottom);
+  }
+  .svc-form-grid, .svc-form-grid-4 { grid-template-columns: minmax(0, 1fr) !important; }
+
+  /* Every row that carried a hardcoded 32px gutter uses the shared padding. */
+  .svc-tabs-row, .svc-subrow, .svc-body { padding-left: var(--page-pad-x) !important; padding-right: var(--page-pad-x) !important; }
+  .svc-subrow { gap: 8px !important; }
+
+  /* The toast sits above whatever strip of the page is hidden while zoomed. */
+  .svc-toast {
+    bottom: calc(var(--vv-bottom, 0px) + 16px) !important;
+    left: var(--page-pad-x) !important;
+    right: var(--page-pad-x) !important;
+    max-width: none !important;
+  }
 }
 
-@media (max-width: 720px) {
-  .svc-header-row { padding: 16px !important; }
-  .svc-stats-grid { grid-template-columns: 1fr !important; }
-  .svc-catalog-grid { min-width: 260px !important; }
-  .svc-corp-grid { min-width: 280px !important; }
+@media (max-width: 480px) {
+  /* Four count cells stay two per row rather than one tall cell each. */
+  .svc-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .svc-stats-grid > div { padding: 12px 12px !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -405,7 +461,8 @@ const EditModal = ({ item, onSave, onClose, saving }: {
               letterSpacing:"0.1em", fontWeight:700, marginBottom:10, fontFamily:FONT }}>
               {isLaundry ? "Standard Pricing (GH₵)" : "Service Rate (GH₵)"}
             </div>
-            <div style={{ display:"grid",
+            <div className="svc-form-grid"
+              style={{ display:"grid",
               gridTemplateColumns: isLaundry ? "1fr 1fr" : "1fr", gap:9 }}>
               {fields.map(({key,label}) => (
                 <div key={key}
@@ -564,7 +621,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
                 outline:"none", fontFamily:FONT }}
             />
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+          <div className="svc-form-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
             <div>
               <div style={{ fontSize:11, color:T.textTert, marginBottom:6, fontFamily:FONT }}>
                 Service Type
@@ -598,7 +655,8 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
             <div style={{ fontSize:11, color:T.textTert, marginBottom:8, fontFamily:FONT }}>
               {isLaundry ? "Standard Pricing (GH₵)" : "Service Rate (GH₵)"}
             </div>
-            <div style={{ display:"grid",
+            <div className="svc-form-grid-4"
+              style={{ display:"grid",
               gridTemplateColumns: isLaundry ? "repeat(4,1fr)" : "1fr", gap:8 }}>
               {(isLaundry
                 ? [{k:"wash",l:"Wash"},{k:"iron",l:"Iron"},{k:"fold",l:"Fold"},{k:"hang",l:"Hang"}]
@@ -954,8 +1012,8 @@ export const Services = () => {
     ({fontSize:sz,color,textTransform:"uppercase",letterSpacing:"0.08em",fontWeight:700,fontFamily:FONT});
 
   if (permLoading) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: T.textTert, fontFamily: FONT }}>
-      Loading...
+    <div style={{ padding: "var(--page-pad-y) var(--page-pad-x)", fontFamily: FONT }}>
+      <LoadingRows rows={5} label="Loading services" />
     </div>
   );
 
@@ -977,7 +1035,7 @@ export const Services = () => {
         </div>
       )}
 
-      <div style={{ background:T.bgBase, minHeight:"100vh",
+      <div style={{ background:T.bgBase, minHeight:"100%",
         fontFamily:FONT, color:T.textPrimary, animation:"svcFadeIn 0.3s ease" }}>
 
         {isOffline && <OfflineBanner onRetry={handleRetry} retrying={retrying} lastSynced={lastSynced} />}
@@ -1075,7 +1133,7 @@ export const Services = () => {
           ))}
         </div>
 
-        <div style={{ background:T.bgSurface,
+        <div className="svc-tabs-row" style={{ background:T.bgSurface,
           borderBottom:`1px solid ${T.borderFaint}`,
           padding:"0 32px",
           display:"flex", gap:2, overflowX:"auto" }}>
@@ -1110,7 +1168,7 @@ export const Services = () => {
           })}
         </div>
 
-        <div style={{ background:T.bgSurface,
+        <div className="svc-subrow" style={{ background:T.bgSurface,
           borderBottom:`1px solid ${T.borderFaint}`,
           padding:"10px 32px",
           display:"flex", alignItems:"center",
@@ -1133,7 +1191,7 @@ export const Services = () => {
 
           <div style={{ flex:1 }}/>
 
-          <div style={{ position:"relative", width:230, flexShrink:0 }}>
+          <div className="svc-search" style={{ position:"relative", width:230, flexShrink:0 }}>
             <Search size={13} style={{ position:"absolute", left:11, top:"50%",
               transform:"translateY(-50%)", color:T.textHint, pointerEvents:"none" }}/>
             <input className="search-input"
@@ -1150,7 +1208,7 @@ export const Services = () => {
         </div>
 
         <PermissionGuard>
-          <div style={{ padding:"26px 32px", width: "100%" }}>
+          <div className="svc-body" style={{ padding:"26px 32px", width: "100%" }}>
             {filtered.length === 0 ? (
               <div style={{ display:"flex", flexDirection:"column",
                 alignItems:"center", justifyContent:"center",
@@ -1215,7 +1273,7 @@ export const Services = () => {
             )}
           </div>
 
-          <div style={{ background:T.bgSurface,
+          <div className="svc-body" style={{ background:T.bgSurface,
             borderTop:`1px solid ${T.borderFaint}`,
             padding:"24px 32px", width: "100%" }}>
 

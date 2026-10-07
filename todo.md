@@ -74,7 +74,11 @@ the five-screen correctness pass and the definition of done live in
         Dashboard's area chart now measures its box instead of scaling a 600-unit drawing
         (its phone labels were rendering at about 4px), with label spacing from the measured
         width; the loading skeleton is fluid and quick actions are thumb sized.
-  - [ ] D3, Services, Payments, Receipt.
+  - [x] D3, Services, Payments, Receipt. All three fill the shell frame instead of owning
+        the viewport, use the page padding tokens, reach 16px fields and thumb-height buttons,
+        and size their dialogs to the visible area as bottom sheets. Payments' ten-column
+        table is now labelled cards (it was a sideways scroll to reach the receipt button).
+        Receipt's phone layer is `@media screen` only, so the print stylesheet is untouched.
   - [ ] D4, Security, Settings, Login, Help, Profile, then the `legacy-bridge` cleanup.
 - [ ] Phase E, overall appearance: palette, type, surfaces, border contrast, spacing,
       button hierarchy, status colours, icons, states, motion, wording. Refine the dark

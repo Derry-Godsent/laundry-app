@@ -112,13 +112,83 @@ const GlobalStyle = () => (
       .pay-row, .pay-card, .pay-stat, .pay-orb { animation:none !important; }
       .pay-primary-btn:hover, .pay-filter-btn:hover { transform:none !important; }
     }
-    @media (max-width: 480px) {
-      .pay-header-row { padding: 16px !important; }
-      .pay-controls-row { padding: 12px 16px !important; flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
+    @media (max-width: 900px) {
+      /* Page padding and header come from the shared tokens. */
+      .pay-header-row { padding: 18px var(--page-pad-x) !important; flex-direction: column !important; align-items: stretch !important; gap: 12px; }
+      .pay-header-row button { width: 100%; justify-content: center; min-height: var(--tap-min); }
+      .pay-controls-row { padding: 12px var(--page-pad-x) !important; flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
       .pay-searchbox { width: 100% !important; }
-      .pay-stats-grid { grid-template-columns: 1fr !important; }
-      .pay-table-view { overflow-x: auto; }
-      .pay-table-view table { min-width: 680px; }
+      .pay-search-inp { font-size: 16px !important; }
+      .pay-body { padding: 16px var(--page-pad-x) 40px !important; }
+
+      /* Two count tiles per row instead of four squeezed ones. */
+      .pay-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .pay-stat { padding: 14px 15px !important; }
+
+      .pay-filter-btn, .pay-receipt-btn, .pay-close-btn, .pay-ghost-btn { min-height: var(--tap-min); }
+      .pay-filter-btn { padding: 9px 14px !important; }
+      .pay-receipt-btn { min-height: var(--tap-min); width: 100%; justify-content: center; }
+
+      /* 16px keeps iOS from zooming the page in on focus and leaving it zoomed. */
+      .pay-input, .pay-select { font-size: 16px !important; min-height: var(--tap-min); }
+
+      /* The record-payment dialog is sized to the visible area and rises from
+         the bottom edge, so a zoomed page or an open keyboard cannot push the
+         Save button off screen. */
+      .pay-modal-ov {
+        top: var(--vv-top, 0px) !important;
+        bottom: auto !important;
+        height: var(--vv-h, 100dvh);
+        padding: 0 !important;
+        align-items: flex-end !important;
+      }
+      .pay-modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: var(--vv-h, 100dvh) !important;
+        border-radius: 16px 16px 0 0 !important;
+        padding-bottom: var(--safe-bottom);
+      }
+      .pay-modal-row { grid-template-columns: minmax(0, 1fr) !important; }
+      .pay-modal-row--2 { grid-template-columns: minmax(0, 1fr) !important; }
+
+      .pay-orb { display: none; }
+
+      /* A ten-column table cannot be read on a phone: each row becomes a card
+         with the same labelled fields the other lists use. */
+      .pay-table-view { overflow: visible !important; }
+      .pay-table-view table { min-width: 0 !important; }
+      .pay-table-view thead { display: none; }
+      .pay-table-row {
+        display: block;
+        padding: 12px var(--page-pad-x);
+        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+      }
+      .pay-table-row td {
+        display: block;
+        padding: 6px 0 6px 42% !important;
+        border: none;
+        text-align: left;
+        position: relative;
+        font-size: 13.5px;
+      }
+      .pay-table-row td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        top: 8px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-4);
+      }
+      .pay-table-row td[data-label="Receipt"] { padding-left: 0 !important; margin-top: 6px; }
+      .pay-table-row td[data-label="Receipt"]::before { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .pay-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
     }
   `}</style>
 );
@@ -221,6 +291,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
 
   return createPortal(
     <div
+      className="pay-modal-ov"
       style={{
         position: "fixed", inset: 0, zIndex: 99999,
         background: "rgba(4,6,12,0.85)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
@@ -231,6 +302,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
       onClick={onClose}
     >
       <div
+        className="pay-modal"
         onClick={(e) => e.stopPropagation()}
         style={{
           background: `linear-gradient(180deg, ${T.bgElevated} 0%, ${T.bgRaised} 100%)`,
@@ -275,7 +347,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
           </div>
 
           {selectedOrder && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+            <div className="pay-modal-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 10, color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Client</div>
                 <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textPrimary, fontSize: 14, fontFamily: FONT, fontWeight: 500 }}>
@@ -297,7 +369,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
             </div>
           )}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div className="pay-modal-row pay-modal-row--2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
               <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Amount (GH₵)</div>
               <input
@@ -538,9 +610,9 @@ export const Payments = () => {
   ];
 
   if (isLoading || permLoading) return (
-    <div className="pay-root" style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary }}>
+    <div className="pay-root" style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT, color: T.textPrimary }}>
       <GlobalStyle />
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", gap: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60%", gap: 14, padding: "var(--page-pad-y) var(--page-pad-x)" }}>
         <div style={{ width: 44, height: 44, borderRadius: 12, background: T.bgElevated, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <CreditCard size={22} color={T.accent} className="pay-orb" style={{ animation: "spin 0.8s linear infinite" }} />
         </div>
@@ -555,7 +627,7 @@ export const Payments = () => {
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
       {showModal && <PaymentModal onClose={() => setShowModal(false)} onSave={addPayment} outstandingOrders={outstandingOrders} />}
       
-      <div className="pay-root" style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary, position: "relative", overflow: "hidden" }}>
+      <div className="pay-root" style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT, color: T.textPrimary, position: "relative", overflow: "hidden" }}>
         <div aria-hidden style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
           <div className="pay-orb" style={{ position: "absolute", top: "-10%", right: "8%", width: 420, height: 420, borderRadius: "50%", background: `radial-gradient(circle, ${T.accentGlow} 0%, transparent 70%)`, opacity: 0.12, filter: "blur(40px)" }} />
           <div className="pay-orb" style={{ position: "absolute", bottom: "-15%", left: "4%", width: 480, height: 480, borderRadius: "50%", background: `radial-gradient(circle, ${T.goldGlow} 0%, transparent 70%)`, opacity: 0.08, filter: "blur(50px)", animationDelay: "3s" }} />
@@ -603,12 +675,12 @@ export const Payments = () => {
             </div>
             <div className="pay-searchbox" style={{ position: "relative", width: 260, border: `1px solid ${T.borderSoft}`, borderRadius: 9, background: T.bgRaised, transition: "border-color .16s ease, box-shadow .16s ease" }}>
               <Search size={14} style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: T.textHint, pointerEvents: "none" }} />
-              <input placeholder="Search client or order ID…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: "100%", padding: "9px 12px 9px 34px", background: "transparent", border: "none", borderRadius: 9, color: T.textPrimary, fontSize: 13.5, outline: "none", fontFamily: FONT }} />
+              <input className="pay-search-inp" placeholder="Search client or order ID…" value={search} onChange={e => setSearch(e.target.value)} style={{ width: "100%", padding: "9px 12px 9px 34px", background: "transparent", border: "none", borderRadius: 9, color: T.textPrimary, outline: "none", fontFamily: FONT }} />
             </div>
           </div>
 
           <PermissionGuard>
-            <div style={{ padding: "20px 32px 48px" }}>
+            <div className="pay-body" style={{ padding: "20px 32px 48px" }}>
               {isLoading ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {[0,1,2,3,4].map(i => <div key={i} className="pay-skeleton" style={{ height: 54, borderRadius: 10, border: `1px solid ${T.borderFaint}` }} />)}
@@ -636,21 +708,21 @@ export const Payments = () => {
                           const s = statusStyle(t.status);
                           return (
                             <tr key={t.id} className="pay-table-row pay-row" style={{ borderBottom: `1px solid ${T.borderFaint}`, animationDelay: `${Math.min(i, 10) * 35}ms` }}>
-                              <td style={{ padding: "16px 20px", fontFamily: MONO, color: T.accent, fontWeight: 500 }}>{t.id}</td>
-                              <td style={{ padding: "16px 20px", fontFamily: MONO, color: T.textSec }}>{t.orderId}</td>
-                              <td style={{ padding: "16px 20px", fontWeight: 500 }}>{t.client}</td>
-                              <td style={{ padding: "16px 20px", fontFamily: MONO }}>{t.total}</td>
-                              <td style={{ padding: "16px 20px", fontFamily: MONO, color: T.emerald }}>₵{t.paid}</td>
-                              <td style={{ padding: "16px 20px", fontFamily: MONO, color: t.balance > 0 ? T.ember : T.textTert }}>₵{t.balance}</td>
-                              <td style={{ padding: "16px 20px" }}>
+                              <td data-label="Payment" style={{ padding: "16px 20px", fontFamily: MONO, color: T.accent, fontWeight: 500 }}>{t.id}</td>
+                              <td data-label="Order" style={{ padding: "16px 20px", fontFamily: MONO, color: T.textSec }}>{t.orderId}</td>
+                              <td data-label="Client" style={{ padding: "16px 20px", fontWeight: 500 }}>{t.client}</td>
+                              <td data-label="Total" style={{ padding: "16px 20px", fontFamily: MONO }}>{t.total}</td>
+                              <td data-label="Paid" style={{ padding: "16px 20px", fontFamily: MONO, color: T.emerald }}>₵{t.paid}</td>
+                              <td data-label="Balance" style={{ padding: "16px 20px", fontFamily: MONO, color: t.balance > 0 ? T.ember : T.textTert }}>₵{t.balance}</td>
+                              <td data-label="Status" style={{ padding: "16px 20px" }}>
                                 <span style={{ padding: "4px 10px", borderRadius: 100, fontSize: 11.5, fontWeight: 600, background: s.bg, color: s.color, border: `1px solid ${s.border}`, display: "inline-flex", alignItems: "center", gap: 6 }}>
                                   {t.status === "Pending" && <span style={{ width: 5, height: 5, borderRadius: "50%", background: s.color, animation: "pulseDot 1.3s infinite" }} />}
                                   {t.status}
                                 </span>
                               </td>
-                              <td style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{t.method}</td>
-                              <td style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{t.date}</td>
-                              <td style={{ padding: "16px 20px" }}>
+                              <td data-label="Method" style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{t.method}</td>
+                              <td data-label="Date" style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{t.date}</td>
+                              <td data-label="Receipt" style={{ padding: "16px 20px" }}>
                                 <button className="pay-receipt-btn" style={{ padding: "6px 12px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 7, color: T.textSec, fontSize: 12, cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", gap: 5 }} onClick={() => navigate(`/receipt?order=${t.orderId}`)}>
                                   View Receipt <ChevronRight size={12} />
                                 </button>

@@ -50,7 +50,7 @@ const OfflineBanner = ({ onRetry, retrying, lastSynced }: { onRetry:()=>void; re
 const Toast = ({ msg, type, onClose }: { msg: string; type: 'success' | 'error'; onClose: () => void }) => {
   useEffect(() => { const t = setTimeout(onClose, 3500); return () => clearTimeout(t); }, [onClose]);
   return (
-    <div className="no-print" style={{ position:"fixed", bottom:24, right:24, zIndex:10000,
+    <div className="no-print receipt-toast" style={{ position:"fixed", bottom:24, right:24, zIndex:10000,
       background: type==='error' ? T.emberDim : T.emeraldDim,
       border:`1px solid ${type==='error' ? T.emberBord : T.emeraldBord}`,
       borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12,
@@ -168,13 +168,13 @@ export const Receipt = () => {
   const safeDate = receipt?.created_at ? new Date(receipt.created_at).toLocaleDateString('en-GB') : 'N/A';
 
   if (permLoading) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: T.textTert, fontFamily: FONT }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60%", padding: "var(--page-pad-y) var(--page-pad-x)", color: T.textTert, fontFamily: FONT }}>
       Loading...
     </div>
   );
 
   return (
-    <div style={{ background: T.bgBase, minHeight: "100vh", fontFamily: FONT, color: T.textPrimary }}>
+    <div style={{ background: T.bgBase, minHeight: "100%", fontFamily: FONT, color: T.textPrimary }}>
       <style>{`
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: calc(200px + 100%) 0; } }
@@ -217,6 +217,24 @@ export const Receipt = () => {
         @media (max-width: 480px) {
           .receipt-items-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
           .receipt-items-grid > div:nth-child(2), .receipt-items-grid > div:nth-child(3) { display: none; }
+        }
+
+        /* Screen only: none of this may reach the printed receipt. */
+        @media screen and (max-width: 900px) {
+          .top-bar { padding: 16px var(--page-pad-x) !important; }
+          .top-bar select { width: 100% !important; min-width: 0 !important; font-size: 16px !important; min-height: var(--tap-min); }
+          .top-bar button { min-height: var(--tap-min); }
+          .receipt-stage { padding: 18px var(--page-pad-x) 40px !important; }
+          .receipt-card { margin: 0 !important; }
+
+          /* Buttons reach thumb height, and the toast clears whatever strip of
+             the page is hidden while the page is zoomed. */
+          .receipt-footer button, .receipt-summary button { min-height: var(--tap-min); }
+          .receipt-toast {
+            bottom: calc(var(--vv-bottom, 0px) + 16px) !important;
+            left: var(--page-pad-x) !important;
+            right: var(--page-pad-x) !important;
+          }
         }
       `}</style>
 
@@ -296,7 +314,7 @@ export const Receipt = () => {
         </div>
       ) : (
         <PermissionGuard>
-          <div style={{ display: "flex", justifyContent: "center", padding: "40px 20px" }}>
+          <div className="receipt-stage" style={{ display: "flex", justifyContent: "center", padding: "40px 20px" }}>
             <div className="receipt-card" style={{ 
               width: "100%", maxWidth: 620, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, 
               borderRadius: 16, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" 

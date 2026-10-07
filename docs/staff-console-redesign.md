@@ -365,6 +365,16 @@ was phone polish rather than restructure:
 | App Ideas | Shared `Banner`, `EmptyState` and `LoadingRows`; shared page padding; a stacked header with a full-width action; the four status buttons at thumb height sharing the row; six counted tiles two per row; long pasted text wraps instead of pushing the page sideways. |
 | Dashboard | The area chart was a 600-unit viewBox scaled to the container, so on a phone its axis labels rendered at about four pixels. It now measures its box with a `ResizeObserver` and draws at that width (clamped 280 to 900), which keeps text at the size it was written, shortens the chart on a narrow box and spaces the labels by available width instead of a fixed count. The loading skeleton is fluid, and quick actions and feed rows are phone-sized. |
 
+D3 took the three legacy token-object pages, which share a shape: their colours
+come from a local `T` object, their padding and gutters are inline, and their
+tables and dialogs were written for a desk.
+
+| Screen | What was wrong | What changed |
+| --- | --- | --- |
+| Services | Loading and page were `100vh` inside the frame; gutters were hardcoded 32px; the modal was a centred box wider than a phone | Page fills the frame; the shared `LoadingRows`; gutters use the page tokens; four count cells stay two per row; the modal is a bottom sheet sized to the visible area with its form grids stacked; fields reach 16px; buttons reach thumb height; the toast clears the hidden strip |
+| Payments | A ten-column table with a 680px floor, which on a phone was a sideways scroll through nine columns to reach the receipt button; the record-payment dialog was centred at 85vh; four stat tiles squeezed into one column | Each row is a labelled card (`data-label` on all ten cells), the floor and the head are gone at 900px; the dialog is a bottom sheet sized to the visible area with its rows stacked; tiles two per row; fields 16px; every button thumb height |
+| Receipt | `100vh` in two states; the order selector kept `minWidth: 260`; small fields; a toast below the visible area when zoomed | Fills the frame; phone layer is `@media screen` only, so the print stylesheet is untouched; the selector goes full width at 16px; buttons thumb height; the toast clears the hidden strip |
+
 **Copy rules (repo-wide).** No em dashes. `npm run check:copy` fails on U+2014
 anywhere in the repo; use a full stop, a colon, a comma or a middot separator
 instead, and a plain hyphen for "no value" cells. En dashes survive only in
