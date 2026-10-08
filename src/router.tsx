@@ -22,7 +22,6 @@ import { MobileRequests } from "./pages/MobileRequests";
 import { ServiceRequests } from "./pages/ServiceRequests";
 import { AppIdeas } from "./pages/AppIdeas";
 import { AppAccounts } from "./pages/AppAccounts";
-import { DesignPreview } from "./pages/DesignPreview";
 
 /* ─── PROTECTED ROUTE WRAPPER ────────────────────────────────────────────── */
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -63,12 +62,6 @@ export const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />, 
-  },
-  {
-    /* Credential-free walkthrough of the redesigned console, rendered from
-       sample records only. Remove with the redesign sign-off. */
-    path: "/preview",
-    element: <DesignPreview />,
   },
   {
     path: "/",

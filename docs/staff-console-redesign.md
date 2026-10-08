@@ -92,7 +92,7 @@ TypeScript wrappers (import from `@/components/ui`):
 - `src/pages/MobileRequests.tsx` + `MobileRequests.css`: the intake queue rebuilt: view control with live counts, request cards that state the client's chosen date / item count / estimate, a detail column (preferred vs proposed date, pickup point, items, customer and staff notes) and a decision panel that is the only place a record changes state. Data logic, realtime channel and update payloads are unchanged.
 
 **New**
-- `src/pages/DesignPreview.tsx` + `DesignPreview.css` at `/preview`: a credential-free walkthrough of the redesign rendered from **sample records only**, plus a gallery of the components. Section 3 shows the order book frame with six sample orders and the same toolbar controls. It touches no Supabase table. Delete it (and its route) once the redesign is signed off.
+- The walkthrough page (`/preview`) that made the redesign reviewable without credentials was deleted at sign-off, together with its stylesheet and route, exactly as this record planned. Credential-free review from here on is `scripts/audit-console.cjs`, which renders the real pages.
 - `scripts/check-copy.mjs` (`npm run check:copy`): fails the build if an em dash (U+2014) appears anywhere in the repo. See the copy rules below.
 - `src/styles/base.css` PLATFORM GUARDS: the two rules that are requirements of the mobile browsers rather than styling, moved here from the deleted legacy bridge: the 16px field floor (`input, select, textarea`, so iOS cannot zoom on focus) and the named sideways scrollers for wide legacy tables (`.tbl-wrap`, `.sf-tbl-wrap`, `.table-wrapper`).
 
@@ -103,7 +103,7 @@ TypeScript wrappers (import from `@/components/ui`):
 - Every Supabase query, table, column and update payload.
 - Realtime channels (`mobile-laundry-requests`, `staff-sidebar-counts`, `workspace-branches`).
 - Permissions: `usePermission`, `PermissionGuard`, `role_permissions` filtering, and which actions are hidden for view-only roles.
-- Routes and URLs, except the additive `/preview`.
+- Routes and URLs. The one additive route this work introduced, `/preview`, was removed at sign-off.
 
 Two small clean-ups rode along: the Mobile Requests page no longer `console.log`s
 every customer row it loads, and four now-unnecessary `// @ts-ignore` comments
@@ -115,7 +115,7 @@ were dropped from files touched by this pass.
 
 ```bash
 npm install          # repo ships bun.lockb; npm works, bun is not required
-npm run dev          # http://localhost:5173  → /preview (no sign-in needed)
+npm run dev          # http://localhost:5173  → /login (a real sign-in)
 npx tsc -b           # type check
 npm run build        # type check + production bundle
 ```
@@ -158,10 +158,10 @@ roadmap: 1 to 5 are done and are not repeated; A to F are what remains.
 | A | **Responsive foundation** · shell, `100dvh`, safe areas, one scroll area per page, compact top bar, drawer, notification panel, shared breakpoints and padding tokens | ✅ done |
 | B | **Shared mobile patterns** · page header, summary cards, filter/search bar, list row, detail view, bottom actions, full-screen modal, confirm dialog, empty/error/loading states | ✅ done |
 | C | **Daily operations** · Mobile Requests, Service Requests, Orders QA, New Order, Clients | ✅ done |
-| D | **Rest of the app** · Dashboard, App Ideas, App Accounts, Staff, Services, Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile | ⬜ |
+| D | **Rest of the app** · Dashboard, App Ideas, App Accounts, Staff, Services, Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile | ✅ done |
 | E | **Overall appearance** · palette, type, surfaces, border contrast, spacing, button hierarchy, status colours, icons, states, motion, wording (refine the dark operational style, do not replace it) | ✅ done |
 | F | **Mobile app integration** · Mobile Requests, Service Requests, customer replies, App Ideas, App Accounts, realtime alerts, staff actions that start in the customer app | ✅ done |
-| G | Sign-off: delete `/preview` (route + page + CSS) and the sample-data note here, then close PR #7 | ⬜ |
+| G | Sign-off: delete `/preview` (route + page + CSS) and the sample-data note here, then close PR #7 | ✅ done |
 
 ### Riding along with A and B: minimal correctness pass
 
@@ -224,8 +224,8 @@ and export from `@/components/ui`.
 | Loading | `LoadingRows` `.loading-rows` | placeholder rows keep the page's shape |
 | Failure | `ErrorState` `.state-block` | plain words plus the one action that might fix it |
 
-Section 5 of `/preview` demonstrates all of them, inside the width probe, with
-live dialog and confirmation buttons.
+The walkthrough that demonstrated all of them, with live dialog and
+confirmation buttons inside the width probe, was removed at sign-off.
 
 ### Page archetypes (the two shapes a page may have)
 
@@ -277,8 +277,8 @@ come from the `--stage-*` ramp in `tokens.css`, and the `.ord-*` rules in
 permission checks and routes are untouched.
 
 Kept for the record: the original page is at `5512924` and the rejected rebuild
-at `22f31ed` on this branch. `/preview` section 3 shows the frame with sample
-orders.
+at `22f31ed` on this branch. The walkthrough's order-book section showed this
+frame with sample records before the walkthrough was removed at sign-off.
 
 **Phase C (daily operations) · the intake queues and the two busiest screens.**
 Mobile Requests and Service Requests now compose from the phase B patterns
@@ -472,8 +472,9 @@ every page is in scope.
 - `npm run check:visual` holds all of it, including a rule that fails on a
   `var()` that nothing defines, which is how a renamed token silently draws
   nothing.
-- The `/preview` gallery shows the primitives, the tile family and the button
-  hierarchy in every state.
+- The deleted walkthrough gallery showed the primitives, the tile family and the
+  button hierarchy in every state; `scripts/audit-console.cjs` and the real pages
+  carry that job now.
 
 **Connection status (one source of truth).**
 
@@ -683,6 +684,24 @@ the shell is an empty or skeleton state. Layout is measured; data, wording and
 the feel of a list full of real records still need the deployed console and
 eyes.
 
+### Phase G: sign-off
+
+The redesign is signed off. The walkthrough page (`/preview`, its stylesheet and
+its route) is deleted, which was its whole plan: it existed so the console could
+be reviewed without credentials, and it carried sample records rather than
+touching Supabase. What replaces it for review is `scripts/audit-console.cjs`,
+which renders the real pages headlessly and measures them.
+
+Deleted with it: the sample-data note in the file list above, and the phase G row
+in the table now reads done. Nothing else changed at sign-off: no route, query,
+payload or permission was touched on the way out, and the console builds and
+measures exactly as it did before the page was removed.
+
+PR #7 is closed, and closed **without merging**, which is what this work always
+said it would be: the review lived on the branch, the branch is the record, and
+nothing about the redesign was ever going to arrive through a merge commit. Every
+commit named in this document is on `arena/03b7f65b-laundry-app`.
+
 ### Phase E closes: the last 658 sizes onto the scale
 
 The palette half of E landed much earlier. The type half was the largest single
@@ -862,8 +881,8 @@ Rules that keep the phases safe:
 - Data logic is frozen: queries, tables, columns, realtime channels, update
   payloads, permission checks and routes must not change. Presentation only.
 - Each phase must end with `npx tsc -b`, `npm run build` and `npm run check:copy`
-  passing, and the page exercised in `/preview` (add a sample block) or against a
-  real sign-in.
+  passing, and the page exercised in `scripts/audit-console.cjs` or against a real
+  sign-in.
 
 ## 7. Resuming this work in a new chat
 
@@ -891,4 +910,5 @@ pick the work up without any chat history:
    > Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile),
    > same rules, same verification.
 
-4. **Review without credentials** at any point: `/preview` (sample data only).
+4. **Review without credentials** at any point: `node scripts/audit-console.cjs`
+   measures the real pages headlessly (see the browser section above).

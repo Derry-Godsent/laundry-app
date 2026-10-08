@@ -245,7 +245,9 @@ the five-screen correctness pass and the definition of done live in
         notification panel and account menu open fully inside the screen at 320,
         375 and 414. It cannot see data: the backend is unreachable from here, so
         every page below the shell is empty or skeleton.
-  - [ ] Then Phase G, sign-off: delete /preview and close PR #7.
+  - [x] Phase G, sign-off: `/preview`, its stylesheet and its route are deleted, and the
+        PR is closed. The walkthrough was the only credential-free way to see the redesign;
+        `scripts/audit-console.cjs` renders the real pages instead.
 - [x] Phase F, mobile app integration. Alerts now cover the two events that reached
       nobody: a customer answering a service appointment, and a customer creating an
       app account. The alert panel only holds live work (unanswered intakes, both
@@ -254,7 +256,9 @@ the five-screen correctness pass and the definition of done live in
       for from both queues. An idea's phone number is a call link. Each alert opens
       the view that holds what it is about (both queues carry their view in the
       address, so "the approved work" is also a shareable link).
-- [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.
+- [x] Phase G, sign-off: `/preview` is deleted (route, page, stylesheet) and PR #7 is
+      closed. The browser audit replaced the walkthrough as the credential-free way to
+      review the console.
 - [x] The company name, everywhere: `Chapman Prestige Limited`, `CPL` for short. Page
       titles, sidebar, receipts, notifications, badge tooltips, download file names,
       the browser tab, the manifest and the customer app. Database functions, storage
