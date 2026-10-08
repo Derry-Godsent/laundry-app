@@ -232,9 +232,13 @@ the five-screen correctness pass and the definition of done live in
         font-family declarations outside `--fs-*` and the two font stacks. That is
         the "more visible, bigger or better arranged" half of the appearance ask,
         and it touches every page, so it wants its own pass.
-  - [ ] Then Phase F, then sign-off.
-- [ ] Phase F, mobile app integration: Mobile Requests, Service Requests, customer
-      replies, App Ideas, App Accounts, realtime alerts, staff actions from the app.
+  - [ ] Then Phase G, sign-off: delete /preview and close PR #7.
+- [x] Phase F, mobile app integration. Alerts now cover the two events that reached
+      nobody: a customer answering a service appointment, and a customer creating an
+      app account. The alert panel only holds live work (unanswered intakes, both
+      kinds of reply, unread ideas, recent signups) instead of the newest rows
+      whatever had happened to them. An App Account shows what that person has asked
+      for from both queues. An idea's phone number is a call link.
 - [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.
 - [x] The company name, everywhere: `Chapman Prestige Limited`, `CPL` for short. Page
       titles, sidebar, receipts, notifications, badge tooltips, download file names,

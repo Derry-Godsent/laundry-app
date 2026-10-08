@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { KeyRound, RefreshCw, Search, ShieldCheck, Smartphone, UserCheck } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight, KeyRound, RefreshCw, Search, ShieldCheck, Smartphone, UserCheck } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { PermissionGuard } from "../components/PermissionGuard";
 import { usePermission } from "../hooks/usePermission";
@@ -33,6 +34,77 @@ interface AppCustomer {
   created_at: string;
   client_id: string | null;
 }
+
+/* What this customer has asked for, from both intake queues.
+ *
+ * Every app relationship starts as one of these, so an account on its own is
+ * half a picture: the office also needs to know whether the person is waiting
+ * on something. The two tables link to the account by `customer_account_id`,
+ * which is the same key the queues themselves use. */
+export interface CustomerAsk {
+  id: string;
+  kind: "laundry" | "service";
+  label: string;
+  state: string;
+  tone: "waiting" | "live" | "done";
+  /** When the customer asked. Ordering is on this for both queues: a laundry
+   *  request's preferred pickup date is a different kind of time from a service
+   *  enquiry's arrival, and mixing the two would order the list by nothing. */
+  askedAt: string;
+}
+
+const LAUNDRY_STATE: Record<string, { label: string; tone: CustomerAsk["tone"] }> = {
+  pending: { label: "Waiting for CPL", tone: "waiting" },
+  under_review: { label: "Being reviewed", tone: "live" },
+  needs_customer_confirmation: { label: "With the customer", tone: "live" },
+  confirmed: { label: "Date agreed", tone: "done" },
+  converted: { label: "Turned into an order", tone: "done" },
+  declined: { label: "Closed by the customer", tone: "done" },
+  cancelled: { label: "Cancelled", tone: "done" },
+};
+
+const SERVICE_STATE: Record<string, { label: string; tone: CustomerAsk["tone"] }> = {
+  "awaiting-chapman": { label: "Waiting for a date from CPL", tone: "waiting" },
+  "awaiting-customer": { label: "With the customer", tone: "live" },
+  accepted: { label: "Date accepted", tone: "done" },
+  rejected: { label: "Wants another date", tone: "waiting" },
+  declined: { label: "Not taken up", tone: "done" },
+};
+
+/** Rows in, what the office reads out. Pure, so the probe can check it. */
+export const mapAsks = (laundry: any[], service: any[]): CustomerAsk[] => {
+  const asks: CustomerAsk[] = [];
+
+  for (const row of laundry) {
+    const state = LAUNDRY_STATE[row.request_status] ?? { label: row.request_status || "Recorded", tone: "live" as const };
+    asks.push({
+      id: `laundry-${row.id}`,
+      kind: "laundry",
+      label: [
+        "Laundry pickup",
+        row.estimated_total ? `about GH₵${Number(row.estimated_total).toFixed(2)}` : "",
+        row.requested_for ? `for ${row.requested_for}` : "",
+      ].filter(Boolean).join(", "),
+      state: state.label,
+      tone: state.tone,
+      askedAt: row.created_at,
+    });
+  }
+
+  for (const row of service) {
+    const state = SERVICE_STATE[row.appointment_response] ?? { label: row.appointment_response || "Recorded", tone: "live" as const };
+    asks.push({
+      id: `service-${row.id}`,
+      kind: "service",
+      label: row.service_title ? `${row.service_title} request` : "Service request",
+      state: state.label,
+      tone: state.tone,
+      askedAt: row.created_at,
+    });
+  }
+
+  return asks.sort((left, right) => new Date(right.askedAt).getTime() - new Date(left.askedAt).getTime());
+};
 
 interface SecurityEvent {
   id: string;
@@ -68,6 +140,9 @@ function AppAccountsContent() {
   const [historyOff, setHistoryOff] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [asks, setAsks] = useState<CustomerAsk[]>([]);
+  const [asksNote, setAsksNote] = useState<string | null>(null);
+  const [asksLoading, setAsksLoading] = useState(false);
 
   const loadEverything = useCallback(async () => {
     setLoading(true);
@@ -118,6 +193,46 @@ function AppAccountsContent() {
       supabase.removeChannel(channel);
     };
   }, [loadEverything]);
+
+  /* What this one customer has asked for. Read when an account is opened rather
+     than for the whole list, so the page never pulls every request in the
+     system to decorate a name. */
+  const loadAsks = useCallback(async (accountId: string) => {
+    setAsksLoading(true);
+    setAsksNote(null);
+
+    const [laundry, service] = await Promise.all([
+      supabase
+        .from("mobile_requests")
+        .select("id, request_status, requested_for, estimated_total, created_at")
+        .eq("customer_account_id", accountId)
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("quote_requests")
+        .select("id, service_title, appointment_response, created_at")
+        .eq("customer_account_id", accountId)
+        .order("created_at", { ascending: false })
+        .limit(5),
+    ]);
+
+    if (laundry.error && service.error) {
+      setAsks([]);
+      setAsksNote(`Their requests could not be read: ${laundry.error.message}`);
+    } else {
+      if (laundry.error) console.warn("Could not read this customer's laundry requests:", laundry.error.message);
+      if (service.error) console.warn("Could not read this customer's service requests:", service.error.message);
+      setAsks(mapAsks(laundry.data ?? [], service.data ?? []));
+      if (laundry.error || service.error) setAsksNote("One of the two queues could not be read, so this list may be short.");
+    }
+
+    setAsksLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedId) { setAsks([]); setAsksNote(null); return; }
+    void loadAsks(selectedId);
+  }, [selectedId, loadAsks]);
 
   const byCustomer = useMemo(() => {
     const grouped = new Map<string, SecurityEvent[]>();
@@ -279,6 +394,39 @@ function AppAccountsContent() {
               title={selected.full_name?.trim() || "Name not given"}
               subtitle={`${selected.phone ?? "No number"} · joined ${formatMoment(selected.created_at)}`}
             >
+
+              <div className="aa-asks">
+                <div className="aa-asks-head">
+                  <h3>What they have asked for</h3>
+                  <span>Newest first, from both queues</span>
+                </div>
+
+                {asksLoading ? (
+                  <p className="aa-asks-note">Reading their requests</p>
+                ) : asks.length === 0 ? (
+                  <p className="aa-asks-note">
+                    Nothing yet. An account appears here whether or not the person has
+                    asked for anything, so this can simply mean they have not booked.
+                  </p>
+                ) : (
+                  <ul className="aa-asks-list">
+                    {asks.map((ask) => (
+                      <li key={ask.id} className={`aa-ask aa-ask--${ask.tone}`}>
+                        <span className="aa-ask-label">{ask.label}</span>
+                        <span className="aa-ask-state">{ask.state}</span>
+                        <time>{formatMoment(ask.askedAt)}</time>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {asksNote && <p className="aa-asks-note aa-asks-note--warn">{asksNote}</p>}
+
+                <div className="aa-asks-links">
+                  <Link to="/mobile-requests">Mobile Requests <ArrowRight size={13} aria-hidden="true" /></Link>
+                  <Link to="/service-requests">Service Requests <ArrowRight size={13} aria-hidden="true" /></Link>
+                </div>
+              </div>
 
               <div className="aa-honest">
                 <KeyRound size={15} />

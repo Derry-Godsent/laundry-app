@@ -220,7 +220,11 @@ function AppIdeasContent() {
 
                     <div className="ai-meta">
                       <span>{idea.author_name?.trim() || "Name not given"}</span>
-                      <span>{idea.phone?.trim() || "No number"}</span>
+                      {idea.phone?.trim() ? (
+                        <a className="ai-phone" href={`tel:${idea.phone.trim()}`}>{idea.phone.trim()}</a>
+                      ) : (
+                        <span>No number</span>
+                      )}
                       <span>{formatMoment(idea.created_at)}</span>
                     </div>
 

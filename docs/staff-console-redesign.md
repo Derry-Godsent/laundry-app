@@ -160,7 +160,7 @@ roadmap: 1 to 5 are done and are not repeated; A to F are what remains.
 | C | **Daily operations** · Mobile Requests, Service Requests, Orders QA, New Order, Clients | ✅ done |
 | D | **Rest of the app** · Dashboard, App Ideas, App Accounts, Staff, Services, Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile | ⬜ |
 | E | **Overall appearance** · palette, type, surfaces, border contrast, spacing, button hierarchy, status colours, icons, states, motion, wording (refine the dark operational style, do not replace it) | ⬜ |
-| F | **Mobile app integration** · Mobile Requests, Service Requests, customer replies, App Ideas, App Accounts, realtime alerts, staff actions that start in the customer app | ⬜ |
+| F | **Mobile app integration** · Mobile Requests, Service Requests, customer replies, App Ideas, App Accounts, realtime alerts, staff actions that start in the customer app | ✅ done |
 | G | Sign-off: delete `/preview` (route + page + CSS) and the sample-data note here, then close PR #7 | ⬜ |
 
 ### Riding along with A and B: minimal correctness pass
@@ -639,6 +639,46 @@ what the page holds, nothing more.
 
 **Consequence for phase 6+:** new pages must not regress the pinned chrome. Use
 the page frame below for table screens instead of the plain `.page` wrapper.
+
+### Phase F: the console's end of every app flow
+
+Every request the app sends has an end in the console, and Phase F is about that
+end being complete and honest. The four intake screens already read the live
+tables and update themselves; what follows is what they were missing.
+
+**Two events reached nobody.** A customer answering the appointment the office
+offered on a service request, and a customer creating an account in the app.
+Both changed the database and moved a number in the side menu, and neither told
+anyone. They now raise an alert, like the laundry answers already did.
+
+**The alert panel only says true things.** It used to list the ten newest rows of
+each table whatever had happened to them, so a closed request still read as a new
+one ("This one needs a date from CPL" on a job the customer had already
+accepted), and an idea somebody had already dealt with still read as unread. Each
+query now asks for exactly the rows that still need somebody: intakes nobody has
+answered, the two kinds of customer reply, unread ideas and recent signups. A
+rejected laundry date says the request is closed, because that is what the
+database does with it (migration 20260827_008).
+
+**An account now shows what that person asked for.** Opening an account in App
+Accounts lists their five most recent requests from both queues, in the state
+each one is in, with links into the two queues. Ordering is by when the customer
+asked, for both queues: a laundry request's preferred pickup date is a different
+kind of time from a service enquiry's arrival, and sorting by a mixture of the
+two would order the list by nothing. The list-page rule holds too, the same one
+the KPI cards follow: a figure or a line is drawn from a record or not at all. If
+a queue cannot be read, the panel says which one rather than showing a short list
+as if it were the whole story.
+
+**The office can act on what the app sends.** An idea carries the customer's
+number, and the number is now a call link rather than text to copy out.
+
+Two decisions worth keeping:
+
+- The alert list holds only live work. A list that keeps last week's resolved
+  jobs is a list nobody reads, and it buries the one row that matters.
+- Alerts are per staff member and stored in the browser, so the unread count
+  means "new since I last looked". That predates Phase F and is unchanged.
 
 ### The company name, and the logo pipeline
 

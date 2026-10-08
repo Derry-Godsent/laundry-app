@@ -48,6 +48,10 @@
 .ai-status { padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
 .ai-text { margin: 0; color: var(--text-1); font-size: 13.5px; line-height: 21px; white-space: pre-wrap; }
 .ai-meta { display: flex; flex-wrap: wrap; gap: 12px; color: var(--text-3); font-size: 11.5px; }
+/* The number came from the app with the idea, so it is the office's way back to
+   the customer: tappable on a phone rather than something to copy out. */
+.ai-phone { color: var(--brand-400); font-weight: 650; text-decoration: none; font-family: var(--font-mono); }
+.ai-phone:hover { color: var(--brand-500); text-decoration: underline; }
 
 .ai-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.07); }
 .ai-move { padding: 7px 12px; border: 1px solid rgba(255,255,255,0.13); border-radius: 9px; background: rgba(255,255,255,0.05); color: var(--text-2); font-size: 11.5px; font-weight: 700; cursor: pointer; }

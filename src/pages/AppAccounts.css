@@ -68,6 +68,29 @@
 .aa-moment-copy span { color: var(--text-2); font-size: 12.5px; line-height: 18px; }
 .aa-moment-copy time { color: var(--text-3); font-size: 11px; }
 
+/* ── What they have asked for ─────────────────────────────────────────────
+   Both intake queues, filtered to this one account. On a phone the label takes
+   the full width and the state and date sit under it, because three columns of
+   text and chips do not fit 320px. */
+
+.aa-asks { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3); border: 1px solid var(--line-soft); border-radius: var(--r-md); background: var(--ink-raised); }
+.aa-asks-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; }
+.aa-asks-head h3 { margin: 0; font-size: var(--fs-sm); font-weight: 700; color: var(--text-1); }
+.aa-asks-head span { font-size: var(--fs-2xs); color: var(--text-3); }
+.aa-asks-note { margin: 0; font-size: var(--fs-xs); line-height: 1.45; color: var(--text-3); }
+.aa-asks-note--warn { color: var(--warn-500); }
+.aa-asks-list { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.aa-ask { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: var(--sp-3); padding: 8px 10px; border: 1px solid var(--line-faint); border-radius: var(--r-sm); background: var(--ink-card); }
+.aa-ask-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-sm); color: var(--text-1); }
+.aa-ask-state { padding: 3px 8px; border-radius: var(--r-pill); white-space: nowrap; font-size: var(--fs-2xs); font-weight: 650; }
+.aa-ask time { white-space: nowrap; font-size: var(--fs-2xs); color: var(--text-3); }
+.aa-ask--waiting .aa-ask-state { color: var(--warn-500); background: var(--warn-soft); }
+.aa-ask--live .aa-ask-state { color: var(--brand-400); background: var(--brand-soft); }
+.aa-ask--done .aa-ask-state { color: var(--text-2); background: var(--ink-active); }
+.aa-asks-links { display: flex; gap: var(--sp-4); flex-wrap: wrap; }
+.aa-asks-links a { display: inline-flex; align-items: center; gap: 5px; font-size: var(--fs-xs); font-weight: 650; color: var(--brand-400); text-decoration: none; }
+.aa-asks-links a:hover { color: var(--brand-500); }
+
 .aa-detail-panel { display: flex; flex-direction: column; min-width: 0; }
 .aa-detail-empty-card { padding: var(--sp-4); }
 
@@ -98,4 +121,7 @@
   .aa-list-panel { padding: var(--sp-3); }
   .aa-person { padding: 12px; }
   .aa-moment { padding: 11px; }
+  /* The label gets the full width, the state and the date share the line under it. */
+  .aa-ask { grid-template-columns: minmax(0, 1fr) auto; row-gap: 5px; }
+  .aa-ask-label { grid-column: 1 / -1; white-space: normal; }
 }
