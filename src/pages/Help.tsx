@@ -38,28 +38,28 @@ export const Help = () => {
     <>
       <style>{HELP_CSS}</style>
       <div className="hp-page" style={{ padding: "32px", maxWidth: 800, margin: "0 auto", fontFamily: FONT, color: T.textPrimary }}>
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24, letterSpacing: "-0.03em" }}>Help & Support</h2>
+      <h2 style={{ fontSize: "var(--fs-2xl)", fontWeight: 700, marginBottom: 24, letterSpacing: "-0.03em" }}>Help & Support</h2>
 
       {/* Contact Card */}
       <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, padding: 24, marginBottom: 32 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+        <h3 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
           <MessageCircle size={16} color={T.accent} /> Contact Support
         </h3>
         <div className="hp-contact" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
-          <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
+          <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: "var(--fs-md)" }}>
             <Mail size={16} color={T.accent} /> chapmanprestigeltd1@gmail.com
           </div>
-          <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
+          <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: "var(--fs-md)" }}>
             <Phone size={16} color={T.emerald} /> +233 534 134 809
           </div>
-          <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
+          <div className="hp-contact-row" style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: "var(--fs-md)" }}>
             <MapPin size={16} color="var(--text-2)" /> Kwadaso-Ohwimase, Kumasi
           </div>
         </div>
       </div>
 
       {/* FAQ Section */}
-      <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Frequently Asked Questions</h3>
+      <h3 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 16 }}>Frequently Asked Questions</h3>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {faqs.map((faq, index) => (
           <div key={index} style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 10, overflow: "hidden" }}>
@@ -68,7 +68,7 @@ export const Help = () => {
               onClick={() => setOpenFaq(openFaq === index ? null : index)}
               style={{
                 width: "100%", padding: "16px 20px", background: "transparent", border: "none",
-                color: T.textPrimary, fontSize: 14, fontWeight: 600, cursor: "pointer",
+                color: T.textPrimary, fontSize: "var(--fs-md)", fontWeight: 600, cursor: "pointer",
                 display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: FONT,
                 textAlign: "left"
               }}
@@ -77,7 +77,7 @@ export const Help = () => {
               {openFaq === index ? <ChevronUp size={16} color={T.textTert} /> : <ChevronDown size={16} color={T.textTert} />}
             </button>
             {openFaq === index && (
-              <div className="hp-faq-body" style={{ padding: "0 20px 16px", color: T.textSec, fontSize: 13.5, lineHeight: 1.6, fontFamily: FONT }}>
+              <div className="hp-faq-body" style={{ padding: "0 20px 16px", color: T.textSec, fontSize: "var(--fs-md)", lineHeight: 1.6, fontFamily: FONT }}>
                 {faq.a}
               </div>
             )}

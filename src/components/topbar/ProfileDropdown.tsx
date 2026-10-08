@@ -26,7 +26,7 @@ const CSS = `
 .pd-av {
   width: 28px; height: 28px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
+  font-size: var(--fs-xs); font-weight: 700;
   flex-shrink: 0;
   transition: box-shadow 0.2s ease;
 }
@@ -37,12 +37,12 @@ const CSS = `
 /* Name/role */
 .pd-info { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 .pd-name {
-  font-size: 12.5px; font-weight: 600; color: var(--text-2);
+  font-size: var(--fs-sm); font-weight: 600; color: var(--text-2);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   max-width: 110px; line-height: 1;
 }
 .pd-role {
-  font-size: 10px; font-weight: 600; text-transform: capitalize;
+  font-size: var(--fs-2xs); font-weight: 600; text-transform: capitalize;
   margin-top: 2px; padding: 1px 6px; border-radius: 20px;
   white-space: nowrap;
 }
@@ -83,14 +83,14 @@ const CSS = `
 .pd-card-av {
   width: 38px; height: 38px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700; flex-shrink: 0;
+  font-size: var(--fs-lg); font-weight: 700; flex-shrink: 0;
 }
 .pd-card-name {
-  font-size: 13px; font-weight: 700; color: var(--text-1);
+  font-size: var(--fs-sm); font-weight: 700; color: var(--text-1);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pd-card-email {
-  font-size: 11px; color: var(--text-4);
+  font-size: var(--fs-2xs); color: var(--text-4);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-top: 2px;
   font-family: var(--font-mono);
@@ -102,7 +102,7 @@ const CSS = `
   display: flex; align-items: center; gap: 10px;
   padding: 9px 10px; border-radius: 8px; width: 100%;
   background: transparent; border: none;
-  color: var(--text-3); font-size: 13px; font-weight: 500;
+  color: var(--text-3); font-size: var(--fs-sm); font-weight: 500;
   cursor: pointer; font-family: var(--font-ui);
   text-align: left; text-transform: capitalize;
   transition: background-color 0.15s ease, color 0.15s ease;
@@ -126,7 +126,7 @@ const CSS = `
   display: flex; align-items: center; gap: 10px;
   padding: 9px 10px; border-radius: 8px; width: 100%;
   background: transparent; border: none;
-  color: var(--text-4); font-size: 13px; font-weight: 500;
+  color: var(--text-4); font-size: var(--fs-sm); font-weight: 500;
   cursor: pointer; font-family: var(--font-ui);
   text-align: left;
   transition: background-color 0.15s ease, color 0.15s ease;

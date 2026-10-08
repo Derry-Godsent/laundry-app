@@ -265,8 +265,8 @@ export const Reports = () => {
       <div className="rp-page" style={{ maxWidth: 1600, margin: "0 auto", fontFamily: FONT, color: T.textPrimary, background: T.bgBase }}>
         <div className="rp-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
           <div>
-            <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.03em", margin: 0 }}>Business Intelligence</h2>
-            <p style={{ fontSize: 13, color: T.textTert, marginTop: 4 }}>Comprehensive overview of revenue, expenses, growth, and clientele.</p>
+            <h2 style={{ fontSize: "var(--fs-2xl)", fontWeight: 700, letterSpacing: "-0.03em", margin: 0 }}>Business Intelligence</h2>
+            <p style={{ fontSize: "var(--fs-sm)", color: T.textTert, marginTop: 4 }}>Comprehensive overview of revenue, expenses, growth, and clientele.</p>
           </div>
           <div className="rp-range" style={{ display: "flex", gap: 4, background: T.bgRaised, padding: 4, borderRadius: 10, border: `1px solid ${T.borderSoft}` }}>
             {(["7d", "30d", "month", "year"] as const).map((range) => (
@@ -274,7 +274,7 @@ export const Reports = () => {
                 key={range}
                 onClick={() => setTimeRange(range)}
                 style={{
-                  padding: "8px 16px", borderRadius: 7, fontSize: 12.5, fontWeight: 600, fontFamily: FONT,
+                  padding: "8px 16px", borderRadius: 7, fontSize: "var(--fs-sm)", fontWeight: 600, fontFamily: FONT,
                   background: timeRange === range ? T.accent : "transparent",
                   color: timeRange === range ? "#fff" : T.textSec,
                   border: "none", cursor: "pointer", transition: "all 0.18s"
@@ -300,7 +300,7 @@ export const Reports = () => {
             {/* CHARTS ROW 1 */}
             <div className="rp-split" style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
               <div className="report-card">
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Revenue vs Expenses (Daily)</h3>
+                <h3 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 16 }}>Revenue vs Expenses (Daily)</h3>
                 <div className="rp-chart">
                 <ResponsiveContainer width="100%" height={chartHeight}>
                   <ComposedChart data={data.chartData}>
@@ -308,7 +308,7 @@ export const Reports = () => {
                     <XAxis dataKey="date" stroke={T.textTert} fontSize={11} tickFormatter={(str) => str.slice(5)} />
                     <YAxis stroke={T.textTert} fontSize={11} />
                     <Tooltip contentStyle={{ background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary, fontFamily: FONT }} />
-                    <Legend wrapperStyle={{ fontSize: 12, color: T.textSec }} />
+                    <Legend wrapperStyle={{ fontSize: "var(--fs-xs)", color: T.textSec }} />
                     <Bar dataKey="revenue" fill={T.emerald} radius={[4, 4, 0, 0]} name="Revenue" />
                     <Line type="monotone" dataKey="orders" stroke={T.accent} strokeWidth={2} dot={false} name="Orders" yAxisId="right" />
                   </ComposedChart>
@@ -317,7 +317,7 @@ export const Reports = () => {
               </div>
 
               <div className="report-card">
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Busiest Days</h3>
+                <h3 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 16 }}>Busiest Days</h3>
                 <div className="rp-chart">
                 <ResponsiveContainer width="100%" height={chartHeight}>
                   <BarChart data={data.dowData}>
@@ -335,7 +335,7 @@ export const Reports = () => {
             {/* CHARTS ROW 2 */}
             <div className="rp-half" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
               <div className="report-card">
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Service Revenue Mix</h3>
+                <h3 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 16 }}>Service Revenue Mix</h3>
                 <div className="rp-chart">
                 <ResponsiveContainer width="100%" height={pieHeight}>
                   <PieChart>
@@ -350,7 +350,7 @@ export const Reports = () => {
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 8 }}>
                   {data.pieData.map((entry: any, index: number) => (
-                    <div key={index} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: T.textSec }}>
+                    <div key={index} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "var(--fs-2xs)", color: T.textSec }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: entry.color }} />
                       {entry.name}
                     </div>
@@ -359,13 +359,13 @@ export const Reports = () => {
               </div>
 
               <div className="report-card">
-                <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Top 5 Clients</h3>
+                <h3 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 16 }}>Top 5 Clients</h3>
                 <div style={{ overflowX: "auto" }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--fs-sm)" }}>
                     <thead>
                       <tr style={{ borderBottom: `1px solid ${T.borderSoft}` }}>
                         {["Rank", "Client", "Revenue"].map(h => (
-                          <th key={h} style={{ padding: "12px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
+                          <th key={h} style={{ padding: "12px 12px", textAlign: "left", fontSize: "var(--fs-2xs)", fontWeight: 700, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.05em" }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -417,16 +417,16 @@ function KPICard({ title, value, icon, color, sub, growth }: { title: string; va
           {icon}
         </div>
         {growth !== undefined && (
-          <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: growth >= 0 ? T.emerald : T.danger, background: growth >= 0 ? T.emeraldDim : T.dangerDim, padding: "2px 8px", borderRadius: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "var(--fs-2xs)", fontWeight: 600, color: growth >= 0 ? T.emerald : T.danger, background: growth >= 0 ? T.emeraldDim : T.dangerDim, padding: "2px 8px", borderRadius: 12 }}>
             {growth >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
             {Math.abs(growth).toFixed(1)}%
           </div>
         )}
       </div>
       <div>
-        <div style={{ fontSize: 11, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 700, marginBottom: 4 }}>{title}</div>
-        <div style={{ fontSize: 24, fontWeight: 700, fontFamily: MONO, color: T.textPrimary }}>{value}</div>
-        {sub && <div style={{ fontSize: 11, color: T.textSec, marginTop: 4 }}>{sub}</div>}
+        <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 700, marginBottom: 4 }}>{title}</div>
+        <div style={{ fontSize: "var(--fs-2xl)", fontWeight: 700, fontFamily: MONO, color: T.textPrimary }}>{value}</div>
+        {sub && <div style={{ fontSize: "var(--fs-2xs)", color: T.textSec, marginTop: 4 }}>{sub}</div>}
       </div>
     </div>
   );

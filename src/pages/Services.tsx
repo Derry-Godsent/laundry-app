@@ -157,7 +157,7 @@ const GLOBAL_CSS = `
   .svc-stats-grid > div { padding: 13px 14px !important; border-right: none !important; }
   .svc-stats-grid > div:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.05) !important; }
   /* The count is the third child: an accent bar, the label, then the number. */
-  .svc-stats-grid .stat-cell > div:nth-of-type(3) { font-size: 21px !important; }
+  .svc-stats-grid .stat-cell > div:nth-of-type(3) { font-size: var(--fs-2xl) !important; }
   .svc-catalog-grid { grid-template-columns: 1fr !important; }
   .svc-corp-grid { grid-template-columns: 1fr !important; }
   .svc-badge-pill { display: none !important; }
@@ -165,7 +165,7 @@ const GLOBAL_CSS = `
   /* 16px is the threshold under which iOS zooms the page in on focus and
      leaves it zoomed, which moves everything the staff member was reading. */
   .modal-box input, .modal-box select, .modal-box textarea,
-  .price-input, .svc-search input, .search-input { font-size: 16px; }
+  .price-input, .svc-search input, .search-input { font-size: var(--fs-lg); }
   /* A 230px search box beside the tabs leaves nothing for the list. */
   .svc-search { width: 100% !important; flex: 1 1 100% !important; }
   .svc-search input { width: 100% !important; }
@@ -286,12 +286,12 @@ const Chip = ({ label, value, accent }: { label:string; value:number; accent?:st
     border:`1px solid ${T.borderFaint}`, borderRadius:8,
     padding:"9px 10px", display:"flex", flexDirection:"column", gap:3,
     transition:"border-color 0.18s ease" }}>
-    <span style={{ fontSize:9.5, color:T.textTert, textTransform:"uppercase",
+    <span style={{ fontSize: "var(--fs-2xs)", color:T.textTert, textTransform:"uppercase",
       letterSpacing:"0.09em", fontWeight:700, fontFamily:FONT }}>{label}</span>
-    <span style={{ fontSize:16, fontWeight:500,
+    <span style={{ fontSize: "var(--fs-lg)", fontWeight:500,
       color: value ? (accent || T.textPrimary) : T.textHint,
       fontFamily:MONO, letterSpacing:"-0.02em", lineHeight:1 }}>
-      {value ? `GH₵${value}` : <span style={{fontSize:13,color:T.textHint}}>-</span>}
+      {value ? `GH₵${value}` : <span style={{fontSize: "var(--fs-sm)",color:T.textHint}}>-</span>}
     </span>
   </div>
 );
@@ -323,11 +323,11 @@ const ServiceCard = ({ item, onEdit, superConf, index }: {
           <Icon size={15} color={superConf.color} />
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontSize:13.5, fontWeight:600, color:T.textPrimary,
+          <div style={{ fontSize: "var(--fs-md)", fontWeight:600, color:T.textPrimary,
             letterSpacing:"-0.015em", lineHeight:1.3, fontFamily:FONT }}>
             {item.name}
           </div>
-          <div style={{ fontSize:10.5, color:T.textTert, marginTop:2.5,
+          <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginTop:2.5,
             textTransform:"uppercase", letterSpacing:"0.07em", fontFamily:FONT }}>
             {item.category}
           </div>
@@ -359,18 +359,18 @@ const ServiceCard = ({ item, onEdit, superConf, index }: {
         alignItems:"center", paddingTop:8, borderTop:`1px solid ${T.borderFaint}` }}>
         {isLaundry ? (
           <>
-            <span style={{ fontSize:10.5, color:T.textTert, fontFamily:FONT }}>
+            <span style={{ fontSize: "var(--fs-2xs)", color:T.textTert, fontFamily:FONT }}>
               Express{" "}
               <span style={{ color:T.gold, fontFamily:MONO, fontWeight:500 }}>
                 +GH₵{EXPRESS}
               </span>
             </span>
-            <span style={{ fontSize:10.5, color:T.textHint, fontFamily:MONO }}>
+            <span style={{ fontSize: "var(--fs-2xs)", color:T.textHint, fontFamily:MONO }}>
               min GH₵{item.prices.wash + EXPRESS}
             </span>
           </>
         ) : (
-          <span style={{ fontSize:10.5, color:T.textTert, fontFamily:FONT }}>
+          <span style={{ fontSize: "var(--fs-2xs)", color:T.textTert, fontFamily:FONT }}>
             Quoted per job &nbsp;·&nbsp; contact for custom pricing
           </span>
         )}
@@ -407,9 +407,9 @@ const EditModal = ({ item, onSave, onClose, saving }: {
           display:"flex", justifyContent:"space-between", alignItems:"flex-start",
           position:"sticky", top:0, background:T.bgRaised, zIndex:2 }}>
           <div>
-            <div style={{ fontSize:16, fontWeight:700, color:T.textPrimary,
+            <div style={{ fontSize: "var(--fs-lg)", fontWeight:700, color:T.textPrimary,
               letterSpacing:"-0.02em", fontFamily:FONT }}>{item.name}</div>
-            <div style={{ fontSize:11, color:T.textTert, marginTop:3,
+            <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginTop:3,
               textTransform:"uppercase", letterSpacing:"0.07em", fontFamily:FONT }}>
               {item.category} · Edit Pricing
             </div>
@@ -425,7 +425,7 @@ const EditModal = ({ item, onSave, onClose, saving }: {
 
         <div style={{ padding:"20px 24px", display:"flex", flexDirection:"column", gap:16 }}>
           <div>
-            <div style={{ fontSize:10, color:T.textTert, textTransform:"uppercase",
+            <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, textTransform:"uppercase",
               letterSpacing:"0.1em", fontWeight:700, marginBottom:10, fontFamily:FONT }}>
               {isLaundry ? "Standard Pricing (GH₵)" : "Service Rate (GH₵)"}
             </div>
@@ -437,7 +437,7 @@ const EditModal = ({ item, onSave, onClose, saving }: {
                   style={{ background:T.bgElevated,
                     border:`1px solid ${T.borderSoft}`,
                     borderRadius:10, padding:"12px 14px" }}>
-                  <div style={{ fontSize:10, color:T.textTert, textTransform:"uppercase",
+                  <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, textTransform:"uppercase",
                     letterSpacing:"0.08em", fontWeight:700,
                     marginBottom:8, fontFamily:FONT }}>{label}</div>
                   <input type="number" min={0} value={p[key]}
@@ -446,7 +446,7 @@ const EditModal = ({ item, onSave, onClose, saving }: {
                     style={{ width:"100%", background:T.bgSurface,
                       border:`1px solid ${T.borderMid}`, borderRadius:7,
                       color:T.textPrimary, fontFamily:MONO,
-                      fontSize:24, fontWeight:500, textAlign:"center",
+                      fontSize: "var(--fs-2xl)", fontWeight:500, textAlign:"center",
                       padding:"8px 0", outline:"none",
                       letterSpacing:"-0.02em", transition:"border-color 0.15s, box-shadow 0.15s" }}
                   />
@@ -458,17 +458,17 @@ const EditModal = ({ item, onSave, onClose, saving }: {
           {isLaundry && (
             <div style={{ background:T.goldDim, border:`1px solid ${T.goldBord}`,
               borderRadius:10, padding:"13px 16px" }}>
-              <div style={{ fontSize:10, color:T.gold, textTransform:"uppercase",
+              <div style={{ fontSize: "var(--fs-2xs)", color:T.gold, textTransform:"uppercase",
                 letterSpacing:"0.1em", fontWeight:700, marginBottom:10, fontFamily:FONT }}>
                 Express Prices (+GH₵{EXPRESS})
               </div>
               <div style={{ display:"flex", gap:10 }}>
                 {fields.map(({key,label}) => (
                   <div key={key} style={{ flex:1, textAlign:"center" }}>
-                    <div style={{ fontSize:10, color:T.textTert, marginBottom:4, fontFamily:FONT }}>
+                    <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginBottom:4, fontFamily:FONT }}>
                       {label.slice(0,4)}
                     </div>
-                    <div style={{ fontSize:15, fontWeight:500, color:T.gold, fontFamily:MONO }}>
+                    <div style={{ fontSize: "var(--fs-lg)", fontWeight:500, color:T.gold, fontFamily:MONO }}>
                       GH₵{p[key]+EXPRESS}
                     </div>
                   </div>
@@ -480,7 +480,7 @@ const EditModal = ({ item, onSave, onClose, saving }: {
           {isLaundry && (
             <div style={{ background:T.bgElevated,
               border:`1px solid ${T.borderFaint}`, borderRadius:10, overflow:"hidden" }}>
-              <div style={{ fontSize:10, color:T.textTert, textTransform:"uppercase",
+              <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, textTransform:"uppercase",
                 letterSpacing:"0.1em", fontWeight:700, padding:"9px 14px",
                 borderBottom:`1px solid ${T.borderFaint}`, fontFamily:FONT }}>
                 Loyalty Discount Tiers
@@ -490,12 +490,12 @@ const EditModal = ({ item, onSave, onClose, saving }: {
                   style={{ display:"flex", justifyContent:"space-between",
                     alignItems:"center", padding:"8px 14px",
                     borderBottom: i<LOYALTY.length-1?`1px solid ${T.borderFaint}`:"none" }}>
-                  <span style={{ fontSize:12.5, fontWeight:600,
+                  <span style={{ fontSize: "var(--fs-sm)", fontWeight:600,
                     color:tier.color, fontFamily:FONT }}>{tier.name}</span>
-                  <span style={{ fontSize:11, color:T.textTert, fontFamily:MONO }}>
+                  <span style={{ fontSize: "var(--fs-2xs)", color:T.textTert, fontFamily:MONO }}>
                     {tier.visits}
                   </span>
-                  <span style={{ fontSize:12.5, fontWeight:500,
+                  <span style={{ fontSize: "var(--fs-sm)", fontWeight:500,
                     color:T.emerald, fontFamily:MONO }}>{tier.discount}% off</span>
                 </div>
               ))}
@@ -509,14 +509,14 @@ const EditModal = ({ item, onSave, onClose, saving }: {
           <button className="btn-ghost" onClick={onClose}
             style={{ padding:"9px 20px", background:"transparent",
               border:`1px solid ${T.borderSoft}`, borderRadius:8,
-              color:T.textSec, fontSize:13.5, fontWeight:500,
+              color:T.textSec, fontSize: "var(--fs-md)", fontWeight:500,
               cursor:"pointer", fontFamily:FONT }}>
             Cancel
           </button>
           <button className="btn-accent" disabled={saving}
             onClick={()=>onSave(p)}
             style={{ padding:"9px 22px", background:"var(--ok-700)", border:"none",
-              borderRadius:8, color:"var(--on-ok)", fontSize:13.5, fontWeight:700,
+              borderRadius:8, color:"var(--on-ok)", fontSize: "var(--fs-md)", fontWeight:700,
               cursor: saving ? "default" : "pointer", display:"flex", alignItems:"center",
               gap:7, fontFamily:FONT, opacity: saving ? 0.7 : 1 }}>
             {saving ? <Loader2 size={14} className="svc-spinner" /> : <Check size={14}/>}
@@ -559,9 +559,9 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
           borderBottom:`1px solid ${T.borderFaint}`,
           display:"flex", justifyContent:"space-between", alignItems:"center" }}>
           <div>
-            <div style={{ fontSize:16, fontWeight:700,
+            <div style={{ fontSize: "var(--fs-lg)", fontWeight:700,
               color:T.textPrimary, fontFamily:FONT }}>Add Service Item</div>
-            <div style={{ fontSize:11, color:T.textTert, marginTop:3, fontFamily:FONT }}>
+            <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginTop:3, fontFamily:FONT }}>
               New item with pricing
             </div>
           </div>
@@ -576,7 +576,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
 
         <div style={{ padding:"20px 24px", display:"flex", flexDirection:"column", gap:14 }}>
           <div>
-            <div style={{ fontSize:11, color:T.textTert, marginBottom:6, fontFamily:FONT }}>
+            <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginBottom:6, fontFamily:FONT }}>
               Item Name
             </div>
             <input value={name} onChange={e=>setName(e.target.value)}
@@ -584,19 +584,19 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
               className="price-input"
               style={{ width:"100%", padding:"10px 13px",
                 background:T.bgSurface, border:`1px solid ${T.borderMid}`,
-                borderRadius:8, color:T.textPrimary, fontSize:16,
+                borderRadius:8, color:T.textPrimary, fontSize: "var(--fs-lg)",
                 outline:"none", fontFamily:FONT }}
             />
           </div>
           <div className="svc-form-grid" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
             <div>
-              <div style={{ fontSize:11, color:T.textTert, marginBottom:6, fontFamily:FONT }}>
+              <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginBottom:6, fontFamily:FONT }}>
                 Service Type
               </div>
               <select value={superCat} onChange={e=>handleSuperChange(e.target.value)}
                 style={{ width:"100%", padding:"9px 12px",
                   background:T.bgSurface, border:`1px solid ${T.borderMid}`,
-                  borderRadius:8, color:T.textPrimary, fontSize:16,
+                  borderRadius:8, color:T.textPrimary, fontSize: "var(--fs-lg)",
                   outline:"none", fontFamily:FONT }}>
                 {SUPER_CATS.filter((c: typeof SUPER_CATS[0])=>c.key!=="all").map(c=>(
                   <option key={c.key} value={c.key}>{c.label}</option>
@@ -604,13 +604,13 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
               </select>
             </div>
             <div>
-              <div style={{ fontSize:11, color:T.textTert, marginBottom:6, fontFamily:FONT }}>
+              <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginBottom:6, fontFamily:FONT }}>
                 Category
               </div>
               <select value={cat} onChange={e=>setCat(e.target.value)}
                 style={{ width:"100%", padding:"9px 12px",
                   background:T.bgSurface, border:`1px solid ${T.borderMid}`,
-                  borderRadius:8, color:T.textPrimary, fontSize:16,
+                  borderRadius:8, color:T.textPrimary, fontSize: "var(--fs-lg)",
                   outline:"none", fontFamily:FONT }}>
                 {(CATS_BY_SUPER[superCat]||[]).map(c=>(
                   <option key={c} value={c}>{c}</option>
@@ -619,7 +619,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
             </div>
           </div>
           <div>
-            <div style={{ fontSize:11, color:T.textTert, marginBottom:8, fontFamily:FONT }}>
+            <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginBottom:8, fontFamily:FONT }}>
               {isLaundry ? "Standard Pricing (GH₵)" : "Service Rate (GH₵)"}
             </div>
             <div className="svc-form-grid-4"
@@ -631,7 +631,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
               ).map(({k,l})=>(
                 <div key={k} style={{ background:T.bgElevated,
                   border:`1px solid ${T.borderSoft}`, borderRadius:8, padding:"10px" }}>
-                  <div style={{ fontSize:10, color:T.textTert,
+                  <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert,
                     marginBottom:6, fontFamily:FONT }}>{l}</div>
                   <input type="number" min={0}
                     value={prices[k as keyof Prices]}
@@ -639,7 +639,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
                     className="price-input"
                     style={{ width:"100%", background:T.bgSurface,
                       border:`1px solid ${T.borderMid}`, borderRadius:6,
-                      color:T.textPrimary, fontFamily:MONO, fontSize:18,
+                      color:T.textPrimary, fontFamily:MONO, fontSize: "var(--fs-xl)",
                       fontWeight:500, textAlign:"center",
                       padding:"6px 0", outline:"none" }}
                   />
@@ -655,7 +655,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
           <button className="btn-ghost" onClick={onClose}
             style={{ padding:"9px 20px", background:"transparent",
               border:`1px solid ${T.borderSoft}`, borderRadius:8,
-              color:T.textSec, fontSize:13.5, fontWeight:500,
+              color:T.textSec, fontSize: "var(--fs-md)", fontWeight:500,
               cursor:"pointer", fontFamily:FONT }}>
             Cancel
           </button>
@@ -665,7 +665,7 @@ const AddModal = ({ onClose, onAdd, defaultSuper="laundry", adding }: {
               onAdd({id:`new-${Date.now()}`,name:name.trim(),category:cat,superCat,prices});
             }}
             style={{ padding:"9px 22px", background:T.accentStrong, border:"none",
-              borderRadius:8, color:"#fff", fontSize:13.5, fontWeight:700,
+              borderRadius:8, color:"#fff", fontSize: "var(--fs-md)", fontWeight:700,
               cursor: adding ? "default" : "pointer", display:"flex", alignItems:"center",
               gap:7, fontFamily:FONT, opacity: adding ? 0.7 : 1 }}>
             {adding ? <Loader2 size={14} className="svc-spinner" /> : <Check size={14}/>}
@@ -688,24 +688,24 @@ const AddCorporateClientModal = ({ onClose, onAdd, adding }: {
       <div className="modal-box" style={{ background:T.bgRaised, border:`1px solid ${T.borderMid}`, borderRadius:16, width:460, maxWidth:"94vw", display:"flex", flexDirection:"column", boxShadow:"0 28px 70px rgba(0,0,0,0.55)" }}>
         <div style={{ padding:"20px 24px 16px", borderBottom:`1px solid ${T.borderFaint}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
           <div>
-            <div style={{ fontSize:16, fontWeight:700, color:T.textPrimary, fontFamily:FONT }}>Add Corporate Client</div>
-            <div style={{ fontSize:11, color:T.textTert, marginTop:3, fontFamily:FONT }}>New contract-based account</div>
+            <div style={{ fontSize: "var(--fs-lg)", fontWeight:700, color:T.textPrimary, fontFamily:FONT }}>Add Corporate Client</div>
+            <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginTop:3, fontFamily:FONT }}>New contract-based account</div>
           </div>
           <button onClick={onClose} style={{ width:32, height:32, borderRadius:8, border:`1px solid ${T.borderSoft}`, background:"transparent", color:T.textSec, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}><X size={15}/></button>
         </div>
         <div style={{ padding:"20px 24px", display:"flex", flexDirection:"column", gap:14 }}>
           <div>
-            <div style={{ fontSize:11, color:T.textTert, marginBottom:6, fontFamily:FONT }}>Company Name</div>
-            <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. St. Martins Hospital" className="price-input" style={{ width:"100%", padding:"10px 13px", background:T.bgSurface, border:`1px solid ${T.borderMid}`, borderRadius:8, color:T.textPrimary, fontSize:16, outline:"none", fontFamily:FONT }} />
+            <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginBottom:6, fontFamily:FONT }}>Company Name</div>
+            <input value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. St. Martins Hospital" className="price-input" style={{ width:"100%", padding:"10px 13px", background:T.bgSurface, border:`1px solid ${T.borderMid}`, borderRadius:8, color:T.textPrimary, fontSize: "var(--fs-lg)", outline:"none", fontFamily:FONT }} />
           </div>
           <div>
-            <div style={{ fontSize:11, color:T.textTert, marginBottom:6, fontFamily:FONT }}>Notes (Optional)</div>
-            <input value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Contract details..." className="price-input" style={{ width:"100%", padding:"10px 13px", background:T.bgSurface, border:`1px solid ${T.borderMid}`, borderRadius:8, color:T.textPrimary, fontSize:16, outline:"none", fontFamily:FONT }} />
+            <div style={{ fontSize: "var(--fs-2xs)", color:T.textTert, marginBottom:6, fontFamily:FONT }}>Notes (Optional)</div>
+            <input value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Contract details..." className="price-input" style={{ width:"100%", padding:"10px 13px", background:T.bgSurface, border:`1px solid ${T.borderMid}`, borderRadius:8, color:T.textPrimary, fontSize: "var(--fs-lg)", outline:"none", fontFamily:FONT }} />
           </div>
         </div>
         <div style={{ padding:"14px 24px", borderTop:`1px solid ${T.borderFaint}`, display:"flex", justifyContent:"flex-end", gap:10 }}>
-          <button className="btn-ghost" onClick={onClose} style={{ padding:"9px 20px", background:"transparent", border:`1px solid ${T.borderSoft}`, borderRadius:8, color:T.textSec, fontSize:13.5, fontWeight:500, cursor:"pointer", fontFamily:FONT }}>Cancel</button>
-          <button className="btn-accent" disabled={adding} onClick={()=>{ if(!name.trim()) return; onAdd({name:name.trim(), notes}); }} style={{ padding:"9px 22px", background:T.accentStrong, border:"none", borderRadius:8, color:"#fff", fontSize:13.5, fontWeight:700, cursor: adding ? "default" : "pointer", display:"flex", alignItems:"center", gap:7, fontFamily:FONT, opacity: adding ? 0.7 : 1 }}>
+          <button className="btn-ghost" onClick={onClose} style={{ padding:"9px 20px", background:"transparent", border:`1px solid ${T.borderSoft}`, borderRadius:8, color:T.textSec, fontSize: "var(--fs-md)", fontWeight:500, cursor:"pointer", fontFamily:FONT }}>Cancel</button>
+          <button className="btn-accent" disabled={adding} onClick={()=>{ if(!name.trim()) return; onAdd({name:name.trim(), notes}); }} style={{ padding:"9px 22px", background:T.accentStrong, border:"none", borderRadius:8, color:"#fff", fontSize: "var(--fs-md)", fontWeight:700, cursor: adding ? "default" : "pointer", display:"flex", alignItems:"center", gap:7, fontFamily:FONT, opacity: adding ? 0.7 : 1 }}>
             {adding ? <Loader2 size={14} className="svc-spinner" /> : <Check size={14}/>}
             {adding ? "Adding…" : "Add Client"}
           </button>
@@ -998,7 +998,7 @@ export const Services = () => {
           borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12,
           boxShadow:"0 14px 36px rgba(0,0,0,0.45)", zIndex:10000 }}>
           {toast.type==='error' ? <AlertCircle size={15} color={T.ember}/> : <Check size={15} color={T.emerald}/>}
-          <span style={{ fontSize:14, color: toast.type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{toast.msg}</span>
+          <span style={{ fontSize: "var(--fs-md)", color: toast.type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{toast.msg}</span>
           <button onClick={()=>setToast(null)} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><X size={14}/></button>
         </div>
       )}
@@ -1012,11 +1012,11 @@ export const Services = () => {
           display:"flex", justifyContent:"space-between", alignItems:"center" }}>
           <div className="svc-aurora" />
           <div style={{ position:"relative", zIndex:1 }}>
-            <div style={{ fontSize:21, fontWeight:700, color:T.textPrimary,
+            <div style={{ fontSize: "var(--fs-2xl)", fontWeight:700, color:T.textPrimary,
               letterSpacing:"-0.03em", fontFamily:FONT }}>
               Services &amp; Pricing
             </div>
-            <div style={{ fontSize:12.5, color:T.textTert, marginTop:4, fontFamily:FONT, display:"flex", alignItems:"center", gap:8 }}>
+            <div style={{ fontSize: "var(--fs-sm)", color:T.textTert, marginTop:4, fontFamily:FONT, display:"flex", alignItems:"center", gap:8 }}>
               <span>Chapman Prestige Limited &nbsp;·&nbsp; {services.length} items across {stats.cats} categories</span>
               {!isOffline && lastSynced && (
                 <span style={{ display:"flex", alignItems:"center", gap:4, color:T.emerald }}>
@@ -1029,7 +1029,7 @@ export const Services = () => {
             <div className="svc-badge-pill" style={{ display:"flex", alignItems:"center", gap:7,
               padding:"7px 14px", background:T.goldDim,
               border:`1px solid ${T.goldBord}`, borderRadius:100,
-              color:T.gold, fontSize:12.5, fontWeight:600, fontFamily:FONT }}>
+              color:T.gold, fontSize: "var(--fs-sm)", fontWeight:600, fontFamily:FONT }}>
               <AlertCircle size={13}/> Express +GH₵{EXPRESS} / laundry item
             </div>
             <button 
@@ -1041,7 +1041,7 @@ export const Services = () => {
                 border:`1px solid ${T.borderSoft}`,
                 borderRadius:9, 
                 color:T.textSec, 
-                fontSize:14, 
+                fontSize: "var(--fs-md)", 
                 fontWeight:600,
                 cursor: "pointer", 
                 display:"flex", 
@@ -1061,7 +1061,7 @@ export const Services = () => {
                 border:"none",
                 borderRadius:9, 
                 color: canEdit ? "#fff" : T.textTert, 
-                fontSize:14, 
+                fontSize: "var(--fs-md)", 
                 fontWeight:600,
                 cursor: canEdit ? "pointer" : "not-allowed", 
                 display:"flex", 
@@ -1089,7 +1089,7 @@ export const Services = () => {
               <div style={{ position:"absolute", top:0, left:0, right:0, height:2,
                 background: st.color, opacity:0.5 }} />
               <div style={lbl(10.5,T.textTert)}>{st.label}</div>
-              <div style={{ fontSize:26, fontWeight:600, color:T.textPrimary,
+              <div style={{ fontSize: "var(--fs-3xl)", fontWeight:600, color:T.textPrimary,
                 letterSpacing:"-0.04em", lineHeight:1, marginTop:7, fontFamily:FONT }}>
                 {st.prefix || ""}{st.val}{st.suffix || ""}
               </div>
@@ -1114,7 +1114,7 @@ export const Services = () => {
                     ? `2px solid ${tab.color}`
                     : "2px solid transparent",
                   color: active ? tab.color : T.textTert,
-                  fontSize:13.5, fontWeight: active ? 600 : 500,
+                  fontSize: "var(--fs-md)", fontWeight: active ? 600 : 500,
                   cursor:"pointer", fontFamily:FONT,
                   whiteSpace:"nowrap", marginBottom:"-1px",
                   boxShadow: active ? `0 10px 20px -12px ${tab.color}` : "none" }}>
@@ -1122,7 +1122,7 @@ export const Services = () => {
                 {tab.label}
                 {active && (
                   <span style={{ background:tab.dim, border:`1px solid ${tab.bord}`,
-                    color:tab.color, fontSize:10, fontWeight:700,
+                    color:tab.color, fontSize: "var(--fs-2xs)", fontWeight:700,
                     padding:"2px 7px", borderRadius:100, fontFamily:MONO }}>
                     {services.filter(s=>tab.key==="all"||s.superCat===tab.key).length}
                   </span>
@@ -1144,7 +1144,7 @@ export const Services = () => {
               <button key={cat} className="sub-tab"
                 onClick={()=>setSubCat(cat)}
                 style={{ padding:"5px 14px", borderRadius:7,
-                  fontSize:12.5, fontWeight:500, cursor:"pointer",
+                  fontSize: "var(--fs-sm)", fontWeight:500, cursor:"pointer",
                   fontFamily:FONT, border:`1px solid ${active ? T.accentBord : "transparent"}`,
                   background: active ? T.accentDim : "transparent",
                   color: active ? T.accentSoft : T.textTert }}>
@@ -1164,7 +1164,7 @@ export const Services = () => {
               onChange={e=>setSearch(e.target.value)}
               style={{ width:"100%", padding:"8px 12px 8px 32px",
                 background:T.bgRaised, border:`1px solid ${T.borderSoft}`,
-                borderRadius:8, color:T.textPrimary, fontSize:16,
+                borderRadius:8, color:T.textPrimary, fontSize: "var(--fs-lg)",
                 outline:"none", fontFamily:FONT,
                 transition:"border-color 0.15s" }}
             />
@@ -1182,7 +1182,7 @@ export const Services = () => {
                   display:"flex", alignItems:"center", justifyContent:"center" }}>
                   <Package size={26} color={T.textHint}/>
                 </div>
-                <div style={{ fontSize:14, color:T.textTert, fontFamily:FONT }}>
+                <div style={{ fontSize: "var(--fs-md)", color:T.textTert, fontFamily:FONT }}>
                   {isOffline 
                     ? "Connection issue. Retry to load services" 
                     : services.length === 0 
@@ -1194,7 +1194,7 @@ export const Services = () => {
                     onClick={()=>setShowAdd(true)}
                     style={{ padding:"9px 20px", background:T.accentStrong,
                       border:"none", borderRadius:8, color:"#fff",
-                      fontSize:13.5, fontWeight:600, cursor:"pointer",
+                      fontSize: "var(--fs-md)", fontWeight:600, cursor:"pointer",
                       display:"flex", alignItems:"center", gap:7, fontFamily:FONT }}>
                     <Plus size={14}/> Add First Item
                   </button>
@@ -1215,7 +1215,7 @@ export const Services = () => {
                         <CatIcon size={12} color={conf.color}/>
                       </div>
                       <span style={lbl(11.5, T.textTert)}>{cat}</span>
-                      <span style={{ fontSize:11, color:T.textHint, fontFamily:MONO }}>
+                      <span style={{ fontSize: "var(--fs-2xs)", color:T.textHint, fontFamily:MONO }}>
                         {items.length} {items.length===1?"item":"items"}
                       </span>
                       <div style={{ flex:1, height:1, background:T.borderFaint }}/>
@@ -1244,18 +1244,18 @@ export const Services = () => {
             <div style={{ display:"flex", justifyContent:"space-between",
               alignItems:"center", marginBottom:18 }}>
               <div>
-                <div style={{ fontSize:16, fontWeight:700,
+                <div style={{ fontSize: "var(--fs-lg)", fontWeight:700,
                   color:T.textPrimary, letterSpacing:"-0.025em", fontFamily:FONT }}>
                   Corporate Accounts
                 </div>
-                <div style={{ fontSize:12.5, color:T.textTert, marginTop:3, fontFamily:FONT }}>
+                <div style={{ fontSize: "var(--fs-sm)", color:T.textTert, marginTop:3, fontFamily:FONT }}>
                   Contract-based pricing · managed by GM
                 </div>
               </div>
               {canEdit && (
                 <button className="btn-accent" onClick={() => setShowAddClient(true)}
                   style={{ padding:"9px 18px", background:T.accentStrong, border:"none",
-                    borderRadius:9, color:"#fff", fontSize:13.5, fontWeight:600,
+                    borderRadius:9, color:"#fff", fontSize: "var(--fs-md)", fontWeight:600,
                     cursor:"pointer", display:"flex", alignItems:"center",
                     gap:7, fontFamily:FONT }}>
                   <Plus size={14}/> Add Client
@@ -1284,7 +1284,7 @@ export const Services = () => {
                       <button className="status-pill"
                         onClick={()=>updateClient(client.id, {active: !client.active})}
                         style={{ padding:"4px 13px", borderRadius:100,
-                          fontSize:11.5, fontWeight:600, border:"none",
+                          fontSize: "var(--fs-xs)", fontWeight:600, border:"none",
                           cursor:"pointer", fontFamily:FONT,
                           background: client.active ? T.emeraldDim : "var(--tint-neutral)",
                           color: client.active ? T.emerald : T.textTert,
@@ -1293,7 +1293,7 @@ export const Services = () => {
                       </button>
                     ) : (
                       <span style={{ padding:"4px 13px", borderRadius:100,
-                        fontSize:11.5, fontWeight:600, 
+                        fontSize: "var(--fs-xs)", fontWeight:600, 
                         background: client.active ? T.emeraldDim : "var(--tint-neutral)",
                         color: client.active ? T.emerald : T.textTert,
                         fontFamily:FONT }}>
@@ -1303,25 +1303,25 @@ export const Services = () => {
                   </div>
 
                   <div>
-                    <div style={{ fontSize:15, fontWeight:700, color:T.textPrimary,
+                    <div style={{ fontSize: "var(--fs-lg)", fontWeight:700, color:T.textPrimary,
                       letterSpacing:"-0.02em", fontFamily:FONT }}>
                       {client.name}
                     </div>
-                    <div style={{ fontSize:12.5, color:T.textTert, marginTop:3, fontFamily:FONT }}>
+                    <div style={{ fontSize: "var(--fs-sm)", color:T.textTert, marginTop:3, fontFamily:FONT }}>
                       {client.type} · {client.billing} billing
                     </div>
                   </div>
 
                   <div style={{ display:"flex", alignItems:"center", gap:10,
                     paddingTop:11, borderTop:`1px solid ${T.borderFaint}` }}>
-                    <span style={{ fontSize:12, color:T.textTert, flex:1, fontFamily:FONT }}>
+                    <span style={{ fontSize: "var(--fs-xs)", color:T.textTert, flex:1, fontFamily:FONT }}>
                       Contract discount
                     </span>
                     {canEdit ? (
                       <select value={client.discount}
                         onChange={e=>updateClient(client.id, {discount: e.target.value})}
                         style={{ background:T.bgSurface, border:`1px solid ${T.borderSoft}`,
-                          borderRadius:7, color:T.gold, fontSize:16, fontWeight:600,
+                          borderRadius:7, color:T.gold, fontSize: "var(--fs-lg)", fontWeight:600,
                           fontFamily:MONO, padding:"5px 9px",
                           outline:"none", cursor:"pointer" }}>
                         <option value="-">-</option>
@@ -1333,7 +1333,7 @@ export const Services = () => {
                       </select>
                     ) : (
                       <span style={{ background:T.bgSurface, border:`1px solid ${T.borderSoft}`,
-                        borderRadius:7, color:T.gold, fontSize:13.5, fontWeight:600,
+                        borderRadius:7, color:T.gold, fontSize: "var(--fs-md)", fontWeight:600,
                         fontFamily:MONO, padding:"5px 9px" }}>
                         {client.discount}
                       </span>
@@ -1344,12 +1344,12 @@ export const Services = () => {
                     alignItems:"center", paddingTop:9,
                     borderTop:`1px dashed ${T.borderFaint}` }}>
                     <span style={lbl(10.5, T.textHint)}>Ref</span>
-                    <span style={{ fontSize:12.5, color:T.accent,
+                    <span style={{ fontSize: "var(--fs-sm)", color:T.accent,
                       fontFamily:MONO }}>{client.contractRef}</span>
                   </div>
 
                   {client.notes && (
-                    <div style={{ fontSize:12, color:T.textHint, fontStyle:"italic",
+                    <div style={{ fontSize: "var(--fs-xs)", color:T.textHint, fontStyle:"italic",
                       paddingTop:8, borderTop:`1px dashed ${T.borderFaint}`, fontFamily:FONT }}>
                       {client.notes}
                     </div>

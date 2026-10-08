@@ -7,58 +7,12 @@
  * scale. It runs over src/ and fails the same way check-copy does, with the
  * file and line so the fix is obvious.
  *
- * Files still being migrated in phase E are listed in PENDING. A file that is
- * not in that list must pass every rule; a file that is in it is skipped, and
- * the script prints how many are left, so the list can only ever shrink.
+ * There is no exempt list any more. The phase E type pass took the last 658
+ * declarations onto the scale, so every file is checked, and a new file has to
+ * arrive on the scale rather than be added to a list.
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, extname } from "node:path";
-
-/* The last files awaiting their appearance pass. Delete entries as they land;
-   never add one. */
-const PENDING = new Set([
-  /* Chrome and the shared sheet: primitives, phase E2. */
-  "src/components/FAB/FAB.css",
-  "src/components/sidebar/NavItem.css",
-  "src/components/sidebar/Sidebar.css",
-  "src/components/sidebar/WorkspaceSwitcher.css",
-  "src/components/topbar/CommandPalette.css",
-  "src/components/topbar/NotificationDropdown.css",
-  "src/components/topbar/NotificationDropdown.tsx",
-  "src/components/topbar/ProfileDropdown.css",
-  "src/components/topbar/ProfileDropdown.tsx",
-  "src/components/topbar/Topbar.css",
-  "src/main.tsx",
-  "src/styles/components.css",
-
-  /* Pages: operations, then management, phase E3 and E4. */
-  "src/pages/AppAccounts.css",
-  "src/pages/AppAccounts.tsx",
-  "src/pages/AppIdeas.css",
-  "src/pages/AppIdeas.tsx",
-  "src/pages/Clients.tsx",
-  "src/pages/Dashboard.css",
-  "src/pages/Dashboard.tsx",
-  "src/pages/DesignPreview.css",
-  "src/pages/DesignPreview.tsx",
-  "src/pages/Help.tsx",
-  "src/pages/MobileRequests.css",
-  "src/pages/OrderBuilder.css",
-  "src/pages/OrderBuilder.tsx",
-  "src/pages/Orders.css",
-  "src/pages/Orders.tsx",
-  "src/pages/Payments.tsx",
-  "src/pages/Profile.tsx",
-  "src/pages/Receipt.tsx",
-  "src/pages/Reports.tsx",
-  "src/pages/Security.tsx",
-  "src/pages/ServiceRequests.css",
-  "src/pages/ServiceRequests.tsx",
-  "src/pages/Services.tsx",
-  "src/pages/Settings.tsx",
-  "src/pages/Staff.tsx",
-  "src/pages/SystemAdmin.tsx",
-]);
 
 /* The scale, as a set of allowed values. */
 const FONT_SIZES = new Set([
@@ -66,6 +20,29 @@ const FONT_SIZES = new Set([
   "var(--fs-lg)", "var(--fs-xl)", "var(--fs-2xl)", "var(--fs-3xl)",
   "var(--fs-4xl)", "0", "inherit",
 ]);
+
+/* The scale's values in pixels, for the two places a size is a number rather
+   than a token: an SVG/canvas attribute, and a chart's tick prop. A number
+   cannot be a var(), so these must at least be one of the scale's steps. */
+const SCALE_PX = new Set([11, 12, 13, 14, 16, 18, 22, 28, 34]);
+
+/* The numbers in an expression that are values rather than thresholds: in
+   `size > 48 ? 12 : 11` that is 12 and 11, not 48, and in `size/2` it is
+   nothing. A number whose nearest neighbour is an operator is part of a
+   comparison or a sum, so it is not a size. */
+const valuesIn = (expression) => {
+  const found = [];
+  const pattern = /\d+(?:\.\d+)?/g;
+  let match;
+  while ((match = pattern.exec(expression)) !== null) {
+    const before = expression.slice(0, match.index).trimEnd().slice(-1);
+    const after = expression.slice(match.index + match[0].length).trimStart().slice(0, 1);
+    const operator = /[<>+\-*/%]/;
+    if (operator.test(before) || operator.test(after)) continue;
+    if (!found.includes(match[0])) found.push(match[0]);
+  }
+  return found;
+};
 
 const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]/u;
 const HEX = /#[0-9a-fA-F]{3,8}\b/;
@@ -100,8 +77,6 @@ for (const full of files) {
   if (file === "src/styles/tokens.css") continue; // the vocabulary itself
 
   const lines = readFileSync(full, "utf8").split("\n");
-  const strict = !PENDING.has(file);
-  if (!strict) continue;
 
   lines.forEach((line, index) => {
     const n = index + 1;
@@ -141,6 +116,21 @@ for (const full of files) {
     const inline = code.match(/fontSize\s*:\s*([\d.]+)/);
     if (inline) {
       add(file, n, `fontSize ${inline[1]}: use a --fs-* step`);
+    }
+    /* A number is the only option here: an SVG attribute and a chart's tick
+       prop both want one, and a var() would arrive as text. So the numbers are
+       checked against the scale instead, which is how a 9px ring label was
+       found hiding behind the rule that only looked for prose-style sizes.
+       Only numbers that are values count: in `size > 48 ? 12 : 11` the 48 is a
+       threshold, and flagging it would be noise that teaches people to ignore
+       this check. */
+    const attribute = code.match(/fontSize=\{([^}]*)\}/);
+    if (attribute) {
+      for (const literal of valuesIn(attribute[1])) {
+        if (!SCALE_PX.has(Number(literal))) {
+          add(file, n, `fontSize={${attribute[1].trim()}}: ${literal} is not a --fs-* step (11, 12, 13, 14, 16, 18, 22, 28, 34)`);
+        }
+      }
     }
   });
 }
@@ -187,6 +177,4 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(
-  `check:visual passed. ${PENDING.size} file(s) still awaiting their phase E pass.`
-);
+console.log("check:visual passed. Palette, type scale, fonts, motion and tokens are clean.");

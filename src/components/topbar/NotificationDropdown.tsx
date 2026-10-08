@@ -30,7 +30,7 @@ const CSS = `
   min-width: 17px; height: 17px; padding: 0 4px;
   border-radius: 20px;
   background: var(--bad-500); color: #fff;
-  font-size: 9.5px; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   border: 2px solid var(--ink-base);
   animation: ndPop 0.3s cubic-bezier(0.4,0,0.2,1);
@@ -69,17 +69,17 @@ const CSS = `
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .nd-head-title {
-  font-size: 13.5px; font-weight: 700; color: var(--text-1);
+  font-size: var(--fs-md); font-weight: 700; color: var(--text-1);
   display: flex; align-items: center; gap: 8px;
 }
 .nd-head-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .nd-unread-chip {
-  font-size: 10px; font-weight: 700;
+  font-size: var(--fs-2xs); font-weight: 700;
   padding: 2px 7px; border-radius: 20px;
   background: var(--brand-soft); color: var(--brand-500);
 }
 .nd-mark-all {
-  font-size: 11.5px; font-weight: 600; color: var(--text-4);
+  font-size: var(--fs-xs); font-weight: 600; color: var(--text-4);
   background: none; border: none; cursor: pointer;
   font-family: var(--font-ui);
   transition: color 0.15s; padding: 0;
@@ -106,7 +106,7 @@ const CSS = `
   padding: 36px 20px;
   text-align: center;
   color: var(--text-4);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   display: flex; flex-direction: column; align-items: center; gap: 8px;
 }
 .nd-empty-ico { display: inline-flex; color: var(--text-4); }
@@ -140,17 +140,17 @@ const CSS = `
 
 .nd-content { flex: 1; min-width: 0; }
 .nd-item-title {
-  font-size: 12.5px; font-weight: 600; color: var(--text-2);
+  font-size: var(--fs-sm); font-weight: 600; color: var(--text-2);
   margin-bottom: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .nd-item-desc {
-  font-size: 11.5px; color: var(--text-4);
+  font-size: var(--fs-xs); color: var(--text-4);
   line-height: 1.45;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.nd-item-time { font-size: 10.5px; color: var(--text-4); margin-top: 4px; }
+.nd-item-time { font-size: var(--fs-2xs); color: var(--text-4); margin-top: 4px; }
 
 /* Item actions */
 .nd-item-acts {
@@ -193,7 +193,7 @@ const CSS = `
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 8px;
-  color: var(--text-4); font-size: 12.5px; font-weight: 600;
+  color: var(--text-4); font-size: var(--fs-sm); font-weight: 600;
   cursor: pointer; font-family: var(--font-ui);
   transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
@@ -253,15 +253,15 @@ const CSS = `
   .nd-list { max-height: none; }
 
   .nd-head { padding: 12px 12px 10px 16px; gap: 8px; }
-  .nd-head-title { font-size: 14px; }
+  .nd-head-title { font-size: var(--fs-md); }
   .nd-mark-all { min-height: 32px; padding: 0 8px; }
   .nd-close { display: inline-flex; }
   .nd-item { padding: 13px 14px; gap: 10px; }
-  .nd-item-title { font-size: 13px; }
-  .nd-item-desc { font-size: 12.5px; }
-  .nd-item-time { font-size: 11px; }
+  .nd-item-title { font-size: var(--fs-sm); }
+  .nd-item-desc { font-size: var(--fs-sm); }
+  .nd-item-time { font-size: var(--fs-2xs); }
   .nd-act-btn { width: 36px; height: 36px; }
-  .nd-view-all { padding: 12px; font-size: 13.5px; }
+  .nd-view-all { padding: 12px; font-size: var(--fs-md); }
 }
 
 /* Close button: the sheet is dismissed by tapping the backdrop as well, but a

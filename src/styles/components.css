@@ -37,7 +37,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -48,7 +48,7 @@
 .eyebrow svg { color: currentColor; }
 
 .page-title {
-  font-size: 27px;
+  font-size: var(--fs-3xl);
   font-weight: 650;
   letter-spacing: -0.03em;
   line-height: 1.15;
@@ -56,7 +56,7 @@
 
 .page-subtitle {
   margin-top: 6px;
-  font-size: 13.5px;
+  font-size: var(--fs-md);
   color: var(--text-2);
   max-width: 76ch;
 }
@@ -69,13 +69,13 @@
 }
 
 .section-title {
-  font-size: 15px;
+  font-size: var(--fs-lg);
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 .section-sub {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--text-3);
   margin-top: 2px;
 }
@@ -579,7 +579,7 @@
   height: 30px;
   padding: 0 var(--sp-3);
   border-radius: var(--r-sm);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--text-3);
   transition: color var(--dur-base) var(--ease-out),
@@ -596,7 +596,7 @@
 }
 
 .segmented__count {
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   font-variant-numeric: tabular-nums;
   color: var(--text-4);
 }
@@ -617,12 +617,12 @@
   background: var(--ink-raised);
   border: 1px solid var(--line-faint);
   color: var(--text-2);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
-.avatar--sm { width: 28px; height: 28px; font-size: 11px; }
-.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+.avatar--sm { width: 28px; height: 28px; font-size: var(--fs-2xs); }
+.avatar--lg { width: 44px; height: 44px; font-size: var(--fs-lg); }
 
 /* ───────────────────────────────────────────────────────────────────────────
    FORM FIELDS
@@ -748,7 +748,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   input[type="password"],
   select,
   textarea {
-    font-size: 16px;
+    font-size: var(--fs-lg);
   }
 }
 
@@ -863,7 +863,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     top: 9px;
     max-width: 46%;
     text-align: left;
-    font-size: 10px;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -897,7 +897,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .data-table {
   width: 100%;
-  font-size: 13.5px;
+  font-size: var(--fs-md);
   min-width: 640px;
 }
 
@@ -907,7 +907,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   z-index: 1;
   padding: var(--sp-3) var(--sp-4);
   text-align: left;
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -933,7 +933,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .data-table td .cell-sub {
   display: block;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-4);
   margin-top: 2px;
 }
@@ -965,12 +965,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .empty-state h3 {
-  font-size: 15px;
+  font-size: var(--fs-lg);
   font-weight: 600;
 }
 
 .empty-state p {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-3);
   max-width: 46ch;
 }
@@ -987,7 +987,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-radius: var(--r-md);
   border: 1px solid var(--line-soft);
   background: var(--ink-raised);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
   animation: fadeIn var(--dur-base) var(--ease-out) both;
 }
@@ -1023,8 +1023,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     margin-bottom: var(--sp-5);
   }
 
-  .page-title { font-size: 21px; }
-  .page-subtitle { font-size: 13px; }
+  .page-title { font-size: var(--fs-2xl); }
+  .page-subtitle { font-size: var(--fs-sm); }
 
   /* Actions become a full-width row of equal buttons, thumb height. */
   .page-header__actions { gap: var(--sp-2); }
@@ -1042,7 +1042,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
   .stat { padding: var(--sp-4); }
   .stat__value,
-  .stat strong { font-size: 20px; }
+  .stat strong { font-size: var(--fs-2xl); }
 }
 
 /* ── Filter bar ─────────────────────────────────────────────────────────── */
@@ -1129,7 +1129,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  font-size: 13.5px;
+  font-size: var(--fs-md);
   font-weight: 600;
   color: var(--text-1);
 }
@@ -1142,7 +1142,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .record__sub {
   margin-top: 3px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-3);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1154,7 +1154,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   align-items: center;
   gap: var(--sp-3);
   margin-top: 6px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--text-4);
   flex-wrap: wrap;
 }
@@ -1222,7 +1222,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border-radius: var(--r-sm);
   background: var(--ink-raised);
   color: var(--text-2);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -1232,7 +1232,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .detail-view__titles { flex: 1; min-width: 0; }
 
 .detail-view__title {
-  font-size: 14.5px;
+  font-size: var(--fs-md);
   font-weight: 650;
   color: var(--text-1);
   overflow: hidden;
@@ -1240,7 +1240,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   white-space: nowrap;
 }
 
-.detail-view__sub { margin-top: 2px; font-size: 12px; color: var(--text-3); }
+.detail-view__sub { margin-top: 2px; font-size: var(--fs-xs); color: var(--text-3); }
 
 .detail-view__actions { display: flex; align-items: center; gap: var(--sp-2); flex-shrink: 0; }
 
@@ -1280,7 +1280,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: var(--ink-shell);
   }
 
-  .detail-view.is-overlay .detail-view__title { font-size: 15px; }
+  .detail-view.is-overlay .detail-view__title { font-size: var(--fs-lg); }
 
   .detail-view.is-overlay .detail-view__body {
     padding: var(--sp-4) var(--page-pad-x) var(--sp-7);
@@ -1306,7 +1306,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .action-bar__note {
   flex: 1 1 auto;
   min-width: 0;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-3);
 }
 
@@ -1373,8 +1373,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .modal__titles { flex: 1; min-width: 0; }
 
-.modal__title { font-size: 16px; font-weight: 650; color: var(--text-1); }
-.modal__sub { margin-top: 3px; font-size: 12.5px; color: var(--text-3); }
+.modal__title { font-size: var(--fs-lg); font-weight: 650; color: var(--text-1); }
+.modal__sub { margin-top: 3px; font-size: var(--fs-sm); color: var(--text-3); }
 
 .modal__close {
   display: grid;
@@ -1473,14 +1473,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .confirm--brand .confirm__icon { background: var(--brand-soft); color: var(--brand-400); }
 .confirm--ok .confirm__icon { background: var(--ok-soft); color: var(--ok-500); }
 
-.confirm__text { font-size: 13.5px; color: var(--text-2); line-height: 1.55; }
+.confirm__text { font-size: var(--fs-md); color: var(--text-2); line-height: 1.55; }
 
 @media (max-width: 640px) {
   /* On a phone the sheet is the screen, so a confirmation reads as a page:
      the decision stays at the bottom where the thumb is. */
   .modal.confirm .modal__sheet { justify-content: flex-start; }
   .modal.confirm .modal__body { flex: 0 0 auto; }
-  .confirm__text { font-size: 14px; }
+  .confirm__text { font-size: var(--fs-md); }
 }
 
 /* ── Loading rows ───────────────────────────────────────────────────────── */
@@ -1530,8 +1530,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   color: var(--bad-500);
 }
 
-.state-block h3 { font-size: 15px; font-weight: 600; }
-.state-block p { font-size: 13px; color: var(--text-3); max-width: 44ch; }
+.state-block h3 { font-size: var(--fs-lg); font-weight: 600; }
+.state-block p { font-size: var(--fs-sm); color: var(--text-3); max-width: 44ch; }
 
 /* ───────────────────────────────────────────────────────────────────────────
    GENERIC LIST ROWS
@@ -1576,7 +1576,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .meta-item small {
   display: block;
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1586,7 +1586,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .meta-item strong {
   display: block;
-  font-size: 13.5px;
+  font-size: var(--fs-md);
   font-weight: 600;
   color: var(--text-1);
   word-break: break-word;
@@ -1601,7 +1601,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   align-items: center;
   gap: var(--sp-3);
   padding: 7px 0;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 .legend-row__dot {

@@ -19,12 +19,12 @@
 }
 
 .ob-header-title {
-  font-size: 20px;
+  font-size: var(--fs-2xl);
   font-weight: 700;
 }
 
 .ob-header-sub {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-4);
 }
 
@@ -34,7 +34,7 @@
   border: none;
   border-radius: 9px;
   color: #fff;
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -71,7 +71,7 @@
 }
 
 .ob-panel-title {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   margin-bottom: 12px;
   display: flex;
@@ -87,7 +87,7 @@
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 8px;
   color: var(--text-1);
-  font-size: 14px;
+  font-size: var(--fs-md);
   outline: none;
   font-family: var(--font-ui);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -115,7 +115,7 @@
 
 /* ── Date Input ────────────────────────────────── */
 .ob-date-label {
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   color: var(--text-4);
   margin-bottom: 6px;
   text-transform: uppercase;
@@ -194,7 +194,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   border-radius: 6px;
   padding: 4px 8px;
   color: var(--text-1);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   outline: none;
   font-family: var(--font-ui);
 }
@@ -232,7 +232,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .ob-dropdown-item {
   padding: 10px 14px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--fs-md);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition: background-color 0.15s ease;
 }
@@ -251,14 +251,14 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-dropdown-meta {
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   color: var(--text-4);
 }
 
 .ob-dropdown-empty {
   padding: 12px;
   color: var(--text-4);
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 /* ── Client Info ───────────────────────────────── */
@@ -270,7 +270,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 .ob-client-phone {
@@ -285,7 +285,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   background: var(--warn-soft);
   color: var(--warn-500);
   border-radius: 6px;
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
 }
 
@@ -322,7 +322,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-service-category {
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   color: var(--text-4);
 }
 
@@ -336,7 +336,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .ob-cart-header {
   padding: 14px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -347,20 +347,20 @@ input[type="date"]::-moz-calendar-picker-indicator {
   padding: 40px;
   text-align: center;
   color: var(--text-4);
-  font-size: 14px;
+  font-size: var(--fs-md);
 }
 
 .ob-cart-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 .ob-cart-table th {
   padding: 12px 16px;
   text-align: left;
   color: var(--text-4);
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   background: var(--ink-shell);
@@ -457,12 +457,12 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-option-label {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
 }
 
 .ob-option-hint {
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   color: var(--text-4);
   padding: 4px 12px;
   background: var(--warn-soft);
@@ -491,7 +491,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .ob-total-row {
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 .ob-total-row.secondary {
@@ -519,14 +519,14 @@ input[type="date"]::-moz-calendar-picker-indicator {
 .ob-total-final {
   display: flex;
   justify-content: space-between;
-  font-size: 18px;
+  font-size: var(--fs-xl);
   font-weight: 700;
 }
 
 .ob-total-balance {
   display: flex;
   justify-content: space-between;
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 600;
 }
 
@@ -565,7 +565,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
 }
 
 .ob-toast-text {
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 500;
 }
 
@@ -661,7 +661,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
     position: absolute;
     left: 0;
     top: 9px;
-    font-size: 10px;
+    font-size: var(--fs-2xs);
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -680,7 +680,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   .ob-input,
   .ob-select,
   .ob-textarea {
-    font-size: 16px;
+    font-size: var(--fs-lg);
   }
 
   .ob-submit-btn,
@@ -716,7 +716,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
     flex: 1 1 auto;
     min-width: 0;
     color: var(--text-3);
-    font-size: 11px;
+    font-size: var(--fs-2xs);
     letter-spacing: 0.04em;
     text-transform: uppercase;
   }
@@ -725,7 +725,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
     display: block;
     margin-top: 2px;
     font-family: var(--font-mono);
-    font-size: 15px;
+    font-size: var(--fs-lg);
     letter-spacing: 0;
     text-transform: none;
     color: var(--text-1);
@@ -755,7 +755,7 @@ input[type="date"]::-moz-calendar-picker-indicator {
   }
 
   .ob-total-final {
-    font-size: 16px;
+    font-size: var(--fs-lg);
   }
 }
 

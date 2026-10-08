@@ -13,35 +13,35 @@
 }
 
 .aa-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
-.aa-eyebrow { display: flex; align-items: center; gap: 7px; color: var(--ok-500); font-size: 11px; font-weight: 700; letter-spacing: 1.3px; }
-.aa-header h1 { margin: 6px 0 6px; font-size: 26px; font-weight: 800; letter-spacing: -0.4px; }
-.aa-header p { margin: 0; max-width: 660px; color: var(--text-2); font-size: 13px; line-height: 20px; }
-.aa-refresh { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border: 1px solid rgba(255,255,255,0.13); border-radius: 11px; background: rgba(255,255,255,0.05); color: var(--text-2); font-size: 12px; font-weight: 700; cursor: pointer; }
+.aa-eyebrow { display: flex; align-items: center; gap: 7px; color: var(--ok-500); font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 1.3px; }
+.aa-header h1 { margin: 6px 0 6px; font-size: var(--fs-3xl); font-weight: 800; letter-spacing: -0.4px; }
+.aa-header p { margin: 0; max-width: 660px; color: var(--text-2); font-size: var(--fs-sm); line-height: 20px; }
+.aa-refresh { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border: 1px solid rgba(255,255,255,0.13); border-radius: 11px; background: rgba(255,255,255,0.05); color: var(--text-2); font-size: var(--fs-xs); font-weight: 700; cursor: pointer; }
 .aa-refresh:disabled { opacity: 0.6; cursor: default; }
 .aa-spin { animation: aa-rotate 900ms linear infinite; }
 @keyframes aa-rotate { to { transform: rotate(360deg); } }
 
 .aa-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px; }
 .aa-summary-card { display: flex; flex-direction: column; gap: 5px; padding: 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; background: rgba(255,255,255,0.04); color: var(--text-2); }
-.aa-summary-card span { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
-.aa-summary-card strong { font-size: 24px; font-weight: 800; color: #ffffff; }
+.aa-summary-card span { font-size: var(--fs-2xs); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+.aa-summary-card strong { font-size: var(--fs-2xl); font-weight: 800; color: #ffffff; }
 
-.aa-error { padding: 11px; border-radius: 11px; background: var(--bad-soft); color: var(--bad-500); font-size: 12px; }
+.aa-error { padding: 11px; border-radius: 11px; background: var(--bad-soft); color: var(--bad-500); font-size: var(--fs-xs); }
 .aa-notready { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; padding: 20px; border: 1px solid var(--warn-border); border-radius: 18px; background: var(--warn-soft); color: var(--warn-500); }
-.aa-notready h2 { margin: 0; font-size: 15.5px; font-weight: 800; color: var(--warn-500); }
-.aa-notready p { margin: 0; max-width: 700px; color: var(--warn-500); font-size: 12.5px; line-height: 19px; }
+.aa-notready h2 { margin: 0; font-size: var(--fs-lg); font-weight: 800; color: var(--warn-500); }
+.aa-notready p { margin: 0; max-width: 700px; color: var(--warn-500); font-size: var(--fs-sm); line-height: 19px; }
 .aa-notready strong { color: #ffffff; }
 
 .aa-workspace { display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); gap: 16px; align-items: start; }
 
 .aa-list-panel { display: flex; flex-direction: column; gap: 11px; padding: 15px; border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; background: rgba(255,255,255,0.035); }
 .aa-list-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.aa-list-heading h2 { margin: 0 0 4px; font-size: 15px; font-weight: 800; }
-.aa-list-heading p { margin: 0; color: var(--text-3); font-size: 11px; line-height: 16px; }
-.aa-list-heading > span { min-width: 28px; height: 28px; border-radius: 9px; background: rgba(255,255,255,0.08); color: var(--text-1); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.aa-list-heading h2 { margin: 0 0 4px; font-size: var(--fs-lg); font-weight: 800; }
+.aa-list-heading p { margin: 0; color: var(--text-3); font-size: var(--fs-2xs); line-height: 16px; }
+.aa-list-heading > span { min-width: 28px; height: 28px; border-radius: 9px; background: rgba(255,255,255,0.08); color: var(--text-1); font-size: var(--fs-xs); font-weight: 800; display: flex; align-items: center; justify-content: center; }
 
 .aa-search { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border: 1px solid rgba(255,255,255,0.12); border-radius: 11px; background: rgba(255,255,255,0.04); color: var(--text-3); }
-.aa-search input { flex: 1; min-width: 0; border: none; background: transparent; color: var(--text-1); font-size: 13px; outline: none; font-family: inherit; }
+.aa-search input { flex: 1; min-width: 0; border: none; background: transparent; color: var(--text-1); font-size: var(--fs-sm); outline: none; font-family: var(--font-ui); }
 
 .aa-list { display: flex; flex-direction: column; gap: 9px; }
 
@@ -55,18 +55,18 @@
 .aa-person:hover { border-color: var(--ok-border); }
 .aa-person.selected { border-color: var(--ok-border); background: var(--ok-soft); }
 .aa-person-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.aa-person-top strong { font-size: 13px; font-weight: 800; }
-.aa-pin { padding: 4px 9px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.4px; }
-.aa-person-meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--text-2); font-size: 11px; }
+.aa-person-top strong { font-size: var(--fs-sm); font-weight: 800; }
+.aa-pin { padding: 4px 9px; border-radius: 999px; font-size: var(--fs-2xs); font-weight: 800; letter-spacing: 0.4px; }
+.aa-person-meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--text-2); font-size: var(--fs-2xs); }
 
-.aa-honest { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid var(--ok-border); border-radius: 13px; background: var(--ok-soft); color: var(--ok-500); font-size: 12px; line-height: 18px; }
+.aa-honest { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid var(--ok-border); border-radius: 13px; background: var(--ok-soft); color: var(--ok-500); font-size: var(--fs-xs); line-height: 18px; }
 
 .aa-history { display: flex; flex-direction: column; gap: 9px; }
 .aa-moment { display: flex; align-items: flex-start; gap: 11px; padding: 12px; border: 1px solid rgba(255,255,255,0.08); border-radius: 13px; background: rgba(255,255,255,0.025); }
-.aa-moment-kind { padding: 4px 9px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.4px; white-space: nowrap; }
+.aa-moment-kind { padding: 4px 9px; border-radius: 999px; font-size: var(--fs-2xs); font-weight: 800; letter-spacing: 0.4px; white-space: nowrap; }
 .aa-moment-copy { display: flex; flex-direction: column; gap: 3px; }
-.aa-moment-copy span { color: var(--text-2); font-size: 12.5px; line-height: 18px; }
-.aa-moment-copy time { color: var(--text-3); font-size: 11px; }
+.aa-moment-copy span { color: var(--text-2); font-size: var(--fs-sm); line-height: 18px; }
+.aa-moment-copy time { color: var(--text-3); font-size: var(--fs-2xs); }
 
 /* ── What they have asked for ─────────────────────────────────────────────
    Both intake queues, filtered to this one account. On a phone the label takes
@@ -107,17 +107,17 @@
   .aa-workspace { grid-template-columns: minmax(0, 1fr); }
 
   /* 16px keeps iOS from zooming the page in on focus and leaving it zoomed. */
-  .aa-search input { font-size: 16px; }
+  .aa-search input { font-size: var(--fs-lg); }
   .aa-search { height: var(--tap-min); }
 }
 
 @media (max-width: 640px) {
   .aa-page { gap: 14px; }
   .aa-header { flex-direction: column; align-items: stretch; gap: 12px; }
-  .aa-header h1 { font-size: 21px; }
+  .aa-header h1 { font-size: var(--fs-2xl); }
   .aa-refresh { width: 100%; justify-content: center; min-height: var(--tap-min); }
   .aa-summary-card { padding: 12px 13px; border-radius: var(--r-md); }
-  .aa-summary-card strong { font-size: 20px; }
+  .aa-summary-card strong { font-size: var(--fs-2xl); }
   .aa-list-panel { padding: var(--sp-3); }
   .aa-person { padding: 12px; }
   .aa-moment { padding: 11px; }

@@ -11,7 +11,7 @@
   padding: 0 var(--sp-3);
   border-radius: var(--r-sm);
   color: var(--text-2);
-  font-size: 13.5px;
+  font-size: var(--fs-md);
   font-weight: 550;
   letter-spacing: -0.008em;
   transition: color var(--dur-base) var(--ease-out),
@@ -68,7 +68,7 @@
   background: var(--brand-soft);
   border: 1px solid var(--brand-border);
   color: var(--brand-400);
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   font-weight: 700;
   text-align: center;
   font-variant-numeric: tabular-nums;

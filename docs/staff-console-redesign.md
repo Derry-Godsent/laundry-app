@@ -159,7 +159,7 @@ roadmap: 1 to 5 are done and are not repeated; A to F are what remains.
 | B | **Shared mobile patterns** · page header, summary cards, filter/search bar, list row, detail view, bottom actions, full-screen modal, confirm dialog, empty/error/loading states | ✅ done |
 | C | **Daily operations** · Mobile Requests, Service Requests, Orders QA, New Order, Clients | ✅ done |
 | D | **Rest of the app** · Dashboard, App Ideas, App Accounts, Staff, Services, Payments, Receipt, Reports, Security, Settings, Help, System Admin, Login, Profile | ⬜ |
-| E | **Overall appearance** · palette, type, surfaces, border contrast, spacing, button hierarchy, status colours, icons, states, motion, wording (refine the dark operational style, do not replace it) | ⬜ |
+| E | **Overall appearance** · palette, type, surfaces, border contrast, spacing, button hierarchy, status colours, icons, states, motion, wording (refine the dark operational style, do not replace it) | ✅ done |
 | F | **Mobile app integration** · Mobile Requests, Service Requests, customer replies, App Ideas, App Accounts, realtime alerts, staff actions that start in the customer app | ✅ done |
 | G | Sign-off: delete `/preview` (route + page + CSS) and the sample-data note here, then close PR #7 | ⬜ |
 
@@ -639,6 +639,56 @@ what the page holds, nothing more.
 
 **Consequence for phase 6+:** new pages must not regress the pinned chrome. Use
 the page frame below for table screens instead of the plain `.page` wrapper.
+
+### Phase E closes: the last 658 sizes onto the scale
+
+The palette half of E landed much earlier. The type half was the largest single
+change in the redesign: 664 declarations across 32 files were off the scale, 356
+in stylesheets and 274 in inline styles, plus 34 font stacks that were not one of
+the two shared ones. Every one of them is now a `--fs-*` step or `var(--font-ui)`
+/ `var(--font-mono)`, and `scripts/check-visual.mjs` has no exempt list any more:
+every file in `src/` is checked, and a new file has to arrive on the scale.
+
+The mapping, applied in one pass, with ties rounded **up** because the ask behind
+this work was "more visible, bigger or well arranged":
+
+| was | became | step |
+| --- | --- | --- |
+| 9, 9.5, 10, 10.5, 11 | 11 | `--fs-2xs` |
+| 11.5, 12 | 12 | `--fs-xs` |
+| 12.5, 13 | 13 | `--fs-sm` |
+| 13.5, 14, 14.5 | 14 | `--fs-md` |
+| 15, 15.5, 16 | 16 | `--fs-lg` |
+| 17, 18, 19 | 18 | `--fs-xl` |
+| 20, 21, 22, 24 | 22 | `--fs-2xl` |
+| 26, 27, 28 | 28 | `--fs-3xl` |
+
+What that did to the product: 343 declarations are the same size as before, 258
+grew, and 30 shrank. Nothing moved by more than 2px in either direction. The
+growth is concentrated where it matters, in the two smallest sizes, which is
+where the "more visible" ask pointed: 146 declarations of 9 to 10.5px, mostly
+table meta and micro labels, are now 11px, and the seven 20px headings are 22px.
+The three that came down (14.5 and 19 to 14 and 18, 24 to 22) were values that
+sat between two steps with a nearer neighbour.
+
+Two holes in the guard were found while doing this, and both are closed:
+
+- **`fontSize={11}`.** An SVG attribute and a chart's tick prop need a number, and
+  the guard's rules only looked at `font-size:` and `fontSize:`. Four chart ticks
+  and a ring label were hiding there, one of them at 9px. Numbers are now checked
+  against the scale's own values, in value positions only: in
+  `size > 48 ? 12 : 11` the 48 is a threshold, and flagging it would teach people
+  to ignore the check.
+- **Page-local font aliases.** `--sf-font`, `${FONT}` and `font-family: inherit`
+  all end at the same stack, but a reader of the file cannot see that, and the
+  guard could not either. They now name `var(--font-ui)` / `var(--font-mono)`
+  directly.
+
+The risk in a sweep this size is not a wrong token, it is text overflowing what
+used to hold it. That was checked rather than hoped: for every block that sets
+both a size and a `line-height` or a fixed `height`, the old and new values were
+compared, and there is no case where the new size no longer fits what fitted
+before.
 
 ### Phase F: the console's end of every app flow
 

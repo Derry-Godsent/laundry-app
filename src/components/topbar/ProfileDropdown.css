@@ -35,7 +35,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: #ffffff;
   box-shadow: 0 0 0 2px var(--brand-soft);
   transition: box-shadow 0.2s ease;
@@ -53,7 +53,7 @@
 }
 
 .profile-name {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: #ffffff;
   overflow: hidden;
@@ -63,7 +63,7 @@
 }
 
 .profile-role {
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -111,7 +111,7 @@
   border: none;
   border-radius: 8px;
   color: var(--text-3);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
   transform: translateZ(0);

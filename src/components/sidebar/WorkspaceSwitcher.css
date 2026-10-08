@@ -42,7 +42,7 @@
 .ws-info { flex: 1; min-width: 0; }
 
 .ws-name {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--text-1);
   white-space: nowrap;
@@ -95,7 +95,7 @@
 .ws-option {
   padding: 9px var(--sp-3);
   border-radius: var(--r-sm);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
   cursor: pointer;
   transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);

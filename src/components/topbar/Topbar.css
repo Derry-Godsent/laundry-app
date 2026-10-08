@@ -48,7 +48,7 @@
   border: 1px solid var(--line-soft);
   border-radius: var(--r-sm);
   color: var(--text-4);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   transition: border-color var(--dur-base) var(--ease-out),
     background-color var(--dur-base) var(--ease-out),
     color var(--dur-base) var(--ease-out),
@@ -77,7 +77,7 @@
   border: 1px solid var(--line-soft);
   border-radius: var(--r-xs);
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
   color: var(--text-3);
 }
@@ -115,7 +115,7 @@
   place-items: center;
   background: var(--bad-500);
   color: var(--on-bad);
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   font-weight: 800;
   border-radius: var(--r-pill);
   border: 2px solid var(--ink-shell);
@@ -166,7 +166,7 @@
   .topbar { gap: var(--sp-2); }
   .topbar-left { gap: var(--sp-2); }
   .topbar-right { gap: var(--sp-2); }
-  .breadcrumbs { font-size: 13px; }
+  .breadcrumbs { font-size: var(--fs-sm); }
 }
 
 @media (max-width: 480px) {

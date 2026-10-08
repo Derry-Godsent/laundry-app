@@ -700,7 +700,7 @@ export const OrderBuilder = () => {
               </label>
 
               <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
-                <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <div style={{ fontSize: "var(--fs-2xs)", color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Delivery Fee
                 </div>
                 <input
@@ -714,7 +714,7 @@ export const OrderBuilder = () => {
               </div>
 
               <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
-                <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <div style={{ fontSize: "var(--fs-2xs)", color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Discount (%)
                 </div>
                 <input
@@ -728,7 +728,7 @@ export const OrderBuilder = () => {
               </div>
 
               <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
-                <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <div style={{ fontSize: "var(--fs-2xs)", color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Amount Paid
                 </div>
                 <input
@@ -745,7 +745,7 @@ export const OrderBuilder = () => {
               </div>
 
               <div style={{ opacity: !canEdit ? 0.6 : 1 }}>
-                <div style={{ fontSize: 11, color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                <div style={{ fontSize: "var(--fs-2xs)", color: "var(--text-4)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
                   Notes
                 </div>
                 <textarea

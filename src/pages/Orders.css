@@ -58,7 +58,7 @@
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-4);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   line-height: 1.45;
   pointer-events: none;
 }
@@ -73,10 +73,10 @@
   width: auto;
   min-height: 36px;
   padding: 6px 11px;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
 }
 
-.ord-dates__sep { font-size: 12px; color: var(--text-4); }
+.ord-dates__sep { font-size: var(--fs-xs); color: var(--text-4); }
 
 /* Auto-width filter selects with their own caret, rather than the full-width
    field style: three filters have to fit on one row. */
@@ -87,7 +87,7 @@
   max-width: 190px;
   min-height: 36px;
   padding: 7px 30px 7px 12px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23737e96'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -110,7 +110,7 @@
   border-radius: var(--r-sm);
   background: var(--bad-soft);
   color: var(--bad-500);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 650;
   cursor: pointer;
   transition: background-color var(--dur-base) var(--ease-out),
@@ -133,7 +133,7 @@
   border-radius: var(--r-sm);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-2);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -195,7 +195,7 @@
   padding: 10px var(--page-pad-x);
   border-bottom: 1px solid var(--brand-border);
   background: var(--ink-raised);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
 }
 
@@ -207,7 +207,7 @@
   height: 30px;
   padding: 0 12px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 
 .ord-bulk .btn--icon { width: 30px; padding: 0; }
@@ -219,7 +219,7 @@
 
 .ord-id {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 500;
   color: var(--brand-400);
   letter-spacing: -0.1px;
@@ -231,31 +231,31 @@
   gap: var(--sp-3);
 }
 
-.ord-cust__name { font-size: 13px; font-weight: 650; color: var(--text-1); }
-.ord-cust__phone { font-size: 11.5px; color: var(--text-4); margin-top: 2px; }
+.ord-cust__name { font-size: var(--fs-sm); font-weight: 650; color: var(--text-1); }
+.ord-cust__phone { font-size: var(--fs-xs); color: var(--text-4); margin-top: 2px; }
 
 .ord-num {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--text-2);
   font-variant-numeric: tabular-nums;
 }
 
 .ord-amount {
   font-family: var(--font-mono);
-  font-size: 13.5px;
+  font-size: var(--fs-md);
   font-weight: 650;
   color: var(--text-1);
   font-variant-numeric: tabular-nums;
 }
 
-.ord-dim { color: var(--text-3); font-size: 12.5px; }
+.ord-dim { color: var(--text-3); font-size: var(--fs-sm); }
 
 .ord-stage {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 550;
   color: var(--text-2);
   white-space: nowrap;
@@ -291,7 +291,7 @@
 }
 
 .ord-pag__info {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--text-3);
   font-variant-numeric: tabular-nums;
 }
@@ -302,7 +302,7 @@
   width: auto;
   min-height: 32px;
   padding: 5px 10px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-2);
 }
 
@@ -314,7 +314,7 @@
   border-radius: var(--r-xs);
   border: 1px solid transparent;
   color: var(--text-3);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   transition: color var(--dur-fast) var(--ease-out),
@@ -370,7 +370,7 @@
   display: flex;
   align-items: center;
   gap: var(--sp-2);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--text-1);
 }
@@ -390,7 +390,7 @@
 .ord-col__empty {
   padding: var(--sp-5) var(--sp-3);
   text-align: center;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--text-4);
 }
 
@@ -423,21 +423,21 @@
 
 .ord-card__id {
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: var(--brand-400);
 }
 
 .ord-card__cust { display: flex; align-items: center; gap: var(--sp-2); }
-.ord-card__name { font-size: 12.5px; font-weight: 650; color: var(--text-1); }
-.ord-card__sub { font-size: 11px; color: var(--text-4); margin-top: 1px; }
+.ord-card__name { font-size: var(--fs-sm); font-weight: 650; color: var(--text-1); }
+.ord-card__sub { font-size: var(--fs-2xs); color: var(--text-4); margin-top: 1px; }
 
 .ord-card__foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-2);
-  font-size: 11px;
+  font-size: var(--fs-2xs);
   color: var(--text-4);
 }
 
@@ -491,12 +491,12 @@
 
 .ord-drawer__id {
   font-family: var(--font-mono);
-  font-size: 19px;
+  font-size: var(--fs-xl);
   font-weight: 650;
   color: var(--brand-400);
 }
 
-.ord-drawer__date { font-size: 12px; color: var(--text-4); margin-top: 4px; }
+.ord-drawer__date { font-size: var(--fs-xs); color: var(--text-4); margin-top: 4px; }
 
 .ord-drawer__head-actions {
   display: flex;
@@ -525,7 +525,7 @@
 }
 
 .ord-block-label {
-  font-size: 10.5px;
+  font-size: var(--fs-2xs);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -536,7 +536,7 @@
 .ord-customer { display: flex; align-items: flex-start; gap: var(--sp-3); }
 
 .ord-customer__name {
-  font-size: 15px;
+  font-size: var(--fs-lg);
   font-weight: 650;
   color: var(--text-1);
   margin-bottom: 5px;
@@ -546,7 +546,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--text-3);
   margin-bottom: 3px;
 }
@@ -557,7 +557,7 @@
   border-radius: var(--r-md);
   background: var(--ink-raised);
   border: 1px solid var(--line-faint);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   line-height: 1.6;
   color: var(--text-2);
   font-style: italic;
@@ -618,7 +618,7 @@
 }
 
 .ord-tl__label {
-  font-size: 9.5px;
+  font-size: var(--fs-2xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-align: center;
@@ -639,7 +639,7 @@
   border: 1px solid var(--line-soft);
   background: var(--ink-hover);
   box-shadow: var(--shadow-modal);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 550;
   animation: fadeUp var(--dur-base) var(--ease-out) both;
 }
@@ -703,7 +703,7 @@
 @media (max-width: 900px) {
   .ord-dates .input,
   .ord-srch__inp,
-  .ord-fp { font-size: 16px; }
+  .ord-fp { font-size: var(--fs-lg); }
 
   .ord-fp { max-width: 100%; }
 }

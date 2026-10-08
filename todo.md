@@ -227,11 +227,13 @@ the five-screen correctness pass and the definition of done live in
   - [ ] Waiting on the user: the real logo at `public/brand/logo.png`, and
         (optional) service photographs at `public/services/<slug>.jpg`.
 - [ ] Next, in order:
-  - [ ] Type, on the scale. The palette rule is met everywhere now; with the
-        guard's pending list emptied it reports 624 font-size declarations and 34
-        font-family declarations outside `--fs-*` and the two font stacks. That is
-        the "more visible, bigger or better arranged" half of the appearance ask,
-        and it touches every page, so it wants its own pass.
+  - [x] Type, on the scale: 631 sizes and 34 font stacks onto `--fs-*` and the two
+        shared stacks, across 32 files. 343 declarations are unchanged, 258 grew,
+        30 shrank, nothing moved more than 2px, and no block that set a line-height
+        or a height now fails to fit its text. The guard's exempt list is gone:
+        every file in src/ is checked, including the two holes that were hiding
+        numbers from it (chart ticks and SVG attributes, and page-local font
+        aliases).
   - [ ] Then Phase G, sign-off: delete /preview and close PR #7.
 - [x] Phase F, mobile app integration. Alerts now cover the two events that reached
       nobody: a customer answering a service appointment, and a customer creating an

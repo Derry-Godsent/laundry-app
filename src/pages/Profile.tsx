@@ -62,14 +62,14 @@ export const Profile = () => {
     <>
     <style>{PHONE_CSS}</style>
     <div className="pf-page" style={{ padding: "32px", maxWidth: 800, margin: "0 auto", fontFamily: FONT, color: T.textPrimary }}>
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24, letterSpacing: "-0.03em" }}>My Profile</h2>
+      <h2 style={{ fontSize: "var(--fs-2xl)", fontWeight: 700, marginBottom: 24, letterSpacing: "-0.03em" }}>My Profile</h2>
 
       {message && (
         <div style={{
           padding: "12px 16px", borderRadius: 10, marginBottom: 24, display: "flex", alignItems: "center", gap: 10,
           background: message.type === "success" ? T.emeraldDim : T.dangerDim,
           border: `1px solid ${message.type === "success" ? T.emeraldBord : T.dangerBord}`,
-          color: message.type === "success" ? T.emerald : T.danger, fontSize: 13, fontWeight: 500
+          color: message.type === "success" ? T.emerald : T.danger, fontSize: "var(--fs-sm)", fontWeight: 500
         }}>
           {message.type === "success" ? <Check size={16} /> : <AlertCircle size={16} />}
           {message.text}
@@ -79,24 +79,24 @@ export const Profile = () => {
       <div className="pf-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
         {/* User Info Card */}
         <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
+          <h3 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
             <User size={16} color={T.accent} /> Account Information
           </h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: `${roleColor}22`, color: roleColor, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: `${roleColor}22`, color: roleColor, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "var(--fs-lg)" }}>
                 {user?.email?.charAt(0).toUpperCase()}
               </div>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 600 }}>{staff?.first_name} {staff?.last_name || "User"}</div>
-                <div style={{ fontSize: 11, color: T.textTert, textTransform: "uppercase", fontWeight: 600, letterSpacing: "0.05em" }}>{staff?.role || "Staff"}</div>
+                <div style={{ fontSize: "var(--fs-md)", fontWeight: 600 }}>{staff?.first_name} {staff?.last_name || "User"}</div>
+                <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", fontWeight: 600, letterSpacing: "0.05em" }}>{staff?.role || "Staff"}</div>
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: "var(--fs-md)" }}>
               <Mail size={16} color={T.textTert} /> {user?.email}
             </div>
             {staff?.phone && (
-              <div style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: 13.5 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, color: T.textSec, fontSize: "var(--fs-md)" }}>
                 <Phone size={16} color={T.textTert} /> {staff.phone}
               </div>
             )}
@@ -105,12 +105,12 @@ export const Profile = () => {
 
         {/* Change Password Card */}
         <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
+          <h3 style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
             <Shield size={16} color={T.accent} /> Security
           </h3>
           <form onSubmit={handlePasswordChange} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div>
-              <label style={{ fontSize: 11, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: 6 }}>New Password</label>
+              <label style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: 6 }}>New Password</label>
               <div style={{ position: "relative" }}>
                 <input
                   type={showPass ? "text" : "password"}
@@ -120,7 +120,7 @@ export const Profile = () => {
                   style={{
                     width: "100%", padding: "10px 40px 10px 12px", background: T.bgSurface,
                     border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textPrimary,
-                    fontSize: 13.5, outline: "none", fontFamily: FONT
+                    fontSize: "var(--fs-md)", outline: "none", fontFamily: FONT
                   }}
                 />
                 <button
@@ -137,7 +137,7 @@ export const Profile = () => {
               disabled={saving || !newPassword}
               style={{
                 padding: "10px 16px", background: T.accentStrong, border: "none", borderRadius: 8,
-                color: "#fff", fontSize: 13.5, fontWeight: 600, cursor: saving || !newPassword ? "not-allowed" : "pointer",
+                color: "#fff", fontSize: "var(--fs-md)", fontWeight: 600, cursor: saving || !newPassword ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: FONT,
                 opacity: saving || !newPassword ? 0.6 : 1, transition: "opacity 0.15s"
               }}
@@ -157,7 +157,7 @@ const PHONE_CSS = `
   @media screen and (max-width: 900px) {
     .pf-page { padding: 18px var(--page-pad-x) 40px !important; }
     .pf-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 16px !important; }
-    .pf-page input, .pf-page select { font-size: 16px !important; min-height: var(--tap-min); }
+    .pf-page input, .pf-page select { font-size: var(--fs-lg) !important; min-height: var(--tap-min); }
     .pf-page button { min-height: var(--tap-min); }
   }
 `;

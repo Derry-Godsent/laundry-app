@@ -37,7 +37,7 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
       boxShadow: "var(--shadow-modal)", animation: "csFadeUp 0.3s cubic-bezier(.4,0,.2,1)", whiteSpace: "nowrap" 
     }}>
       {type === "success" ? <Check size={15} color={T.emerald} /> : <AlertCircle size={15} color={T.danger} />}
-      <span style={{ fontSize: 13.5, fontWeight: 500, color: type === "success" ? T.emerald : T.danger, fontFamily: FONT }}>{msg}</span>
+      <span style={{ fontSize: "var(--fs-md)", fontWeight: 500, color: type === "success" ? T.emerald : T.danger, fontFamily: FONT }}>{msg}</span>
       <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", opacity: 0.6, display: "flex", alignItems: "center", transition: "opacity 0.15s" }}>
         <X size={13} />
       </button>
@@ -393,14 +393,14 @@ export const Settings = () => {
   const inputStyle: React.CSSProperties = {
     width: "100%", padding: "10px 12px", background: T.bgSurface,
     border: `1px solid ${T.borderSoft}`, borderRadius: 8,
-    color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT,
+    color: T.textPrimary, fontSize: "var(--fs-md)", outline: "none", fontFamily: FONT,
     transition: "border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
     opacity: canEdit ? 1 : 0.6,
     cursor: canEdit ? "text" : "not-allowed"
   };
 
   const labelStyle: React.CSSProperties = {
-    fontSize: 11, color: T.textTert, marginBottom: 6,
+    fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 6,
     textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT
   };
 
@@ -414,7 +414,7 @@ export const Settings = () => {
   if (loading || permLoading) return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center", justifyContent: "center", minHeight: "60%", padding: "var(--page-pad-y) var(--page-pad-x)", color: T.textTert, fontFamily: FONT, background: T.bgBase }}>
       <div className="cs-spinner" />
-      <div style={{ fontSize: 13, letterSpacing: "0.04em" }}>Loading settings…</div>
+      <div style={{ fontSize: "var(--fs-sm)", letterSpacing: "0.04em" }}>Loading settings…</div>
       <style>{`
         @keyframes csSpin { to { transform: rotate(360deg); } }
         .cs-spinner { width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid ${T.borderSoft}; border-top-color: ${T.accent}; animation: csSpin 0.75s linear infinite; }
@@ -468,7 +468,7 @@ export const Settings = () => {
              zoomed, which moves everything the staff member was reading.
              The page renders most of its controls inline styled, so this
              covers the classed fields and any field inside a settings card. */
-          .cs-input, .cs-panel input, .cs-panel select, .cs-panel textarea { font-size: 16px !important; }
+          .cs-input, .cs-panel input, .cs-panel select, .cs-panel textarea { font-size: var(--fs-lg) !important; }
           .cs-input { min-height: var(--tap-min); }
           .cs-iconbtn { min-height: var(--tap-min); }
           .cs-card button { min-height: var(--tap-min); }
@@ -497,8 +497,8 @@ export const Settings = () => {
         <div className="cs-aurora" />
         <div className="cs-header-inner" style={{ position: "relative", zIndex: 1, padding: "20px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: T.textPrimary, letterSpacing: "-0.03em", fontFamily: FONT }}>Settings</div>
-            <div style={{ fontSize: 12.5, color: T.textTert, marginTop: 4, fontFamily: FONT }}>System configuration</div>
+            <div style={{ fontSize: "var(--fs-2xl)", fontWeight: 700, color: T.textPrimary, letterSpacing: "-0.03em", fontFamily: FONT }}>Settings</div>
+            <div style={{ fontSize: "var(--fs-sm)", color: T.textTert, marginTop: 4, fontFamily: FONT }}>System configuration</div>
           </div>
           <button
             onClick={() => canEdit && handleSave()}
@@ -510,7 +510,7 @@ export const Settings = () => {
               border: `1px solid ${saveFailed ? "var(--bad-border)" : saved ? "var(--ok-border)" : canEdit ? "var(--brand-600)" : T.borderSoft}`,
               borderRadius: 9,
               color: saveFailed ? "var(--on-bad)" : saved ? "var(--on-brand)" : (canEdit ? "var(--on-brand)" : "var(--text-disabled)"),
-              fontSize: 14, fontWeight: 600, cursor: canEdit ? "pointer" : "not-allowed",
+              fontSize: "var(--fs-md)", fontWeight: 600, cursor: canEdit ? "pointer" : "not-allowed",
               display: "flex", alignItems: "center", gap: 7, fontFamily: FONT,
               opacity: canEdit ? 1 : 0.7
             }}
@@ -522,7 +522,7 @@ export const Settings = () => {
       </div>
 
       {hasStored === false && !loadError && (
-        <div style={{ padding: "9px 32px", borderBottom: `1px solid ${T.borderFaint}`, fontSize: 12, color: "var(--text-4)", fontFamily: FONT }}>
+        <div style={{ padding: "9px 32px", borderBottom: `1px solid ${T.borderFaint}`, fontSize: "var(--fs-xs)", color: "var(--text-4)", fontFamily: FONT }}>
           Nothing has been saved from this page yet, so these are the built-in values.
         </div>
       )}
@@ -531,11 +531,11 @@ export const Settings = () => {
         <div style={{ background: "var(--tint-warn)", borderBottom: "1px solid var(--warn-border)", padding: "16px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
             <Database size={15} style={{ color: "var(--warn-500)", flexShrink: 0 }} />
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-1)", fontFamily: FONT }}>
+            <span style={{ fontSize: "var(--fs-sm)", fontWeight: 600, color: "var(--text-1)", fontFamily: FONT }}>
               {storeMissing ? "Settings need one table in the database" : "Settings need access to that table"}
             </span>
           </div>
-          <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.55, color: "var(--text-2)", fontFamily: FONT, maxWidth: "78ch" }}>
+          <p style={{ margin: 0, fontSize: "var(--fs-sm)", lineHeight: 1.55, color: "var(--text-2)", fontFamily: FONT, maxWidth: "78ch" }}>
             {storeMissing
               ? "The profile is stored as one row of a table called business_settings, and that table is not in your database yet, so this page is showing its built-in values and cannot save."
               : "The table is there, but this role has not been granted access to it, so the database refuses both reading and saving."}
@@ -544,13 +544,13 @@ export const Settings = () => {
             then press Try again. It is safe to run twice.
           </p>
           {loadError && (
-            <p style={{ margin: 0, fontSize: 12, color: "var(--text-3)", fontFamily: FONT }}>
+            <p style={{ margin: 0, fontSize: "var(--fs-xs)", color: "var(--text-3)", fontFamily: FONT }}>
               The database said: {loadError}.{rawError ? ` Its words: ${rawError}` : ""}
             </p>
           )}
           <pre style={{
             margin: 0, padding: "12px 14px", background: T.bgBase, border: `1px solid ${T.borderSoft}`, borderRadius: 9,
-            fontSize: 11.5, lineHeight: 1.5, color: "var(--text-2)", fontFamily: MONO,
+            fontSize: "var(--fs-xs)", lineHeight: 1.5, color: "var(--text-2)", fontFamily: MONO,
             overflowX: "auto", whiteSpace: "pre", maxHeight: 230, WebkitOverflowScrolling: "touch",
           }}>
             {STORE_SQL}
@@ -558,13 +558,13 @@ export const Settings = () => {
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
               onClick={handleCopySql}
-              style={{ padding: "7px 14px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textSec, fontSize: 12.5, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, fontFamily: FONT }}
+              style={{ padding: "7px 14px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textSec, fontSize: "var(--fs-sm)", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, fontFamily: FONT }}
             >
               {sqlCopied ? <Check size={14} /> : <Copy size={14} />} {sqlCopied ? "Copied" : "Copy SQL"}
             </button>
             <button
               onClick={() => fetchSettings()}
-              style={{ padding: "7px 14px", background: "var(--warn-700)", border: "none", borderRadius: 8, color: "var(--on-brand)", fontSize: 12.5, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, fontFamily: FONT }}
+              style={{ padding: "7px 14px", background: "var(--warn-700)", border: "none", borderRadius: 8, color: "var(--on-brand)", fontSize: "var(--fs-sm)", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 7, fontFamily: FONT }}
             >
               <RefreshCw size={14} /> Try again
             </button>
@@ -575,12 +575,12 @@ export const Settings = () => {
       {loadError && !storeMissing && !storeBlocked && (
         <div className="cs-readonly cs-readonly--bad" style={{ background: "var(--tint-bad)", borderBottom: "1px solid var(--bad-border)", padding: "10px 32px", display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
           <AlertCircle size={14} style={{ color: "var(--bad-500)", flexShrink: 0 }} />
-          <span style={{ fontSize: 12.5, color: "var(--text-2)", fontFamily: FONT }}>
+          <span style={{ fontSize: "var(--fs-sm)", color: "var(--text-2)", fontFamily: FONT }}>
             Showing built-in values: the database would not return your saved settings ({loadError}).
           </span>
           <button
             onClick={() => fetchSettings()}
-            style={{ padding: "5px 12px", background: "var(--bad-700)", border: "none", borderRadius: 7, color: "var(--on-brand)", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}
+            style={{ padding: "5px 12px", background: "var(--bad-700)", border: "none", borderRadius: 7, color: "var(--on-brand)", fontSize: "var(--fs-xs)", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}
           >
             Try again
           </button>
@@ -590,16 +590,16 @@ export const Settings = () => {
       {!canEdit && !permLoading && (
         <div className="cs-readonly" style={{ background: "var(--tint-warn)", borderBottom: "1px solid var(--warn-border)", padding: "10px 32px", display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
           <Lock size={14} style={{ color: "var(--warn-500)", flexShrink: 0 }} />
-          <span style={{ fontSize: 12.5, color: "var(--text-2)", fontFamily: FONT }}>
+          <span style={{ fontSize: "var(--fs-sm)", color: "var(--text-2)", fontFamily: FONT }}>
             {permError
               ? "Your permissions could not be checked, so changes are held back."
               : "Your role does not allow changes to settings."}
           </span>
-          {!permError && <span style={{ fontSize: 12.5, color: T.textTert, fontFamily: FONT }}>Ask an administrator to grant edit access on the System Admin page.</span>}
+          {!permError && <span style={{ fontSize: "var(--fs-sm)", color: T.textTert, fontFamily: FONT }}>Ask an administrator to grant edit access on the System Admin page.</span>}
           {permError && (
             <button
               onClick={() => window.dispatchEvent(new Event("permissions-updated"))}
-              style={{ padding: "5px 12px", background: "var(--warn-700)", border: "none", borderRadius: 7, color: "var(--on-brand)", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}
+              style={{ padding: "5px 12px", background: "var(--warn-700)", border: "none", borderRadius: 7, color: "var(--on-brand)", fontSize: "var(--fs-xs)", fontWeight: 600, cursor: "pointer", fontFamily: FONT }}
             >
               Check again
             </button>
@@ -614,7 +614,7 @@ export const Settings = () => {
             className={`cs-tabbtn ${activeTab === tab.id ? "active" : ""}`}
             onClick={() => setActiveTab(tab.id)}
             style={{
-              display: "flex", alignItems: "center", gap: 8, padding: "14px 18px", fontSize: 13.5, fontWeight: 500,
+              display: "flex", alignItems: "center", gap: 8, padding: "14px 18px", fontSize: "var(--fs-md)", fontWeight: 500,
               cursor: "pointer", fontFamily: FONT, border: "none",
               color: activeTab === tab.id ? T.textPrimary : T.textTert, background: "transparent",
             }}
@@ -653,8 +653,8 @@ export const Settings = () => {
                     <Lock size={15} color={T.accent} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 600, fontFamily: FONT }}>Sheet Protection Password</div>
-                    <div style={{ fontSize: 12, color: T.textTert, marginTop: 2, fontFamily: MONO }}>{showPass ? config.sheetPass : "••••••"}</div>
+                    <div style={{ fontSize: "var(--fs-md)", fontWeight: 600, fontFamily: FONT }}>Sheet Protection Password</div>
+                    <div style={{ fontSize: "var(--fs-xs)", color: T.textTert, marginTop: 2, fontFamily: MONO }}>{showPass ? config.sheetPass : "••••••"}</div>
                   </div>
                 </div>
                 <button 
@@ -689,8 +689,8 @@ export const Settings = () => {
                 </div>
               </div>
               <div className="cs-card" style={{ padding: 20, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 10 }}>
-                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16, fontFamily: FONT }}>Pricing Rules</div>
-                <div className="cs-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, fontSize: 13, color: T.textSec, fontFamily: FONT }}>
+                <div style={{ fontSize: "var(--fs-lg)", fontWeight: 600, marginBottom: 16, fontFamily: FONT }}>Pricing Rules</div>
+                <div className="cs-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, fontSize: "var(--fs-sm)", color: T.textSec, fontFamily: FONT }}>
                   <div style={{ display: "flex", gap: 10, alignItems: "start" }}>
                     <div style={{ width: 6, height: 6, borderRadius: "50%", background: T.textTert, marginTop: 6, flexShrink: 0 }} />
                     <div><strong style={{ color: T.textPrimary }}>Standard Items:</strong> Calculated from Price List based on Service Type.</div>
@@ -711,7 +711,7 @@ export const Settings = () => {
           {activeTab === "loyalty" && (
             <div key="loyalty" className="cs-panel" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div className="cs-card" style={{ padding: 16, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 10 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10, fontFamily: FONT }}>
+                <div style={{ fontSize: "var(--fs-sm)", fontWeight: 600, marginBottom: 10, fontFamily: FONT }}>
                   Tier Assignment by Visit Count
                 </div>
                 {[
@@ -728,12 +728,12 @@ export const Settings = () => {
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <l.icon size={18} color={l.color} strokeWidth={1.9} aria-hidden />
                       <div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: l.color, fontFamily: FONT }}>{l.tier}</div>
-                        <div style={{ fontSize: 12, color: T.textTert, marginTop: 2, fontFamily: FONT }}>{l.visits}</div>
+                        <div style={{ fontSize: "var(--fs-md)", fontWeight: 600, color: l.color, fontFamily: FONT }}>{l.tier}</div>
+                        <div style={{ fontSize: "var(--fs-xs)", color: T.textTert, marginTop: 2, fontFamily: FONT }}>{l.visits}</div>
                       </div>
                     </div>
                     <div style={{
-                      padding: "4px 10px", borderRadius: 12, fontSize: 12, fontWeight: 600,
+                      padding: "4px 10px", borderRadius: 12, fontSize: "var(--fs-xs)", fontWeight: 600,
                       background: `${l.color}15`, color: l.color, fontFamily: FONT,
                     }}>
                       {l.discount}
@@ -750,9 +750,9 @@ export const Settings = () => {
                 <div className="cs-card cs-exportbtn" style={{ padding: 20, background: "var(--tint-accent)", border: "1px solid var(--brand-border)", borderRadius: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                     <Download size={18} color={T.accent} />
-                    <div style={{ fontSize: 15, fontWeight: 600, fontFamily: FONT }}>Export Data</div>
+                    <div style={{ fontSize: "var(--fs-lg)", fontWeight: 600, fontFamily: FONT }}>Export Data</div>
                   </div>
-                  <div style={{ fontSize: 13, color: T.textTert, marginBottom: 16, fontFamily: FONT }}>Client, order, and pricing data in JSON format.</div>
+                  <div style={{ fontSize: "var(--fs-sm)", color: T.textTert, marginBottom: 16, fontFamily: FONT }}>Client, order, and pricing data in JSON format.</div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button 
                       onClick={() => canEdit && handleExport('clients')}
@@ -765,7 +765,7 @@ export const Settings = () => {
                         border: `1px solid ${T.borderSoft}`, 
                         borderRadius: 8, 
                         color: canEdit ? T.textSec : T.textHint, 
-                        fontSize: 13, 
+                        fontSize: "var(--fs-sm)", 
                         cursor: canEdit ? "pointer" : "not-allowed", 
                         fontFamily: FONT 
                       }}
@@ -783,7 +783,7 @@ export const Settings = () => {
                         border: `1px solid ${T.borderSoft}`, 
                         borderRadius: 8, 
                         color: canEdit ? T.textSec : T.textHint, 
-                        fontSize: 13, 
+                        fontSize: "var(--fs-sm)", 
                         cursor: canEdit ? "pointer" : "not-allowed", 
                         fontFamily: FONT 
                       }}
@@ -795,9 +795,9 @@ export const Settings = () => {
                 <div className="cs-card cs-importbtn" style={{ padding: 20, background: "var(--tint-ok)", border: "1px solid var(--ok-border)", borderRadius: 12 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                     <Upload size={18} color={T.emerald} />
-                    <div style={{ fontSize: 15, fontWeight: 600, fontFamily: FONT }}>Import Data</div>
+                    <div style={{ fontSize: "var(--fs-lg)", fontWeight: 600, fontFamily: FONT }}>Import Data</div>
                   </div>
-                  <div style={{ fontSize: 13, color: T.textTert, marginBottom: 16, fontFamily: FONT }}>Restore data from previously exported files.</div>
+                  <div style={{ fontSize: "var(--fs-sm)", color: T.textTert, marginBottom: 16, fontFamily: FONT }}>Restore data from previously exported files.</div>
                   <button
                     onClick={() => {
                       if (!canEdit) return;
@@ -818,7 +818,7 @@ export const Settings = () => {
                       border: `1px solid ${canEdit ? T.emeraldBord : T.borderSoft}`, 
                       borderRadius: 8, 
                       color: canEdit ? T.emerald : T.textHint, 
-                      fontSize: 13, 
+                      fontSize: "var(--fs-sm)", 
                       fontWeight: 600, 
                       cursor: canEdit ? "pointer" : "not-allowed", 
                       fontFamily: FONT,
@@ -831,8 +831,8 @@ export const Settings = () => {
               </div>
               <div className="cs-card" style={{ padding: 16, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, fontFamily: FONT }}>Automatic Backups</div>
-                  <div style={{ fontSize: 12, color: T.textTert, marginTop: 2, fontFamily: FONT }}>Daily at 11:59 PM</div>
+                  <div style={{ fontSize: "var(--fs-md)", fontWeight: 600, fontFamily: FONT }}>Automatic Backups</div>
+                  <div style={{ fontSize: "var(--fs-xs)", color: T.textTert, marginTop: 2, fontFamily: FONT }}>Daily at 11:59 PM</div>
                 </div>
                 <div
                   style={toggleStyle(config.autoBackup)}

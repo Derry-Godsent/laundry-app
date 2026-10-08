@@ -34,7 +34,7 @@ const Toast = ({ msg, type, onClose }: { msg: string; type: 'success' | 'error';
       borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12,
       boxShadow:"0 14px 36px rgba(0,0,0,0.45)", animation: "fadeInUp 0.3s ease both" }}>
       {type==='error' ? <AlertCircle size={15} color={T.ember}/> : <Check size={15} color={T.emerald}/>}
-      <span style={{ fontSize:14, color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
+      <span style={{ fontSize: "var(--fs-md)", color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
       <button onClick={onClose} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><X size={14}/></button>
     </div>
   );
@@ -186,7 +186,7 @@ export const Receipt = () => {
           .receipt-card { margin: 0 12px !important; }
           .receipt-header, .receipt-body, .receipt-summary, .receipt-footer { padding: 20px !important; }
           .receipt-grid { grid-template-columns: 1fr !important; }
-          .receipt-items-grid { grid-template-columns: 2fr 1fr 1fr 1fr !important; font-size: 12px !important; }
+          .receipt-items-grid { grid-template-columns: 2fr 1fr 1fr 1fr !important; font-size: var(--fs-xs) !important; }
         }
         @media (max-width: 480px) {
           .receipt-items-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
@@ -196,7 +196,7 @@ export const Receipt = () => {
         /* Screen only: none of this may reach the printed receipt. */
         @media screen and (max-width: 900px) {
           .top-bar { padding: 16px var(--page-pad-x) !important; }
-          .top-bar select { width: 100% !important; min-width: 0 !important; font-size: 16px !important; min-height: var(--tap-min); }
+          .top-bar select { width: 100% !important; min-width: 0 !important; font-size: var(--fs-lg) !important; min-height: var(--tap-min); }
           .top-bar button { min-height: var(--tap-min); }
           .receipt-stage { padding: 18px var(--page-pad-x) 40px !important; }
           .receipt-card { margin: 0 !important; }
@@ -218,18 +218,18 @@ export const Receipt = () => {
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <button 
             onClick={() => navigate(-1)} 
-            style={{ display: "flex", alignItems: "center", gap: 8, background: "transparent", border: "none", color: T.textSec, cursor: "pointer", fontFamily: FONT, fontSize: 14 }}
+            style={{ display: "flex", alignItems: "center", gap: 8, background: "transparent", border: "none", color: T.textSec, cursor: "pointer", fontFamily: FONT, fontSize: "var(--fs-md)" }}
           >
             <ArrowLeft size={18} /> Back
           </button>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Receipt Generator</h2>
+          <h2 style={{ margin: 0, fontSize: "var(--fs-xl)", fontWeight: 700 }}>Receipt Generator</h2>
         </div>
         
         <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
           <select 
             value={selectedOrderId} 
             onChange={e => setSelectedOrderId(e.target.value)}
-            style={{ padding: "10px 14px", background: T.bgRaised, border: `1px solid ${T.borderMid}`, borderRadius: 8, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT, minWidth: 260, cursor: "pointer" }}
+            style={{ padding: "10px 14px", background: T.bgRaised, border: `1px solid ${T.borderMid}`, borderRadius: 8, color: T.textPrimary, fontSize: "var(--fs-md)", outline: "none", fontFamily: FONT, minWidth: 260, cursor: "pointer" }}
           >
             <option value="">Select an order to print...</option>
             {orders.map(o => (
@@ -243,7 +243,7 @@ export const Receipt = () => {
             style={{ 
               padding: "10px 18px", 
               background: (selectedOrderId && canEdit) ? T.accent : T.textHint, 
-              border: "none", borderRadius: 8, color: "#fff", fontSize: 14, fontWeight: 600, 
+              border: "none", borderRadius: 8, color: "#fff", fontSize: "var(--fs-md)", fontWeight: 600, 
               cursor: (selectedOrderId && canEdit) ? "pointer" : "not-allowed", 
               display: "flex", alignItems: "center", gap: 6, fontFamily: FONT,
               opacity: (selectedOrderId && canEdit) ? 1 : 0.7
@@ -276,8 +276,8 @@ export const Receipt = () => {
       ) : !receipt && orders.length === 0 ? (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 20px", color: T.textTert, fontFamily: FONT }}>
           <Package size={48} style={{ opacity: 0.3, marginBottom: 16 }} />
-          <div style={{ fontSize: 16, fontWeight: 600, color: T.textSec }}>No orders found</div>
-          <div style={{ fontSize: 13, marginTop: 8, textAlign: "center", maxWidth: 400 }}>
+          <div style={{ fontSize: "var(--fs-lg)", fontWeight: 600, color: T.textSec }}>No orders found</div>
+          <div style={{ fontSize: "var(--fs-sm)", marginTop: 8, textAlign: "center", maxWidth: 400 }}>
             Create your first order in the <strong>New Order</strong> page, then come back here to generate receipts.
           </div>
         </div>
@@ -293,30 +293,30 @@ export const Receipt = () => {
               borderRadius: 16, overflow: "hidden", boxShadow: "var(--shadow-modal)" 
             }}>
               <div className="receipt-header" style={{ padding: "32px", textAlign: "center", borderBottom: `1px solid ${T.borderFaint}` }}>
-                <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 8, textTransform: "uppercase" }}>{BRAND.name}</div>
-                <div style={{ fontSize: 13, color: T.textTert, lineHeight: 1.6 }}>
+                <div style={{ fontSize: "var(--fs-2xl)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 8, textTransform: "uppercase" }}>{BRAND.name}</div>
+                <div style={{ fontSize: "var(--fs-sm)", color: T.textTert, lineHeight: 1.6 }}>
                   Kwadaso-Ohwimase, Kumasi • Tel: +233 534 134 809<br/>
                   chapmanprestigelimited@gmail.com
                 </div>
-                <div style={{ marginTop: 16, padding: "6px 14px", background: T.bgElevated, borderRadius: 20, fontSize: 11, color: T.textSec, display: "inline-block", letterSpacing: "0.08em", fontWeight: 700 }}>
+                <div style={{ marginTop: 16, padding: "6px 14px", background: T.bgElevated, borderRadius: 20, fontSize: "var(--fs-2xs)", color: T.textSec, display: "inline-block", letterSpacing: "0.08em", fontWeight: 700 }}>
                   OFFICIAL RECEIPT
                 </div>
               </div>
 
               <div className="receipt-body" style={{ padding: "24px 32px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, borderBottom: `1px solid ${T.borderFaint}` }}>
                 <div>
-                  <div style={{ fontSize: 10, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 4 }}>Order ID</div>
-                  <div style={{ fontSize: 15, fontWeight: 600, fontFamily: MONO, color: T.accent }}>{receipt.order_id}</div>
+                  <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 4 }}>Order ID</div>
+                  <div style={{ fontSize: "var(--fs-lg)", fontWeight: 600, fontFamily: MONO, color: T.accent }}>{receipt.order_id}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 10, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 4 }}>Date</div>
-                  <div style={{ fontSize: 15, fontWeight: 600 }}>{safeDate}</div>
+                  <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 4 }}>Date</div>
+                  <div style={{ fontSize: "var(--fs-lg)", fontWeight: 600 }}>{safeDate}</div>
                 </div>
                 <div style={{ gridColumn: "span 2" }}>
-                  <div style={{ fontSize: 10, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 4 }}>Client</div>
-                  <div style={{ fontSize: 15, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, marginBottom: 4 }}>Client</div>
+                  <div style={{ fontSize: "var(--fs-lg)", fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
                     {receipt.clients?.name || "Walk-in"}
-                    <span style={{ fontSize: 10, padding: "2px 6px", background: T.goldDim, color: T.gold, borderRadius: 4, fontWeight: 600 }}>
+                    <span style={{ fontSize: "var(--fs-2xs)", padding: "2px 6px", background: T.goldDim, color: T.gold, borderRadius: 4, fontWeight: 600 }}>
                       {receipt.clients?.tier || "Standard"}
                     </span>
                   </div>
@@ -324,13 +324,13 @@ export const Receipt = () => {
               </div>
 
               <div className="receipt-items" style={{ padding: "24px 32px" }}>
-                <div className="receipt-items-grid" style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr", gap: 12, paddingBottom: 10, borderBottom: `1px solid ${T.borderSoft}`, fontSize: 10, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>
+                <div className="receipt-items-grid" style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr", gap: 12, paddingBottom: 10, borderBottom: `1px solid ${T.borderSoft}`, fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>
                   <div>Item</div><div style={{ textAlign: "center" }}>Qty</div><div style={{ textAlign: "right" }}>Unit</div><div style={{ textAlign: "right" }}>Total</div>
                 </div>
                 {receipt.order_items?.map((item: any, i: number) => {
                   const lineTotal = Number(item.quantity || 1) * Number(item.unit_price || 0);
                   return (
-                    <div key={i} style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr", gap: 12, padding: "10px 0", borderBottom: `1px solid ${T.borderFaint}`, fontSize: 14 }}>
+                    <div key={i} style={{ display: "grid", gridTemplateColumns: "3fr 1fr 1fr 1fr", gap: 12, padding: "10px 0", borderBottom: `1px solid ${T.borderFaint}`, fontSize: "var(--fs-md)" }}>
                       <div style={{ fontWeight: 500 }}>{item.services?.name || "Service"}</div>
                       <div style={{ textAlign: "center", color: T.textSec }}>{item.quantity}</div>
                       <div style={{ textAlign: "right", color: T.textSec, fontFamily: MONO }}>GH₵{Number(item.unit_price || 0).toFixed(2)}</div>
@@ -342,42 +342,42 @@ export const Receipt = () => {
 
               <div className="receipt-summary" style={{ padding: "24px 32px", background: T.bgSurface, borderTop: `1px solid ${T.borderFaint}` }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.textSec }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--fs-sm)", color: T.textSec }}>
                     <span>Subtotal</span><span style={{ fontFamily: MONO }}>GH₵{Number(subtotal).toFixed(2)}</span>
                   </div>
                   {expressSurcharge > 0 && (
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.gold }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--fs-sm)", color: T.gold }}>
                       <span>Express Surcharge</span><span style={{ fontFamily: MONO }}>+GH₵{Number(expressSurcharge).toFixed(2)}</span>
                     </div>
                   )}
                   {Number(receipt?.delivery_fee || 0) > 0 && (
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.textSec }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--fs-sm)", color: T.textSec }}>
                       <span>Delivery</span><span style={{ fontFamily: MONO }}>+GH₵{Number(receipt.delivery_fee || 0).toFixed(2)}</span>
                     </div>
                   )}
                   {discountAmount > 0 && (
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: T.emerald }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--fs-sm)", color: T.emerald }}>
                       <span>Discount ({Number(receipt?.discount_percent || 0)}%)</span><span style={{ fontFamily: MONO }}>-GH₵{Number(discountAmount).toFixed(2)}</span>
                     </div>
                   )}
                   <div style={{ height: 1, background: T.borderSoft, margin: "6px 0" }} />
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 18, fontWeight: 700 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--fs-xl)", fontWeight: 700 }}>
                     <span>TOTAL DUE</span><span style={{ fontFamily: MONO }}>GH₵{Number(totalDue).toFixed(2)}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: T.textSec }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--fs-md)", color: T.textSec }}>
                     <span>Paid</span><span style={{ fontFamily: MONO }}>GH₵{Number(receipt?.amount_paid || 0).toFixed(2)}</span>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, color: balance > 0 ? T.ember : T.emerald, fontWeight: 600 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "var(--fs-lg)", color: balance > 0 ? T.ember : T.emerald, fontWeight: 600 }}>
                     <span>BALANCE</span><span style={{ fontFamily: MONO }}>GH₵{Number(balance).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
 
               <div className="receipt-footer" style={{ padding: "24px 32px", textAlign: "center", borderTop: `1px solid ${T.borderFaint}` }}>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Thank you for choosing Chapman Prestige Limited.</div>
-                <div style={{ fontSize: 11, color: T.textTert }}>Official receipt • Keep for records</div>
+                <div style={{ fontSize: "var(--fs-md)", fontWeight: 600, marginBottom: 6 }}>Thank you for choosing Chapman Prestige Limited.</div>
+                <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert }}>Official receipt • Keep for records</div>
                 {balance > 0 && (
-                  <div style={{ marginTop: 14, padding: 10, background: T.emberDim, borderRadius: 8, fontSize: 12, color: T.ember, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <div style={{ marginTop: 14, padding: 10, background: T.emberDim, borderRadius: 8, fontSize: "var(--fs-xs)", color: T.ember, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                     <AlertCircle size={14} /> Balance of GH₵{Number(balance).toFixed(2)} due on pickup/delivery
                   </div>
                 )}

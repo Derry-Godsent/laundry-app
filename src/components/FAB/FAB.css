@@ -71,7 +71,7 @@
   border: 1px solid var(--line-soft);
   background: var(--ink-hover);
   color: var(--text-1);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 550;
   white-space: nowrap;
   box-shadow: var(--shadow-modal);
@@ -104,7 +104,7 @@
 }
 
 @media (max-width: 480px) {
-  .fab-item { font-size: 12.5px; }
+  .fab-item { font-size: var(--fs-sm); }
 }
 
 @media (prefers-reduced-motion: reduce) {

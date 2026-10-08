@@ -118,7 +118,7 @@ const GlobalStyle = () => (
       .pay-header-row button { width: 100%; justify-content: center; min-height: var(--tap-min); }
       .pay-controls-row { padding: 12px var(--page-pad-x) !important; flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
       .pay-searchbox { width: 100% !important; }
-      .pay-search-inp { font-size: 16px !important; }
+      .pay-search-inp { font-size: var(--fs-lg) !important; }
       .pay-body { padding: 16px var(--page-pad-x) 40px !important; }
 
       /* Two count tiles per row instead of four squeezed ones. */
@@ -130,7 +130,7 @@ const GlobalStyle = () => (
       .pay-receipt-btn { min-height: var(--tap-min); width: 100%; justify-content: center; }
 
       /* 16px keeps iOS from zooming the page in on focus and leaving it zoomed. */
-      .pay-input, .pay-select { font-size: 16px !important; min-height: var(--tap-min); }
+      .pay-input, .pay-select { font-size: var(--fs-lg) !important; min-height: var(--tap-min); }
 
       /* The record-payment dialog is sized to the visible area and rises from
          the bottom edge, so a zoomed page or an open keyboard cannot push the
@@ -170,14 +170,14 @@ const GlobalStyle = () => (
         border: none;
         text-align: left;
         position: relative;
-        font-size: 13.5px;
+        font-size: var(--fs-md);
       }
       .pay-table-row td::before {
         content: attr(data-label);
         position: absolute;
         left: 0;
         top: 8px;
-        font-size: 10px;
+        font-size: var(--fs-2xs);
         font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
@@ -224,7 +224,7 @@ const Toast = ({ msg, type, onClose }: { msg: string; type: 'success' | 'error';
       borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12,
       boxShadow:"0 14px 36px rgba(0,0,0,0.45)", animation: "fadeInUp 0.3s ease both" }}>
       {type==='error' ? <AlertCircle size={15} color={T.ember}/> : <Check size={15} color={T.emerald}/>}
-      <span style={{ fontSize:14, color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
+      <span style={{ fontSize: "var(--fs-md)", color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
       <button onClick={onClose} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><X size={14}/></button>
     </div>
   );
@@ -306,8 +306,8 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
           position: "sticky", top: 0, zIndex: 2,
         }}>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: T.textPrimary, fontFamily: DISPLAY, letterSpacing: "-0.01em" }}>Record Payment</div>
-            <div style={{ fontSize: 11.5, color: T.textTert, marginTop: 4, fontFamily: FONT }}>Select an outstanding order to pay</div>
+            <div style={{ fontSize: "var(--fs-xl)", fontWeight: 700, color: T.textPrimary, fontFamily: DISPLAY, letterSpacing: "-0.01em" }}>Record Payment</div>
+            <div style={{ fontSize: "var(--fs-xs)", color: T.textTert, marginTop: 4, fontFamily: FONT }}>Select an outstanding order to pay</div>
           </div>
           <button className="pay-close-btn" onClick={onClose} style={{ width: 32, height: 32, borderRadius: 9, border: `1px solid ${T.borderSoft}`, background: "transparent", color: T.textSec, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <X size={15} />
@@ -316,12 +316,12 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
 
         <div style={{ padding: "24px 26px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Select Order</div>
+            <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Select Order</div>
             <select
               className="pay-select"
               value={selectedOrderId}
               onChange={(e) => setSelectedOrderId(e.target.value)}
-              style={{ width: "100%", padding: "11px 13px", background: T.bgSurface, border: `1px solid ${T.borderMid}`, borderRadius: 9, color: T.textPrimary, fontSize: 13.5, outline: "none", fontFamily: FONT, transition: "border-color .16s ease, box-shadow .16s ease" }}
+              style={{ width: "100%", padding: "11px 13px", background: T.bgSurface, border: `1px solid ${T.borderMid}`, borderRadius: 9, color: T.textPrimary, fontSize: "var(--fs-md)", outline: "none", fontFamily: FONT, transition: "border-color .16s ease, box-shadow .16s ease" }}
             >
               <option value="">Choose an order with a balance...</option>
               {outstandingOrders.map(o => (
@@ -335,20 +335,20 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
           {selectedOrder && (
             <div className="pay-modal-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
               <div>
-                <div style={{ fontSize: 10, color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Client</div>
-                <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textPrimary, fontSize: 14, fontFamily: FONT, fontWeight: 500 }}>
+                <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Client</div>
+                <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textPrimary, fontSize: "var(--fs-md)", fontFamily: FONT, fontWeight: 500 }}>
                   {selectedOrder.client}
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 10, color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Total Due</div>
-                <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textPrimary, fontSize: 14, fontFamily: MONO, fontWeight: 600 }}>
+                <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Total Due</div>
+                <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textPrimary, fontSize: "var(--fs-md)", fontFamily: MONO, fontWeight: 600 }}>
                   GH₵{selectedOrder.total}
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 10, color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Remaining</div>
-                <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.emberBord}`, borderRadius: 9, color: T.ember, fontSize: 14, fontFamily: MONO, fontWeight: 600 }}>
+                <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 5, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Remaining</div>
+                <div style={{ padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.emberBord}`, borderRadius: 9, color: T.ember, fontSize: "var(--fs-md)", fontFamily: MONO, fontWeight: 600 }}>
                   GH₵{selectedOrder.balance}
                 </div>
               </div>
@@ -357,7 +357,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
 
           <div className="pay-modal-row pay-modal-row--2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div>
-              <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Amount (GH₵)</div>
+              <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Amount (GH₵)</div>
               <input
                 className="pay-input"
                 type="number"
@@ -367,18 +367,18 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
                 style={{
                   width: "100%", padding: "11px 13px", background: T.bgSurface,
                   border: `1px solid ${T.borderMid}`,
-                  borderRadius: 9, color: T.gold, fontSize: 14.5, outline: "none", fontFamily: MONO, fontWeight: 600,
+                  borderRadius: 9, color: T.gold, fontSize: "var(--fs-md)", outline: "none", fontFamily: MONO, fontWeight: 600,
                   transition: "border-color .16s ease, box-shadow .16s ease",
                 }}
               />
             </div>
             <div>
-              <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Payment Method</div>
+              <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Payment Method</div>
               <select
                 className="pay-select"
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
-                style={{ width: "100%", padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderMid}`, borderRadius: 9, color: T.textPrimary, fontSize: 13.5, outline: "none", fontFamily: FONT, transition: "border-color .16s ease, box-shadow .16s ease" }}
+                style={{ width: "100%", padding: "10px 13px", background: T.bgSurface, border: `1px solid ${T.borderMid}`, borderRadius: 9, color: T.textPrimary, fontSize: "var(--fs-md)", outline: "none", fontFamily: FONT, transition: "border-color .16s ease, box-shadow .16s ease" }}
               >
                 <option>Cash</option>
                 <option>Mobile Money</option>
@@ -388,19 +388,19 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Reference / Note (Optional)</div>
+            <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 7, fontFamily: FONT, textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>Reference / Note (Optional)</div>
             <input
               className="pay-input"
               value={ref}
               onChange={(e) => setRef(e.target.value)}
               placeholder="e.g. MTN-8821 or Cash drawer"
-              style={{ width: "100%", padding: "11px 13px", background: T.bgSurface, border: `1px solid ${T.borderMid}`, borderRadius: 9, color: T.textPrimary, fontSize: 14, outline: "none", fontFamily: FONT, transition: "border-color .16s ease, box-shadow .16s ease" }}
+              style={{ width: "100%", padding: "11px 13px", background: T.bgSurface, border: `1px solid ${T.borderMid}`, borderRadius: 9, color: T.textPrimary, fontSize: "var(--fs-md)", outline: "none", fontFamily: FONT, transition: "border-color .16s ease, box-shadow .16s ease" }}
             />
           </div>
         </div>
 
         <div style={{ padding: "16px 26px", borderTop: `1px solid ${T.borderFaint}`, display: "flex", justifyContent: "flex-end", gap: 10, position: "sticky", bottom: 0, background: T.bgRaised }}>
-          <button onClick={onClose} className="pay-ghost-btn" style={{ padding: "9px 20px", background: "transparent", border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textSec, fontSize: 13.5, fontWeight: 500, cursor: "pointer", fontFamily: FONT }}>
+          <button onClick={onClose} className="pay-ghost-btn" style={{ padding: "9px 20px", background: "transparent", border: `1px solid ${T.borderSoft}`, borderRadius: 9, color: T.textSec, fontSize: "var(--fs-md)", fontWeight: 500, cursor: "pointer", fontFamily: FONT }}>
             Cancel
           </button>
           <button
@@ -409,7 +409,7 @@ const PaymentModal = ({ onClose, onSave, outstandingOrders }: {
             disabled={saving || !selectedOrderId || !amount}
             style={{
               padding: "9px 22px", background: "var(--ok-700)", border: "none", borderRadius: 9, color: "var(--on-ok)",
-              fontSize: 13.5, fontWeight: 700, cursor: saving || !selectedOrderId || !amount ? "default" : "pointer", display: "flex", alignItems: "center", gap: 8,
+              fontSize: "var(--fs-md)", fontWeight: 700, cursor: saving || !selectedOrderId || !amount ? "default" : "pointer", display: "flex", alignItems: "center", gap: 8,
               fontFamily: FONT, opacity: saving || !selectedOrderId || !amount ? 0.75 : 1,
             }}
           >
@@ -428,8 +428,8 @@ const StatCard = ({ label, value, prefix = "", icon, delay, isCurrency = true }:
   return (
     <div className="pay-stat" style={{ padding: "18px 26px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", animationDelay: `${delay}ms`, position: "relative", overflow: "hidden" }}>
       <div>
-        <div style={{ fontSize: 10.5, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>{label}</div>
-        <div style={{ fontSize: 27, fontWeight: 600, color: T.textPrimary, letterSpacing: "-0.03em", lineHeight: 1, marginTop: 8, fontFamily: DISPLAY }}>
+        <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>{label}</div>
+        <div style={{ fontSize: "var(--fs-3xl)", fontWeight: 600, color: T.textPrimary, letterSpacing: "-0.03em", lineHeight: 1, marginTop: 8, fontFamily: DISPLAY }}>
           {isCurrency ? `${prefix}${animated.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : Math.round(animated)}
         </div>
       </div>
@@ -586,7 +586,7 @@ export const Payments = () => {
         <div style={{ width: 44, height: 44, borderRadius: 12, background: T.bgElevated, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <CreditCard size={22} color={T.accent} className="pay-orb" style={{ animation: "spin 0.8s linear infinite" }} />
         </div>
-        <div style={{ color: T.textTert, fontSize: 13, fontFamily: FONT }}>{isOffline ? "Waiting for connection…" : "Loading payments…"}</div>
+        <div style={{ color: T.textTert, fontSize: "var(--fs-sm)", fontFamily: FONT }}>{isOffline ? "Waiting for connection…" : "Loading payments…"}</div>
       </div>
     </div>
   );
@@ -602,12 +602,12 @@ export const Payments = () => {
         <div style={{ position: "relative", zIndex: 1 }}>
           <div className="pay-header-row" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "22px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 600, color: T.textPrimary, letterSpacing: "-0.02em", fontFamily: DISPLAY }}>Payments &amp; Balances</div>
-              <div style={{ fontSize: 12.5, color: T.textTert, marginTop: 5, fontFamily: FONT, display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ fontSize: "var(--fs-2xl)", fontWeight: 600, color: T.textPrimary, letterSpacing: "-0.02em", fontFamily: DISPLAY }}>Payments &amp; Balances</div>
+              <div style={{ fontSize: "var(--fs-sm)", color: T.textTert, marginTop: 5, fontFamily: FONT, display: "flex", alignItems: "center", gap: 8 }}>
                 Track collections, outstanding balances, and payment history
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 5, marginLeft: 4 }}>
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: !isOffline && !syncError ? T.emerald : !isOffline ? T.gold : T.ember, animation: !isOffline && !syncError ? "ringPulse 2s infinite" : "pulseDot 1.4s infinite", color: !isOffline && !syncError ? T.emerald : !isOffline ? T.gold : T.ember }} />
-                  <span style={{ fontSize: 11, color: T.textHint, fontFamily: MONO }}>{!isOffline && !syncError ? "live" : !isOffline ? "sync issue" : "offline"}</span>
+                  <span style={{ fontSize: "var(--fs-2xs)", color: T.textHint, fontFamily: MONO }}>{!isOffline && !syncError ? "live" : !isOffline ? "sync issue" : "offline"}</span>
                 </span>
               </div>
             </div>
@@ -615,7 +615,7 @@ export const Payments = () => {
               onClick={() => canEdit && setShowModal(true)} 
               disabled={!canEdit}
               className="pay-primary-btn" 
-              style={{ padding: "11px 22px", background: canEdit ? T.emerald : T.bgElevated, border: canEdit ? "none" : `1px solid ${T.borderSoft}`, borderRadius: 10, color: canEdit ? "var(--on-ok)" : T.textTert, fontSize: 14, fontWeight: 600, cursor: canEdit ? "pointer" : "not-allowed", display: "flex", alignItems: "center", gap: 8, fontFamily: FONT, opacity: canEdit ? 1 : 0.7 }}
+              style={{ padding: "11px 22px", background: canEdit ? T.emerald : T.bgElevated, border: canEdit ? "none" : `1px solid ${T.borderSoft}`, borderRadius: 10, color: canEdit ? "var(--on-ok)" : T.textTert, fontSize: "var(--fs-md)", fontWeight: 600, cursor: canEdit ? "pointer" : "not-allowed", display: "flex", alignItems: "center", gap: 8, fontFamily: FONT, opacity: canEdit ? 1 : 0.7 }}
             >
               <Plus size={16} /> {canEdit ? "Record Payment" : "View Only"}
             </button>
@@ -634,7 +634,7 @@ export const Payments = () => {
           <div className="pay-controls-row" style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderFaint}`, padding: "14px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20 }}>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {["All", "Paid", "Partial", "Pending"].map(st => (
-                <button key={st} className="pay-filter-btn" onClick={() => setStatusFilter(st)} style={{ padding: "7px 15px", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: FONT, border: `1px solid ${statusFilter === st ? T.accentBord : "transparent"}`, background: statusFilter === st ? T.accentDim : "transparent", color: statusFilter === st ? "var(--brand-400)" : T.textTert, boxShadow: statusFilter === st ? `0 0 0 1px ${T.accentBord} inset` : "none" }}>
+                <button key={st} className="pay-filter-btn" onClick={() => setStatusFilter(st)} style={{ padding: "7px 15px", borderRadius: 8, fontSize: "var(--fs-sm)", fontWeight: 500, cursor: "pointer", fontFamily: FONT, border: `1px solid ${statusFilter === st ? T.accentBord : "transparent"}`, background: statusFilter === st ? T.accentDim : "transparent", color: statusFilter === st ? "var(--brand-400)" : T.textTert, boxShadow: statusFilter === st ? `0 0 0 1px ${T.accentBord} inset` : "none" }}>
                   {st}
                 </button>
               ))}
@@ -656,16 +656,16 @@ export const Payments = () => {
                   <div style={{ width: 64, height: 64, borderRadius: "50%", background: T.bgElevated, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <CreditCard size={28} color={T.textHint} />
                   </div>
-                  <span style={{ fontSize: 14, fontFamily: FONT }}>{syncError ? "Connection issue. Retry to load payments" : transactions.length === 0 ? "No payments recorded yet" : "No transactions match your filters"}</span>
+                  <span style={{ fontSize: "var(--fs-md)", fontFamily: FONT }}>{syncError ? "Connection issue. Retry to load payments" : transactions.length === 0 ? "No payments recorded yet" : "No transactions match your filters"}</span>
                 </div>
               ) : (
                 <>
                   <div className="pay-table-view" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, overflow: "hidden", boxShadow: "var(--shadow-modal)" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--fs-md)" }}>
                       <thead>
                         <tr style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderSoft}` }}>
                           {["Payment ID", "Order", "Client", "Total", "Paid", "Balance", "Status", "Method", "Date", ""].map(h => (
-                            <th key={h} style={{ padding: "14px 20px", textAlign: "left", fontSize: 11, fontWeight: 600, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: FONT }}>{h}</th>
+                            <th key={h} style={{ padding: "14px 20px", textAlign: "left", fontSize: "var(--fs-2xs)", fontWeight: 600, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: FONT }}>{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -681,15 +681,15 @@ export const Payments = () => {
                               <td data-label="Paid" style={{ padding: "16px 20px", fontFamily: MONO, color: T.emerald }}>GH₵{t.paid}</td>
                               <td data-label="Balance" style={{ padding: "16px 20px", fontFamily: MONO, color: t.balance > 0 ? T.ember : T.textTert }}>GH₵{t.balance}</td>
                               <td data-label="Status" style={{ padding: "16px 20px" }}>
-                                <span style={{ padding: "4px 10px", borderRadius: 100, fontSize: 11.5, fontWeight: 600, background: s.bg, color: s.color, border: `1px solid ${s.border}`, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                <span style={{ padding: "4px 10px", borderRadius: 100, fontSize: "var(--fs-xs)", fontWeight: 600, background: s.bg, color: s.color, border: `1px solid ${s.border}`, display: "inline-flex", alignItems: "center", gap: 6 }}>
                                   {t.status === "Pending" && <span style={{ width: 5, height: 5, borderRadius: "50%", background: s.color, animation: "pulseDot 1.3s infinite" }} />}
                                   {t.status}
                                 </span>
                               </td>
-                              <td data-label="Method" style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{t.method}</td>
-                              <td data-label="Date" style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{t.date}</td>
+                              <td data-label="Method" style={{ padding: "16px 20px", fontSize: "var(--fs-sm)", color: T.textSec }}>{t.method}</td>
+                              <td data-label="Date" style={{ padding: "16px 20px", fontSize: "var(--fs-sm)", color: T.textSec }}>{t.date}</td>
                               <td data-label="Receipt" style={{ padding: "16px 20px" }}>
-                                <button className="pay-receipt-btn" style={{ padding: "6px 12px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 7, color: T.textSec, fontSize: 12, cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", gap: 5 }} onClick={() => navigate(`/receipt?order=${t.orderId}`)}>
+                                <button className="pay-receipt-btn" style={{ padding: "6px 12px", background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 7, color: T.textSec, fontSize: "var(--fs-xs)", cursor: "pointer", fontFamily: FONT, display: "flex", alignItems: "center", gap: 5 }} onClick={() => navigate(`/receipt?order=${t.orderId}`)}>
                                   View Receipt <ChevronRight size={12} />
                                 </button>
                               </td>
@@ -707,23 +707,23 @@ export const Payments = () => {
                         <div key={t.id} className="pay-card" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, padding: 16, animationDelay: `${Math.min(i, 10) * 35}ms` }} onClick={() => navigate(`/receipt?order=${t.orderId}`)}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                             <div>
-                              <div style={{ fontFamily: MONO, color: T.accent, fontSize: 13, fontWeight: 500 }}>{t.id}</div>
-                              <div style={{ fontWeight: 600, fontSize: 15, marginTop: 3 }}>{t.client}</div>
-                              <div style={{ fontFamily: MONO, color: T.textTert, fontSize: 12, marginTop: 2 }}>{t.orderId}</div>
+                              <div style={{ fontFamily: MONO, color: T.accent, fontSize: "var(--fs-sm)", fontWeight: 500 }}>{t.id}</div>
+                              <div style={{ fontWeight: 600, fontSize: "var(--fs-lg)", marginTop: 3 }}>{t.client}</div>
+                              <div style={{ fontFamily: MONO, color: T.textTert, fontSize: "var(--fs-xs)", marginTop: 2 }}>{t.orderId}</div>
                             </div>
-                            <span style={{ padding: "4px 10px", borderRadius: 100, fontSize: 11, fontWeight: 600, background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>{t.status}</span>
+                            <span style={{ padding: "4px 10px", borderRadius: 100, fontSize: "var(--fs-2xs)", fontWeight: 600, background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>{t.status}</span>
                           </div>
                           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 14, paddingTop: 14, borderTop: `1px solid ${T.borderFaint}` }}>
                             <div>
-                              <div style={{ fontSize: 10.5, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.06em" }}>Paid / Total</div>
-                              <div style={{ fontFamily: MONO, fontSize: 14, marginTop: 3 }}><span style={{ color: T.emerald }}>GH₵{t.paid}</span> <span style={{ color: T.textHint }}>/ GH₵{t.total}</span></div>
+                              <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", letterSpacing: "0.06em" }}>Paid / Total</div>
+                              <div style={{ fontFamily: MONO, fontSize: "var(--fs-md)", marginTop: 3 }}><span style={{ color: T.emerald }}>GH₵{t.paid}</span> <span style={{ color: T.textHint }}>/ GH₵{t.total}</span></div>
                             </div>
                             <div style={{ textAlign: "right" }}>
-                              <div style={{ fontSize: 10.5, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.06em" }}>Balance</div>
-                              <div style={{ fontFamily: MONO, fontSize: 14, marginTop: 3, color: t.balance > 0 ? T.ember : T.textTert }}>GH₵{t.balance}</div>
+                              <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: "uppercase", letterSpacing: "0.06em" }}>Balance</div>
+                              <div style={{ fontFamily: MONO, fontSize: "var(--fs-md)", marginTop: 3, color: t.balance > 0 ? T.ember : T.textTert }}>GH₵{t.balance}</div>
                             </div>
                           </div>
-                          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 12, color: T.textSec }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: "var(--fs-xs)", color: T.textSec }}>
                             <span>{t.method}</span>
                             <span>{t.date}</span>
                           </div>

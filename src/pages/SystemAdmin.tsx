@@ -80,7 +80,7 @@ const Toast = ({ msg, type, onClose }: any) => {
       background: type==='error' ? T.emberDim : T.emeraldDim, border:`1px solid ${type==='error' ? T.emberBord : T.emeraldBord}`,
       borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12, boxShadow:"0 14px 36px rgba(0,0,0,0.45)", animation: "fadeInUp 0.3s ease both" }}>
       {type==='error' ? <AlertTriangle size={15} color={T.ember}/> : <Check size={15} color={T.emerald}/>}
-      <span style={{ fontSize:14, color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
+      <span style={{ fontSize: "var(--fs-md)", color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
       <button onClick={onClose} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><X size={14}/></button>
     </div>
   );
@@ -308,24 +308,24 @@ export const SystemAdmin = () => {
           .spin { animation: spin 0.8s linear infinite; }
           .sys-admin-root * { box-sizing: border-box; }
           .sys-tabs { display: flex; gap: 4px; background: ${T.bgRaised}; padding: 4px; border-radius: 10px; border: 1px solid ${T.borderSoft}; flex-wrap: wrap; }
-          .sys-tab { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; color: ${T.textSec}; cursor: pointer; transition: all 0.18s ease; display: flex; align-items: center; gap: 8px; border: none; background: transparent; font-family: ${FONT}; }
+          .sys-tab { padding: 8px 16px; border-radius: 7px; font-size: var(--fs-sm); font-weight: 600; color: ${T.textSec}; cursor: pointer; transition: all 0.18s ease; display: flex; align-items: center; gap: 8px; border: none; background: transparent; font-family: var(--font-ui); }
           .sys-tab:hover { color: ${T.textPrimary}; background: rgba(255,255,255,0.05); }
           .sys-tab.active { background: ${T.accentStrong}; color: var(--on-brand); }
           .sys-table { width: 100%; border-collapse: collapse; min-width: 760px; }
-          .sys-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: ${T.textTert}; padding: 13px 18px; border-bottom: 1px solid ${T.borderFaint}; background: rgba(255,255,255,0.015); }
-          .sys-table td { padding: 12px 18px; vertical-align: middle; border-bottom: 1px solid ${T.borderFaint}; font-size: 13.5px; }
+          .sys-table th { text-align: left; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: ${T.textTert}; padding: 13px 18px; border-bottom: 1px solid ${T.borderFaint}; background: rgba(255,255,255,0.015); }
+          .sys-table td { padding: 12px 18px; vertical-align: middle; border-bottom: 1px solid ${T.borderFaint}; font-size: var(--fs-md); }
           .sys-row { cursor: pointer; transition: background 0.15s ease; }
           .sys-row:hover { background: rgba(255,255,255,0.02); }
-          .action-btn { padding: 8px 12px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; transition: transform 0.15s ease; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; font-family: ${FONT}; }
+          .action-btn { padding: 8px 12px; border-radius: 7px; font-size: var(--fs-xs); font-weight: 600; cursor: pointer; transition: transform 0.15s ease; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; font-family: var(--font-ui); }
           .action-btn:hover { transform: translateY(-1px); }
           .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-          .modal-input { width: 100%; padding: 10px 12px; background: ${T.bgElevated}; border: 1px solid ${T.borderSoft}; border-radius: 8px; color: ${T.textPrimary}; font-size: 13.5px; outline: none; font-family: ${FONT}; transition: border-color 0.15s; }
+          .modal-input { width: 100%; padding: 10px 12px; background: ${T.bgElevated}; border: 1px solid ${T.borderSoft}; border-radius: 8px; color: ${T.textPrimary}; font-size: var(--fs-md); outline: none; font-family: var(--font-ui); transition: border-color 0.15s; }
           .modal-input:focus { border-color: ${T.accentBord}; }
           .perm-check { width: 18px; height: 18px; cursor: pointer; accent-color: ${T.emerald}; }
           @media (max-width: 900px) {
             /* A focused field under 16px makes iOS zoom the page in and leave it
                zoomed, which moves everything the staff member was looking at. */
-            .modal-input, .sys-search-inp, .sys-role-sel { font-size: 16px; }
+            .modal-input, .sys-search-inp, .sys-role-sel { font-size: var(--fs-lg); }
 
             /* The four tabs slide sideways instead of stacking four rows deep. */
             .sys-tabs {
@@ -377,14 +377,14 @@ export const SystemAdmin = () => {
               border: none;
               text-align: left;
               position: relative;
-              font-size: 13px;
+              font-size: var(--fs-sm);
             }
             .sys-row td::before {
               content: attr(data-label);
               position: absolute;
               left: 0;
               top: 6px;
-              font-size: 10px;
+              font-size: var(--fs-2xs);
               color: ${T.textTert};
               text-transform: uppercase;
               font-weight: 700;
@@ -456,7 +456,7 @@ export const SystemAdmin = () => {
                       {filteredStaff.length === 0 ? (<tr><td colSpan={5} style={{ textAlign: "center", padding: "48px 20px", color: T.textTert }}>No staff match your search</td></tr>) : (
                         filteredStaff.map((s) => (
                           <tr key={s.id} className="sys-row">
-                            <td data-label="Staff"><div style={{ display: "flex", alignItems: "center", gap: "11px" }}><div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--ink-active)", color: "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 12 }}>{s.first_name.charAt(0)}{s.last_name.charAt(0)}</div><div><div style={{ fontWeight: 600, color: T.textPrimary }}>{s.first_name} {s.last_name}</div><div style={{ fontSize: "11.5px", color: T.textTert, fontFamily: MONO }}>{s.phone}</div></div></div></td>
+                            <td data-label="Staff"><div style={{ display: "flex", alignItems: "center", gap: "11px" }}><div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--ink-active)", color: "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "var(--fs-xs)" }}>{s.first_name.charAt(0)}{s.last_name.charAt(0)}</div><div><div style={{ fontWeight: 600, color: T.textPrimary }}>{s.first_name} {s.last_name}</div><div style={{ fontSize: "11.5px", color: T.textTert, fontFamily: MONO }}>{s.phone}</div></div></div></td>
                             <td data-label="Role">{canEdit ? (<select className="sys-role-sel" value={s.role} onChange={(e) => handleUpdateRole(s.id, e.target.value as StaffRole)} disabled={updating === s.id} style={{ background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: "7px", color: T.textPrimary, padding: "6px 10px", fontFamily: FONT, cursor: updating === s.id ? "not-allowed" : "pointer", opacity: updating === s.id ? 0.6 : 1 }}>{ROLE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}</select>) : <span style={{ fontSize: "11px", fontWeight: 700, padding: "4px 10px", borderRadius: "20px", background: T.accentDim, color: T.accent, border: `1px solid ${T.accentBord}` }}>{s.role}</span>}</td>
                             <td data-label="Status"><span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11.5px", fontWeight: 700, padding: "5px 11px", borderRadius: "20px", border: `1px solid ${STATUS_COLORS[s.status]}40`, background: `${STATUS_COLORS[s.status]}12`, color: STATUS_COLORS[s.status] }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: STATUS_COLORS[s.status] }} />{s.status}</span></td>
                             <td data-label="Joined" style={{ color: T.textTert, fontSize: "12.5px" }}>{s.joined_date}</td>
@@ -474,8 +474,8 @@ export const SystemAdmin = () => {
           {activeTab === 'permissions' && (
             <div style={{ animation: "fadeInUp 0.3s ease both", background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 14, overflow: "hidden" }}>
               <div style={{ padding: "16px 20px", borderBottom: `1px solid ${T.borderFaint}`, background: "rgba(255,255,255,0.015)" }}>
-                <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: T.textPrimary, display: "flex", alignItems: "center", gap: 8 }}><LayoutGrid size={16} color={T.accent} /> Role Permissions Matrix</h3>
-                <p style={{ margin: "4px 0 0", fontSize: 12, color: T.textTert }}>Toggle access for each role. Changes apply instantly across the entire system.</p>
+                <h3 style={{ margin: 0, fontSize: "var(--fs-md)", fontWeight: 600, color: T.textPrimary, display: "flex", alignItems: "center", gap: 8 }}><LayoutGrid size={16} color={T.accent} /> Role Permissions Matrix</h3>
+                <p style={{ margin: "4px 0 0", fontSize: "var(--fs-xs)", color: T.textTert }}>Toggle access for each role. Changes apply instantly across the entire system.</p>
               </div>
               <div className="sys-perm" style={{ overflowX: "auto" }}>
                 <table className="sys-table" style={{ minWidth: "var(--sys-table-min, 1100px)" }}>
@@ -490,8 +490,8 @@ export const SystemAdmin = () => {
                       <th></th>
                       {PAGES_MATRIX.map(p => (
                         <React.Fragment key={p.key}>
-                          <th style={{ textAlign: "center", fontSize: 9, padding: "8px 4px", color: T.textHint }}>View</th>
-                          <th style={{ textAlign: "center", fontSize: 9, padding: "8px 4px", color: T.textHint, borderRight: "1px solid rgba(255,255,255,0.05)" }}>Edit</th>
+                          <th style={{ textAlign: "center", fontSize: "var(--fs-2xs)", padding: "8px 4px", color: T.textHint }}>View</th>
+                          <th style={{ textAlign: "center", fontSize: "var(--fs-2xs)", padding: "8px 4px", color: T.textHint, borderRight: "1px solid rgba(255,255,255,0.05)" }}>Edit</th>
                         </React.Fragment>
                       ))}
                     </tr>
@@ -531,7 +531,7 @@ export const SystemAdmin = () => {
                 { key: "allow_new_staff_registration", label: "Allow New Staff Registration", desc: "Prevents new staff accounts from being created" }
               ].map((setting) => (
                 <div key={setting.key} style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, padding: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div><div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{setting.label}</div><div style={{ fontSize: 12, color: T.textTert }}>{setting.desc}</div></div>
+                  <div><div style={{ fontWeight: 600, fontSize: "var(--fs-md)", marginBottom: 4 }}>{setting.label}</div><div style={{ fontSize: "var(--fs-xs)", color: T.textTert }}>{setting.desc}</div></div>
                   <div className={`toggle-switch ${settings[setting.key] ? 'on' : 'off'}`} onClick={() => canEdit && handleToggleSetting(setting.key, settings[setting.key] || false)} style={{ width: 44, height: 24, borderRadius: 12, position: "relative", cursor: canEdit ? "pointer" : "not-allowed", transition: "background 0.2s", background: settings[setting.key] ? T.emerald : T.textHint }}>
                     <div style={{ width: 20, height: 20, background: "#fff", borderRadius: "50%", position: "absolute", top: 2, transition: "left 0.2s", left: settings[setting.key] ? 22 : 2 }} />
                   </div>
@@ -550,7 +550,7 @@ export const SystemAdmin = () => {
                       <td data-label="Action" style={{ color: T.textPrimary, fontWeight: 500 }}>{log.action}</td>
                       <td data-label="Target" style={{ color: T.textSec }}>{log.target}</td>
                       <td data-label="Admin" style={{ color: T.accent, fontWeight: 600 }}>{log.admin}</td>
-                      <td data-label="Timestamp" style={{ color: T.textTert, fontSize: 12.5, fontFamily: MONO }}>{log.timestamp}</td>
+                      <td data-label="Timestamp" style={{ color: T.textTert, fontSize: "var(--fs-sm)", fontFamily: MONO }}>{log.timestamp}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -564,18 +564,18 @@ export const SystemAdmin = () => {
         {showAddModal && (
           <div className="sys-modal-ov" style={{ position: 'fixed', inset: 0, background: 'rgba(4,5,9,0.85)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: 20 }} onClick={() => setShowAddModal(false)}>
             <div className="sys-modal" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 16, width: 460, maxWidth: '100%', padding: 24, boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
-              <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}><User size={16} color={T.emerald} /> Add New Staff Member</h3>
-              <p style={{ margin: '0 0 16px', fontSize: 12.5, color: T.textTert }}>Create a new account and assign initial permissions.</p>
+              <h3 style={{ margin: '0 0 4px', fontSize: "var(--fs-lg)", fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}><User size={16} color={T.emerald} /> Add New Staff Member</h3>
+              <p style={{ margin: '0 0 16px', fontSize: "var(--fs-sm)", color: T.textTert }}>Create a new account and assign initial permissions.</p>
               <div className="sys-modal-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-                <div><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>First Name</label><input className="modal-input" value={newStaff.firstName} onChange={e => setNewStaff({...newStaff, firstName: e.target.value})} placeholder="e.g. Kwame" /></div>
-                <div><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Last Name</label><input className="modal-input" value={newStaff.lastName} onChange={e => setNewStaff({...newStaff, lastName: e.target.value})} placeholder="e.g. Asante" /></div>
+                <div><label style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>First Name</label><input className="modal-input" value={newStaff.firstName} onChange={e => setNewStaff({...newStaff, firstName: e.target.value})} placeholder="e.g. Kwame" /></div>
+                <div><label style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Last Name</label><input className="modal-input" value={newStaff.lastName} onChange={e => setNewStaff({...newStaff, lastName: e.target.value})} placeholder="e.g. Asante" /></div>
               </div>
-              <div style={{ marginBottom: 12 }}><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Email Address</label><input className="modal-input" type="email" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} placeholder="staff@chapmanprestige.com" /></div>
+              <div style={{ marginBottom: 12 }}><label style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Email Address</label><input className="modal-input" type="email" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} placeholder="staff@chapmanprestige.com" /></div>
               <div className="sys-modal-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-                <div><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Phone Number</label><input className="modal-input" value={newStaff.phone} onChange={e => setNewStaff({...newStaff, phone: e.target.value})} placeholder="+233..." /></div>
-                <div><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Role / Permission</label><select className="modal-input" value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value as StaffRole})} style={{ cursor: "pointer" }}>{ROLE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}</select></div>
+                <div><label style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Phone Number</label><input className="modal-input" value={newStaff.phone} onChange={e => setNewStaff({...newStaff, phone: e.target.value})} placeholder="+233..." /></div>
+                <div><label style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Role / Permission</label><select className="modal-input" value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value as StaffRole})} style={{ cursor: "pointer" }}>{ROLE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}</select></div>
               </div>
-              <div style={{ marginBottom: 20 }}><label style={{ fontSize: 10.5, color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Temporary Password</label><div style={{ position: 'relative' }}><input className="modal-input" type={showPass ? "text" : "password"} value={newStaff.password} onChange={e => setNewStaff({...newStaff, password: e.target.value})} placeholder="Min 6 characters" style={{ paddingRight: 40 }} /><button onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: T.textSec, cursor: 'pointer' }}>{showPass ? <EyeOff size={14} /> : <Eye size={14} />}</button></div></div>
+              <div style={{ marginBottom: 20 }}><label style={{ fontSize: "var(--fs-2xs)", color: T.textTert, textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 700, display: 'block', marginBottom: 6 }}>Temporary Password</label><div style={{ position: 'relative' }}><input className="modal-input" type={showPass ? "text" : "password"} value={newStaff.password} onChange={e => setNewStaff({...newStaff, password: e.target.value})} placeholder="Min 6 characters" style={{ paddingRight: 40 }} /><button onClick={() => setShowPass(!showPass)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: T.textSec, cursor: 'pointer' }}>{showPass ? <EyeOff size={14} /> : <Eye size={14} />}</button></div></div>
               <div className="sys-modal-actions" style={{ display: 'flex', gap: 10 }}>
                 <button onClick={() => setShowAddModal(false)} style={{ flex: 1, padding: 10, background: T.bgElevated, border: `1px solid ${T.borderSoft}`, borderRadius: 8, color: T.textSec, fontWeight: 600, cursor: 'pointer', fontFamily: FONT }}>Cancel</button>
                 <button onClick={handleAddStaff} disabled={addingStaff} style={{ flex: 1.5, padding: 10, background: T.emerald, border: 'none', borderRadius: 8, color: 'var(--on-ok)', fontWeight: 700, cursor: addingStaff ? 'not-allowed' : 'pointer', opacity: addingStaff ? 0.6 : 1, fontFamily: FONT, display: "flex", justifyContent: "center", alignItems: "center", gap: 8 }}>{addingStaff ? <Loader2 size={14} className="spin" /> : <Check size={14} />} {addingStaff ? "Creating..." : "Create Account"}</button>

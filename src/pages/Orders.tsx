@@ -484,9 +484,9 @@ export const Orders = () => {
         }}
       >
         <div style={{ textAlign: "center", borderBottom: "3px solid #000", paddingBottom: 20, marginBottom: 30 }}>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700 }}>CHAPMAN PRESTIGE LIMITED</h1>
-          <p style={{ margin: "8px 0 0", fontSize: 14 }}>Kumasi, Ghana • +233 53 413 4809</p>
-          <p style={{ margin: "4px 0 0", fontSize: 14, fontWeight: 600 }}>
+          <h1 style={{ margin: 0, fontSize: "var(--fs-2xl)", fontWeight: 700 }}>CHAPMAN PRESTIGE LIMITED</h1>
+          <p style={{ margin: "8px 0 0", fontSize: "var(--fs-md)" }}>Kumasi, Ghana • +233 53 413 4809</p>
+          <p style={{ margin: "4px 0 0", fontSize: "var(--fs-md)", fontWeight: 600 }}>
             Bulk Receipt: {startDate} to {endDate}
           </p>
         </div>
@@ -499,7 +499,7 @@ export const Orders = () => {
 
           return (
             <div key={monthKey} style={{ marginBottom: 24 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 8px", borderBottom: "1px solid #999", paddingBottom: 4 }}>
+              <h3 style={{ fontSize: "var(--fs-lg)", fontWeight: 700, margin: "0 0 8px", borderBottom: "1px solid #999", paddingBottom: 4 }}>
                 {monthKey}
               </h3>
               <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 8 }}>
@@ -551,22 +551,22 @@ export const Orders = () => {
         })}
 
         <div style={{ textAlign: "right", marginTop: 20 }}>
-          <p style={{ margin: "4px 0", fontSize: 14 }}>
+          <p style={{ margin: "4px 0", fontSize: "var(--fs-md)" }}>
             <strong>Total Orders:</strong> {bulkOrders.length}
           </p>
-          <p style={{ margin: "4px 0", fontSize: 14 }}>
+          <p style={{ margin: "4px 0", fontSize: "var(--fs-md)" }}>
             <strong>Grand Total:</strong> GH₵{bulkOrders.reduce((sum, o) => sum + o.amount, 0).toFixed(2)}
           </p>
-          <p style={{ margin: "4px 0", fontSize: 14 }}>
+          <p style={{ margin: "4px 0", fontSize: "var(--fs-md)" }}>
             <strong>Total Paid:</strong> GH₵{bulkOrders.reduce((sum, o) => sum + (o.amount_paid || 0), 0).toFixed(2)}
           </p>
-          <p style={{ margin: "4px 0", fontSize: 14, fontWeight: 700 }}>
+          <p style={{ margin: "4px 0", fontSize: "var(--fs-md)", fontWeight: 700 }}>
             <strong>Outstanding Balance:</strong> GH₵
             {bulkOrders.reduce((sum, o) => sum + (o.amount - (o.amount_paid || 0)), 0).toFixed(2)}
           </p>
         </div>
 
-        <div style={{ marginTop: 40, textAlign: "center", fontSize: 12, color: "#666" }}>
+        <div style={{ marginTop: 40, textAlign: "center", fontSize: "var(--fs-xs)", color: "#666" }}>
           <p>Thank you for choosing {BRAND.name}</p>
           <p>This is a system-generated document. No signature required.</p>
         </div>

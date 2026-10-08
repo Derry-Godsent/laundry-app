@@ -68,18 +68,18 @@ const StyleSheet = () => (
     @keyframes secBannerIn { from { transform: translateY(-100%); } to { transform: none; } }
 
     .sec-root * { box-sizing: border-box; }
-    .sec-input { transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; width: 100%; padding: 10px 12px; background: ${T.bgSurface}; border: 1px solid ${T.borderSoft}; border-radius: 8px; color: ${T.textPrimary}; font-size: 14px; outline: none; font-family: ${FONT}; }
+    .sec-input { transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease; width: 100%; padding: 10px 12px; background: ${T.bgSurface}; border: 1px solid ${T.borderSoft}; border-radius: 8px; color: ${T.textPrimary}; font-size: var(--fs-md); outline: none; font-family: var(--font-ui); }
     .sec-input:focus { border-color: ${T.accent} !important; box-shadow: var(--focus-ring); background: ${T.bgElevated} !important; }
     .sec-input:hover { border-color: ${T.borderMid} !important; }
 
-    .sec-btn-primary { transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease; padding: 10px 20px; border-radius: 9px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 7px; font-family: ${FONT}; border: none; }
+    .sec-btn-primary { transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease; padding: 10px 20px; border-radius: 9px; font-size: var(--fs-md); font-weight: 600; display: flex; align-items: center; gap: 7px; font-family: var(--font-ui); border: none; }
     .sec-btn-primary:hover { filter: brightness(1.06); }
     .sec-btn-primary:active { transform: translateY(0px) scale(0.98); }
 
-    .sec-btn-ghost { transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.15s ease; padding: 8px 16px; border-radius: 8px; font-size: 13px; display: flex; align-items: center; gap: 6px; font-family: ${FONT}; border: 1px solid ${T.borderSoft}; background: ${T.bgElevated}; }
+    .sec-btn-ghost { transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.15s ease; padding: 8px 16px; border-radius: 8px; font-size: var(--fs-sm); display: flex; align-items: center; gap: 6px; font-family: var(--font-ui); border: 1px solid ${T.borderSoft}; background: ${T.bgElevated}; }
     .sec-btn-ghost:hover { border-color: ${T.borderMid} !important; color: ${T.textPrimary} !important; background: ${T.bgElevated} !important; transform: translateY(-1px); }
 
-    .sec-tab { position: relative; transition: color 0.2s ease; display: flex; align-items: center; gap: 8px; padding: 14px 18px; font-size: 13.5px; font-weight: 500; cursor: pointer; font-family: ${FONT}; border: none; background: transparent; white-space: nowrap; }
+    .sec-tab { position: relative; transition: color 0.2s ease; display: flex; align-items: center; gap: 8px; padding: 14px 18px; font-size: var(--fs-md); font-weight: 500; cursor: pointer; font-family: var(--font-ui); border: none; background: transparent; white-space: nowrap; }
     .sec-tab:hover { color: ${T.textPrimary} !important; }
     .sec-tab-bar { position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; border-radius: 2px 2px 0 0; background: var(--brand-500); transform: scaleX(0); transform-origin: center; transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
     .sec-tab-bar.active { transform: scaleX(1); }
@@ -95,7 +95,7 @@ const StyleSheet = () => (
     .sec-eye-btn { transition: color 0.18s ease, transform 0.18s ease; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; }
     .sec-eye-btn:hover { color: ${T.textPrimary} !important; transform: translateY(-50%) scale(1.08); }
 
-    .sec-edit-btn { transition: all 0.18s ease; padding: 6px 12px; background: ${T.bgElevated}; border: 1px solid ${T.borderSoft}; border-radius: 6px; color: ${T.textSec}; font-size: 12px; cursor: pointer; font-family: ${FONT}; }
+    .sec-edit-btn { transition: all 0.18s ease; padding: 6px 12px; background: ${T.bgElevated}; border: 1px solid ${T.borderSoft}; border-radius: 6px; color: ${T.textSec}; font-size: var(--fs-xs); cursor: pointer; font-family: var(--font-ui); }
     .sec-edit-btn:hover { background: ${T.accentDim} !important; border-color: ${T.accentBord} !important; color: ${T.accentBright} !important; }
 
     .sec-skeleton { background: ${T.bgElevated}; animation: skeletonPulse 1.8s var(--ease-in-out) infinite; border-radius: 6px; }
@@ -117,7 +117,7 @@ const StyleSheet = () => (
       .sec-grid-2 { grid-template-columns: minmax(0, 1fr) !important; }
 
       /* 16px keeps iOS from zooming the page in on focus and leaving it zoomed. */
-      .sec-input { font-size: 16px !important; min-height: var(--tap-min); }
+      .sec-input { font-size: var(--fs-lg) !important; min-height: var(--tap-min); }
       .sec-btn, .sec-btn-ghost, .sec-edit-btn { min-height: var(--tap-min); }
 
       /* A 640px table cannot be read on a phone: each row becomes a labelled
@@ -139,14 +139,14 @@ const StyleSheet = () => (
         border: none;
         text-align: left;
         position: relative;
-        font-size: 13.5px;
+        font-size: var(--fs-md);
       }
       .sec-row td::before {
         content: attr(data-label);
         position: absolute;
         left: 0;
         top: 8px;
-        font-size: 10px;
+        font-size: var(--fs-2xs);
         font-weight: 700;
         letter-spacing: 0.06em;
         text-transform: uppercase;
@@ -175,8 +175,8 @@ const Toast = ({ msg, type, onClose }: { msg: string; type: 'success' | 'error';
   return (
     <div className="sec-toast" style={{ position:"fixed", bottom:24, right:24, zIndex:10000, background: type==='error' ? T.emberDim : T.emeraldDim, border:`1px solid ${type==='error' ? T.emberBord : T.emeraldBord}`, borderRadius:10, padding:"12px 20px", display:"flex", alignItems:"center", gap:12, boxShadow:"0 14px 36px rgba(0,0,0,0.45)", animation: "secFadeUp 0.3s ease both" }}>
       {type==='error' ? <AlertTriangle size={15} color={T.ember}/> : <Check size={15} color={T.emerald}/>}
-      <span style={{ fontSize:14, color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
-      <button onClick={onClose} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><span style={{fontSize: 14}}><X size={16} /></span></button>
+      <span style={{ fontSize: "var(--fs-md)", color: type==='error' ? T.ember : T.emerald, fontWeight:500, fontFamily:FONT }}>{msg}</span>
+      <button onClick={onClose} style={{ padding:4, background:"transparent", border:"none", color:T.textSec, cursor:"pointer" }}><span style={{fontSize: "var(--fs-md)"}}><X size={16} /></span></button>
     </div>
   );
 };
@@ -399,7 +399,7 @@ export const Security = () => {
         <div style={{ position: "relative", width: 44, height: 44 }}>
           <Shield size={44} color={T.accent} className="sec-spin" style={{ opacity: 0.85 }} />
         </div>
-        <div style={{ color: T.textTert, fontSize: 13, letterSpacing: "0.04em", fontFamily: FONT }}>
+        <div style={{ color: T.textTert, fontSize: "var(--fs-sm)", letterSpacing: "0.04em", fontFamily: FONT }}>
           {!isOffline ? "Loading security configuration…" : "Waiting for connection…"}
         </div>
       </div>
@@ -417,8 +417,8 @@ export const Security = () => {
       {!isOffline && syncFailed && (
         <div className="sec-banner" style={{ position: "sticky", top: 0, zIndex: 50, background: T.emberDim, borderBottom: `1px solid ${T.emberBord}`, padding: "10px 32px", display: "flex", alignItems: "center", gap: 10 }}>
           <WifiOff size={15} color={T.ember} />
-          <span style={{ fontSize: 13, color: T.textPrimary, fontFamily: FONT, fontWeight: 600 }}>Couldn't reach the security service.</span>
-          <span style={{ fontSize: 13, color: T.textSec, fontFamily: FONT }}>Showing the last data loaded this session.</span>
+          <span style={{ fontSize: "var(--fs-sm)", color: T.textPrimary, fontFamily: FONT, fontWeight: 600 }}>Couldn't reach the security service.</span>
+          <span style={{ fontSize: "var(--fs-sm)", color: T.textSec, fontFamily: FONT }}>Showing the last data loaded this session.</span>
         </div>
       )}
 
@@ -431,10 +431,10 @@ export const Security = () => {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: T.textPrimary, letterSpacing: "-0.03em", fontFamily: FONT }}>Security</div>
+            <div style={{ fontSize: "var(--fs-2xl)", fontWeight: 700, color: T.textPrimary, letterSpacing: "-0.03em", fontFamily: FONT }}>Security</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
               <span className="sec-status-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, display: "inline-block" }} />
-              <span style={{ fontSize: 11.5, color: T.textTert, fontFamily: FONT, letterSpacing: "0.03em" }}>{!isOffline ? (syncFailed ? "Connected, last sync failed" : "System online") : "System offline"}</span>
+              <span style={{ fontSize: "var(--fs-xs)", color: T.textTert, fontFamily: FONT, letterSpacing: "0.03em" }}>{!isOffline ? (syncFailed ? "Connected, last sync failed" : "System online") : "System offline"}</span>
             </div>
           </div>
         </div>
@@ -445,7 +445,7 @@ export const Security = () => {
       </div>
 
       {saveBlocked && (
-        <div className="sec-banner" style={{ background: T.emberDim, borderBottom: `1px solid ${T.emberBord}`, padding: "8px 32px", fontSize: 12.5, color: T.ember, display: "flex", alignItems: "center", gap: 8, fontFamily: FONT }}>
+        <div className="sec-banner" style={{ background: T.emberDim, borderBottom: `1px solid ${T.emberBord}`, padding: "8px 32px", fontSize: "var(--fs-sm)", color: T.ember, display: "flex", alignItems: "center", gap: 8, fontFamily: FONT }}>
           <AlertTriangle size={14} /> Changes can't be saved while offline. They'll stay in the form. Reconnect and try again.
         </div>
       )}
@@ -464,11 +464,11 @@ export const Security = () => {
           
           {activeTab === "roles" && (
             <div key="roles" className="sec-card sec-table-wrap" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, overflow: "hidden", boxShadow: "var(--shadow-modal)" }}>
-              <table className="sec-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+              <table className="sec-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--fs-md)" }}>
                 <thead>
                   <tr style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderSoft}` }}>
                     {["Role", "Users", "Permissions", "Last Active", "Actions"].map(h => (
-                      <th key={h} style={{ padding: "14px 20px", textAlign: "left", fontSize: 11, fontWeight: 600, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: FONT }}>{h}</th>
+                      <th key={h} style={{ padding: "14px 20px", textAlign: "left", fontSize: "var(--fs-2xs)", fontWeight: 600, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: FONT }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -484,11 +484,11 @@ export const Security = () => {
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                             {role.permissions.map(p => {
                               const label = PAGE_CONFIG.find(c => c.key === p)?.label || p;
-                              return <span key={p} style={{ padding: "3px 8px", background: T.bgElevated, borderRadius: 4, fontSize: 11, color: T.textSec, border: `1px solid ${T.borderFaint}` }}>{label}</span>;
+                              return <span key={p} style={{ padding: "3px 8px", background: T.bgElevated, borderRadius: 4, fontSize: "var(--fs-2xs)", color: T.textSec, border: `1px solid ${T.borderFaint}` }}>{label}</span>;
                             })}
                           </div>
                         </td>
-                        <td data-label="Last Active" style={{ padding: "16px 20px", fontSize: 13, color: T.textSec }}>{role.lastActive}</td>
+                        <td data-label="Last Active" style={{ padding: "16px 20px", fontSize: "var(--fs-sm)", color: T.textSec }}>{role.lastActive}</td>
                         <td data-label="Actions" style={{ padding: "16px 20px" }}>
                           <button className="sec-edit-btn" onClick={(e) => {
                             e.stopPropagation();
@@ -508,21 +508,21 @@ export const Security = () => {
             <div key="access" className="sec-card" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div className="sec-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div>
-                  <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>Sheet Protection Password</div>
+                  <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>Sheet Protection Password</div>
                   <div style={{ position: "relative" }}>
                     <input className="sec-input" type={showPass ? "text" : "password"} value={config.sheetPass} onChange={e => setConfig(p => ({...p, sheetPass: e.target.value}))} style={{ paddingRight: 40 }} />
                     <button onClick={() => setShowPass(!showPass)} className="sec-eye-btn">{showPass ? <EyeOff size={16} /> : <Eye size={16} />}</button>
                   </div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>Allowed IP Range</div>
+                  <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>Allowed IP Range</div>
                   <input className="sec-input" value={config.ipWhitelist} onChange={e => setConfig(p => ({...p, ipWhitelist: e.target.value}))} placeholder="192.168.1.0/24" />
                 </div>
               </div>
               <div style={{ padding: 16, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 10 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, fontFamily: FONT }}>Remote Access</div>
+                <div style={{ fontSize: "var(--fs-sm)", fontWeight: 600, marginBottom: 12, fontFamily: FONT }}>Remote Access</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${T.borderFaint}` }}>
-                  <div style={{ fontSize: 14, fontWeight: 500, fontFamily: FONT }}>Allow Remote Login</div>
+                  <div style={{ fontSize: "var(--fs-md)", fontWeight: 500, fontFamily: FONT }}>Allow Remote Login</div>
                   <div className="sec-toggle" style={toggleStyle(config.allowRemote)} onClick={() => !isOffline && setConfig(p => ({...p, allowRemote: !p.allowRemote}))}>
                     <div className="sec-toggle-thumb" style={thumbStyle(config.allowRemote)} />
                   </div>
@@ -534,11 +534,11 @@ export const Security = () => {
           {activeTab === "audit" && (
             <div key="audit" className="sec-card" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <div className="sec-table-wrap" style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 12, overflow: "hidden", boxShadow: "var(--shadow-modal)" }}>
-                <table className="sec-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <table className="sec-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--fs-sm)" }}>
                   <thead>
                     <tr style={{ background: T.bgSurface, borderBottom: `1px solid ${T.borderSoft}` }}>
                       {["User", "Action", "Timestamp", "IP Address"].map(h => (
-                        <th key={h} style={{ padding: "14px 20px", textAlign: "left", fontSize: 11, fontWeight: 600, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: FONT }}>{h}</th>
+                        <th key={h} style={{ padding: "14px 20px", textAlign: "left", fontSize: "var(--fs-2xs)", fontWeight: 600, color: T.textTert, textTransform: "uppercase", letterSpacing: "0.08em", fontFamily: FONT }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -550,8 +550,8 @@ export const Security = () => {
                         <tr key={log.id} className="sec-row" style={{ borderBottom: `1px solid ${T.borderFaint}`, animationDelay: `${Math.min(i, 12) * 35}ms` }}>
                           <td data-label="User" style={{ padding: "16px 20px", fontWeight: 500 }}>{log.user}</td>
                           <td data-label="Action" style={{ padding: "16px 20px", color: T.textSec }}>{log.action}</td>
-                          <td data-label="Time" style={{ padding: "16px 20px", fontFamily: MONO, fontSize: 12 }}>{log.time}</td>
-                          <td data-label="IP Address" style={{ padding: "16px 20px", fontFamily: MONO, fontSize: 12, color: T.textTert }}>{log.ip}</td>
+                          <td data-label="Time" style={{ padding: "16px 20px", fontFamily: MONO, fontSize: "var(--fs-xs)" }}>{log.time}</td>
+                          <td data-label="IP Address" style={{ padding: "16px 20px", fontFamily: MONO, fontSize: "var(--fs-xs)", color: T.textTert }}>{log.ip}</td>
                         </tr>
                       ))
                     )}
@@ -570,18 +570,18 @@ export const Security = () => {
             <div key="session" className="sec-card" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <div className="sec-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div>
-                  <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>Session Timeout (minutes)</div>
+                  <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>Session Timeout (minutes)</div>
                   <input className="sec-input" type="number" value={config.sessionTimeout} onChange={e => setConfig(p => ({...p, sessionTimeout: Number(e.target.value)}))} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>Password Expiry (days)</div>
+                  <div style={{ fontSize: "var(--fs-2xs)", color: T.textTert, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, fontFamily: FONT }}>Password Expiry (days)</div>
                   <input className="sec-input" type="number" value={config.passwordExpiry} onChange={e => setConfig(p => ({...p, passwordExpiry: Number(e.target.value)}))} />
                 </div>
               </div>
               <div style={{ padding: 16, background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 10 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, fontFamily: FONT }}>Two-Factor Authentication</div>
+                <div style={{ fontSize: "var(--fs-sm)", fontWeight: 600, marginBottom: 12, fontFamily: FONT }}>Two-Factor Authentication</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0" }}>
-                  <div style={{ fontSize: 14, fontWeight: 500, fontFamily: FONT }}>Require 2FA for Remote Access</div>
+                  <div style={{ fontSize: "var(--fs-md)", fontWeight: 500, fontFamily: FONT }}>Require 2FA for Remote Access</div>
                   <div className="sec-toggle" style={toggleStyle(config.require2FA)} onClick={() => !isOffline && setConfig(p => ({...p, require2FA: !p.require2FA}))}>
                     <div className="sec-toggle-thumb" style={thumbStyle(config.require2FA)} />
                   </div>
@@ -595,12 +595,12 @@ export const Security = () => {
         {editingRole && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(4,5,9,0.8)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 20 }} onClick={() => setEditingRole(null)}>
             <div style={{ background: T.bgRaised, border: `1px solid ${T.borderSoft}`, borderRadius: 16, width: 420, maxWidth: '100%', padding: 24, boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
-              <h3 style={{ margin: '0 0 4px', fontSize: 16, fontWeight: 700, fontFamily: FONT }}>Edit Role: {editingRole.name}</h3>
-              <p style={{ margin: '0 0 16px', fontSize: 12.5, color: T.textTert, fontFamily: FONT }}>Select permissions for this role</p>
+              <h3 style={{ margin: '0 0 4px', fontSize: "var(--fs-lg)", fontWeight: 700, fontFamily: FONT }}>Edit Role: {editingRole.name}</h3>
+              <p style={{ margin: '0 0 16px', fontSize: "var(--fs-sm)", color: T.textTert, fontFamily: FONT }}>Select permissions for this role</p>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20, maxHeight: '300px', overflowY: 'auto' }}>
                 {PAGE_CONFIG.map(({ label, key }) => (
-                  <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: T.textPrimary, fontFamily: FONT, cursor: 'pointer' }}>
+                  <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: "var(--fs-sm)", color: T.textPrimary, fontFamily: FONT, cursor: 'pointer' }}>
                     <input type="checkbox" checked={rolePermissions.includes(key)} onChange={(e) => {
                       if (e.target.checked) setRolePermissions(prev => [...prev, key]);
                       else setRolePermissions(prev => prev.filter(p => p !== key));
