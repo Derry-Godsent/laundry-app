@@ -56,6 +56,9 @@ const CSS = `
 .pd-trigger:hover .pd-chev { color: var(--text-4); }
 
 /* Mobile: collapse to avatar only */
+@media (pointer: coarse) {
+  .pd-trigger { min-width: 40px; min-height: 40px; }
+}
 @media (max-width: 480px) {
   .pd-trigger { width: 40px; height: 40px; padding: 0; justify-content: center; gap: 0; }
   .pd-info { display: none; }

@@ -291,7 +291,7 @@ const CSS = `
 }
 /* Phones: match the 40px controls either side of it, so the row reads as one
    hand of the same tools rather than four different sizes. */
-@media (max-width: 480px) {
+@media (max-width: 480px), (pointer: coarse) {
   .nd-bell { width: 40px; height: 40px; }
 }
 .nd-bell:hover { background: var(--ink-hover); border-color: var(--line); color: var(--text-1); }

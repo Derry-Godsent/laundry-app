@@ -178,10 +178,36 @@
      while walking. */
   .icon-btn,
   .sidebar-toggle-mobile,
-  .command-trigger { width: 40px; height: 40px; }
+  .command-trigger {
+    width: 40px;
+    height: 40px;
+    /* The 1024px block above pins this one to 38 with min-width and max-width,
+       so a width alone would be clamped straight back down. */
+    min-width: 40px;
+    max-width: 40px;
+  }
   /* Two classes, because components.css is a later stylesheet and its plain
      `.btn` rule would otherwise put the button back. */
   .topbar .topbar-action { display: none; }
+}
+
+/* A finger is a finger at any width. A phone in landscape and a tablet get the
+   same controls at 38px from the width rules above; on a touch device they keep
+   the 40px the phone gives them. The search trigger stays out of it above
+   1024px, where it is a 300px field rather than an icon. */
+@media (pointer: coarse) and (max-width: 1024px) {
+  .icon-btn,
+  .sidebar-toggle-mobile,
+  .command-trigger {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    max-width: 40px;
+  }
+  /* Two classes again: a later stylesheet's `.btn { height: 38px }` would set
+     the height on its own otherwise. */
+  .topbar .topbar-action { width: 40px; height: 40px; padding: 0; }
+  .breadcrumb-current { padding: 9px 6px; }
 }
 
 /* Under 400px even that is not enough, and the mark gives way next. It stands
