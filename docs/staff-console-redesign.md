@@ -663,8 +663,9 @@ this work was "more visible, bigger or well arranged":
 | 20, 21, 22, 24 | 22 | `--fs-2xl` |
 | 26, 27, 28 | 28 | `--fs-3xl` |
 
-What that did to the product: 343 declarations are the same size as before, 258
-grew, and 30 shrank. Nothing moved by more than 2px in either direction. The
+What that did to the product: of the 630 declarations that pair one to one
+between the two revisions, 362 are the same size as before, 259 grew and 9
+shrank, and nothing moved by more than 2px in either direction. The
 growth is concentrated where it matters, in the two smallest sizes, which is
 where the "more visible" ask pointed: 146 declarations of 9 to 10.5px, mostly
 table meta and micro labels, are now 11px, and the seven 20px headings are 22px.
