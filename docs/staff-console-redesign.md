@@ -640,6 +640,49 @@ what the page holds, nothing more.
 **Consequence for phase 6+:** new pages must not regress the pinned chrome. Use
 the page frame below for table screens instead of the plain `.page` wrapper.
 
+### The first browser: what it found and what it fixed
+
+The redesign was verified by static checks and by eye, because no browser could be
+run here. That changed: Chromium arrives through the npm registry as the
+serverless build, and with its libraries unpacked by hand it runs the console
+for real. `scripts/audit-console.cjs` opens any list of routes at any list of
+widths with a locally seeded session and measures what the definition of done
+actually asks about: document overflow, elements past the viewport that nothing
+clips, sideways scrollers with no name, and targets a thumb cannot hit.
+
+Four defects it found, all fixed:
+
+- **The top bar at phone width.** The account button, the bell, the search
+  trigger, the New Order button, the connection pill and the page name were all
+  competing for one 320px row. The bell was refusing to shrink, so it hung 42px
+  off the right edge, and everything left of it was crushed: the brand mark was
+  squeezed from 26px to 7px, which rendered its wordmark as a smear, and the page
+  name was given a 12px-wide scroll strip. The bar now gives up the New Order
+  button on phones (the FAB carries it first in its list, within thumb reach), the
+  three controls are 40px, and the name truncates instead of scrolling.
+- **`button` losing to `button`.** The rule hiding the New Order button on a
+  phone did nothing at first, because `styles/components.css` is imported after
+  `Topbar.css` and its plain `.btn` rule won the tie. Fixed with the weight the
+  cascade actually needs, `.topbar .topbar-action`, not by adding an exemption.
+- **The demo walkthrough overflowed a phone by 64px.** `.preview-gallery` asked
+  for `minmax(360px, 1fr)`, a floor wider than the screen it was on. It is
+  `minmax(min(360px, 100%), 1fr)` now, so the floor collapses to the column it
+  is given.
+- **The auth session shape.** Not a product defect, but worth writing down: the
+  audit seeds `sb-<project-ref>-auth-token` in localStorage, which is where
+  supabase-js keeps the session the console reads.
+
+What the browser then proved, at 320, 768 and 1440, across all eighteen console
+pages: **no document overflow, nothing past the viewport, no unnamed sideways
+scrolling, no page errors.** The notification panel and the account menu open
+fully inside the screen at 320, 375 and 414, with the page dimmed behind them and
+not scrolling.
+
+What it does not cover: the backend is unreachable from here, so every page below
+the shell is an empty or skeleton state. Layout is measured; data, wording and
+the feel of a list full of real records still need the deployed console and
+eyes.
+
 ### Phase E closes: the last 658 sizes onto the scale
 
 The palette half of E landed much earlier. The type half was the largest single

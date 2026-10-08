@@ -2,23 +2,25 @@
    BREADCRUMBS: quiet route context, sits left of the search field
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* The trail never scrolls sideways. A 12px-wide strip that answers a swipe was
+   the worst of both worlds: an invisible scroll area that also painted its text
+   across the controls beside it. It truncates instead, so what is on screen is
+   always true. */
 .breadcrumbs {
   display: flex;
   align-items: center;
   gap: 2px;
   min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
+  overflow: hidden;
   font-size: var(--fs-sm);
   color: var(--text-3);
 }
-
-.breadcrumbs::-webkit-scrollbar { display: none; }
 
 .breadcrumb-item {
   display: flex;
   align-items: center;
   gap: 2px;
+  min-width: 0;
   white-space: nowrap;
 }
 
@@ -37,7 +39,11 @@
 }
 
 .breadcrumb-current {
+  min-width: 0;
   padding: 5px 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--text-1);
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -52,6 +58,10 @@
   .breadcrumb-link { display: none; }
   .breadcrumb-separator { display: none; }
   .breadcrumb-current { font-size: var(--fs-md); }
+}
+
+@media (max-width: 480px) {
+  .breadcrumb-current { padding: 5px 4px; font-size: var(--fs-sm); }
 }
 
 @media (prefers-reduced-motion: reduce) {

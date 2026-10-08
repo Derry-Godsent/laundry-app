@@ -82,7 +82,10 @@
 /* ── Component gallery ──────────────────────────────────────────────────── */
 .preview-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  /* `min(360px, 100%)`: a fixed 360px floor is wider than a 320px phone, which
+     is what pushed this page 64px sideways on one. The floor now collapses to
+     the column it is actually given, so the cards wrap instead of spilling. */
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
   gap: var(--sp-4);
   align-items: start;
 }

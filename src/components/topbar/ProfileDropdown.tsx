@@ -57,7 +57,7 @@ const CSS = `
 
 /* Mobile: collapse to avatar only */
 @media (max-width: 480px) {
-  .pd-trigger { padding: 4px; gap: 0; }
+  .pd-trigger { width: 40px; height: 40px; padding: 0; justify-content: center; gap: 0; }
   .pd-info { display: none; }
   .pd-chev { display: none; }
 }

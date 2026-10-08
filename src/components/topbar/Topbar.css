@@ -171,10 +171,24 @@
 
 @media (max-width: 480px) {
   .topbar-right { gap: var(--sp-2); }
+  /* Four controls, the connection pill and the page name do not fit a phone in
+     one row, so the bar keeps the controls and the name and gives up the New
+     Order button: the FAB already carries it, first in its list, inside thumb
+     reach at the bottom. 40px is the smallest target that is comfortable to hit
+     while walking. */
   .icon-btn,
   .sidebar-toggle-mobile,
-  .command-trigger,
-  .topbar-action { width: 36px; height: 36px; }
+  .command-trigger { width: 40px; height: 40px; }
+  /* Two classes, because components.css is a later stylesheet and its plain
+     `.btn` rule would otherwise put the button back. */
+  .topbar .topbar-action { display: none; }
+}
+
+/* Under 400px even that is not enough, and the mark gives way next. It stands
+   in for the sidebar, and the sidebar behind the toggle carries it at full
+   size, so nothing is lost: what stays in the bar is where you are. */
+@media (max-width: 400px) {
+  .topbar-brand { display: none; }
 }
 
 /* ── Connection status ──────────────────────────────────────────────────────
@@ -239,8 +253,16 @@
    screen: the bar then always carries the brand, and the breadcrumb follows it. */
 .topbar-brand {
   margin-right: var(--sp-2);
+  /* The mark is a fixed-size graphic: squeezed, it renders as a smear of its
+     own wordmark, which is exactly what it did at 414px before this. The name
+     beside it truncates instead. */
+  flex-shrink: 0;
 }
 
 @media (max-width: 640px) {
   .topbar-brand { margin-right: 2px; }
 }
+
+/* The page name is the last thing to give way, and it truncates rather than
+   pushing the bar wider. */
+.breadcrumbs { overflow: hidden; }

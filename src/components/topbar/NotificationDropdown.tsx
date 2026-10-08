@@ -289,6 +289,11 @@ const CSS = `
   background: var(--ink-card);
   color: var(--text-3);
 }
+/* Phones: match the 40px controls either side of it, so the row reads as one
+   hand of the same tools rather than four different sizes. */
+@media (max-width: 480px) {
+  .nd-bell { width: 40px; height: 40px; }
+}
 .nd-bell:hover { background: var(--ink-hover); border-color: var(--line); color: var(--text-1); }
 .nd-bell.open { background: var(--brand-soft); border-color: var(--brand-border); color: var(--brand-400); }
 .nd-badge { background: var(--bad-500); color: var(--on-bad); border-color: var(--ink-shell); }

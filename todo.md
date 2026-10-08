@@ -234,6 +234,17 @@ the five-screen correctness pass and the definition of done live in
         every file in src/ is checked, including the two holes that were hiding
         numbers from it (chart ticks and SVG attributes, and page-local font
         aliases).
+  - [x] A real browser, at last. `scripts/audit-console.cjs` runs headless Chromium
+        over any route at any width with a seeded session, and measures the things
+        only a browser can answer: document overflow, elements past the viewport
+        that nothing clips, sideways scrollers with no name, and tap targets a thumb
+        cannot find. It found four defects (the top bar at phone width, a cascade tie
+        that silently voided a rule, the demo walkthrough overflowing a 320px phone
+        by 64px, and the localStorage key the console reads its session from) and all
+        four are fixed. All 18 pages measure clean at 320, 768 and 1440, and the
+        notification panel and account menu open fully inside the screen at 320,
+        375 and 414. It cannot see data: the backend is unreachable from here, so
+        every page below the shell is empty or skeleton.
   - [ ] Then Phase G, sign-off: delete /preview and close PR #7.
 - [x] Phase F, mobile app integration. Alerts now cover the two events that reached
       nobody: a customer answering a service appointment, and a customer creating an
