@@ -673,6 +673,21 @@ as if it were the whole story.
 **The office can act on what the app sends.** An idea carries the customer's
 number, and the number is now a call link rather than text to copy out.
 
+**An alert opens the view that holds what it is about.** Both queues already had
+their own views (Needs action, Waiting for client, Approved work, Declined
+history; and Needs a date, With the customer, Accepted, Wants another date, Not
+taken), and an alert used to land on whichever view the page happened to open
+on. So "Customer accepted the date" took the office to a list that did not
+contain the request, and it looked as if the alert were wrong.
+
+The view now lives in the address as well as in state: `/mobile-requests?view=confirmed`,
+`/service-requests?view=another`. The page opens on it, follows it if it changes
+while the page is already open, and writes it back when a staff member changes
+the view themselves, so "the approved work" is a link that can be shared. Each
+page exports its own list of views, and a check proves that every alert's link
+names a view that page actually has, because a typo there would send the office
+to the default view and look like the page ignoring them.
+
 Two decisions worth keeping:
 
 - The alert list holds only live work. A list that keeps last week's resolved

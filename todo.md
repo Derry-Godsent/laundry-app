@@ -238,7 +238,9 @@ the five-screen correctness pass and the definition of done live in
       app account. The alert panel only holds live work (unanswered intakes, both
       kinds of reply, unread ideas, recent signups) instead of the newest rows
       whatever had happened to them. An App Account shows what that person has asked
-      for from both queues. An idea's phone number is a call link.
+      for from both queues. An idea's phone number is a call link. Each alert opens
+      the view that holds what it is about (both queues carry their view in the
+      address, so "the approved work" is also a shareable link).
 - [ ] Phase G, sign-off: delete `/preview` (route, page, CSS) and close PR #7.
 - [x] The company name, everywhere: `Chapman Prestige Limited`, `CPL` for short. Page
       titles, sidebar, receipts, notifications, badge tooltips, download file names,

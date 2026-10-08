@@ -88,7 +88,7 @@ export function laundryNotification(row: any): StaffNotification {
     time: minutesAgo(row.created_at),
     read: false,
     type: "success",
-    href: "/mobile-requests",
+    href: "/mobile-requests?view=active",
     createdAt: row.created_at,
   };
 }
@@ -102,7 +102,7 @@ export function serviceNotification(row: any): StaffNotification {
     time: minutesAgo(row.created_at),
     read: false,
     type: "info",
-    href: "/service-requests",
+    href: "/service-requests?view=action",
     createdAt: row.created_at,
   };
 }
@@ -127,7 +127,7 @@ export function answerNotification(row: any): StaffNotification {
     time: minutesAgo(row.customer_response_at || row.created_at),
     read: false,
     type: accepted ? "success" : "warning",
-    href: "/mobile-requests",
+    href: accepted ? "/mobile-requests?view=confirmed" : closed ? "/mobile-requests?view=declined" : "/mobile-requests?view=waiting",
     createdAt: row.customer_response_at || row.created_at,
   };
 }
@@ -148,7 +148,7 @@ export function appointmentAnswerNotification(row: any): StaffNotification {
     time: minutesAgo(row.created_at),
     read: false,
     type: accepted ? "success" : "warning",
-    href: "/service-requests",
+    href: accepted ? "/service-requests?view=accepted" : "/service-requests?view=another",
     createdAt: row.created_at,
   };
 }

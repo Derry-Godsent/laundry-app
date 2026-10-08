@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   CalendarDays, Check, ChevronRight, ClipboardList, ExternalLink, Inbox,
   MapPin, MessageSquareText, Phone, RefreshCw, ShieldCheck, Smartphone, User, X,
@@ -28,6 +29,14 @@ import "./MobileRequests.css";
 
 type RequestStatus = "pending" | "under_review" | "needs_customer_confirmation" | "confirmed" | "declined" | "cancelled" | "converted";
 type RequestView = "active" | "waiting" | "confirmed" | "declined";
+
+/** The four views, exported so an alert can point at the one that holds the
+ *  thing it is about, and so a check can prove the two lists agree. */
+export const REQUEST_VIEWS: RequestView[] = ["active", "waiting", "confirmed", "declined"];
+
+/** A view name from the address, or null when it is not one of ours. */
+export const parseRequestView = (value: string | null): RequestView | null =>
+  REQUEST_VIEWS.includes(value as RequestView) ? (value as RequestView) : null;
 
 interface MobileRequest {
   id: string;
@@ -157,7 +166,24 @@ function MobileRequestsContent() {
   const [requests, setRequests] = useState<MobileRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<RequestView>("active");
+  /* The view lives in the address as well as in state, so an alert can open the
+     queue on the view that holds what the alert is about, and so a staff member
+     can share "the approved work" as a link. */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewParam = searchParams.get("view");
+  const [filter, setFilter] = useState<RequestView>(() => parseRequestView(viewParam) ?? "active");
+
+  const changeView = useCallback((next: RequestView) => {
+    setFilter(next);
+    setSearchParams(next === "active" ? {} : { view: next }, { replace: true });
+  }, [setSearchParams]);
+
+  /* An alert navigated here with a view in mind. This covers arriving and
+     arriving again while already on the page. */
+  useEffect(() => {
+    const requested = parseRequestView(viewParam);
+    if (requested) setFilter(requested);
+  }, [viewParam]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<IdentityMap>({});
   const [clientRecords, setClientRecords] = useState<IdentityMap>({});
@@ -342,7 +368,7 @@ function MobileRequestsContent() {
           ? "Client date approved. It remains in Approved work for the next step."
           : "New date sent. It remains in Waiting for client until the client responds."
     );
-    setFilter(decision === "declined" ? "declined" : decision === "confirmed" ? "confirmed" : "waiting");
+    changeView(decision === "declined" ? "declined" : decision === "confirmed" ? "confirmed" : "waiting");
     await loadRequests();
   };
 
@@ -368,7 +394,7 @@ function MobileRequestsContent() {
       <SegmentedControl<RequestView>
         ariaLabel="Request views"
         value={filter}
-        onChange={setFilter}
+        onChange={changeView}
         options={[
           { value: "active", label: "Needs action", count: counts.active },
           { value: "waiting", label: "Waiting for client", count: counts.waiting },

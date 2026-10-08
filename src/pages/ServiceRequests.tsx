@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { CalendarDays, ClipboardList, Inbox, Ruler, RefreshCw, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { PermissionGuard } from "../components/PermissionGuard";
@@ -36,6 +37,14 @@ import "./ServiceRequests.css";
 
 type AppointmentResponse = "awaiting-chapman" | "awaiting-customer" | "accepted" | "rejected" | "declined";
 type RequestView = "action" | "waiting" | "accepted" | "another" | "declined";
+
+/** The five views, exported so an alert can point at the one that holds the
+ *  thing it is about, and so a check can prove the two lists agree. */
+export const REQUEST_VIEWS: RequestView[] = ["action", "waiting", "accepted", "another", "declined"];
+
+/** A view name from the address, or null when it is not one of ours. */
+export const parseRequestView = (value: string | null): RequestView | null =>
+  REQUEST_VIEWS.includes(value as RequestView) ? (value as RequestView) : null;
 
 interface QuoteDetails {
   primaryLabel?: string;
@@ -125,7 +134,22 @@ function ServiceRequestsContent() {
   const [identities, setIdentities] = useState<Record<string, CustomerIdentity>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<RequestView>("action");
+  /* The view lives in the address as well as in state, so an alert can open the
+     queue on the view that holds what the alert is about, and so "the accepted
+     work" can be shared as a link. */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewParam = searchParams.get("view");
+  const [filter, setFilter] = useState<RequestView>(() => parseRequestView(viewParam) ?? "action");
+
+  const changeView = useCallback((next: RequestView) => {
+    setFilter(next);
+    setSearchParams(next === "action" ? {} : { view: next }, { replace: true });
+  }, [setSearchParams]);
+
+  useEffect(() => {
+    const requested = parseRequestView(viewParam);
+    if (requested) setFilter(requested);
+  }, [viewParam]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [date, setDate] = useState("");
   const [declineReason, setDeclineReason] = useState("");
@@ -273,7 +297,7 @@ function ServiceRequestsContent() {
 
     setSelectedId(null);
     setSavedMessage(`${formatDay(date)} sent to the customer. It stays in With the customer until they reply in the app.`);
-    setFilter("waiting");
+    changeView("waiting");
     await loadRequests();
   };
 
@@ -306,7 +330,7 @@ function ServiceRequestsContent() {
 
     setSelectedId(null);
     setSavedMessage(`Declined. The customer now sees this reason in the app: "${reason}"`);
-    setFilter("declined");
+    changeView("declined");
     await loadRequests();
   };
 
@@ -340,7 +364,7 @@ function ServiceRequestsContent() {
     <SegmentedControl<RequestView>
       ariaLabel="Service request views"
       value={filter}
-      onChange={setFilter}
+      onChange={changeView}
       options={[
         { value: "action", label: "Needs a date", count: counts.action },
         { value: "waiting", label: "With the customer", count: counts.waiting },
